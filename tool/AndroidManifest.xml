@@ -3,6 +3,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission
@@ -58,6 +59,9 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Continuous user-started offline monitoring of local, RTSP, or paired-phone video with on-device AI." />
         </service>
+        <service android:name="com.minhacamera.PhoneCameraBackgroundService"
+            android:exported="false" android:stopWithTask="false"
+            android:foregroundServiceType="camera" />
         <service android:name=".RadioPlaybackService" android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
         <receiver

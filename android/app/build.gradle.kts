@@ -78,6 +78,8 @@ kotlin {
 }
 
 dependencies {
+    // Serviço de câmera nativo MCRP/NotificationCompat, migrado do Minha Câmera.
+    implementation("androidx.core:core-ktx:1.13.1")
     // Rádio online: ExoPlayer (MP3/AAC/Ogg/HLS com metadados ICY) e MediaSession.
     implementation("androidx.media3:media3-exoplayer:1.8.0")
     implementation("androidx.media3:media3-exoplayer-hls:1.8.0")

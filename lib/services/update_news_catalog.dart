@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.272', build: 272);
+      AppBuildVersion(version: '1.0.273', build: 273);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.272', build: 272),
+      version: AppBuildVersion(version: '1.0.273', build: 273),
       changes: <String>[
-        'Ao vivo ganhou controles MCRP do Redmi A3, sem sair do monitoramento.',
-        'Zoom, lanterna, gravação, foto, FPS, resolução e Eco via Wi-Fi local.',
-        'Tela Minha Câmera agora reutiliza o painel visual de comandos remotos.'
+        'Transmissor nativo experimental com câmera e vídeo no próprio Vigia IA.',
+        'Compartilhe o QR MCRP entre dois celulares com o Vigia IA instalado.',
+        'Transmissão com serviço Android independente e controles de qualidade e gravação.',
       ],
     ),
   ]);

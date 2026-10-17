@@ -1,4 +1,11 @@
-# Validação Vigia IA 1.0.272+272
+# Validação Vigia IA 1.0.273+273
+
+## 1.0.273: migração do motor nativo MCRP (2026-10-17)
+
+- Contratos locais: `python3 -m unittest -q tool/test_native_transmitter_273.py`, `python3 tool/check_version_sync.py`, `python3 tool/check_mcrp_272.py`.
+- Testes de integração obrigatórios no CI Android: Flutter analyzer, testes, Gradle; físicos com A3: tela apagada, aquecimento, gravação, FPS, Eco e comandos remotos via segundo Vigia.
+- O modo Flutter anterior continua disponível como fallback e o Minha Câmera original permanece backup até validação no dispositivo.
+
 
 ## 1.0.272: integração inicial de comandos MCRP (2026-10-17)
 

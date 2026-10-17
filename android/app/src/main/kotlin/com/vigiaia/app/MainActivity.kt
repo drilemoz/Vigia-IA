@@ -60,6 +60,22 @@ import kotlin.math.max
 import kotlin.math.min
 
 class MainActivity : FlutterActivity() {
+    private fun nativeTransmitterStatus(): Map<String, Any?> {
+        val service = com.minhacamera.PhoneCameraBackgroundService
+        return mapOf(
+            "running" to service.running,
+            "starting" to service.starting,
+            "releasing" to service.releasing,
+            "recording" to service.recording,
+            "ready" to (service.running && service.firstFramePublished),
+            "url" to service.streamUrl,
+            "phase" to service.startupPhase,
+            "error" to service.lastError,
+            "seconds" to (if (service.running && service.transmissionStartedMs > 0L)
+                (SystemClock.elapsedRealtime() - service.transmissionStartedMs).coerceAtLeast(0) / 1000 else 0L)
+        )
+    }
+
     private val backgroundChannelName = "vigiaia/background"
     private val nativeChannelName = "vigiaia/native"
     private val compassChannelName = "vigiaia/compass"
@@ -217,6 +233,54 @@ class MainActivity : FlutterActivity() {
                             .putString("schedule", schedule)
                             .apply()
                         result.success(true)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        // Núcleo nativo Minha Câmera (MCRP v1), independente do ciclo de vida Flutter.
+        // O serviço só inicia mediante ação do usuário com a Activity em primeiro plano.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "vigiaia/native_transmitter")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "status" -> result.success(nativeTransmitterStatus())
+                    "start" -> {
+                        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            result.error("camera_permission", "Permita a câmera antes de transmitir.", null)
+                        } else {
+                            try {
+                                com.minhacamera.PhoneCameraBackgroundService.command(
+                                    this, com.minhacamera.PhoneCameraBackgroundService.ACTION_START
+                                )
+                                result.success(true)
+                            } catch (error: Exception) {
+                                result.error("native_transmitter_start", error.message, null)
+                            }
+                        }
+                    }
+                    "stop" -> {
+                        try {
+                            val service = com.minhacamera.PhoneCameraBackgroundService
+                            if (service.running || service.starting || service.releasing) {
+                                service.command(this, service.ACTION_STOP)
+                            }
+                            result.success(true)
+                        } catch (error: Exception) {
+                            result.error("native_transmitter_stop", error.message, null)
+                        }
+                    }
+                    "record" -> {
+                        val service = com.minhacamera.PhoneCameraBackgroundService
+                        if (!service.running || service.starting) {
+                            result.error("not_running", "Aguarde o início da transmissão.", null)
+                        } else {
+                            try {
+                                service.command(this, service.ACTION_RECORD)
+                                result.success(true)
+                            } catch (error: Exception) {
+                                result.error("native_transmitter_record", error.message, null)
+                            }
+                        }
                     }
                     else -> result.notImplemented()
                 }

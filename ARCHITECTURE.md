@@ -1,4 +1,9 @@
-# Arquitetura — Vigia IA 1.0.272+272
+# Arquitetura — Vigia IA 1.0.273+273
+
+## Modo transmissor nativo experimental (1.0.273)
+
+O núcleo MCRP v1 do Minha Câmera foi incluído no mesmo projeto Android em `android/app/src/main/kotlin/com/minhacamera`, e espelhado em `tool/android/native_transmitter` para sobreviver ao `tool/bootstrap_android.sh`. O Flutter chama `vigiaia/native_transmitter` para início/parada/status, porém a captura headless, watchdog, MJPEG, gravação e servidor MCRP são mantidos pelo serviço foreground Kotlin, sem executar IA no transmissor. A versão Dart anterior segue intacta e mutuamente exclusiva pela porta TCP 8765. Conectar pelo QR do Vigia IA receptor, URL privada `/live/<token>`. Testar condições Android e estabilidade antes de migrar o uso normal.
+
 
 **Receptor remoto MCRP 272:** `McrpControlPanel` concentra comandos permitidos por `McrpClient`. `McrpLiveRemoteControls` faz GET `/control/<token>/status` periódico (4 s) e POST para comandos MCRP com token já presente na URL, sem duplicar stream de vídeo/decoder/IA. `monitor_screen_mcrp_support.dart` só monta o controle quando `VideoSourceConfig` é `remotePhone` com URL válida `MinhaCameraLiveUrl`, evitando enviar comandos a RTSP, ESP32 e pareamento `vigiaia://pair`. O menu dá acesso a controles no modo paisagem/tela cheia. Troca de codec em Ao vivo permanece bloqueada porque o pipeline de IA depende de MJPEG; a tela MCRP independente continua suportando troca de codec. Esta fase não migra o serviço Kotlin do transmissor para o Vigia IA.
 

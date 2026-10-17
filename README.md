@@ -1,3 +1,9 @@
+## 1.0.273+273: transmissor nativo experimental (2026-10-17)
+
+- Migração inicial do serviço Kotlin do Minha Câmera, com captura Android independente da Activity do Flutter e controle MCRP v1.
+- Início voluntário do motor nativo, QR privado, gravação, foto, FPS, qualidade, zoom, lanterna e Eco pelo receptor.
+- Modo transmissor Flutter anterior preservado como alternativa; estabilidade, consumo, temperatura e tela apagada requerem teste no Redmi A3.
+
 ## 1.0.272+272: controle remoto Minha Câmera no Ao vivo (2026-10-17)
 
 - Ao selecionar uma fonte de câmera Minha Câmera `/live/` privada, o monitor **Ao vivo** passa a exibir controles remotos para gravação, foto, câmera frontal/traseira, Eco, lanterna, zoom 0..100%, resolução e FPS.
@@ -185,7 +191,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.272+272`
+**Versão atual:** `1.0.273+273`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

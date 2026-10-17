@@ -37,6 +37,10 @@ cp "$ROOT/tool/android/MonitorSystemUi.kt" "$KOTLIN_DIR/MonitorSystemUi.kt"
 cp "$ROOT/tool/android/MonitoringForegroundService.kt" "$KOTLIN_DIR/MonitoringForegroundService.kt"
 cp "$ROOT/tool/android/RadioPlaybackService.kt" "$KOTLIN_DIR/RadioPlaybackService.kt"
 cp "$ROOT/tool/android/MonitorRecoveryReceiver.kt" "$KOTLIN_DIR/MonitorRecoveryReceiver.kt"
+# Portabilidade do transmissor MCRP Android independente do Flutter.
+NATIVE_DIR="android/app/src/main/kotlin/com/minhacamera"
+mkdir -p "$NATIVE_DIR"
+cp "$ROOT/tool/android/native_transmitter/"*.kt "$NATIVE_DIR/"
 
 # Áudios personalizados opcionais. Eles ficam fora de android/ para sobreviver
 # à recriação completa feita por este bootstrap.
@@ -130,6 +134,7 @@ if 'signingConfig = signingConfigs.getByName("release")' not in text:
 if 'signingConfigs.getByName("debug")' in text:
     raise SystemExit('Assinatura debug ainda presente no release')
 media_deps = '''dependencies {
+    implementation("androidx.core:core-ktx:1.13.1")
     // Rádio online: ExoPlayer (MP3/AAC/Ogg/HLS com metadados ICY) e MediaSession.
     implementation("androidx.media3:media3-exoplayer:1.8.0")
     implementation("androidx.media3:media3-exoplayer-hls:1.8.0")
@@ -137,6 +142,8 @@ media_deps = '''dependencies {
 }
 
 '''
+if 'androidx.core:core-ktx' not in text and 'androidx.media3' in text:
+    text = text.replace('dependencies {', 'dependencies {\n    implementation("androidx.core:core-ktx:1.13.1")', 1)
 if 'androidx.media3' not in text:
     flutter_marker = 'flutter {\n    source'
     if flutter_marker not in text:

@@ -1,3 +1,9 @@
+## 1.0.273+273: transmissor nativo experimental (2026-10-17)
+
+- Migração inicial do serviço Kotlin do Minha Câmera, com captura Android independente da Activity do Flutter e controle MCRP v1.
+- Início voluntário do motor nativo, QR privado, gravação, foto, FPS, qualidade, zoom, lanterna e Eco pelo receptor.
+- Modo transmissor Flutter anterior preservado como alternativa; estabilidade, consumo, temperatura e tela apagada requerem teste no Redmi A3.
+
 ## 1.0.272+272: receptor MCRP unificado no Ao vivo (2026-10-17)
 
 - Painel de controle remoto também na tela Ao vivo quando a fonte é Minha Câmera, preservando detecção e mapa.

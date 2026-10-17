@@ -12,6 +12,8 @@ import '../services/remote_camera_server_service.dart';
 import '../services/system_ui_service.dart';
 import 'bike_mode_screen.dart';
 import 'launch_mode_screen.dart';
+import 'native_transmitter_screen.dart';
+import '../services/native_camera_transmitter_service.dart';
 
 class CameraModeScreen extends StatefulWidget {
   const CameraModeScreen({super.key});
@@ -69,6 +71,13 @@ class _CameraModeScreenState extends State<CameraModeScreen> {
     }
   }
 
+  Future<void> _openNativeTransmitter() async {
+    if (_server.running || _server.starting) return;
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => const NativeTransmitterScreen(),
+    ));
+  }
+
   Future<void> _openTransmissionSettings() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const BikeModeScreen()),
@@ -86,6 +95,15 @@ class _CameraModeScreenState extends State<CameraModeScreen> {
   }
 
   Future<void> _toggle() async {
+    if (!_server.running) {
+      final native = await NativeCameraTransmitterService.status();
+      if (native.running || native.starting || native.releasing) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Desligue o transmissor nativo antes de iniciar o antigo.'),
+        ));
+        return;
+      }
+    }
     if (_server.running) {
       await _server.stop();
       return;
@@ -257,7 +275,9 @@ class _CameraModeScreenState extends State<CameraModeScreen> {
             color: Colors.black,
             child: _server.running
                 ? _server.buildPreview()
-                : const _CameraStandbyPanel(),
+                : _CameraStandbyPanel(
+                    onNative: () => unawaited(_openNativeTransmitter()),
+                  ),
           ),
           Positioned(
             left: 0,
@@ -275,6 +295,7 @@ class _CameraModeScreenState extends State<CameraModeScreen> {
                   onBack: () => unawaited(_returnToModeSelection()),
                   onSettings: () => unawaited(_openTransmissionSettings()),
                   onToggle: _toggle,
+                  onNativeTransmitter: () => unawaited(_openNativeTransmitter()),
                 ),
               ),
             ),
@@ -330,6 +351,7 @@ class _CameraModeTopBar extends StatelessWidget {
     required this.onBack,
     required this.onSettings,
     required this.onToggle,
+    required this.onNativeTransmitter,
   });
 
   final bool running;
@@ -339,6 +361,7 @@ class _CameraModeTopBar extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onSettings;
   final VoidCallback onToggle;
+  final VoidCallback onNativeTransmitter;
 
   @override
   Widget build(BuildContext context) {
@@ -398,6 +421,12 @@ class _CameraModeTopBar extends StatelessWidget {
               ),
               const SizedBox(width: 4),
             ],
+            if (!running)
+              IconButton(
+                tooltip: 'Transmissor nativo experimental',
+                onPressed: starting ? null : onNativeTransmitter,
+                icon: const Icon(Icons.wifi_tethering_rounded, size: 20),
+              ),
             IconButton(
               tooltip: 'Bike e economia',
               onPressed: onSettings,
@@ -425,7 +454,8 @@ class _CameraModeTopBar extends StatelessWidget {
 }
 
 class _CameraStandbyPanel extends StatelessWidget {
-  const _CameraStandbyPanel();
+  const _CameraStandbyPanel({required this.onNative});
+  final VoidCallback onNative;
 
   @override
   Widget build(BuildContext context) {
@@ -439,10 +469,10 @@ class _CameraStandbyPanel extends StatelessWidget {
           borderRadius: BorderRadius.circular(26),
           border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
         ),
-        child: const Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.video_camera_front_outlined, size: 58, color: Colors.white),
+            const Icon(Icons.video_camera_front_outlined, size: 58, color: Colors.white),
             SizedBox(height: 12),
             Text(
               'Transmissão desligada',
@@ -455,6 +485,16 @@ class _CameraStandbyPanel extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70),
             ),
+            const SizedBox(height: 18),
+            OutlinedButton.icon(
+              onPressed: onNative,
+              icon: const Icon(Icons.wifi_tethering_rounded),
+              label: const Text('Testar transmissor nativo'),
+            ),
+            const SizedBox(height: 6),
+            const Text('Beta: câmera com tela apagada e controle MCRP.',
+                style: TextStyle(color: Colors.white70, fontSize: 12),
+                textAlign: TextAlign.center),
           ],
         ),
       ),

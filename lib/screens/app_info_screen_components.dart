@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.272',
+          version: '1.0.273',
           current: true,
+          changes: [
+            'Modo de transmissão nativa experimental integrado ao Vigia IA.',
+            'Serviço de câmera Android com QR MCRP e envio com a tela apagada.',
+            'Comandos remotos do Minha Câmera preservados para o receptor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.272',
           changes: [
             'Controle remoto do Minha Câmera integrado ao Ao vivo.',
             'Comandos de REC, foto, lanterna, zoom, FPS e resolução para o Redmi A3.',
@@ -2426,8 +2435,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.272',
+          version: '1.0.273',
           current: true,
+          changes: [
+            'Modo de transmissão nativa experimental integrado ao Vigia IA.',
+            'Serviço de câmera Android com QR MCRP e envio com a tela apagada.',
+            'Comandos remotos do Minha Câmera preservados para o receptor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.272',
           changes: [
             'Controle remoto do Minha Câmera integrado ao Ao vivo.',
             'Comandos de REC, foto, lanterna, zoom, FPS e resolução para o Redmi A3.',
