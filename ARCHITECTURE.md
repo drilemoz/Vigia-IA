@@ -1,3 +1,7 @@
+# Arquitetura — Vigia IA 1.0.269+269
+
+**Ao vivo renovado (1.0.269):** a ação principal do botão **Mapa** passa a alternar `_primaryContentMode` para o mini mapa/monitor compacto, preservando o explorador de mapa completo como fluxo separado. O botão **Áudio** abre `AudioSettingsScreen` em `showModalBottomSheet`, dando acesso aos controles de voz sem sair do monitor. `SessionStatusPanel` recebeu hierarquia visual nova com chips/resumos e ícones por métrica, mantendo os mesmos dados de sessão. Em `EventsScreenActions`, a prévia prioriza `snapshotPath` e cai para `clipPath` apenas quando necessário, reduzindo falhas ao tocar em fotos.
+
 Vigia IA 1.0.248+248 — câmera cadastrada no hub central; monitor seleciona a fonte correta.
 
 Vigia IA 1.0.247+247 — atualização de arquitetura: armazenamento local de câmeras MCRP.
@@ -9,7 +13,9 @@ Vigia IA 1.0.247+247 — atualização de arquitetura: armazenamento local de c�
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-# Arquitetura — Vigia IA 1.0.267+267
+# Arquitetura — Vigia IA 1.0.269+269
+
+**Cadência local 1.0.268:** `_effectiveMonitorAnalysisInterval` respeita `VideoSourceConfig.analysisInterval` e `BikeModeConfig.effectiveAnalysisInterval` com mínimo de segurança de 250 ms; `SharedLocalCameraService` limita conversões e bloqueia sobreposição, sem regular a prévia nativa. A taxa alvo é distinta do FPS real de imagem analisada.
 
 **Lint APK 221 (1.0.267):** callbacks de UI das ferramentas IA, definidas como `extension` sobre o estado do Monitor, chamam `_updateAiDiagnosticState` implementado dentro do `State`. Isto preserva o acesso legítimo ao método protegido `setState` e mantém os controles interativos durante o teste.
 
@@ -23,7 +29,7 @@ Vigia IA 1.0.247+247 — atualização de arquitetura: armazenamento local de c�
 
 **Buildfix APK 215 (1.0.262):** somente a forma sintática da guarda em `MonitorMulticamera._selectLocalPrimarySource` mudou para chaves obrigatórias, mantendo lógica e sequenciamento de liberação do CameraController antes da alternância. O verificador impede regressão do lint, sem afrouxar `flutter analyze`.
 
-**Câmera frontal principal e suavização do monitor (1.0.260):** `MonitorMulticamera` envia a seleção frontal para o controlador principal, encerrando a fonte secundária antes de reinicializar a lente CameraX compartilhada. `LocalCameraSource` propaga `frontCamera` ao `SharedLocalCameraService`, que escolhe câmera frontal ou traseira mantendo apenas um `CameraController`. A conversão RGB local tem limite inferior de 900 ms, desacoplada de `CameraPreview`, e quadros ignorados quando a IA está ocupada não exigem reconstrução da árvore visual. A alteração pode reduzir o FPS da IA; busca manter visualização responsiva. Diagnóstico do 1.0.259: EfficientDet-Lite0/XNNPACK/CPU, não YOLO26s.
+**Câmera frontal principal e suavização do monitor (1.0.260):** `MonitorMulticamera` envia a seleção frontal para o controlador principal, encerrando a fonte secundária antes de reinicializar a lente CameraX compartilhada. `LocalCameraSource` propaga `frontCamera` ao `SharedLocalCameraService`, que escolhe câmera frontal ou traseira mantendo apenas um `CameraController`. Na 1.0.260, a conversão RGB local recebeu limite de 900 ms, separado de `CameraPreview`; essa medida foi substituída na 1.0.269 pela cadência efetivamente configurada, com mínimo de 250 ms. Frames recebidos enquanto a IA está ocupada continuam sem provocar reconstrução desnecessária da árvore visual. Diagnóstico do 1.0.259: EfficientDet-Lite0/XNNPACK/CPU, não YOLO26s.
 
 **Correção do APK 213 (1.0.259):** `activeDetectorModel` exposto uma única vez no `MonitorControllerAiSupport`, sem modificar o runtime do detector nem o fluxo de recepção/telemetria. Teste estático protege contra getters duplicados.
 

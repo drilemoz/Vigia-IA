@@ -1,3 +1,13 @@
+# Validação Vigia IA 1.0.269+269
+
+## 1.0.269: Ao vivo com mapa compacto, áudio em popup e painel renovado (2026-10-16)
+
+- [x] Botão **Mapa** do Ao vivo alterado para alternar o conteúdo principal para o mapa compacto da sessão.
+- [x] Botão **Áudio** alterado para abrir um modal/popup com a tela de Áudios e voz.
+- [x] Painel **Status da sessão** reorganizado com ícones, chips de resumo e melhor alinhamento visual.
+- [x] Abertura de mídia em **Eventos** passa a priorizar o snapshot/foto do evento; arquivos ausentes mostram placeholder seguro.
+- [ ] Executar `flutter analyze`, `flutter test` e validação manual no Android; indisponíveis neste executor local.
+
 ## 1.0.247+247: câmeras Minha Câmera salvas localmente (2026-10-15)
 
 **1.0.266:** atualização do Ao vivo, telemetria MCRP e diagnóstico livre. Testes fonte/contrato executados localmente conforme logs; Flutter SDK não disponível no executor local, exigindo `flutter analyze`, `flutter test` e montagem de APK no CI. Validar em aparelho: duas câmeras com mapa, troca de modelos durante teste e bateria/temperatura reais do Minha Câmera.
@@ -7,7 +17,15 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-# Validação Vigia IA 1.0.267+267
+# Validação Vigia IA 1.0.269+269
+
+## 1.0.268: liberação do intervalo de 900 ms (2026-10-16)
+
+- [x] Limitador de 900 ms identificado em `monitor_controller_ai_support.dart`; alvo local padrão 400 ms e mínimo de 250 ms respeitado.
+- [x] Configurações avançadas permitem intervalo 250–2000 ms; Modo Bike economia/eco extremo ainda impõem limites.
+- [x] Python regressões do novo comportamento; backpressure do SharedLocalCameraService e do Monitor preservado.
+- [ ] Testar as taxas reais com detector YOLO26s e EfficientDet-Lite0 no aparelho em ambiente semelhante, medindo temperatura da bateria e carga de CPU.
+- [ ] Repetir `flutter analyze`, `flutter test` e build APK no CI; indisponível localmente.
 
 ## Android APK 221: acesso protegido na extensão (2026-10-16)
 

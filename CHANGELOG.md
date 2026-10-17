@@ -1,3 +1,17 @@
+## 1.0.269+269: Ao vivo com mapa compacto, áudio em popup e painel renovado (2026-10-16)
+
+- O botão **Mapa** no Ao vivo agora alterna diretamente para o mapa compacto da sessão, em vez de abrir como ação principal a lista de pontos próximos.
+- O botão **Áudio** abre um popup/modal semelhante ao do mapa, com acesso rápido para ativar, silenciar e personalizar todos os sons e falas.
+- O painel **Status da sessão** foi reorganizado com ícones, chips de resumo, melhor hierarquia visual e alinhamento mais limpo em Saúde, Vídeo e telemetria dos aparelhos.
+- Corrigida a abertura de fotos em **Eventos**: a pré-visualização passa a priorizar a imagem do evento e trata arquivos ausentes com fallback seguro, reduzindo fechamentos inesperados.
+
+## 1.0.268+268: cadência configurável na câmera local (2026-10-16)
+
+- Retirado o teto artificial de 900 ms que restringia FPS para ~1,1 mesmo com inferência rápida. Intervalo padrão de 400 ms volta a ser aplicado na câmera local.
+- Ajustes avançados passam a aceitar 250 ms (4 FPS teóricos); perfis Bike continuam reduzindo frequência quando necessário.
+- Diagnóstico separa o orçamento de análise e a meta aproximada do FPS de prévia. Proteções de backpressure preservadas.
+- O aumento de FPS real depende da carga e implica maior consumo/temperatura: validar no aparelho.
+
 ## 1.0.267+267: correção da análise estática no diagnóstico da IA (APK 221, 2026-10-16)
 
 - Corrigidos os quatro apontamentos `invalid_use_of_protected_member` de `lib/screens/monitor_screen_ai_tools.dart` (linhas 223, 233, 271 e 313 da versão 1.0.266).

@@ -93,6 +93,7 @@ extension _EventsActions on _EventsScreenState {
   }
 
   void _openEvent(MonitorEvent event) {
+    final previewPath = _preferredPreviewPath(event);
     showDialog<void>(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -103,10 +104,8 @@ extension _EventsActions on _EventsScreenState {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (event.clipPath != null)
-                  _Media(path: event.clipPath!, fit: BoxFit.contain)
-                else if (event.snapshotPath != null)
-                  _Media(path: event.snapshotPath!, fit: BoxFit.contain)
+                if (previewPath != null)
+                  _Media(path: previewPath, fit: BoxFit.contain)
                 else
                   const AspectRatio(
                     aspectRatio: 16 / 9,
@@ -173,5 +172,19 @@ extension _EventsActions on _EventsScreenState {
         ),
       ),
     );
+  }
+
+  String? _preferredPreviewPath(MonitorEvent event) {
+    final snapshotPath = event.snapshotPath;
+    if (snapshotPath != null && snapshotPath.isNotEmpty) {
+      final snapshot = File(snapshotPath);
+      if (snapshot.existsSync()) return snapshotPath;
+    }
+    final clipPath = event.clipPath;
+    if (clipPath != null && clipPath.isNotEmpty) {
+      final clip = File(clipPath);
+      if (clip.existsSync()) return clipPath;
+    }
+    return null;
   }
 }

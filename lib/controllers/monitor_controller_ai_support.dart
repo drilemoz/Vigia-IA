@@ -7,12 +7,17 @@ Duration _effectiveMonitorAnalysisInterval(
   final requestedInterval = monitor._bikeConfig.effectiveAnalysisInterval(
     config.analysisInterval,
   );
-  // A visualização CameraPreview é nativa e independente da conversão RGB.
-  // Reduz a frequência de conversão local sob carga e mantém FPS do vídeo.
-  return config.type == VideoSourceType.localCamera &&
-          requestedInterval < const Duration(milliseconds: 900)
-      ? const Duration(milliseconds: 900)
-      : requestedInterval;
+  // O CameraPreview nativo é independente dos quadros RGB enviados à IA.
+  // Respeitar a cadência configurada (400 ms por padrão) e os perfis Bike.
+  // O limite anterior de 900 ms impunha ~1,1 FPS mesmo com IA rápida.
+  // O serviço da câmera já descarta conversões concorrentes e o Monitor
+  // descarta quadros enquanto a inferência estiver ocupada (backpressure).
+  // Alinhar o mínimo ao limite do SharedLocalCameraService (250 ms).
+  if (config.type == VideoSourceType.localCamera &&
+      requestedInterval < const Duration(milliseconds: 250)) {
+    return const Duration(milliseconds: 250);
+  }
+  return requestedInterval;
 }
 
 void _clearMonitorControllerAiState(MonitorController controller) {

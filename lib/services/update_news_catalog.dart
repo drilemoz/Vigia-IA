@@ -8,14 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.267', build: 267);
+      AppBuildVersion(version: '1.0.269', build: 269);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.267', build: 267),
+      version: AppBuildVersion(version: '1.0.269', build: 269),
       changes: <String>[
-        'O diagnóstico interativo agora mantém o painel atualizado com maior estabilidade.',
-        'Duas câmeras, troca de modelo e dados de bateria e temperatura continuam disponíveis.'
+        'Botão Mapa do Ao vivo agora alterna para o mapa compacto da sessão.',
+        'Botão Áudio abre um popup/modal com acesso direto aos controles de voz e sons.',
+        'Painel Status da sessão ficou mais claro e organizado; fotos de Eventos abrem com fallback mais seguro.'
       ],
     ),
   ]);

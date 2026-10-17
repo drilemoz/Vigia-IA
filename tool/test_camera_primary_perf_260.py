@@ -30,7 +30,9 @@ class FrontPrimaryAndPerformance260(unittest.TestCase):
     def test_throttle_does_not_limit_native_preview(self):
         core = source('lib/controllers/monitor_controller.dart')
         shared = source('lib/services/shared_local_camera_service.dart')
-        self.assertIn('requestedInterval < const Duration(milliseconds: 900)', source('lib/controllers/monitor_controller_ai_support.dart'))
+        cadence = source('lib/controllers/monitor_controller_ai_support.dart')
+        self.assertIn('requestedInterval < const Duration(milliseconds: 250)', cadence)
+        self.assertNotIn('requestedInterval < const Duration(milliseconds: 900)', cadence)
         self.assertIn('_effectiveMonitorAnalysisInterval(this, config)', core)
         self.assertIn('CameraPreview(active, key: ObjectKey(active))', shared)
         self.assertIn('if (_converting || _consumers.isEmpty) return;', shared)

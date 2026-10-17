@@ -77,8 +77,25 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.267',
+          version: '1.0.269',
           current: true,
+          changes: [
+            'Botão Mapa no Ao vivo passa a alternar para o mapa compacto da sessão.',
+            'Botão Áudio abre popup/modal com acesso aos controles de voz e sons.',
+            'Status da sessão ficou mais organizado e a abertura de fotos em Eventos ganhou fallback seguro.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.268',
+          changes: [
+            'Câmera local respeita a frequência configurada sem teto oculto de 1,1 FPS.',
+            'Intervalo da IA pode chegar a 250 ms com controle de bateria pelos perfis Bike.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.267',
           changes: [
             'Análise estática do diagnóstico interativo estabilizada para a compilação Android.',
             'Trocas de modelos e painel em tempo real preservados sem bloquear os controles.',
@@ -2383,8 +2400,33 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.265',
+          version: '1.0.269',
           current: true,
+          changes: [
+            'Botão Mapa do Ao vivo agora alterna para o mapa compacto da sessão.',
+            'Botão Áudio abre popup/modal com acesso aos controles de voz e sons.',
+            'Painel Status da sessão foi reorganizado com visual renovado e informações mais claras.',
+            'Fotos de Eventos passam a abrir com fallback mais seguro, evitando fechamento inesperado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.268',
+          changes: [
+            'A câmera local passa a seguir o intervalo configurado, com até 4 FPS alvo.',
+            'Intervalo e FPS esperado agora aparecem juntos no diagnóstico de vídeo.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.267',
+          changes: [
+            'Compatibilidade do diagnóstico interativo com o analisador Flutter.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.265',
           changes: [
             'Corrigido o teste Flutter do modelo YOLO26s padrão no APK 219.',
             'YOLO26s exportado no GitHub Actions; modelo Automático preservado.',

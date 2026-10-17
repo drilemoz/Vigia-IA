@@ -39,6 +39,7 @@ import '../widgets/remote_bike_status_panel.dart';
 import '../widgets/offline_map_manager_sheet.dart';
 import '../widgets/session_status_panel.dart';
 import '../widgets/smart_alert_rules_dialog.dart';
+import 'audio_settings_screen.dart';
 import 'events_screen.dart';
 import 'home_screen.dart';
 import 'launch_mode_screen.dart';
@@ -213,6 +214,26 @@ class _MonitorScreenState extends State<MonitorScreen>
     );
     if (result == null || !mounted) return;
     _controller.setSmartAlertRules(result);
+  }
+
+  Future<void> _togglePrimaryMapMode() async {
+    final next = _primaryContentMode == _MonitorPrimaryContentMode.map
+        ? _MonitorPrimaryContentMode.camera
+        : _MonitorPrimaryContentMode.map;
+    await _setPrimaryContentMode(next);
+  }
+
+  Future<void> _showAudioQuickSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => const FractionallySizedBox(
+        heightFactor: 0.92,
+        child: AudioSettingsScreen(),
+      ),
+    );
   }
 
   Future<void> _renameZone(MonitoringZoneProfile zone) async {

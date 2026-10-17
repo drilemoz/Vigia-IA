@@ -165,7 +165,7 @@ class VideoSessionDetailsPanel extends StatelessWidget {
                 _MetricRow(
                   label: 'FPS recebido',
                   value: '${data.receivedFps.toStringAsFixed(1)} FPS',
-                  detail: 'Meta aproximada: ${data.expectedReceivedFps.toStringAsFixed(1)} FPS',
+                  detail: 'Meta da IA: ${data.expectedReceivedFps.toStringAsFixed(1)} FPS (intervalo ${data.expectedFrameIntervalMs} ms; não é o FPS da prévia).',
                 ),
                 _MetricRow(
                   label: 'FPS analisado',

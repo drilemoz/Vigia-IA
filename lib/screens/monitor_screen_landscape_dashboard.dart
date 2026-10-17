@@ -750,9 +750,9 @@ extension _MonitorLandscapeDashboard on _MonitorScreenState {
               children: [
                 Expanded(child: _DashboardActionButton(icon: Icons.videocam_outlined, label: 'Câmera', accent: _primaryContentMode != _MonitorPrimaryContentMode.cameraOff, onPressed: () => unawaited(_showCameraHub()))),
                 const SizedBox(width: 8),
-                Expanded(child: _DashboardActionButton(icon: Icons.map_outlined, label: 'Mapa', accent: true, onPressed: () => unawaited(_showMapExplorerSheet()))),
+                Expanded(child: _DashboardActionButton(icon: _primaryContentMode == _MonitorPrimaryContentMode.map ? Icons.map_rounded : Icons.map_outlined, label: 'Mapa', accent: _primaryContentMode == _MonitorPrimaryContentMode.map || _shouldShowMonitorMap, onPressed: () => unawaited(_togglePrimaryMapMode()))),
                 const SizedBox(width: 8),
-                Expanded(child: _DashboardActionButton(icon: _controller.voiceEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded, label: 'Áudio', onPressed: () => _controller.setVoiceEnabled(!_controller.voiceEnabled))),
+                Expanded(child: _DashboardActionButton(icon: _controller.voiceEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded, label: 'Áudio', accent: _controller.voiceEnabled, onPressed: () => unawaited(_showAudioQuickSheet()))),
                 const SizedBox(width: 8),
                 Expanded(child: _DashboardActionButton(icon: Icons.tune_rounded, label: 'Painel', onPressed: () => unawaited(_showSessionStatus()))),
                 const SizedBox(width: 8),

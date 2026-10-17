@@ -201,9 +201,19 @@ class _Media extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final file = File(path);
+    if (!file.existsSync()) {
+      return const ColoredBox(
+        color: Colors.black26,
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Center(child: Icon(Icons.broken_image_outlined)),
+        ),
+      );
+    }
     if (path.toLowerCase().endsWith('.mp4')) return _VideoMedia(path: path);
     return Image.file(
-      File(path),
+      file,
       fit: fit,
       gaplessPlayback: true,
       errorBuilder: (_, _, _) => const ColoredBox(

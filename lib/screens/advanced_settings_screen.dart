@@ -102,12 +102,12 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
           ),
           _SettingSlider(
             title: 'Intervalo da IA',
-            description: 'Tempo entre análises de imagem. Menor intervalo reage mais rápido e usa mais processamento e bateria.',
+            description: 'Intervalo alvo entre quadros enviados à IA (400 ms ≈ 2,5 FPS; 250 ms ≈ 4 FPS). Menor intervalo pode aumentar calor e consumo. Perfis Bike podem impor intervalo maior.',
             valueText: '${_analysisMs.round()} ms',
             value: _analysisMs,
-            min: 300,
+            min: 250,
             max: 2000,
-            divisions: 17,
+            divisions: 35,
             onChanged: (value) => setState(() => _analysisMs = value),
           ),
           _SettingSlider(

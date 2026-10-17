@@ -1,3 +1,17 @@
+## 1.0.269+269: Ao vivo mais prático e organizado (2026-10-16)
+
+- O botão **Mapa** do Ao vivo passa a mostrar o mapa compacto da sessão como ação principal.
+- O botão **Áudio** abre um popup/modal com acesso direto aos controles de voz e sons.
+- O painel **Status da sessão** recebeu organização visual nova, com ícones, chips e melhor alinhamento das informações.
+- A visualização de fotos em **Eventos** ficou mais segura e prioriza o snapshot do evento quando houver também um clipe.
+
+
+## 1.0.268+268: FPS da IA na câmera local (2026-10-16)
+
+- Antes a câmera local ficava limitada artificialmente a aproximadamente 1,1 quadro por segundo analisado, ainda que a IA terminasse rapidamente. O intervalo efetivo agora segue a preferência (padrão 400 ms) e respeita o perfil Bike.
+- Em **Configurações > Avançado > Intervalo da IA**, ajuste de 400 ms (~2,5 FPS alvo) para 300 ou 250 ms conforme CPU, bateria e temperatura; a prévia CameraPreview mantém fluxo independente.
+- Maior FPS é uma meta de amostragem, não garantia da taxa real. Priorize conforto térmico e autonomia.
+
 ## 1.0.267+267: compilação do diagnóstico interativo (APK 221, 2026-10-16)
 
 - Corrige quatro avisos `invalid_use_of_protected_member` no `flutter analyze` do APK 221. As extensões de `monitor_screen_ai_tools.dart` passam a atualizar a interface por método pertencente a `_MonitorScreenState`, sem chamar `setState` protegido diretamente.
@@ -151,7 +165,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.267+267`
+**Versão atual:** `1.0.269+269`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

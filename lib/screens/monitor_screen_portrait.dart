@@ -533,6 +533,7 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
 
   Widget _buildPortraitActionRow(BuildContext context) {
     final mapVisible = _shouldShowMonitorMap;
+    final mapSelected = _primaryContentMode == _MonitorPrimaryContentMode.map;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: SizedBox(
@@ -551,11 +552,11 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
             const SizedBox(width: 4),
             Expanded(
               child: _DashboardActionButton(
-                icon: mapVisible ? Icons.map_rounded : Icons.map_outlined,
+                icon: mapSelected ? Icons.map_rounded : Icons.map_outlined,
                 label: 'Mapa',
-                accent: mapVisible,
+                accent: mapSelected || mapVisible,
                 compact: true,
-                onPressed: () => unawaited(_showMapExplorerSheet()),
+                onPressed: () => unawaited(_togglePrimaryMapMode()),
               ),
             ),
             const SizedBox(width: 4),
@@ -565,9 +566,9 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
                     ? Icons.volume_up_rounded
                     : Icons.volume_off_rounded,
                 label: 'Áudio',
+                accent: _controller.voiceEnabled,
                 compact: true,
-                onPressed: () =>
-                    _controller.setVoiceEnabled(!_controller.voiceEnabled),
+                onPressed: () => unawaited(_showAudioQuickSheet()),
               ),
             ),
             const SizedBox(width: 4),
