@@ -15,6 +15,7 @@ import '../core/video_source_status.dart';
 import '../models/detection.dart';
 import '../models/rgb_frame.dart';
 import '../widgets/detection_overlay.dart';
+import '../widgets/mcrp_remote_controls.dart';
 
 /// Cliente independente para Minha Câmera. Não muda o fluxo de IA ou QR vigiaia://pair.
 class McrpCameraScreen extends StatefulWidget {
@@ -179,6 +180,8 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
   bool _legacy = false;
   String? _error;
   int _streamRevision = 0;
+  int _previewQuarterTurns = 0;
+  bool _mirrorPreview = false;
 
   @override
   void dispose() {
@@ -186,6 +189,20 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
     _client?.close();
     _input.dispose();
     super.dispose();
+  }
+
+  void _disconnect() {
+    _timer?.cancel();
+    _client?.close();
+    setState(() {
+      _client = null;
+      _info = null;
+      _status = {};
+      _media = [];
+      _showMedia = false;
+      _error = null;
+      _streamRevision++;
+    });
   }
 
   Future<void> _scan() async {
@@ -327,37 +344,15 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
     ));
   }
 
-  Widget _controls() {
-    final recording = _status['x-recording'] == '1';
-    final eco = _status['x-eco'] == '1';
-    final codec = _status['x-stream-codec'] ?? 'mjpeg';
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        FilledButton.tonalIcon(onPressed: _working ? null : () => _command('record/${recording ? 'stop' : 'start'}'),
-          icon: Icon(recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record),
-          label: Text(recording ? 'Parar REC' : 'Gravar')),
-        OutlinedButton.icon(onPressed: _working ? null : () => _command('photo'),
-          icon: const Icon(Icons.photo_camera), label: const Text('Foto')),
-        OutlinedButton.icon(onPressed: _working ? null : () => _command('eco/${eco ? 'disable' : 'enable'}'),
-          icon: const Icon(Icons.battery_saver), label: Text(eco ? 'Desativar Eco' : 'Eco')),
-        OutlinedButton.icon(onPressed: _working ? null : () => _command('camera/${_status['x-camera-facing'] == '1' ? 'back' : 'front'}'),
-          icon: const Icon(Icons.cameraswitch), label: const Text('Trocar câmera')),
-        OutlinedButton.icon(onPressed: _working ? null : () => _command('codec/${codec == 'mjpeg' ? 'h264' : 'mjpeg'}'),
-          icon: const Icon(Icons.swap_horiz), label: Text('Codec: ${codec.toUpperCase()}')),
-        OutlinedButton.icon(onPressed: _working || _legacy ? null : _loadMedia,
-          icon: const Icon(Icons.video_library_outlined), label: const Text('Multimídia')),
-        OutlinedButton.icon(onPressed: _working || _legacy ? null : _showDiagnostic,
-          icon: const Icon(Icons.bug_report_outlined), label: const Text('Diagnóstico')),
-      ]),
-      const SizedBox(height: 8),
-      Wrap(spacing: 8, runSpacing: 8, children: [
-        for (final q in [360, 480, 720, 768, 1080])
-          ActionChip(label: Text('${q}p'), onPressed: _working ? null : () => _command('quality/$q')),
-        for (final fps in [10, 15, 24, 30])
-          ActionChip(label: Text('$fps FPS'), onPressed: _working ? null : () => _command('fps/$fps')),
-      ]),
-    ]);
-  }
+  Widget _controls() => McrpControlPanel(
+    status: _status,
+    working: _working,
+    onCommand: _command,
+    onReconnect: () => unawaited(_refreshStatus()),
+    onMedia: _working || _legacy ? null : _loadMedia,
+    onDiagnostic: _working || _legacy ? null : () => unawaited(_showDiagnostic()),
+    allowCodecChange: true,
+  );
 
   Future<void> _showDiagnostic() async {
     final client = _client;
@@ -379,8 +374,9 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
     final codec = _status['x-stream-codec'] ?? 'mjpeg';
     final model = (_info?['device'] is Map) ? (_info!['device'] as Map)['model']?.toString() : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Minha Câmera · MCRP v1')),
+      appBar: AppBar(title: const Text('Câmera remota · Minha Câmera')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
+        if (client == null) ...[
         const Text('Conecte o QR exibido pelo Minha Câmera ou informe a URL /live/ completa. Funciona pela rede Wi-Fi local, sem internet.'),
         const SizedBox(height: 12),
         TextField(controller: _input, keyboardType: TextInputType.url,
@@ -417,6 +413,7 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
             ],
           ),
         ],
+        ],
         if (_savedError != null) Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(_savedError!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -425,7 +422,12 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
           child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
         if (_working) const LinearProgressIndicator(),
         if (client != null) ...[
-          const SizedBox(height: 12),
+          Align(alignment: Alignment.centerRight, child: TextButton.icon(
+            onPressed: _working ? null : _disconnect,
+            icon: const Icon(Icons.swap_horiz),
+            label: const Text('Trocar câmera conectada'),
+          )),
+          const SizedBox(height: 6),
           if (_legacy) const Text('Conexão compatível com Minha Câmera 1.4.35. '
               'Biblioteca MCRP e diagnóstico avançado exigem transmissor 1.4.36 ou posterior.'),
           Align(
@@ -436,7 +438,7 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
               label: const Text('Salvar esta câmera'),
             ),
           ),
-          Text('${model ?? 'Celular remoto'}  ·  ${_status['x-resolution'] ?? 'Resolução desconhecida'}  ·  ${_status['x-fps-target'] ?? '?'} FPS',
+          Text('${model ?? 'Celular remoto'}  ·  ${_status['x-resolution'] ?? 'Resolução desconhecida'}  ·  ${_status['x-fps-measured'] ?? '?'} FPS medidos',
             style: Theme.of(context).textTheme.titleMedium),
           Text('AO VIVO ${_status['x-transmission-seconds'] ?? '0'}s  ·  REC ${_status['x-recording-seconds'] ?? '0'}s  ·  Bateria ${_status['x-battery-level'] ?? '?'}%'),
           SwitchListTile.adaptive(
@@ -449,13 +451,32 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
             onChanged: codec == 'h264' ? null : (value) => setState(() => _analyze = value),
           ),
           const SizedBox(height: 10),
-          AspectRatio(aspectRatio: 16 / 9, child: Container(
-            color: Colors.black,
-            child: codec == 'h264'
-                ? _McrpVlcView(key: ValueKey('h264_$_streamRevision'), url: client.address.h264.toString(), h264: true)
-                : _McrpMjpegView(key: ValueKey('mjpeg_$_streamRevision'),
-                    url: client.address.liveUrl.toString(), analysisEnabled: _analyze),
-          )),
+          AspectRatio(aspectRatio: _previewQuarterTurns.isOdd ? 9 / 16 : 16 / 9,
+            child: ColoredBox(color: Colors.black,
+              child: RotatedBox(quarterTurns: _previewQuarterTurns,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.diagonal3Values(_mirrorPreview ? -1 : 1, 1, 1),
+                  child: codec == 'h264'
+                    ? _McrpVlcView(key: ValueKey('h264_$_streamRevision'),
+                        url: client.address.h264.toString(), h264: true)
+                    : _McrpMjpegView(key: ValueKey('mjpeg_$_streamRevision'),
+                        url: client.address.liveUrl.toString(), analysisEnabled: _analyze),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(spacing: 8, runSpacing: 4, children: [
+            OutlinedButton.icon(
+              onPressed: () => setState(() => _previewQuarterTurns = (_previewQuarterTurns + 1) % 4),
+              icon: const Icon(Icons.rotate_right), label: const Text('Girar visor'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => setState(() => _mirrorPreview = !_mirrorPreview),
+              icon: const Icon(Icons.flip), label: const Text('Espelho'),
+            ),
+          ]),
           const SizedBox(height: 12),
           _controls(),
           if (_showMedia) ...[

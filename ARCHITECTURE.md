@@ -1,3 +1,7 @@
+# Arquitetura — Vigia IA 1.0.272+272
+
+**Receptor remoto MCRP 272:** `McrpControlPanel` concentra comandos permitidos por `McrpClient`. `McrpLiveRemoteControls` faz GET `/control/<token>/status` periódico (4 s) e POST para comandos MCRP com token já presente na URL, sem duplicar stream de vídeo/decoder/IA. `monitor_screen_mcrp_support.dart` só monta o controle quando `VideoSourceConfig` é `remotePhone` com URL válida `MinhaCameraLiveUrl`, evitando enviar comandos a RTSP, ESP32 e pareamento `vigiaia://pair`. O menu dá acesso a controles no modo paisagem/tela cheia. Troca de codec em Ao vivo permanece bloqueada porque o pipeline de IA depende de MJPEG; a tela MCRP independente continua suportando troca de codec. Esta fase não migra o serviço Kotlin do transmissor para o Vigia IA.
+
 # Arquitetura — Vigia IA 1.0.271+271
 
 **Detecções/contagem piloto 271:** `monitor_screen_detection_panel.dart` renderiza indicadores instantâneos (sem armazenar totais) e lista classes agregadas. `VehiclePassageCounter` recebe apenas `TrackedDetection` na conclusão de quadros analisados em `MonitorController`, conta a mesma identidade no máximo uma vez, requer amostras estabilizadas nos dois lados da linha vertical e invalida pistas quando há movimento global. A opção permanece desligada por padrão, exige tracking e IA, não persiste, não sincroniza com o transmissor MJPEG e só tem interpretação útil em câmera fixa. Sessão/fonte e alterações relevantes de rastreamento zeram a contagem. A análise no Redmi A3 permanece fora do escopo.

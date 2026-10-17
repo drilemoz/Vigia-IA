@@ -147,6 +147,7 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
                     const SizedBox(height: 7),
                   _buildPortraitActionRow(context),
                   const SizedBox(height: 8),
+                  _buildPortraitRemoteControls(context),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
                     child: _buildPortraitDetectionSummary(context),

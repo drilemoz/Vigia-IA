@@ -1,3 +1,13 @@
+# Validação Vigia IA 1.0.272+272
+
+## 1.0.272: integração inicial de comandos MCRP (2026-10-17)
+
+- [x] Comandos do servidor Minha Câmera 1.4.74 conferidos com a lista do cliente Flutter.
+- [x] Zoom e lanterna adicionados com allowlist, sem rotas livres ou URLs públicas.
+- [x] Painel MCRP compartilhado entre visualização remota e Ao vivo.
+- [x] Novo controle não recebe quadros nem inicia outro processo de IA.
+- [ ] Flutter analyze/test/build Android (SDK indisponível neste ambiente), teste real com Redmi A3 e validação de latência/temperatura.
+
 # Validação Vigia IA 1.0.271+271
 
 ## 1.0.271: painel ao vivo e piloto de passagens (2026-10-17)

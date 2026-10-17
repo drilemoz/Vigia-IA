@@ -102,6 +102,10 @@ extension _MonitorFullscreen on _MonitorScreenState {
           );
           return;
         }
+        if (value == 'mcrp') {
+          unawaited(_showMcrpRemoteSheet());
+          return;
+        }
         if (value == 'lan') {
           unawaited(_showLanAccess());
           return;
@@ -129,6 +133,8 @@ extension _MonitorFullscreen on _MonitorScreenState {
             child: Text('Mapa automático'),
           ),
         const PopupMenuDivider(),
+        if (_activeMcrpLiveUrl != null)
+          const PopupMenuItem(value: 'mcrp', child: Text('Controle remoto da câmera')),
         const PopupMenuItem(value: 'lan', child: Text('Rede local')),
         const PopupMenuItem(value: 'events', child: Text('Eventos')),
         const PopupMenuItem(

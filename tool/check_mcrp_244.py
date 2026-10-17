@@ -4,6 +4,7 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 client=(root/'lib/services/mcrp_client.dart').read_text()
 screen=(root/'lib/screens/mcrp_camera_screen.dart').read_text()
+controls=(root/'lib/widgets/mcrp_remote_controls.dart').read_text()
 home=(root/'lib/screens/home_screen_redesign.dart').read_text()
 legacy=(root/'lib/services/remote_camera_pairing_service.dart').read_text()
 protocol=(root/'docs/MCRP_V1.md').read_text()
@@ -17,7 +18,7 @@ checks={
 'viewer JPEG':"class _McrpMjpegView" in screen,
 'viewer H.264':"class _McrpVlcView" in screen and ":demux=h264" in screen,
 'QR do Minha Câmera':"MobileScanner" in screen and "McrpAddress.parse(raw)" in screen,
-'controles':all(x in screen for x in ('record/', 'eco/', 'photo', 'camera/', 'quality/', 'fps/', 'codec/')),
+'controles': all(x in client for x in ('record/', 'eco/', 'photo', 'camera/', 'quality/', 'fps/', 'codec/')) and 'McrpControlPanel(' in screen and 'onCommand' in controls,
 'central multimídia':"_loadMedia" in screen and "_download" in screen,
 'entrada por Câmeras':"McrpCameraScreen" in (root/'lib/screens/multi_camera_screen.dart').read_text() and "McrpCameraScreen" not in home,
 'pareamento Vigia antigo':"static const String scheme = 'vigiaia';" in legacy,

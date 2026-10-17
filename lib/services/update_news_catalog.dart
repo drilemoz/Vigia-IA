@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.271', build: 271);
+      AppBuildVersion(version: '1.0.272', build: 272);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.271', build: 271),
+      version: AppBuildVersion(version: '1.0.272', build: 272),
       changes: <String>[
-        'Novo painel com pessoas e veículos visíveis separadamente.',
-        'Contador experimental de passagens com ativação manual para câmera fixa.',
-        'Painel arrastável menor, com categorias e status reorganizados.'
+        'Ao vivo ganhou controles MCRP do Redmi A3, sem sair do monitoramento.',
+        'Zoom, lanterna, gravação, foto, FPS, resolução e Eco via Wi-Fi local.',
+        'Tela Minha Câmera agora reutiliza o painel visual de comandos remotos.'
       ],
     ),
   ]);

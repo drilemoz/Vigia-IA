@@ -111,11 +111,16 @@ class McrpClient {
     final headers = <String, String>{};
     for (final name in <String>['x-stream-codec', 'x-device-model', 'x-resolution',
       'x-battery-level', 'x-battery-temp-tenths', 'x-recording', 'x-recording-seconds',
-      'x-transmission-seconds', 'x-eco', 'x-camera-facing', 'x-quality-profile', 'x-fps-target']) {
+      'x-transmission-seconds', 'x-eco', 'x-camera-facing', 'x-quality-profile', 'x-fps-target',
+      'x-fps-measured', 'x-torch-supported', 'x-torch-enabled', 'x-torch-mode',
+      'x-zoom-supported', 'x-zoom-percent', 'x-zoom-ratio-100', 'x-zoom-max-ratio-100']) {
       final value = response.headers.value(name);
       if (value != null) headers[name] = value;
     }
     await response.drain<void>();
+    if (headers['x-stream-codec'] == null && headers['x-device-model'] == null) {
+      throw const FormatException('Status MCRP incompatível.');
+    }
     return headers;
   }
 
@@ -123,8 +128,12 @@ class McrpClient {
     const actions = <String>{'record/start', 'record/stop', 'eco/enable', 'eco/disable',
       'camera/back', 'camera/front', 'photo', 'codec/mjpeg', 'codec/h264',
       'quality/360', 'quality/480', 'quality/720', 'quality/768', 'quality/1080',
-      'fps/5', 'fps/10', 'fps/15', 'fps/24', 'fps/30'};
-    if (!actions.contains(action)) throw const FormatException('Comando não permitido pelo cliente.');
+      'fps/5', 'fps/10', 'fps/15', 'fps/24', 'fps/30',
+      'torch/off', 'torch/30', 'torch/120', 'torch/record'};
+    final zoom = RegExp(r'^zoom/(0|[1-9][0-9]?|100)$').hasMatch(action);
+    if (!actions.contains(action) && !zoom) {
+      throw const FormatException('Comando não permitido pelo cliente.');
+    }
     final uri = address.control(action);
     final request = await _http.postUrl(uri);
     request.followRedirects = false;

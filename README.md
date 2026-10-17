@@ -1,3 +1,10 @@
+## 1.0.272+272: controle remoto Minha Câmera no Ao vivo (2026-10-17)
+
+- Ao selecionar uma fonte de câmera Minha Câmera `/live/` privada, o monitor **Ao vivo** passa a exibir controles remotos para gravação, foto, câmera frontal/traseira, Eco, lanterna, zoom 0..100%, resolução e FPS.
+- O controle também está no menu do monitor, acessível em paisagem/tela cheia; a IA continua no receptor. Para evitar interrupção do MJPEG, troca de codec fica disponível na tela MCRP independente, não no monitor Ao vivo.
+- A tela MCRP reutiliza o painel visual do receptor e consulta telemetria de zoom/lanterna/FPS medido do transmissor 1.4.74; compatibilidade de novos comandos depende do firmware/app remoto.
+- Esta fase **não incorpora o transmissor Kotlin ao Flutter**, nem altera o Minha Câmera instalado. A segurança permanece restrita à URL privada local e ao token de pareamento.
+
 ## 1.0.271+271: painel de detecções e contador experimental (2026-10-17)
 
 - Ao vivo mostra pessoas e veículos visíveis separadamente, agrupando outras categorias em um painel menor e arrastável.
@@ -178,7 +185,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.271+271`
+**Versão atual:** `1.0.272+272`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

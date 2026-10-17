@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.271',
+          version: '1.0.272',
           current: true,
+          changes: [
+            'Controle remoto do Minha Câmera integrado ao Ao vivo.',
+            'Comandos de REC, foto, lanterna, zoom, FPS e resolução para o Redmi A3.',
+            'Tela de câmera remota com painel de ações mais organizado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.271',
           changes: [
             'Detecções ao vivo mostram pessoas e veículos em cartões separados.',
             'Contador experimental de passagens para câmera fixa, ativado manualmente.',
@@ -2417,8 +2426,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.271',
+          version: '1.0.272',
           current: true,
+          changes: [
+            'Controle remoto do Minha Câmera integrado ao Ao vivo.',
+            'Comandos de REC, foto, lanterna, zoom, FPS e resolução para o Redmi A3.',
+            'Tela de câmera remota com painel de ações mais organizado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.271',
           changes: [
             'Detecções ao vivo mostram pessoas e veículos em cartões separados.',
             'Contador experimental de passagens para câmera fixa, ativado manualmente.',

@@ -1,3 +1,10 @@
+## 1.0.272+272: receptor MCRP unificado no Ao vivo (2026-10-17)
+
+- Painel de controle remoto também na tela Ao vivo quando a fonte é Minha Câmera, preservando detecção e mapa.
+- Cliente MCRP ampliado para zoom absoluto, lanterna temporizada/REC e telemetria FPS/zoom/lanterna.
+- Botões e menus de resolução/FPS reusados entre o receptor MCRP e o monitor Ao vivo; girar/espelho do visor incorporados à tela MCRP; H.264 continua desabilitado no Ao vivo que usa MJPEG.
+- Sem IA adicional no transmissor, sem nova conexão de vídeo e sem integração nativa do transmissor nesta entrega.
+
 ## 1.0.271+271: painel compacto e contador de passagens (2026-10-17)
 
 - Reorganizados os indicadores em Detecções ao vivo para mostrar pessoas e veículos no instante, além da listagem agrupada de rótulos e do status do monitor.

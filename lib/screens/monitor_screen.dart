@@ -31,6 +31,9 @@ import '../services/offline_map_service.dart';
 import '../services/route_explorer_service.dart';
 import '../services/camera_registry_service.dart';
 import '../services/remote_camera_pairing_service.dart';
+import '../services/minha_camera_live_url.dart';
+import '../services/mcrp_client.dart';
+import '../widgets/mcrp_remote_controls.dart';
 import '../widgets/detection_overlay.dart';
 import '../widgets/bike_approach_banner.dart';
 import '../widgets/bike_ride_hud.dart';
@@ -56,6 +59,7 @@ part 'monitor_screen_portrait.dart';
 part 'monitor_screen_ai_tools.dart';
 part 'monitor_screen_landscape_dashboard.dart';
 part 'monitor_screen_map_explorer.dart';
+part 'monitor_screen_mcrp_support.dart';
 enum _MonitorPrimaryContentMode { camera, cameraOff, map }
 class MonitorScreen extends StatefulWidget {
   const MonitorScreen({
