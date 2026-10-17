@@ -45,6 +45,7 @@ import '../services/object_appearance_service.dart';
 import '../services/object_detection_service.dart';
 import '../services/object_filter_policy.dart';
 import '../services/object_tracker.dart';
+import '../services/vehicle_passage_counter.dart';
 import '../services/partial_person_detection_service.dart';
 import '../services/performance_telemetry_service.dart';
 import '../services/smart_alert_rule_engine.dart';
@@ -58,6 +59,7 @@ import '../sources/rtsp_camera_source.dart';
 import '../sources/remote_phone_camera_source.dart';
 import '../sources/remote_phone_source_factory.dart';
 part 'monitor_controller_session_support.dart';
+part 'monitor_controller_vehicle_support.dart';
 part 'monitor_controller_event_support.dart';
 part 'monitor_controller_state_support.dart';
 part 'monitor_controller_ai_support.dart';
@@ -112,6 +114,8 @@ class MonitorController extends ChangeNotifier {
   late AlertRepeatGuard _alertGuard;
   late SmartAlertRuleEngine _smartRuleEngine;
   final ObjectTracker _tracker;
+  final VehiclePassageCounter _vehiclePassageCounter = VehiclePassageCounter();
+  bool _vehicleCountingEnabled = false;
   Set<String> _alertLabels;
   SmartAlertRules _smartAlertRules;
   List<MonitoringZoneProfile> _monitoringZones;
@@ -388,7 +392,6 @@ class MonitorController extends ChangeNotifier {
       _smartAlertRules,
       absenceReset: _settings.absenceReset,
     );
-
     try {
       _bikeConfig = await _bikeMode.initialize();
       _lanStream
@@ -480,7 +483,6 @@ class MonitorController extends ChangeNotifier {
       _notify();
     }
   }
-
   Future<void> retry() async {
     if (_disposed || _initializing) return;
     _initializing = true;
@@ -488,7 +490,6 @@ class MonitorController extends ChangeNotifier {
     _error = null;
     _resetEventState();
     _notify();
-
     await _enqueueTransition(_stopSourceUnlocked);
     await _waitForProcessing();
     final oldDetector = _detector;
@@ -496,7 +497,6 @@ class MonitorController extends ChangeNotifier {
     try {
       await oldDetector.dispose();
     } catch (_) {}
-
     try {
       await Future.wait(<Future<void>>[
         _detector.initialize(),
@@ -1132,6 +1132,8 @@ class MonitorController extends ChangeNotifier {
               transitions: <ZoneTransition>[],
             );
       _trackedDetections = tracking.active;
+      _observeVehiclePassages(tracking.active, now,
+          motionResult.cameraMotion);
       if (_announceEntryExit && tracking.transitions.isNotEmpty) {
         unawaited(_recordTransitions(frame, tracking.transitions));
       }
@@ -1378,6 +1380,7 @@ class MonitorController extends ChangeNotifier {
       _alertGuard.reset();
     }
     _tracker.reset();
+    _vehiclePassageCounter.reset();
     _notify();
     unawaited(_persistRuntime());
     unawaited(
@@ -1640,6 +1643,7 @@ class MonitorController extends ChangeNotifier {
     _motion.reset();
     if (_baseReady) _smartRuleEngine.reset();
     _tracker.reset();
+    _vehiclePassageCounter.reset();
     _resetBikeApproach();
     _motionActive = false;
     _cameraMotion = false;

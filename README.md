@@ -1,3 +1,10 @@
+## 1.0.271+271: painel de detecções e contador experimental (2026-10-17)
+
+- Ao vivo mostra pessoas e veículos visíveis separadamente, agrupando outras categorias em um painel menor e arrastável.
+- Em **Detecções**, uma chave ativa manualmente o contador **experimental** de carros/motos/ônibus/caminhões que atravessam a linha vertical central, exigindo IA e rastreamento ativos.
+- A contagem é apenas da sessão atual do Vigia IA (não persiste e não roda no Minha Câmera). É válida apenas com **câmera fixa** e pode falhar por FPS baixo, perda de IDs ou deslocamento da câmera; requer testes físicos antes do uso real.
+- Não altera codificação MJPEG, captura em segundo plano ou reconhecimento no aparelho remoto.
+
 ## 1.0.270+270: correção do build 223 (2026-10-17)
 
 - Corrigido `tool/verify_project.sh`, que ainda exigia o `versionCode` da versão anterior apesar de todos os metadados estarem atualizados.
@@ -171,7 +178,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.270+270`
+**Versão atual:** `1.0.271+271`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

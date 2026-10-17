@@ -72,7 +72,13 @@ extension _MonitorLandscapeDashboard on _MonitorScreenState {
                 ],
               ),
             ),
-            Expanded(child: _buildDetectionPanel(context, compact: false)),
+            Expanded(
+              child: ListenableBuilder(
+                listenable: _controller,
+                builder: (context, _) =>
+                    _buildDetectionPanel(context, compact: false),
+              ),
+            ),
           ],
         ),
       ),

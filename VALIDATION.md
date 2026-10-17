@@ -1,3 +1,13 @@
+# Validação Vigia IA 1.0.271+271
+
+## 1.0.271: painel ao vivo e piloto de passagens (2026-10-17)
+
+- [x] Painel movido para extensão dedicada, mantendo os controles de arraste e os contratos anteriores.
+- [x] Criado contador baseado em tracks com dois quadros de cada lado, sem duplicar a mesma identidade e limpando pistas durante movimento da câmera.
+- [x] Testes Flutter adicionados para passagem, classes não veiculares, movimento de câmera, perda temporal e reinício.
+- [ ] Executar `flutter analyze`, `flutter test` e build Android no workflow (SDK indisponível neste ambiente).
+- [ ] Testar em câmera fixa real, FPS de 1 a 4, oclusões, troca de fonte, e medir eventuais falsos positivos/negativos.
+
 # Validação Vigia IA 1.0.270+270
 
 ## Build 223: versionCode obsoleto no validador (2026-10-17)

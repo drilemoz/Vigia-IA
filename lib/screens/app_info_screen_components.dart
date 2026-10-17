@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.270',
+          version: '1.0.271',
           current: true,
+          changes: [
+            'Detecções ao vivo mostram pessoas e veículos em cartões separados.',
+            'Contador experimental de passagens para câmera fixa, ativado manualmente.',
+            'Painel inferior começa mais compacto e agrupa categorias visíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.270',
           changes: [
             'Verificação de versionamento do Android acompanha a versão do projeto.',
             'Recursos de mapa, áudio e eventos permanecem disponíveis.',
@@ -2408,8 +2417,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.270',
+          version: '1.0.271',
           current: true,
+          changes: [
+            'Detecções ao vivo mostram pessoas e veículos em cartões separados.',
+            'Contador experimental de passagens para câmera fixa, ativado manualmente.',
+            'Painel inferior começa mais compacto e agrupa categorias visíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.270',
           changes: [
             'Verificação de versionamento agora acompanha automaticamente a versão do aplicativo.',
             'Ajustes do Ao vivo, mapa compacto, áudio e painel de sessão da versão anterior foram preservados.',

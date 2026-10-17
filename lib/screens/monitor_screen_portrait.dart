@@ -626,23 +626,20 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
         ? _controller.trackedDetections.length
         : _controller.detections.length;
 
-    final labels = <String>{};
-    if (aiEnabled) {
-      if (tracked) {
-        for (final item in _controller.trackedDetections) {
-          labels.add(item.detection.displayLabel);
-        }
-      } else {
-        for (final item in _controller.detections) {
-          labels.add(item.displayLabel);
-        }
-      }
-    }
+    final current = tracked
+        ? _controller.trackedDetections.map((item) => item.detection)
+        : _controller.detections;
+    final people = aiEnabled
+        ? current.where((item) => ObjectFilterCatalog.people.contains(item.label)).length
+        : 0;
+    final vehicles = aiEnabled
+        ? current.where((item) => ObjectFilterCatalog.vehicles.contains(item.label)).length
+        : 0;
+    final labels = current.map((detection) => detection.displayLabel).toSet();
+    final names = labels.take(3).join(' · ');
     final detail = !aiEnabled
-        ? 'Análise de imagem desativada'
-        : labels.isEmpty
-            ? 'Nenhum objeto no momento'
-            : labels.take(3).join(' · ');
+        ? 'IA desligada'
+        : 'Pessoas $people · Veículos $vehicles${names.isEmpty ? '' : ' · $names'}';
 
     return Material(
       color: Colors.transparent,
@@ -828,8 +825,8 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
       builder: (sheetContext) => SafeArea(
         child: DraggableScrollableSheet(
           expand: false,
-          initialChildSize: 0.60,
-          minChildSize: 0.34,
+          initialChildSize: 0.41,
+          minChildSize: 0.32,
           maxChildSize: 0.90,
           builder: (context, scrollController) => Material(
             color: Theme.of(context).colorScheme.surface,
@@ -853,9 +850,12 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
                 ),
                 const SizedBox(height: 2),
                 Expanded(
-                  child: _buildDetectionPanel(
-                    context,
-                    scrollController: scrollController,
+                  child: ListenableBuilder(
+                    listenable: _controller,
+                    builder: (context, _) => _buildDetectionPanel(
+                      context,
+                      scrollController: scrollController,
+                    ),
                   ),
                 ),
               ],

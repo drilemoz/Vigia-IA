@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.270', build: 270);
+      AppBuildVersion(version: '1.0.271', build: 271);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.270', build: 270),
+      version: AppBuildVersion(version: '1.0.271', build: 271),
       changes: <String>[
-        'Build com validação de versão mais consistente em todas as etapas.',
-        'O mapa compacto, o painel de áudio e os detalhes da sessão continuam disponíveis.',
-        'Compatibilidade do projeto e verificações preventivas aprimoradas.'
+        'Novo painel com pessoas e veículos visíveis separadamente.',
+        'Contador experimental de passagens com ativação manual para câmera fixa.',
+        'Painel arrastável menor, com categorias e status reorganizados.'
       ],
     ),
   ]);

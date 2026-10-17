@@ -1,3 +1,10 @@
+## 1.0.271+271: painel compacto e contador de passagens (2026-10-17)
+
+- Reorganizados os indicadores em Detecções ao vivo para mostrar pessoas e veículos no instante, além da listagem agrupada de rótulos e do status do monitor.
+- O modal vertical abre com 41% da altura disponível (antes 60%) e permanece expansível por gesto.
+- Introduzido contador experimental por cruzamento da linha central para carro, moto, ônibus e caminhão: exige tracking, dois quadros confirmados em cada lado e bloqueia amostras com movimento global detectado.
+- A contagem é manual, temporária e reiniciável, sem persistência, sem sincronismo com Minha Câmera e sem garantia em câmera móvel. Teste real ainda necessário.
+
 ## 1.0.270+270: build 223, versionCode obsoleto no validador (2026-10-17)
 
 - Substituídas três checagens fixas de build 268 (`github-manager.json`, `AppMetadata` e `app_identity.json`) por comparação dinâmica com `pubspec.yaml` através de `tool/check_version_sync.py`.

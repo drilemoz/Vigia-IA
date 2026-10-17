@@ -15,6 +15,7 @@ import '../models/bike_approach_status.dart';
 import '../models/bike_sensor_snapshot.dart';
 import '../models/camera_endpoint.dart';
 import '../models/monitoring_zone.dart';
+import '../models/object_filter_catalog.dart';
 import '../models/device_telemetry.dart';
 import '../models/map_route_point.dart';
 import '../models/route_explorer_models.dart';
@@ -47,6 +48,7 @@ import 'map_monitoring_screen.dart';
 import 'phone_pairing_scanner_screen.dart';
 import 'settings_screen.dart';
 part 'monitor_screen_components.dart';
+part 'monitor_screen_detection_panel.dart';
 part 'monitor_screen_fullscreen.dart';
 part 'monitor_screen_multicamera.dart';
 part 'monitor_screen_offline_map.dart';
@@ -1312,80 +1314,12 @@ class _MonitorScreenState extends State<MonitorScreen>
     bool compact = false,
     bool showHeader = true,
     ScrollController? scrollController,
-  }) {
-    final tracked = _controller.aiEnabled && _controller.trackingEnabled;
-    final count = !_controller.aiEnabled
-        ? 0
-        : tracked
-        ? _controller.trackedDetections.length
-        : _controller.detections.length;
-    return ListView(
-      controller: scrollController,
-      padding: EdgeInsets.fromLTRB(
-        compact ? 12 : 14,
-        12,
-        compact ? 12 : 14,
-        22,
-      ),
-      children: [
-        if (showHeader) ...[
-          Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Detectados agora',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      'Quantidade visível neste instante; não é uma contagem acumulada.',
-                    ),
-                  ],
-                ),
-              ),
-              _CountBadge(count: count),
-            ],
-          ),
-          const SizedBox(height: 10),
-        ],
-        _RuntimeSummary(controller: _controller),
-        if (!_controller.voiceLanguageInstalled &&
-            !_controller.initializing) ...[
-          const SizedBox(height: 8),
-          const _InfoStrip(
-            icon: Icons.volume_off_outlined,
-            text: 'A voz do Android em pt-BR não está instalada. Os áudios integrados continuam disponíveis.',
-          ),
-        ],
-        const SizedBox(height: 10),
-        if (count == 0 && !_controller.initializing)
-          _EmptyDetectionState(
-            text: !_controller.scheduleActive
-                ? 'Pausado pela agenda. O monitor retomará no próximo horário.'
-                : _controller.motionOnly
-                ? 'Aguardando atividade relevante.'
-                : 'Nenhum objeto acima do limite de confiança.',
-          )
-        else if (tracked)
-          ..._controller.trackedDetections.map(
-            (trackedDetection) => _DetectionCard(
-              label: trackedDetection.detection.displayLabel,
-            ),
-          )
-        else
-          ..._controller.detections.map(
-            (detection) => _DetectionCard(
-              label: detection.displayLabel,
-            ),
-          ),
-      ],
-    );
-  }
+  }) => _buildDetectionPanelBody(
+    context,
+    compact: compact,
+    showHeader: showHeader,
+    scrollController: scrollController,
+  );
 
   String _statusText(VideoSourceStatus status) =>
       status.message ??

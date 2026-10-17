@@ -1,4 +1,7 @@
-# Arquitetura — Vigia IA 1.0.270+270
+# Arquitetura — Vigia IA 1.0.271+271
+
+**Detecções/contagem piloto 271:** `monitor_screen_detection_panel.dart` renderiza indicadores instantâneos (sem armazenar totais) e lista classes agregadas. `VehiclePassageCounter` recebe apenas `TrackedDetection` na conclusão de quadros analisados em `MonitorController`, conta a mesma identidade no máximo uma vez, requer amostras estabilizadas nos dois lados da linha vertical e invalida pistas quando há movimento global. A opção permanece desligada por padrão, exige tracking e IA, não persiste, não sincroniza com o transmissor MJPEG e só tem interpretação útil em câmera fixa. Sessão/fonte e alterações relevantes de rastreamento zeram a contagem. A análise no Redmi A3 permanece fora do escopo.
+
 
 **Buildfix 223 (1.0.270):** verificação de `android.versionCode` no `github-manager.json` é dinâmica em `tool/check_version_sync.py`, que compara os metadados com `pubspec.yaml`. A CI mantém os demais contratos e agora impede que um literal antigo bloqueie uma atualização válida.
 
@@ -15,7 +18,7 @@ Vigia IA 1.0.247+247 — atualização de arquitetura: armazenamento local de c�
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-# Arquitetura — Vigia IA 1.0.270+270
+# Arquitetura — Vigia IA 1.0.271+271
 
 **Cadência local 1.0.268:** `_effectiveMonitorAnalysisInterval` respeita `VideoSourceConfig.analysisInterval` e `BikeModeConfig.effectiveAnalysisInterval` com mínimo de segurança de 250 ms; `SharedLocalCameraService` limita conversões e bloqueia sobreposição, sem regular a prévia nativa. A taxa alvo é distinta do FPS real de imagem analisada.
 

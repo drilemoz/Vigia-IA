@@ -89,6 +89,7 @@ extension MonitorControllerStateSupport on MonitorController {
       _smartRuleEngine.reset();
     }
     _tracker.reset();
+    _vehiclePassageCounter.reset();
     _detectionFilter.reset();
     _cadence.reset();
     _lastAlertDecision = 'aguardando análise';
@@ -110,6 +111,7 @@ extension MonitorControllerStateSupport on MonitorController {
       _smartRuleEngine.reset();
     }
     _tracker.reset();
+    _vehiclePassageCounter.reset();
     _detectionFilter.reset();
     _cadence.reset();
     _lastAlertDecision = 'aguardando análise';

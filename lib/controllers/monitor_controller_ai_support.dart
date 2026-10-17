@@ -22,6 +22,8 @@ Duration _effectiveMonitorAnalysisInterval(
 
 void _clearMonitorControllerAiState(MonitorController controller) {
   controller._detections = const <Detection>[];
+  controller._vehicleCountingEnabled = false;
+  controller._vehiclePassageCounter.reset();
   controller._trackedDetections = const <TrackedDetection>[];
   controller._recentMotionByTrackId.clear();
   controller._lastIdleInferenceAt = null;
@@ -139,6 +141,8 @@ extension MonitorControllerAiSupport on MonitorController {
     _trackingEnabled = enabled;
     _settings = _settings.copyWith(trackingEnabled: enabled);
     _tracker.reset();
+    _vehiclePassageCounter.reset();
+    if (!enabled) _vehicleCountingEnabled = false;
     _detectionFilter.reset();
     _recentMotionByTrackId.clear();
     _lastIdleInferenceAt = null;
