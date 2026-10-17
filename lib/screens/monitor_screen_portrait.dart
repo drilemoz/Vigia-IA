@@ -1,6 +1,26 @@
 part of 'monitor_screen.dart';
 
 extension _MonitorPortraitLayout on _MonitorScreenState {
+  Future<void> _togglePrimaryMapMode() async {
+    final next = _primaryContentMode == _MonitorPrimaryContentMode.map
+        ? _MonitorPrimaryContentMode.camera
+        : _MonitorPrimaryContentMode.map;
+    await _setPrimaryContentMode(next);
+  }
+
+  Future<void> _showAudioQuickSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => const FractionallySizedBox(
+        heightFactor: 0.92,
+        child: AudioSettingsScreen(),
+      ),
+    );
+  }
+
   Widget _buildPortrait(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -766,6 +786,15 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   unawaited(_openFullMap());
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.place_outlined),
+                title: const Text('Pontos próximos'),
+                subtitle: const Text('Explorar locais úteis e listas offline'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  unawaited(_showMapExplorerSheet());
                 },
               ),
               ListTile(

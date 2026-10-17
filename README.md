@@ -1,3 +1,9 @@
+## 1.0.270+270: correção do build 223 (2026-10-17)
+
+- Corrigido `tool/verify_project.sh`, que ainda exigia o `versionCode` da versão anterior apesar de todos os metadados estarem atualizados.
+- A versão é conferida dinamicamente contra `pubspec.yaml`; verificador deve rejeitar metadados conflitantes.
+- Sem alterações adicionais de interface sobre a 1.0.269.
+
 ## 1.0.269+269: Ao vivo mais prático e organizado (2026-10-16)
 
 - O botão **Mapa** do Ao vivo passa a mostrar o mapa compacto da sessão como ação principal.
@@ -165,7 +171,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.269+269`
+**Versão atual:** `1.0.270+270`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

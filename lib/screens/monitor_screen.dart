@@ -216,26 +216,6 @@ class _MonitorScreenState extends State<MonitorScreen>
     _controller.setSmartAlertRules(result);
   }
 
-  Future<void> _togglePrimaryMapMode() async {
-    final next = _primaryContentMode == _MonitorPrimaryContentMode.map
-        ? _MonitorPrimaryContentMode.camera
-        : _MonitorPrimaryContentMode.map;
-    await _setPrimaryContentMode(next);
-  }
-
-  Future<void> _showAudioQuickSheet() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      useSafeArea: true,
-      isScrollControlled: true,
-      builder: (sheetContext) => const FractionallySizedBox(
-        heightFactor: 0.92,
-        child: AudioSettingsScreen(),
-      ),
-    );
-  }
-
   Future<void> _renameZone(MonitoringZoneProfile zone) async {
     final text = TextEditingController(text: zone.name);
     final name = await showDialog<String>(
@@ -1006,7 +986,6 @@ class _MonitorScreenState extends State<MonitorScreen>
       ),
     );
   }
-
 
   Future<void> _openStandardScreen(Widget screen) async {
     if (_fullscreen) await _toggleFullscreen();

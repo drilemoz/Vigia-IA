@@ -416,12 +416,27 @@ class _SessionHealthCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(health.summary, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          _InfoChip(icon: Icons.insights_rounded, label: 'Diagnóstico da sessão'),
+          const SizedBox(height: 9),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _InfoChip(icon: _healthIcon(health.state), label: health.state.label),
-              _InfoChip(icon: Icons.insights_rounded, label: health.bottleneck.label),
+              const Icon(Icons.speed_rounded, size: 17),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  'Gargalo provável',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  health.bottleneck.label,
+                  textAlign: TextAlign.end,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
             ],
           ),
           if (displayedIssues.isNotEmpty) ...[

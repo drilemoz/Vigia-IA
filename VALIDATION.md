@@ -1,3 +1,17 @@
+# Validação Vigia IA 1.0.270+270
+
+## Build 223: versionCode obsoleto no validador (2026-10-17)
+
+- [x] Lido o ZIP `Vigia-IA-Android-APK-223-logs.zip`: o workflow 223 parou na verificação preventiva; Flutter Analyze e build APK não começaram.
+- [x] Identificada checagem antiga de `versionCode: 268` em `tool/verify_project.sh` com mensagem referindo-se a 254, apesar de `github-manager.json` registrar 269 na entrega anterior.
+- [x] Checagens obsoletas de `versionCode` (268), `AppMetadata.build` (268) e `app_identity.json.build` (268) substituídas pela validação dinâmica `tool/check_version_sync.py`.
+- [x] 153 testes Python aprovados (incluindo 2 testes de regressão que comprovam rejeição de `versionCode` e `versionName` incorretos).
+- [x] `tool/check_version_sync.py`, `tool/check_ci_contract.py`, `tool/check_import_targets.py` e `bash -n tool/verify_project.sh` aprovados.
+- [x] Contratos restantes validados por execução parcial de `tool/verify_project.sh` a partir da linha 3106, concluída com status 0; bloco central com 153 testes também aprovado.
+- [x] Rótulo **Gargalo provável** e limite de 1400 linhas do `monitor_screen.dart` restabelecidos.
+- [x] Contrato do botão Mapa atualizado para a ação de mapa compacto, preservando acesso a **Pontos próximos** no Painel.
+- [ ] Flutter Analyze, Flutter Test e APK no GitHub Actions precisam ser executados para a versão 270.
+
 # Validação Vigia IA 1.0.269+269
 
 ## 1.0.269: Ao vivo com mapa compacto, áudio em popup e painel renovado (2026-10-16)

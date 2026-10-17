@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.269', build: 269);
+      AppBuildVersion(version: '1.0.270', build: 270);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.269', build: 269),
+      version: AppBuildVersion(version: '1.0.270', build: 270),
       changes: <String>[
-        'Botão Mapa do Ao vivo agora alterna para o mapa compacto da sessão.',
-        'Botão Áudio abre um popup/modal com acesso direto aos controles de voz e sons.',
-        'Painel Status da sessão ficou mais claro e organizado; fotos de Eventos abrem com fallback mais seguro.'
+        'Build com validação de versão mais consistente em todas as etapas.',
+        'O mapa compacto, o painel de áudio e os detalhes da sessão continuam disponíveis.',
+        'Compatibilidade do projeto e verificações preventivas aprimoradas.'
       ],
     ),
   ]);

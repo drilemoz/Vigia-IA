@@ -1,3 +1,10 @@
+## 1.0.270+270: build 223, versionCode obsoleto no validador (2026-10-17)
+
+- Substituídas três checagens fixas de build 268 (`github-manager.json`, `AppMetadata` e `app_identity.json`) por comparação dinâmica com `pubspec.yaml` através de `tool/check_version_sync.py`.
+- Acrescentados testes preventivos de sincronização e detecção de divergência intencional.
+- Restaurado o rótulo **Gargalo provável** no Status da sessão e organizado o acionamento de mapa/áudio na extensão de layout para atender aos contratos estruturais.
+- Botão Mapa continua abrindo o mapa compacto; **Pontos próximos** permanece acessível pelo Painel, com contrato preventivo atualizado.
+
 ## 1.0.269+269: Ao vivo com mapa compacto, áudio em popup e painel renovado (2026-10-16)
 
 - O botão **Mapa** no Ao vivo agora alterna diretamente para o mapa compacto da sessão, em vez de abrir como ação principal a lista de pontos próximos.

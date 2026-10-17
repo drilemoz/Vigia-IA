@@ -1,4 +1,6 @@
-# Arquitetura — Vigia IA 1.0.269+269
+# Arquitetura — Vigia IA 1.0.270+270
+
+**Buildfix 223 (1.0.270):** verificação de `android.versionCode` no `github-manager.json` é dinâmica em `tool/check_version_sync.py`, que compara os metadados com `pubspec.yaml`. A CI mantém os demais contratos e agora impede que um literal antigo bloqueie uma atualização válida.
 
 **Ao vivo renovado (1.0.269):** a ação principal do botão **Mapa** passa a alternar `_primaryContentMode` para o mini mapa/monitor compacto, preservando o explorador de mapa completo como fluxo separado. O botão **Áudio** abre `AudioSettingsScreen` em `showModalBottomSheet`, dando acesso aos controles de voz sem sair do monitor. `SessionStatusPanel` recebeu hierarquia visual nova com chips/resumos e ícones por métrica, mantendo os mesmos dados de sessão. Em `EventsScreenActions`, a prévia prioriza `snapshotPath` e cai para `clipPath` apenas quando necessário, reduzindo falhas ao tocar em fotos.
 
@@ -13,7 +15,7 @@ Vigia IA 1.0.247+247 — atualização de arquitetura: armazenamento local de c�
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-# Arquitetura — Vigia IA 1.0.269+269
+# Arquitetura — Vigia IA 1.0.270+270
 
 **Cadência local 1.0.268:** `_effectiveMonitorAnalysisInterval` respeita `VideoSourceConfig.analysisInterval` e `BikeModeConfig.effectiveAnalysisInterval` com mínimo de segurança de 250 ms; `SharedLocalCameraService` limita conversões e bloqueia sobreposição, sem regular a prévia nativa. A taxa alvo é distinta do FPS real de imagem analisada.
 

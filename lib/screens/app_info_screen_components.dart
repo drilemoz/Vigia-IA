@@ -77,8 +77,16 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.269',
+          version: '1.0.270',
           current: true,
+          changes: [
+            'Verificação de versionamento do Android acompanha a versão do projeto.',
+            'Recursos de mapa, áudio e eventos permanecem disponíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.269',
           changes: [
             'Botão Mapa no Ao vivo passa a alternar para o mapa compacto da sessão.',
             'Botão Áudio abre popup/modal com acesso aos controles de voz e sons.',
@@ -2400,8 +2408,16 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.269',
+          version: '1.0.270',
           current: true,
+          changes: [
+            'Verificação de versionamento agora acompanha automaticamente a versão do aplicativo.',
+            'Ajustes do Ao vivo, mapa compacto, áudio e painel de sessão da versão anterior foram preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.269',
           changes: [
             'Botão Mapa do Ao vivo agora alterna para o mapa compacto da sessão.',
             'Botão Áudio abre popup/modal com acesso aos controles de voz e sons.',
