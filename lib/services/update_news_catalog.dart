@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.274', build: 274);
+      AppBuildVersion(version: '1.0.275', build: 275);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.274', build: 274),
+      version: AppBuildVersion(version: '1.0.275', build: 275),
       changes: <String>[
-        'Indicador de gravação do transmissor nativo atualizado.',
-        'Controles do transmissor nativo agora tratam estados ainda indisponíveis.',
-        'Integração MCRP e modo de transmissão anterior permanecem disponíveis.',
+        'Imagem do transmissor nativo preparada para acompanhar a orientação da câmera.',
+        'Transmissão e controles remotos continuam no mesmo aplicativo.',
+        'O modo antigo continua disponível durante os testes do novo transmissor.',
       ],
     ),
   ]);

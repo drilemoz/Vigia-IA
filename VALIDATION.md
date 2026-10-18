@@ -1,3 +1,12 @@
+# Validação Vigia IA 1.0.275+275
+
+## APK 228: correção de símbolo Kotlin ausente (2026-10-17)
+
+- Logs do workflow APK 228: análise estática Flutter e testes concluíram; `:app:compileReleaseKotlin` falhou no símbolo `Nv21Frames`, linha 642 do `PhoneCameraBackgroundService.kt`.
+- Copiada implementação integral do Minha Câmera 1.4.74 para o módulo Kotlin, com fonte espelhada para bootstrap.
+- Teste específico da classe NV21 com compilador Kotlin local quando disponível, e contrato de empacotamento garantido mesmo sem compilador.
+- Ainda precisam ser executados Flutter/Gradle Android no GitHub Actions e teste físico com o Redmi A3 (incluindo tela apagada, FPS, orientação, gravação e consumo).
+
 # Validação Vigia IA 1.0.274+274
 
 ## 1.0.274: análise do workflow APK 227 (2026-10-17)

@@ -21,8 +21,10 @@ class Build227LintContract(unittest.TestCase):
 
     def test_current_version_is_updated(self):
         pubspec = (ROOT / 'pubspec.yaml').read_text()
-        self.assertIn('version: 1.0.274+274', pubspec)
-        self.assertIn("AppBuildVersion(version: '1.0.274', build: 274)",
+        match = re.search(r'^version: (\d+\.\d+\.\d+)\+(\d+)$', pubspec, re.M)
+        self.assertIsNotNone(match)
+        version, build = match.groups()
+        self.assertIn(f"AppBuildVersion(version: '{version}', build: {build})",
                       (ROOT / 'lib/services/update_news_catalog.dart').read_text())
 
 if __name__ == '__main__':

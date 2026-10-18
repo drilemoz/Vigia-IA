@@ -1,3 +1,9 @@
+## 1.0.275+275: integração NV21 do transmissor nativo, APK 228 (2026-10-17)
+
+- Corrigida a classe ausente `Nv21Frames`, utilizada na captura MJPEG do serviço nativo para rotacionar os quadros em 0°, 90°, 180° e 270°.
+- Fonte Kotlin preservada também em `tool/android/native_transmitter`, permitindo recriar o Android sem perder a implementação.
+- Controles MCRP, Ao vivo e transmissor Flutter anterior mantidos. Compilação Android e teste no Redmi A3 ainda necessários.
+
 ## 1.0.274+274: correção do Flutter Analyze, APK 227 (2026-10-17)
 
 - Corrigido acesso anulável ao estado de gravação do transmissor nativo em duas expressões Dart.
@@ -197,7 +203,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.274+274`
+**Versão atual:** `1.0.275+275`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

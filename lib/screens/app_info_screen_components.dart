@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.274',
+          version: '1.0.275',
           current: true,
+          changes: [
+            'Transmissor nativo inclui a rotação dos quadros da câmera.',
+            'Mantidos a visualização ao vivo e os comandos remotos MCRP.',
+            'O modo anterior de transmissão continua disponível.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.274',
           changes: [
             'Corrigida a análise estática Flutter que interrompia o APK 227.',
             'O transmissor nativo agora consulta o estado de gravação sem acesso nulo.',
@@ -2444,8 +2453,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.274',
+          version: '1.0.275',
           current: true,
+          changes: [
+            'Transmissor nativo inclui a rotação dos quadros da câmera.',
+            'Mantidos a visualização ao vivo e os comandos remotos MCRP.',
+            'O modo anterior de transmissão continua disponível.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.274',
           changes: [
             'Corrigida a análise estática Flutter que interrompia o APK 227.',
             'O transmissor nativo agora consulta o estado de gravação sem acesso nulo.',

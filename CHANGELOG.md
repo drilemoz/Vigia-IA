@@ -1,3 +1,10 @@
+## 1.0.275+275: Kotlin NV21 ausente no APK 228 (2026-10-17)
+
+- APK 228 ultrapassou o Flutter Analyze e os testes; falhou na compilação Kotlin em `PhoneCameraBackgroundService.kt:642` (`Unresolved reference 'Nv21Frames'`).
+- Incorporada a classe original `Nv21Frames.kt` do Minha Câmera 1.4.74, no pacote `com.minhacamera`, em ambas as árvores Android e portátil.
+- Teste de regressão exercita rotações NV21 e verifica integridade da cópia feita pelo bootstrap do Android.
+- Sem alteração no protocolo MCRP, permissões, interface ou política de transmissão. Build e testes físicos pendentes.
+
 ## 1.0.274+274: correção de análise estática do workflow APK 227 (2026-10-17)
 
 - Corrigidos dois erros `unchecked_use_of_nullable_value` em `native_transmitter_screen.dart`.

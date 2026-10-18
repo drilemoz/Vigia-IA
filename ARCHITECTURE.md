@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.275+275
+
+## Buildfix APK 228: conversão NV21 compartilhada
+
+O serviço Kotlin `PhoneCameraBackgroundService` transforma a imagem NV21 conforme o ângulo da câmera antes de gerar MJPEG/H.264. O `Nv21Frames.kt` original, puro Kotlin e pertencente a `com.minhacamera`, agora é copiado em `android/app/src/main/kotlin/com/minhacamera/` e mantido como fonte canônica portátil em `tool/android/native_transmitter/` para o `tool/bootstrap_android.sh`. Em versões anteriores, a ausência do helper impedia `:app:compileReleaseKotlin`. Sua inclusão não ativa automaticamente a câmera nem altera o modo legado.
+
 # Arquitetura — Vigia IA 1.0.274+274
 
 ## Buildfix 227 (1.0.274)
