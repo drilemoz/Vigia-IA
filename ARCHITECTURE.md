@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.276+276
+# Arquitetura — Vigia IA 1.0.277+277
 
 ## Transmissor nativo: interface mínima e comando REC confirmado
 

@@ -200,7 +200,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
                 if (model != null && model.isNotEmpty)
                   Padding(padding: const EdgeInsets.only(top: 6),
                     child: Text('Aparelho: $model', style: Theme.of(context).textTheme.bodySmall)),
-                if (s?.ready != true)
+                if (!s.ready)
                   const Padding(padding: EdgeInsets.only(top: 8),
                     child: Text('Aguardando a câmera disponibilizar quadros…')),
               ],

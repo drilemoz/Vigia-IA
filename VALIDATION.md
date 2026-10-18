@@ -1,3 +1,11 @@
+# Validação Vigia IA 1.0.277+277
+
+## APK 230: aviso de análise estática na tela nativa
+
+- O workflow passou pela suíte preventiva (165 testes Python) e parou em `flutter analyze --fatal-infos --fatal-warnings` por `invalid_null_aware_operator` no arquivo `lib/screens/native_transmitter_screen.dart`, linha 203.
+- O status `s` é promovido a não-nulo após o acesso `s!.seconds`; agora a consulta seguinte usa `!s.ready` em vez de `s?.ready != true`.
+- `tool/verify_project.sh` aprovado localmente, com 167 testes Python na suíte preventiva principal. A regressão do APK 230 também foi validada. `flutter analyze`, `flutter test` e build Android seguem pendentes até confirmação no GitHub Actions.
+
 # Validação Vigia IA 1.0.276+276
 
 ## Transmissor compacto e gravação via Ao vivo

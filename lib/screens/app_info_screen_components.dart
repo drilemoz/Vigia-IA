@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.276',
+          version: '1.0.277',
           current: true,
+          changes: [
+            'Atualização de estabilidade da tela do transmissor nativo.',
+            'Gravação remota pelo Ao vivo e pareamento continuam disponíveis.',
+            'Mantidos os controles da câmera pela rede local.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.276',
           changes: [
             'Tela do transmissor com status e pareamento mais organizados.',
             'Gravação controlada pelo Ao vivo com confirmação do transmissor.',
@@ -2462,8 +2471,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.276',
+          version: '1.0.277',
           current: true,
+          changes: [
+            'Atualização de estabilidade da tela do transmissor nativo.',
+            'Gravação remota pelo Ao vivo e pareamento continuam disponíveis.',
+            'Mantidos os controles da câmera pela rede local.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.276',
           changes: [
             'Tela do transmissor com status e pareamento mais organizados.',
             'Gravação controlada pelo Ao vivo com confirmação do transmissor.',
@@ -2479,6 +2497,7 @@ class _ChangesPanel extends StatelessWidget {
             'O modo anterior de transmissão continua disponível.',
           ],
         ),
+
         SizedBox(height: 10),
         _ReleaseCard(
           version: '1.0.274',

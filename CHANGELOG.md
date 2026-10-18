@@ -1,3 +1,9 @@
+## 1.0.277+277: análise Flutter do APK 230 (2026-10-17)
+
+- Logs do APK 230: verificações preventivas e 165 testes Python passaram; `flutter analyze --fatal-infos --fatal-warnings` interrompeu o workflow em `native_transmitter_screen.dart:203` por `invalid_null_aware_operator`.
+- Na seção protegida pelo estado ativo, substituído o acesso redundante `s?.ready != true` por `!s.ready`, sem mudar o fluxo de captura, REC ou pareamento.
+- Incluído teste de regressão; metadados e versão 1.0.277+277 sincronizados. A compilação Android e o teste no Redmi A3 continuam pendentes.
+
 ## 1.0.276+276: transmissor compacto e gravação MCRP controlada no Ao vivo (2026-10-17)
 
 - Reorganizada a tela nativa em status e telemetria compactos, QR expansível e controles locais de emergência.

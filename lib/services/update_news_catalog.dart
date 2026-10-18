@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.276', build: 276);
+      AppBuildVersion(version: '1.0.277', build: 277);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.276', build: 276),
+      version: AppBuildVersion(version: '1.0.277', build: 277),
       changes: <String>[
-        'Transmissor com tela mais simples e pareamento por QR em um toque.',
-        'Controle de gravação pelo Ao vivo com confirmação do celular remoto.',
-        'Câmeras remotas identificadas de forma clara no monitoramento.',
+        'Tela do transmissor pronta para uma nova atualização.',
+        'Gravação pelo Ao vivo e confirmação do celular remoto mantidas.',
+        'Pareamento por QR e controles da câmera disponíveis.',
       ],
     ),
   ]);
