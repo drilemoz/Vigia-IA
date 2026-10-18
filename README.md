@@ -1,3 +1,10 @@
+## 1.0.291+291 · Compatibilidade do scanner LAN e análise Flutter
+
+- Workflow APK 244: ajustados dois blocos condicionais exigidos pela análise estática Dart.
+- Scanner de câmeras: decodificação Latin-1 dos bytes de resposta TCP/RTSP com transformação tipada compatível (`Stream<Uint8List>`).
+- Preservados transmissor exclusivo, política térmica, preferências persistidas e protocolos MCRP/RTSP/ONVIF.
+- Próxima compilação Flutter/Android ainda precisa confirmar esta entrega.
+
 ## 1.0.290+290 · Transmissor Exclusivo e autonomia
 
 - O papel Transmissão salvo é restaurado ao abrir o Vigia IA e sincronizado com o guard nativo antes de criar a UI. Mudar de papel finaliza serviço e gravação com confirmação.
@@ -316,7 +323,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.290+290`
+**Versão atual:** `1.0.291+291`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

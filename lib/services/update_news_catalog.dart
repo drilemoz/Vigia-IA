@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.290', build: 290);
+      AppBuildVersion(version: '1.0.291', build: 291);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.290', build: 290),
+      version: AppBuildVersion(version: '1.0.291', build: 291),
       changes: <String>[
-        'Transmissão exclusiva mantém câmera e MCRP sem abrir outros módulos.',
-        'Menos processamento quando ninguém acompanha, preservando gravações.',
-        'Restaura a última escolha e adapta a captura à condição térmica.',
+        'Busca de dispositivos LAN mais compatível com diferentes redes e serviços.',
+        'Ajustes de estabilidade e preparação para instalação Android.',
+        'Transmissão exclusiva e preferências anteriores preservadas.',
       ],
     ),
   ]);

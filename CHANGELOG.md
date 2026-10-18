@@ -1,3 +1,10 @@
+## 1.0.291+291: reparo da análise Dart do workflow 244 (2026-10-18)
+
+- `lib/app/app.dart`: bloco explícito no teste `mounted` dentro do callback de inicialização opcional.
+- `lib/services/data_usage_service.dart`: bloco explícito para persistência pendente ao suspender uso de dados no transmissor exclusivo.
+- `lib/services/lan_camera_subnet_scanner.dart`: troca do `latin1.decoder` incompatível com `Stream<Uint8List>` por `map((chunk) => latin1.decode(chunk))`, preservando o protocolo RTSP e o tempo limite.
+- Regressão Python para as três ocorrências do build 244, metadados e novidades sincronizados.
+
 ## 1.0.290+290: isolamento do transmissor e proteção térmica (2026-10-18)
 
 - Persistência do último modo na inicialização com sincronização de estado ao Android antes de inicializar módulos opcionais.

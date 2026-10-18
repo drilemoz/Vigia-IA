@@ -166,7 +166,9 @@ class DataUsageService extends ChangeNotifier {
     final hadPendingWrite = _persistDebounce?.isActive == true;
     _persistDebounce?.cancel();
     _persistDebounce = null;
-    if (hadPendingWrite) unawaited(_persistNow());
+    if (hadPendingWrite) {
+      unawaited(_persistNow());
+    }
   }
 
   void resumeAfterTransmitter() {

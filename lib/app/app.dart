@@ -109,7 +109,9 @@ class _StartupGateState extends State<_StartupGate> {
 
     if (completed && launchMode != AppLaunchMode.transmission) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         unawaited(_initializeOptionalServices());
       });
     }

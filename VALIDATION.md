@@ -1,4 +1,6 @@
-# Validação Vigia IA 1.0.290+290
+# Validação Vigia IA 1.0.291+291
+
+- **Build 244:** a análise Flutter interrompeu com 2 lints `curly_braces_in_flow_control_structures` e 1 erro de tipo no fluxo Latin-1 de `lan_camera_subnet_scanner.dart`. Ajustes pontuais na 1.0.291 e teste de regressão dedicados. `python3 -m unittest discover -s tool -p test_*.py -q`: 237 testes aprovados; `check_version_sync.py`, imports e contrato CI aprovados. `tool/verify_project.sh`: execução parcial interrompida por limite do ambiente; `flutter analyze` e `flutter build apk` precisam ser reexecutados no CI.
 
 - Transmissor Exclusivo: auditar guard Flutter/Kotlin, reboot com último modo salvo, impedir outro FGS e dados/ESP32, validar callbacks de vídeo, contador de espectadores, gravação e proteção térmica. APK/FPS/temperatura/energia no Redmi A3 pendentes até testes reais.
 

@@ -119,7 +119,10 @@ class LanCameraSubnetScanner {
         String response = '';
         try {
           response = await socket
-              .take(1).transform(latin1.decoder).first.timeout(const Duration(milliseconds: 500));
+              .take(1)
+              .map((chunk) => latin1.decode(chunk))
+              .first
+              .timeout(const Duration(milliseconds: 500));
         } on TimeoutException { /* Porta TCP aberta, mas serviço silencioso. */ }
         final firstLine = response.split(RegExp(r'[\r\n]')).first;
         final confirmed = firstLine.toUpperCase().startsWith('RTSP/');

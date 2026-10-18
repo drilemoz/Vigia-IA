@@ -1,4 +1,6 @@
-# Arquitetura — Vigia IA 1.0.290+290
+# Arquitetura — Vigia IA 1.0.291+291
+
+**Build 244:** os bytes TCP do scanner são convertidos por `Stream.map` em texto Latin-1, sem `StreamTransformer` incompatível com `Uint8List`. Guard de inicialização e persistência de uso de dados mantêm as mesmas condições com blocos Dart explícitos.
 
 **Transmissor Exclusivo:** `AppLaunchModeService` salva o papel e sincroniza `TransmitterExclusivePolicy` (`vigiaia/transmitter_exclusive`) na inicialização e na troca. Android `TransmitterExclusiveMode` persiste o guard em SharedPreferences, encerra outros foreground services e recusa novos leases. UI transmissor usa PopScope + Scaffold sem outros destinos e exige parada segura para mudar modo. `PhoneCameraServer` conta espectadores de vídeo separadamente de requests HTTP; `PhoneCameraBackgroundService` reduz JPEG ocioso e amostra status térmico Android, sem bloquear gravação local. Os modelos e mapas permanecem disponíveis em outros papéis.
 

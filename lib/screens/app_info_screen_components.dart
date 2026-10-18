@@ -77,8 +77,16 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.290',
+          version: '1.0.291',
           current: true,
+          changes: [
+            'Correções de compatibilidade da análise Flutter e descoberta LAN.',
+            'Preparação para builds Android preservando transmissão e câmera.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.290',
           changes: [
             'Modo Transmissor Exclusivo bloqueia outros recursos e reduz trabalho ocioso.',
             'Última escolha restaurada e proteção térmica ampliada com sinais do Android.',
