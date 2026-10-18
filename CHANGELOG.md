@@ -1,3 +1,12 @@
+## 1.0.283+283: transmissão renovada e tema do sistema (2026-10-18)
+
+- Tela `Vigia IA · Transmissão`: QR no cabeçalho, acessível em janela central tematizada, com código azul de alto contraste e pequeno selo Vigia IA; endereço privado e token MCRP inalterados.
+- Transmissão ativa em painel compacto com tempos separados de transmissão e REC, telemetria MCRP, FPS, temperatura, bateria e câmera.
+- Controles locais sempre visíveis durante transmissão pronta, com ícones, ações rápidas Foto/REC e escolhas temáticas por pop-up para câmera, Eco, FPS, resolução e lanterna.
+- Novas instalações seguem automaticamente o modo claro/escuro do Android. Preferências de tema já persistidas permanecem intactas.
+- Serviço Kotlin, gravação com tela apagada, funcionamento offline, protocolos MCRP e cadastros existentes preservados.
+- Flutter analyze, flutter test, APK Android e leitura do QR com sobreposição devem ser confirmados no GitHub Actions e em aparelhos reais.
+
 ## 1.0.282+282: Home com funções e estado (2026-10-18)
 
 - Removida a seção duplicada Acessos rápidos, mantendo Início, Histórico, Ao vivo, Câmeras, Mapas e Ajustes na barra fixa.

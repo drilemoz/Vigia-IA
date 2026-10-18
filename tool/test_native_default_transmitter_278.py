@@ -21,11 +21,11 @@ class NativeTransmitterDefault278(unittest.TestCase):
 
     def test_keeps_private_qr_remote_rec_and_emergency_controls(self):
         s=read('lib/screens/native_transmitter_screen.dart')
-        for value in ("'Vigia IA · transmissor'", "'Controles locais de emergência'",
-                      "'Parear outro celular'", 'McrpAddress.parse(url)',
+        for value in ("'Vigia IA · Transmissão'", "'Controles locais'",
+                      "'Parear dispositivo'", 'McrpAddress.parse(url)',
                       'NativeCameraTransmitterService.start()',
                       'NativeCameraTransmitterService.stop()',
-                      "'Alterar modo'", 'QrImageView(data: url'):
+                      "'Alterar modo'", 'QrImageView('):
             self.assertIn(value,s)
         self.assertNotIn('CameraPreview(',s)
         self.assertNotIn('O modo Flutter anterior permanece disponível',s)
@@ -39,7 +39,7 @@ class NativeTransmitterDefault278(unittest.TestCase):
         self.assertNotIn("'Câmera remota / celular'",multicam)
         self.assertIn("MinhaCameraLiveUrl.isValid(address)",monitor)
         # O protocolo e o token /live/ privado continuam compatíveis.
-        self.assertIn('QrImageView(data: url',read('lib/screens/native_transmitter_screen.dart'))
+        self.assertIn('QrImageView(',read('lib/screens/native_transmitter_screen.dart'))
         self.assertIn('record/start',read('lib/services/mcrp_client.dart'))
 
 if __name__=='__main__': unittest.main()

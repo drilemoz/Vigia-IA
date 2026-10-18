@@ -12,7 +12,7 @@ class AppearanceSettingsService extends ChangeNotifier {
 
   static final AppearanceSettingsService instance = AppearanceSettingsService._();
 
-  AppThemePreference _themePreference = AppThemePreference.dark;
+  AppThemePreference _themePreference = AppThemePreference.system;
   AppAccentColor _accentColor = AppAccentColor.turquoise;
   File? _file;
   bool _initialized = false;
@@ -47,7 +47,7 @@ class AppearanceSettingsService extends ChangeNotifier {
           final accentName = map['accent'] as String?;
           _themePreference = AppThemePreference.values.firstWhere(
             (value) => value.name == themeName,
-            orElse: () => AppThemePreference.dark,
+            orElse: () => AppThemePreference.system,
           );
           _accentColor = AppAccentColor.values.firstWhere(
             (value) => value.name == accentName,
@@ -55,7 +55,7 @@ class AppearanceSettingsService extends ChangeNotifier {
           );
         }
       } catch (_) {
-        _themePreference = AppThemePreference.dark;
+        _themePreference = AppThemePreference.system;
         _accentColor = AppAccentColor.turquoise;
       }
     }

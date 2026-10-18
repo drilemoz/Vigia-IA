@@ -1,3 +1,12 @@
+## 1.0.283+283: transmissão renovada e tema do sistema (2026-10-18)
+
+- Tela `Vigia IA · Transmissão`: QR no cabeçalho, acessível em janela central tematizada, com código azul de alto contraste e pequeno selo Vigia IA; endereço privado e token MCRP inalterados.
+- Transmissão ativa em painel compacto com tempos separados de transmissão e REC, telemetria MCRP, FPS, temperatura, bateria e câmera.
+- Controles locais sempre visíveis durante transmissão pronta, com ícones, ações rápidas Foto/REC e escolhas temáticas por pop-up para câmera, Eco, FPS, resolução e lanterna.
+- Novas instalações seguem automaticamente o modo claro/escuro do Android. Preferências de tema já persistidas permanecem intactas.
+- Serviço Kotlin, gravação com tela apagada, funcionamento offline, protocolos MCRP e cadastros existentes preservados.
+- Flutter analyze, flutter test, APK Android e leitura do QR com sobreposição devem ser confirmados no GitHub Actions e em aparelhos reais.
+
 ## 1.0.282+282: Home com funções claras e estado do sistema (2026-10-18)
 
 - Removida a seção Acessos rápidos, cujos destinos já estão na barra inferior fixa.
@@ -255,7 +264,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.282+282`
+**Versão atual:** `1.0.283+283`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

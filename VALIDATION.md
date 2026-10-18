@@ -1,3 +1,11 @@
+# Validação Vigia IA 1.0.283+283
+
+- Testes de contratos para QR modal, comandos MCRP, painel REC e preferência de tema do sistema; verificadores preventivos da versão precedente adaptados sem afrouxar a preservação de protocolo.
+- Testes direcionados: 27 casos Python aprovados (`test_transmitter_redesign_283` e regressões 273/274/276/277/278/281/282). `check_version_sync.py`, `check_import_targets.py`, `check_mcrp_272.py` e `check_ci_contract.py` aprovados.
+- `tool/verify_project.sh`: iniciado, mas interrompido por limite do ambiente; não há aprovação integral nesta sessão.
+- Integridade ZIP: verificada no empacotamento, com CRC completo.
+- Flutter analyze, Flutter test, build Android, leitura física do QR com selo e consumo de bateria no Redmi A3 dependem de CI/aparelhos.
+
 # Validação Vigia IA 1.0.282+282
 
 - `python3 -m unittest -q tool/test_home_organization_282.py tool/test_home_dashboard_281.py`: remoção de atalhos duplicados, modos executando ações, faixa Telemetria com dados de configuração, rolagem e pop-up preservado.

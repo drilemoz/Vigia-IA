@@ -9,13 +9,13 @@ def read(relative):
 class TransmitterRemoteRec276(unittest.TestCase):
     def test_native_screen_removes_preview_and_folds_sensitive_pairing(self):
         ui = read('lib/screens/native_transmitter_screen.dart')
-        self.assertIn("'Vigia IA · transmissor'", ui)
+        self.assertIn("'Vigia IA · Transmissão'", ui)
         self.assertIn("'Transmissão ativa'", ui)
-        self.assertIn("'Parear outro celular'", ui)
-        self.assertIn("'Controles locais de emergência'", ui)
-        self.assertIn("'REC ativo'", ui)
-        self.assertIn('QrImageView(data: url', ui)
-        self.assertIn('ExpansionTile(', ui)
+        self.assertIn("'Parear dispositivo'", ui)
+        self.assertIn("'Controles locais'", ui)
+        self.assertIn("'GRAVANDO'", ui)
+        self.assertIn('QrImageView(', ui)
+        self.assertIn('showDialog<void>(', ui)
         self.assertNotIn('CameraPreview(', ui)
         self.assertNotIn('Image.memory(', ui)
         self.assertNotIn('SelectableText(url', ui)
@@ -46,7 +46,7 @@ class TransmitterRemoteRec276(unittest.TestCase):
         self.assertIn("'Controle remoto · ${_status", read('lib/widgets/mcrp_remote_controls.dart'))
         self.assertIn('MinhaCameraLiveUrl.isValid(url)', read('lib/screens/monitor_screen_mcrp_support.dart'))
         self.assertIn("^/live/[0-9a-f]{32}$", read('lib/services/mcrp_client.dart'))
-        self.assertIn("'1.0.282'", read('lib/core/app_metadata.dart'))
+        self.assertIn("'1.0.283'", read('lib/core/app_metadata.dart'))
 
 if __name__ == '__main__':
     unittest.main()

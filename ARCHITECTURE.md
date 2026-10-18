@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.283+283
+
+**Transmissão nativa:** a tela Flutter agora contém status e controles locais sempre visíveis, com QR privado apresentado apenas mediante ação no AppBar, e modal de opções. O MCRP v1, a URL/token `/live/`, a captura Kotlin sem prévia e o serviço em foreground não foram alterados. A UI consulta `X-Recording-Seconds` para mostrar o relógio de REC, sem estimativa fictícia. Consultas de telemetria são suspensas quando a Activity está fora de foco.
+
+**Tema inicial:** `AppearanceSettingsService` usa `system` como padrão de primeira instalação e fallback para preferência desconhecida; arquivo existente com `dark` ou `light` continua sendo respeitado.
+
 # Arquitetura — Vigia IA 1.0.282+282
 
 **Home de operações:** os quatro `VigiaModeCard` são ações (monitor local, transmissor nativo, conexão remota e ESP32). A barra `AdaptiveMainScaffold` permanece responsável pelas seis seções; os cinco atalhos redundantes foram removidos da Home. `HomeScreen` não importa telas de Mapas/Histórico apenas para atalhos antigos. Três `_HomeDashboardCard` preservam início da fonte selecionada, uso de dados e configurações em `DraggableScrollableSheet`.

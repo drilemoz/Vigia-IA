@@ -8,15 +8,16 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.282', build: 282);
+      AppBuildVersion(version: '1.0.283', build: 283);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.282', build: 282),
+      version: AppBuildVersion(version: '1.0.283', build: 283),
       changes: <String>[
-        'Tela inicial organizada sem atalhos repetidos.',
-        'Quatro modos agora indicam operações de monitorar, transmitir e receber.',
-        'Faixa do estado do sistema com acesso à Telemetria.',
+        'Transmissão renovada com QR azul em janela própria.',
+        'Controles locais com ícones e escolhas organizadas.',
+        'Tempos separados de transmissão e gravação.',
+        'Tema inicial acompanha o modo do Android.',
       ],
     ),
   ]);

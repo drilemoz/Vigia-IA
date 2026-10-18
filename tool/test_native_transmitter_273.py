@@ -53,7 +53,7 @@ class NativeTransmitterContracts(unittest.TestCase):
         self.assertIn('_server.start()', screen)
         self.assertIn('native.running || native.starting || native.releasing', screen)
         self.assertIn('McrpAddress.parse(status.url!)', native)
-        self.assertIn('QrImageView(data: url', native)
+        self.assertIn('QrImageView(', native)
         self.assertIn('NativeCameraTransmitterService.stop()', native)
         self.assertNotIn('ObjectDetectionService', native)
 

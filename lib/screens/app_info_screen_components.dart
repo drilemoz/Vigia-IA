@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.282',
+          version: '1.0.283',
           current: true,
+          changes: [
+            'Transmissão com QR azul em janela e controles organizados.',
+            'Tempo do REC e status separados no painel principal.',
+            'Tema inicial acompanha o modo do celular.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.282',
           changes: [
             'Tela inicial sem atalhos duplicados.',
             'Quatro modos com ações mais claras.',
