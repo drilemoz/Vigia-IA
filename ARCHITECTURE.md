@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.285+285
+# Arquitetura — Vigia IA 1.0.286+286
 
 **Fluxo Planejamento:** tela inicial mostra biblioteca e CTA Nova rota, assistente `showDialog` (seleção de pontos e preferências), seguida de cálculo via `MapCyclingRouteService` e painel de geometria. `LocationTrackingService.ensureAvailable` e `currentPosition` são chamados apenas ao tocar Meu local, sem assinatura `positionStream`, sem serviço permanente.
 
@@ -2282,3 +2282,8 @@ Marcador selecionavel de localizacao.
 
 ## Hub unificado de câmeras (1.0.248)
 `CameraRegistryService` mantém câmeras com endereço e chave protegidos. `migrateMinhaCameraSavedEntries` importa uma única vez as URLs antigas do `McrpSavedCamerasStore`, gravando primeiro a câmera no registro central e só então removendo o registro anterior. `sourceForRegisteredCamera` escolhe VideoSourceType.remotePhone para Minha Câmera (MJPEG) e evita validação RTSP indevida. A Home solicita a câmera ao entrar em Ao vivo; a seção Câmeras gerencia QR/URL e abre controles MCRP, sem um módulo inicial duplicado. O monitor expõe atalho para retornar à Home.
+
+## Build 239 / 1.0.286+286
+
+- Correção estrita de estilo exigido pelo Flutter Analyzer no assistente de Planejamento. Os `if` de GPS, atualização de preferências e exclusão de viagens agora usam chaves obrigatórias.
+- Nenhuma alteração de arquitetura, estado persistido, serviços de mapas, modelo de viagens ou interoperabilidade MCRP.

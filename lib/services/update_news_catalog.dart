@@ -8,16 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.285', build: 285);
+      AppBuildVersion(version: '1.0.286', build: 286);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.285', build: 285),
+      version: AppBuildVersion(version: '1.0.286', build: 286),
       changes: <String>[
-        'Planejamento com assistente em etapas para criar rotas.',
-        'Comece a viagem pela localização atual ou escolha cidades.',
-        'Veja o mapa da viagem e salve ou exporte seus roteiros.',
-        'Exporte em GPX ou JSON e consulte viagens salvas offline.',
+        'Aprimorada a estabilidade do Planejamento de viagens.',
+        'Continue criando rotas com GPS opcional ou cidades escolhidas.',
+        'Salve e exporte seus trajetos em GPX ou JSON.',
       ],
     ),
   ]);

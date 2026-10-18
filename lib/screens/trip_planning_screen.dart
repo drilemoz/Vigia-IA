@@ -248,8 +248,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         offlinePoiPackages: const [], onlyDownloaded: true,
       );
     } catch (_) {
-      if (mounted) setState(() => _message =
-          'Não foi possível obter uma posição GPS atual. Confira sinal e permissão.');
+      if (mounted) {
+        setState(() => _message =
+            'Não foi possível obter uma posição GPS atual. Confira sinal e permissão.');
+      }
     } finally {
       if (mounted) {
         setState(() => _locating = false);
@@ -502,14 +504,16 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
 
   void _refreshDraftPreferences() {
     final draft = _draft;
-    if (draft != null) setState(() => _draft = draft.copyWith(
-      averageSpeedKmh: _speedKmh,
-      ridingHoursPerDay: _hoursPerDay,
-      departureMinute: _departure.hour * 60 + _departure.minute,
-      breakEveryKm: _breakEveryKm,
-      breakMinutes: _breakMinutes,
-      lunchMinutes: _lunchMinutes,
-    ));
+    if (draft != null) {
+      setState(() => _draft = draft.copyWith(
+        averageSpeedKmh: _speedKmh,
+        ridingHoursPerDay: _hoursPerDay,
+        departureMinute: _departure.hour * 60 + _departure.minute,
+        breakEveryKm: _breakEveryKm,
+        breakMinutes: _breakMinutes,
+        lunchMinutes: _lunchMinutes,
+      ));
+    }
     _refreshWizard();
   }
 
@@ -576,10 +580,14 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     try {
       final updated = _saved.where((item) => item.id != trip.id).toList();
       await _library.saveAll(updated);
-      if (mounted) setState(() {
-        _saved = updated;
-        if (_draft?.id == trip.id) _draft = null;
-      });
+      if (mounted) {
+        setState(() {
+          _saved = updated;
+          if (_draft?.id == trip.id) {
+            _draft = null;
+          }
+        });
+      }
     } catch (_) {
       _notify('Não foi possível excluir a viagem.');
     }

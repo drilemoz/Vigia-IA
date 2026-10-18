@@ -1,3 +1,10 @@
+## 1.0.286+286 · Estabilidade do Planejamento (build 239)
+
+- Corrigidos os três avisos `curly_braces_in_flow_control_structures` apontados pelo Flutter Analyzer em `trip_planning_screen.dart` (GPS, ajuste de ritmo e exclusão de viagem).
+- Mantidas as funções do assistente, o uso voluntário de GPS, o armazenamento e a exportação de rotas, sem alterar a lógica de execução.
+- Adicionado teste de regressão para impedir a remoção das chaves desses blocos.
+- Os 201 testes Python passaram no CI do build 239; o Flutter Analyze falhou antes da compilação Android. É necessário confirmar o novo workflow.
+
 ## 1.0.285+285 · Planejamento em assistente
 
 - Abra **Planejamento** na Home e escolha **Nova rota**. A tela inicial conserva a lista de viagens salvas sem mostrar formulário antes da ação.
@@ -278,7 +285,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.285+285`
+**Versão atual:** `1.0.286+286`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

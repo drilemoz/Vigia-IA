@@ -1,4 +1,14 @@
-# Validação Vigia IA 1.0.285+285
+# Validação Vigia IA 1.0.286+286
+
+- Workflow APK 239 da 1.0.285: **201 testes Python aprovados** e `tool/verify_project.sh` aprovado. Falha em `flutter analyze --fatal-infos --fatal-warnings` devido a **3 lints** `curly_braces_in_flow_control_structures` em `lib/screens/trip_planning_screen.dart:251,505,579`.
+- Corrigidos os três `if` com blocos explícitos; sem mudança de semântica em GPS, atualização de preferências ou exclusão de rota.
+- Adicionado `tool/test_build239_trip_lint_286.py` para cobrir os três avisos e evitar regressão no fluxo de verificação.
+- `python3 -m unittest discover -s tool -p 'test_*.py' -q`: **204 testes aprovados** (os 201 anteriores mais 3 regressões novas).
+- `python3 tool/check_version_sync.py`, `python3 tool/check_import_targets.py`, `python3 tool/check_ci_contract.py` e `bash -n tool/verify_project.sh`: aprovados.
+- **`tool/verify_project.sh`: aprovado integralmente, código 0**, incluindo verificações de mapas, sensores, IA, Câmeras/MCRP, estrutura e versionamento.
+- Flutter SDK indisponível neste ambiente: `flutter analyze`, `flutter test` e `flutter build apk` continuam pendentes. O log 239 já mostra 3 avisos exatos; os blocos foram corrigidos estruturalmente, mas somente o próximo workflow confirmará a análise Flutter.
+
+# Validação histórica Vigia IA 1.0.285+285
 
 - Assistente novo: regressão de wizard, seleção manual, GPS sob ação explícita, exportação GPX/JSON via SAF, preservação de bibliotecas.
 - `python3 -m unittest discover -s tool -p 'test_*.py' -q`: **201 testes aprovados** em 9,2 s.

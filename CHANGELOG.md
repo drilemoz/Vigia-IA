@@ -1,3 +1,10 @@
+## 1.0.286+286: correção de análise estática do APK 239 (2026-10-18)
+
+- Build 239: `tool/verify_project.sh` aprovado, com 201 testes Python; `flutter analyze --fatal-infos --fatal-warnings` interrompido por três `curly_braces_in_flow_control_structures` em `trip_planning_screen.dart`.
+- Incluídas chaves explícitas nos condicionais do GPS, atualização de preferências e exclusão de rotas, preservando a semântica.
+- Novo teste estrutural de regressão para impedir a reintrodução desses avisos; versão e metadados sincronizados.
+- Compilação e APK Android ainda precisam ser verificados no GitHub Actions.
+
 ## 1.0.285+285: Planejamento com wizard, GPS opcional e exportação (2026-10-18)
 
 - Planejamento abre com uma tela limpa, ação Nova rota e biblioteca local de viagens.

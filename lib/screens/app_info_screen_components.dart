@@ -77,8 +77,16 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.285',
+          version: '1.0.286',
           current: true,
+          changes: [
+            'Planejamento de rotas mais estável ao utilizar GPS e editar preferências.',
+            'Assistente, biblioteca e exportação de viagens preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.285',
           changes: [
             'Planejamento abre limpo, com Nova rota e assistente por etapas.',
             'Meu local usa GPS só por escolha explícita na origem.',
