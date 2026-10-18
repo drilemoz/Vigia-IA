@@ -1,3 +1,10 @@
+## 1.0.292+292: build 245, blocos explícitos nas guardas do transmissor (2026-10-18)
+
+- `lib/app/app.dart`: fechamento do `if` do modo Transmissor Exclusivo em bloco completo `{ return; }`.
+- `lib/services/data_usage_service.dart`: fechamento do `if` de retomada do timer em bloco completo `{ return; }`.
+- Preservada a correção RTSP do build 244. Testes preventivos de regressão para as posições exatas registradas no CI.
+- Sem alterações em políticas térmicas, formato do stream, gravação, navegação, mapa ou protocolos.
+
 ## 1.0.291+291: reparo da análise Dart do workflow 244 (2026-10-18)
 
 - `lib/app/app.dart`: bloco explícito no teste `mounted` dentro do callback de inicialização opcional.

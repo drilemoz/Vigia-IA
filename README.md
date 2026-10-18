@@ -1,3 +1,10 @@
+## 1.0.292+292 · Ajustes no build 245
+
+- Três erros do build 244 não se repetiram: decodificação RTSP validada; build 245 mostrou apenas dois avisos `curly_braces_in_flow_control_structures`.
+- As guardas de exclusividade do transmissor na inicialização (`app.dart`) e no serviço de consumo (`data_usage_service.dart`) usam blocos com chaves sem alterar condições nem ciclos de vida.
+- Preservados controle MCRP, uso em segundo plano, política Eco/térmica, scanner híbrido, câmera preferida e restauração de modo.
+- Compilação do APK permanece pendente do novo workflow.
+
 ## 1.0.291+291 · Compatibilidade do scanner LAN e análise Flutter
 
 - Workflow APK 244: ajustados dois blocos condicionais exigidos pela análise estática Dart.
@@ -323,7 +330,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.291+291`
+**Versão atual:** `1.0.292+292`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

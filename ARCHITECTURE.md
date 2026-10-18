@@ -1,4 +1,6 @@
-# Arquitetura — Vigia IA 1.0.291+291
+# Arquitetura — Vigia IA 1.0.292+292
+
+**Build 245:** duas guardas de exclusividade (`app.dart` e `data_usage_service.dart`) retornam por blocos completos para cumprir o lint obrigatório de Dart; sem mudar a inicialização de serviços opcionais nem a reativação do monitor de dados.
 
 **Build 244:** os bytes TCP do scanner são convertidos por `Stream.map` em texto Latin-1, sem `StreamTransformer` incompatível com `Uint8List`. Guard de inicialização e persistência de uso de dados mantêm as mesmas condições com blocos Dart explícitos.
 

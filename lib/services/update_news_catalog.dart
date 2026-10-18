@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.291', build: 291);
+      AppBuildVersion(version: '1.0.292', build: 292);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.291', build: 291),
+      version: AppBuildVersion(version: '1.0.292', build: 292),
       changes: <String>[
-        'Busca de dispositivos LAN mais compatível com diferentes redes e serviços.',
-        'Ajustes de estabilidade e preparação para instalação Android.',
-        'Transmissão exclusiva e preferências anteriores preservadas.',
+        'Inicialização do aplicativo mais estável ao restaurar o modo escolhido.',
+        'Retomada do monitor de consumo ajustada para o modo de transmissão.',
+        'Transmissão exclusiva e descoberta de câmeras preservadas.',
       ],
     ),
   ]);

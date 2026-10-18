@@ -77,8 +77,16 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.291',
+          version: '1.0.292',
           current: true,
+          changes: [
+            'Melhorias de estabilidade ao iniciar o aplicativo e retomar serviços.',
+            'Transmissor Exclusivo e descoberta de câmeras mantidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.291',
           changes: [
             'Correções de compatibilidade da análise Flutter e descoberta LAN.',
             'Preparação para builds Android preservando transmissão e câmera.',

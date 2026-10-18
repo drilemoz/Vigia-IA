@@ -1,4 +1,8 @@
-# Validação Vigia IA 1.0.291+291
+# Validação Vigia IA 1.0.292+292
+
+- **Validação local 1.0.292:** `python3 -m unittest discover -s tool -p test_*.py -q`: 241 testes aprovados. `check_version_sync.py`, `check_import_targets.py`, `check_ci_contract.py` e `bash -n tool/verify_project.sh` aprovados. O verificador integral avançou por blocos de testes, mas a execução não foi concluída dentro do limite de 160 segundos; resultado integral pendente. Sem Flutter SDK no ambiente; `flutter analyze`, `flutter test` e APK aguardam GitHub Actions.
+
+- **Build 245:** a 1.0.291 passou na verificação preventiva (237 testes Python) e `flutter analyze` identificou duas guardas sem chaves: `lib/app/app.dart:122` e `lib/services/data_usage_service.dart:176`. A 1.0.292 acrescenta `{}` somente nesses retornos. Analyzer Flutter e APK Android devem ser verificados no CI.
 
 - **Build 244:** a análise Flutter interrompeu com 2 lints `curly_braces_in_flow_control_structures` e 1 erro de tipo no fluxo Latin-1 de `lan_camera_subnet_scanner.dart`. Ajustes pontuais na 1.0.291 e teste de regressão dedicados. `python3 -m unittest discover -s tool -p test_*.py -q`: 237 testes aprovados; `check_version_sync.py`, imports e contrato CI aprovados. `tool/verify_project.sh`: execução parcial interrompida por limite do ambiente; `flutter analyze` e `flutter build apk` precisam ser reexecutados no CI.
 

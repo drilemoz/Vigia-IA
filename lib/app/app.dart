@@ -119,7 +119,9 @@ class _StartupGateState extends State<_StartupGate> {
 
   Future<void> _initializeOptionalServices() async {
     if (TransmitterExclusivePolicy.enabled ||
-        _launchMode == AppLaunchMode.transmission) return;
+        _launchMode == AppLaunchMode.transmission) {
+      return;
+    }
     await Future.wait<void>(<Future<void>>[
       if (_launchMode != AppLaunchMode.normal &&
         _launchMode != AppLaunchMode.bike &&

@@ -173,7 +173,9 @@ class DataUsageService extends ChangeNotifier {
 
   void resumeAfterTransmitter() {
     if (!_initialized || TransmitterExclusivePolicy.enabled ||
-        _timer?.isActive == true) return;
+        _timer?.isActive == true) {
+      return;
+    }
     _timer = Timer.periodic(refreshInterval, (_) => unawaited(refresh()));
     unawaited(refresh());
   }
