@@ -1,3 +1,12 @@
+## 1.0.282+282: Home com funções claras e estado do sistema (2026-10-18)
+
+- Removida a seção Acessos rápidos, cujos destinos já estão na barra inferior fixa.
+- Os quatro cartões de Modo passam a indicar operações: Monitorar, Transmitir, Receber e ESP32.
+- Três cartões compactos continuam iniciando a fonte configurada, abrindo Uso de dados e exibindo Ajuste em pop-up.
+- Faixa Estado do sistema exibe somente configuração conhecida (fonte, IA habilitada/desabilitada, agenda e áreas), sem inventar estado ativo da câmera; abre Telemetria.
+- A disposição se ajusta à altura disponível, com rolagem em telas curtas e faixa de estado próxima ao rodapé em telas altas.
+- Nenhuma alteração nos motores de IA, gravação, transmissão, rede, sensores ou mapa.
+
 ## 1.0.281+281: Home em três cartões (2026-10-18)
 
 - Câmera celular, Uso de dados e Ajuste ficam lado a lado em cartões compactos no painel Monitoramento atual.
@@ -246,7 +255,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.281+281`
+**Versão atual:** `1.0.282+282`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

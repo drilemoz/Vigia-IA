@@ -1,3 +1,11 @@
+## 1.0.282+282: Home com funções e estado (2026-10-18)
+
+- Removida a seção duplicada Acessos rápidos, mantendo Início, Histórico, Ao vivo, Câmeras, Mapas e Ajustes na barra fixa.
+- Modos da Home identificam operações explícitas: Monitorar, Transmitir, Receber e ESP32, sem alterar handlers ou serviços.
+- Estado do sistema/Telemetria em cartão compacto apresenta configuração efetiva, sem supor transmissão ou IA executando.
+- Grade de modos e cartões proporcionais adaptam-se a telas curtas; três cartões e pop-up de Ajuste continuam funcionais.
+- Atualizados contratos e testes da Home, versão e release. Sem alterar transmissão nativa MCRP, mapas ou IA.
+
 ## 1.0.281+281: Home compacta e ajustes em pop-up (2026-10-18)
 
 - Monitoramento atual reúne três cartões proporcionais: Câmera celular/fonte escolhida (iniciar), Uso de dados (detalhes) e Ajuste (configurações).

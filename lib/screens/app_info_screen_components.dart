@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.281',
+          version: '1.0.282',
           current: true,
+          changes: [
+            'Tela inicial sem atalhos duplicados.',
+            'Quatro modos com ações mais claras.',
+            'Estado do sistema e Telemetria no rodapé da Home.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.281',
           changes: [
             'Três cartões compactos para câmera, dados e ajustes na Home.',
             'Preparação do monitoramento disponível num painel deslizante.',

@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.282+282
+
+**Home de operações:** os quatro `VigiaModeCard` são ações (monitor local, transmissor nativo, conexão remota e ESP32). A barra `AdaptiveMainScaffold` permanece responsável pelas seis seções; os cinco atalhos redundantes foram removidos da Home. `HomeScreen` não importa telas de Mapas/Histórico apenas para atalhos antigos. Três `_HomeDashboardCard` preservam início da fonte selecionada, uso de dados e configurações em `DraggableScrollableSheet`.
+
+**Faixa de estado:** `_buildSystemStatusStrip` reutiliza a fonte em uso no perfil, `MonitorSettings.aiEnabled`, agenda e contagem de áreas habilitadas. Esses valores representam configuração, não medição ao vivo de câmera ou serviço. O toque abre `ErrorCenterScreen`, exibido como Telemetria. `SliverFillRemaining(hasScrollBody: false)` usa espaço sobrando sem alongar os cards; `CustomScrollView` mantém rolagem em janelas menores.
+
 # Arquitetura — Vigia IA 1.0.281+281
 
 **Home 281:** três cartões compactos não ativam serviços ao renderizar. Câmera inicia a fonte persistida por ação explícita; Uso de dados abre os detalhes existentes; Ajuste usa `showModalBottomSheet` e `DraggableScrollableSheet` com lista rolável reutilizando `_monitorConfiguration`. O notifier de edição força atualização somente da UI modal após mudanças salvas no estado da Home. Diagnóstico técnico permanece inalterado, com rótulo Telemetria no atalho principal.

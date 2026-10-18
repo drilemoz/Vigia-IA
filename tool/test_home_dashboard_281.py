@@ -39,18 +39,18 @@ class HomeDashboard281(unittest.TestCase):
         self.assertIn('_updateHomeState(() => _schedule', state)
         self.assertIn('_monitorEditorVersion.dispose()', state)
 
-    def test_quick_action_height_and_telemetry_label(self):
+    def test_telemetry_is_reachable_without_duplicate_shortcuts(self):
         ui = read('lib/screens/home_screen_redesign.dart')
-        widget = read('lib/widgets/vigia_ui.dart')
-        self.assertIn("label: 'Telemetria'", ui)
+        self.assertNotIn('Acessos rápidos', ui)
+        self.assertNotIn('Widget _buildQuickActions()', ui)
+        self.assertIn("'Estado do sistema'", ui)
+        self.assertIn("'Telemetria'", ui)
         self.assertIn("onTap: () => _openScreen(const ErrorCenterScreen())", ui)
-        self.assertIn('mainAxisExtent: constraints.maxWidth < 380 ? 72 : 76', ui)
-        self.assertIn('final short = constraints.maxHeight < 80;', widget)
         self.assertIn('class _HomeDashboardCard extends StatelessWidget', read('lib/screens/home_screen_components.dart'))
 
     def test_public_version(self):
-        self.assertIn('version: 1.0.281+281', read('pubspec.yaml'))
-        self.assertIn("version: '1.0.281'", read('lib/screens/app_info_screen_components.dart'))
+        self.assertIn('version: 1.0.282+282', read('pubspec.yaml'))
+        self.assertIn("version: '1.0.282'", read('lib/screens/app_info_screen_components.dart'))
 
 if __name__ == '__main__':
     unittest.main()

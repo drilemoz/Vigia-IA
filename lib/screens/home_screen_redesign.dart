@@ -138,38 +138,120 @@ extension _HomeRedesign on _HomeScreenState {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1180),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
-              children: [
-                const VigiaSectionHeading(
-                  title: 'Modos',
-                  subtitle: 'Escolha como este aparelho vai trabalhar.',
-                ),
-                const SizedBox(height: 12),
-                _buildModeCards(),
-                const SizedBox(height: 18),
-                const VigiaSectionHeading(
-                  title: 'Acessos rápidos',
-                  subtitle: 'Entre direto nas áreas mais usadas do aplicativo.',
-                ),
-                const SizedBox(height: 10),
-                _buildQuickActions(),
-                const SizedBox(height: 18),
-                VigiaSectionHeading(
-                  title: 'Monitoramento atual',
-                  subtitle: 'Câmera, consumo e configuração em três atalhos.',
-                  trailing: VigiaStatusPill(
-                    label: _schedule.enabled ? 'Agendado' : 'Pronto',
-                    icon: _schedule.enabled
-                        ? Icons.schedule_rounded
-                        : Icons.check_circle_outline_rounded,
-                    color: VigiaColors.green,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _buildCompactMonitorCards(sourceText, activeZones),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Manter a Home útil sem esticar cartões em aparelhos altos.
+                // Se a altura for pequena, a rolagem continua disponível.
+                final compactHeight = constraints.maxHeight < 570;
+                final gap = compactHeight ? 12.0 : 18.0;
+                return CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const VigiaSectionHeading(
+                              title: 'Modos',
+                              subtitle: 'Escolha uma função para este aparelho.',
+                            ),
+                            const SizedBox(height: 10),
+                            _buildModeCards(compactHeight: compactHeight),
+                            SizedBox(height: gap),
+                            VigiaSectionHeading(
+                              title: 'Monitoramento atual',
+                              subtitle: 'Operações e ajustes deste monitor.',
+                              trailing: VigiaStatusPill(
+                                label: _schedule.enabled ? 'Agendado' : 'Pronto',
+                                icon: _schedule.enabled
+                                    ? Icons.schedule_rounded
+                                    : Icons.check_circle_outline_rounded,
+                                color: VigiaColors.green,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _buildCompactMonitorCards(sourceText, activeZones),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(16, gap, 16, 18),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            _buildSystemStatusStrip(sourceText, activeZones),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSystemStatusStrip(String sourceText, int activeZones) {
+    final scheme = Theme.of(context).colorScheme;
+    final aiDescription = _loadedSettings.aiEnabled
+        ? 'IA habilitada'
+        : 'IA desativada';
+    final scheduleDescription = _schedule.enabled
+        ? 'Agenda ativa'
+        : 'Agenda manual';
+    return Material(
+      color: scheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openScreen(const ErrorCenterScreen()),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: scheme.outline.withValues(alpha: 0.16)),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.monitor_heart_outlined, color: scheme.primary, size: 24),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Estado do sistema',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '$sourceText · $aiDescription · $scheduleDescription'
+                      '${activeZones > 0 ? ' · $activeZones área(s)' : ''}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Telemetria',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                  color: scheme.primary,
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: scheme.primary, size: 18),
+            ],
           ),
         ),
       ),
@@ -232,7 +314,7 @@ extension _HomeRedesign on _HomeScreenState {
     );
   }
 
-  Widget _buildModeCards() {
+  Widget _buildModeCards({bool compactHeight = false}) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cards = <Widget>[
@@ -240,7 +322,7 @@ extension _HomeRedesign on _HomeScreenState {
             compact: true,
             icon: Icons.videocam_rounded,
             imageAsset: 'assets/images/modes/live.png',
-            title: 'Ao vivo',
+            title: 'Monitorar',
             subtitle: 'Câmera + IA',
             accent: VigiaColors.cyan,
             onTap: () => unawaited(_startLocalCamera()),
@@ -249,7 +331,7 @@ extension _HomeRedesign on _HomeScreenState {
             compact: true,
             icon: Icons.cast_connected_rounded,
             imageAsset: 'assets/images/modes/transmission.png',
-            title: 'Transmissão',
+            title: 'Transmitir',
             subtitle: 'Enviar imagem',
             accent: VigiaColors.blue,
             onTap: () => _openScreen(const NativeTransmitterScreen()),
@@ -258,8 +340,8 @@ extension _HomeRedesign on _HomeScreenState {
             compact: true,
             icon: Icons.phonelink_ring_rounded,
             imageAsset: 'assets/images/modes/remote.png',
-            title: 'Remoto',
-            subtitle: 'Receber imagem',
+            title: 'Receber',
+            subtitle: 'Câmera remota',
             accent: VigiaColors.green,
             onTap: () => _openScreen(const MonitorConnectScreen()),
           ),
@@ -283,63 +365,9 @@ extension _HomeRedesign on _HomeScreenState {
             crossAxisCount: columns,
             crossAxisSpacing: spacing,
             mainAxisSpacing: spacing,
-            mainAxisExtent: columns == 4 ? 108 : 112,
+            mainAxisExtent: columns == 4 ? 108 : (compactHeight ? 103 : 116),
           ),
           itemBuilder: (context, index) => cards[index],
-        );
-      },
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final actions = <({IconData icon, String label, VoidCallback onTap})>[
-          (
-            icon: Icons.video_library_outlined,
-            label: 'Câmeras',
-            onTap: () => _openScreen(const MultiCameraScreen()),
-          ),
-          (
-            icon: Icons.map_outlined,
-            label: 'Mapa',
-            onTap: () => _openScreen(const MapWorkspaceShell()),
-          ),
-          (
-            icon: Icons.history_rounded,
-            label: 'Histórico',
-            onTap: () => _openScreen(const EventsScreen()),
-          ),
-          (
-            icon: Icons.monitor_heart_outlined,
-            label: 'Telemetria',
-            onTap: () => _openScreen(const ErrorCenterScreen()),
-          ),
-          (
-            icon: Icons.settings_outlined,
-            label: 'Ajustes',
-            onTap: () => unawaited(_openSettings()),
-          ),
-        ];
-        final spacing = constraints.maxWidth < 380 ? 5.0 : 7.0;
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: actions.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
-            mainAxisExtent: constraints.maxWidth < 380 ? 72 : 76,
-          ),
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return VigiaQuickAction(
-              icon: action.icon,
-              label: action.label,
-              onTap: action.onTap,
-            );
-          },
         );
       },
     );

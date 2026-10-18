@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.281', build: 281);
+      AppBuildVersion(version: '1.0.282', build: 282);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.281', build: 281),
+      version: AppBuildVersion(version: '1.0.282', build: 282),
       changes: <String>[
-        'Home com três cartões compactos para câmera, consumo e configuração.',
-        'As opções de monitoramento agora abrem em um painel de ajustes.',
-        'Acesso rápido Telemetria ocupa menos espaço na tela inicial.',
+        'Tela inicial organizada sem atalhos repetidos.',
+        'Quatro modos agora indicam operações de monitorar, transmitir e receber.',
+        'Faixa do estado do sistema com acesso à Telemetria.',
       ],
     ),
   ]);

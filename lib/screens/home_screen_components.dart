@@ -361,8 +361,8 @@ class _HomeDashboardCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          height: 132,
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 11),
+          height: 116,
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
           decoration: BoxDecoration(
             border: Border.all(color: scheme.outline.withValues(alpha: 0.16)),
             borderRadius: BorderRadius.circular(18),
@@ -370,7 +370,7 @@ class _HomeDashboardCard extends StatelessWidget {
           child: Column(
             children: [
               Icon(icon, color: scheme.primary, size: 25),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 title,
                 textAlign: TextAlign.center,

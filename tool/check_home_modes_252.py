@@ -8,13 +8,14 @@ master=read('lib/screens/home_screen.dart')
 hub=read('lib/screens/multi_camera_screen.dart')
 card=read('lib/screens/multi_camera_screen_components.dart')
 assert home.count('VigiaModeCard(')==4
-for title in ('Ao vivo','Transmissão','Remoto','ESP32'):
+for title in ('Monitorar','Transmitir','Receber','ESP32'):
  assert f"title: '{title}'" in home,title
 assert "title: 'Minha Câmera'" not in home
 assert 'McrpCameraScreen' not in home
 assert "import 'mcrp_camera_screen.dart';" not in master
 assert "onTap: () => unawaited(_startLocalCamera())" in home
-assert "onTap: () => _openScreen(const MapWorkspaceShell())," in home
+assert 'navigateToMainDestination(context, index, currentIndex: 0)' in home
+assert '_buildQuickActions()' not in home
 assert 'McrpCameraScreen(' in hub and 'onMcrpControls:' in hub
 assert "child: Text('Controles e arquivos')" in card
 assert 'MinhaCameraLiveUrl.isValid(camera.address)' in hub

@@ -1,3 +1,10 @@
+# Validação Vigia IA 1.0.282+282
+
+- `python3 -m unittest -q tool/test_home_organization_282.py tool/test_home_dashboard_281.py`: remoção de atalhos duplicados, modos executando ações, faixa Telemetria com dados de configuração, rolagem e pop-up preservado.
+- `tool/check_home_modes_252.py` ajustado para verificar a navegação principal compartilhada em vez do atalho Mapa removido.
+- `tool/verify_project.sh`: **aprovado**, exit code 0, com 186 testes Python na suíte preventiva principal, verificadores estruturais, NV21 Kotlin, contratos de navegação e validadores de fontes/versão.
+- `flutter analyze`, `flutter test` e compilação Android exigem SDK Flutter ou GitHub Actions.
+
 # Validação Vigia IA 1.0.281+281
 
 - Contratos dirigidos: `python3 -m unittest -q tool/test_home_dashboard_281.py`.

@@ -45,7 +45,12 @@ def validate(read):
     assert 'releaseLocationIfIdle();' in read('lib/services/map_route_service.dart')
     assert 'recording: _tracking,' in read('lib/services/map_route_service.dart')
     assert 'navigating: navigating,' in read('lib/services/map_route_service.dart')
-    assert 'onTap: () => _openScreen(const MapWorkspaceShell()),' in ui
+    # O acesso ao mapa fica na navegação fixa, sem inicialização pela Home.
+    nav = read('lib/widgets/main_navigation_bar.dart')
+    routes = read('lib/widgets/main_navigation_routes.dart')
+    assert "label: 'Mapas'" in nav
+    assert 'MapWorkspaceShell()' in routes
+    assert 'navigateToMainDestination(context, index, currentIndex: 0)' in ui
 
 if __name__ == '__main__':
     validate(lambda f: (ROOT / f).read_text(encoding='utf-8'))
