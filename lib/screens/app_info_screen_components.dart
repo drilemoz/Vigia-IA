@@ -77,12 +77,20 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.280',
+          version: '1.0.281',
           current: true,
           changes: [
-            'Atalhos QR, Celular, RTSP e ESP32 lado a lado em Câmeras.',
-            'Informações sobre contagem disponíveis no ícone de ajuda.',
-            'Câmera celular com cartão menor e evento em destaque.',
+            'Três cartões compactos para câmera, dados e ajustes na Home.',
+            'Preparação do monitoramento disponível num painel deslizante.',
+            'Atalho Telemetria agora cabe numa grade mais baixa.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.280',
+          changes: [
+            'Quatro atalhos compactos na tela Câmeras.',
+            'Ajuda junto aos contadores e cartões de câmeras menores.',
           ],
         ),
         SizedBox(height: 10),
@@ -2489,7 +2497,7 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.280',
+          version: '1.0.281',
           current: true,
           changes: [
             'Atalhos QR, Celular, RTSP e ESP32 lado a lado em Câmeras.',

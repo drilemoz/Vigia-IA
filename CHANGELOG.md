@@ -1,3 +1,10 @@
+## 1.0.281+281: Home compacta e ajustes em pop-up (2026-10-18)
+
+- Monitoramento atual reúne três cartões proporcionais: Câmera celular/fonte escolhida (iniciar), Uso de dados (detalhes) e Ajuste (configurações).
+- Preparação do monitoramento passa a abrir em painel modal rolável; fonte, regras, objetos, agenda e automações permanecem funcionais e os estados refletem alterações no modal.
+- Acesso rápido Diagnóstico renomeado para Telemetria na Home; altura da grade reduzida sem modificar a tela técnica de diagnóstico.
+- Serviços de transmissão, MCRP, IA, GPS e mapas sem alterações.
+
 ## 1.0.280+280: Central de Câmeras compacta (2026-10-18)
 
 - Cabeçalho de Câmeras reúne indicadores e ajuda contextual em uma única linha.

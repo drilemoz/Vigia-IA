@@ -1,3 +1,12 @@
+# Validação Vigia IA 1.0.281+281
+
+- Contratos dirigidos: `python3 -m unittest -q tool/test_home_dashboard_281.py`.
+- Confirmar três cartões em linha, navegação do uso de dados, acionamento de câmera e modal com configuração completa e atualizações de estado.
+- Redução de altura de acessos rápidos e mudança de rótulo para Telemetria.
+- Testes direcionados adicionais: 36 testes Python concluídos com sucesso (Home, Câmeras, MCRP, transmissor nativo, navegação, mapa preguiçoso, lint e versão); checker de importações e sincronização de versão também aprovados.
+- `tool/verify_project.sh` foi iniciado duas vezes, mas excedeu o limite de execução antes da conclusão. Nenhuma falha apareceu nos trechos executados. Não há comprovação de aprovação integral nesta versão.
+- Flutter Analyze, testes Flutter e APK Android exigem CI na ausência do SDK local.
+
 # Validação Vigia IA 1.0.280+280
 
 - Tela Câmeras: quatro atalhos em linha única, ajuda com o aviso original, câmera local renomeada e resumo do último evento mais próximo do cabeçalho.

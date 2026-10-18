@@ -15,11 +15,11 @@ class Build230NativeStatusLint(unittest.TestCase):
         self.assertNotIn('s?.ready != true', running_section)
         self.assertNotIn('s?.ready == false', running_section)
 
-    def test_current_version_is_277(self):
+    def test_current_version_is_281(self):
         pubspec = (ROOT / 'pubspec.yaml').read_text(encoding='utf-8')
-        self.assertRegex(pubspec, r'(?m)^version: 1\.0\.280\+280$')
+        self.assertRegex(pubspec, r'(?m)^version: 1\.0\.281\+281$')
         news = (ROOT / 'lib/services/update_news_catalog.dart').read_text(encoding='utf-8')
-        self.assertIn("AppBuildVersion(version: '1.0.280', build: 280)", news)
+        self.assertIn("AppBuildVersion(version: '1.0.281', build: 281)", news)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,10 @@
+## 1.0.281+281: Home em três cartões (2026-10-18)
+
+- Câmera celular, Uso de dados e Ajuste ficam lado a lado em cartões compactos no painel Monitoramento atual.
+- Ajuste abre um pop-up com rolagem, preservando todos os recursos antes disponíveis em Preparar monitoramento.
+- Acesso rápido Telemetria substitui o rótulo Diagnóstico e ganhou grade menos alta.
+- Módulos, regras, transmissão MCRP e mapas permanecem independentes.
+
 ## 1.0.280+280: Central de Câmeras mais compacta (2026-10-18)
 
 - Aviso de independência/contagem movido para botão de ajuda na mesma linha dos indicadores.
@@ -239,7 +246,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.280+280`
+**Versão atual:** `1.0.281+281`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

@@ -1,0 +1,56 @@
+"""Guarda da Home em três cartões e pop-up de ajustes na versão 281."""
+from pathlib import Path
+import unittest
+
+R = Path(__file__).resolve().parents[1]
+
+def read(path):
+    return (R / path).read_text(encoding='utf-8')
+
+class HomeDashboard281(unittest.TestCase):
+    def test_three_independent_compact_cards(self):
+        src = read('lib/screens/home_screen_redesign.dart')
+        pane = src.split('Widget _buildCompactMonitorCards(', 1)[1].split('Future<void> _openMonitorAdjustments', 1)[0]
+        self.assertEqual(3, pane.count('child: _HomeDashboardCard('))
+        for label in ("title: 'Uso de dados'", "title: 'Ajuste'", 'title: sourceText'):
+            self.assertIn(label, pane)
+        self.assertIn('unawaited(_start())', pane)
+        self.assertIn('DataUsageService.formatBytes(_dataUsage.snapshot.today.total)', pane)
+        self.assertIn('DataUsageScreen()', pane)
+        self.assertIn('_openMonitorAdjustments()', pane)
+        self.assertNotIn('DataUsageCompactCard(', src)
+        self.assertNotIn('_buildMonitorPreparation(', src)
+
+    def test_editor_dialog_keeps_all_existing_settings(self):
+        ui = read('lib/screens/home_screen_redesign.dart')
+        self.assertIn('showModalBottomSheet<void>(', ui)
+        self.assertIn('DraggableScrollableSheet(', ui)
+        self.assertIn('ValueListenableBuilder<int>(', ui)
+        self.assertIn('children: _monitorConfiguration(activeZones)', ui)
+        for name in ('_buildSourcePanel(context)', '_configureObjectFilter',
+                     '_configureSmartAlertRules', '_configureSchedule',
+                     '_FeatureGrid('):
+            self.assertIn(name, ui)
+        state = read('lib/screens/home_screen.dart')
+        self.assertIn('final ValueNotifier<int> _monitorEditorVersion', state)
+        self.assertGreaterEqual(state.count('_monitorEditorVersion.value++'), 2)
+        self.assertIn('_updateHomeState(() => _alertLabels', state)
+        self.assertIn('_updateHomeState(() => _smartAlertRules', state)
+        self.assertIn('_updateHomeState(() => _schedule', state)
+        self.assertIn('_monitorEditorVersion.dispose()', state)
+
+    def test_quick_action_height_and_telemetry_label(self):
+        ui = read('lib/screens/home_screen_redesign.dart')
+        widget = read('lib/widgets/vigia_ui.dart')
+        self.assertIn("label: 'Telemetria'", ui)
+        self.assertIn("onTap: () => _openScreen(const ErrorCenterScreen())", ui)
+        self.assertIn('mainAxisExtent: constraints.maxWidth < 380 ? 72 : 76', ui)
+        self.assertIn('final short = constraints.maxHeight < 80;', widget)
+        self.assertIn('class _HomeDashboardCard extends StatelessWidget', read('lib/screens/home_screen_components.dart'))
+
+    def test_public_version(self):
+        self.assertIn('version: 1.0.281+281', read('pubspec.yaml'))
+        self.assertIn("version: '1.0.281'", read('lib/screens/app_info_screen_components.dart'))
+
+if __name__ == '__main__':
+    unittest.main()

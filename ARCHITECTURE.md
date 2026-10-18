@@ -1,4 +1,6 @@
-# Arquitetura — Vigia IA 1.0.280+280
+# Arquitetura — Vigia IA 1.0.281+281
+
+**Home 281:** três cartões compactos não ativam serviços ao renderizar. Câmera inicia a fonte persistida por ação explícita; Uso de dados abre os detalhes existentes; Ajuste usa `showModalBottomSheet` e `DraggableScrollableSheet` com lista rolável reutilizando `_monitorConfiguration`. O notifier de edição força atualização somente da UI modal após mudanças salvas no estado da Home. Diagnóstico técnico permanece inalterado, com rótulo Telemetria no atalho principal.
 
 - Central de Câmeras: `multi_camera_screen_components.dart` apresenta indicadores/ajuda e botões de fonte em linha; `multi_camera_screen.dart` troca grid fixo por lista de altura natural quando há uma coluna. Nenhuma mudança nas operações de câmera ou no protocolo.
 

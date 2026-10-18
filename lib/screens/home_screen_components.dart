@@ -334,3 +334,71 @@ class _PrivacyCard extends StatelessWidget {
     );
   }
 }
+
+/// Cartão compacto da Home com toda a área de toque clicável.
+class _HomeDashboardCard extends StatelessWidget {
+  const _HomeDashboardCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.description,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surface,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 132,
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 11),
+          decoration: BoxDecoration(
+            border: Border.all(color: scheme.outline.withValues(alpha: 0.16)),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: scheme.primary, size: 25),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, height: 1.12, fontWeight: FontWeight.w800),
+              ),
+              const Spacer(),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: scheme.primary),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

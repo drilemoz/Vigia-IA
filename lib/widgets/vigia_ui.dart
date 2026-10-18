@@ -298,7 +298,8 @@ class VigiaQuickAction extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 66;
-        final iconBox = compact ? 30.0 : 34.0;
+        final short = constraints.maxHeight < 80;
+        final iconBox = short ? 27.0 : (compact ? 30.0 : 34.0);
         return Material(
           color: Colors.transparent,
           child: Ink(
@@ -315,7 +316,7 @@ class VigiaQuickAction extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: compact ? 3 : 7,
-                  vertical: compact ? 7 : 8,
+                  vertical: short ? 5 : (compact ? 7 : 8),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -330,17 +331,17 @@ class VigiaQuickAction extends StatelessWidget {
                       child: Icon(
                         icon,
                         color: scheme.primary,
-                        size: compact ? 17 : 19,
+                        size: short ? 17 : (compact ? 17 : 19),
                       ),
                     ),
-                    SizedBox(height: compact ? 5 : 6),
+                    SizedBox(height: short ? 3 : (compact ? 5 : 6)),
                     Text(
                       label,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: compact ? 9.0 : 10.5,
+                        fontSize: short ? 9.5 : (compact ? 9.0 : 10.5),
                         fontWeight: FontWeight.w800,
                         height: 1.08,
                       ),

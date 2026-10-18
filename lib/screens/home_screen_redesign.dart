@@ -124,7 +124,7 @@ extension _HomeRedesign on _HomeScreenState {
 
     final activeZones = _monitoringZones.where((zone) => zone.enabled).length;
     final sourceText = switch (_sourceType) {
-      VideoSourceType.localCamera => 'Câmera deste celular',
+      VideoSourceType.localCamera => 'Câmera celular',
       VideoSourceType.rtsp => 'Câmera RTSP',
       VideoSourceType.remotePhone => 'Celular remoto',
       VideoSourceType.esp32 => 'Câmera ESP32',
@@ -157,8 +157,7 @@ extension _HomeRedesign on _HomeScreenState {
                 const SizedBox(height: 18),
                 VigiaSectionHeading(
                   title: 'Monitoramento atual',
-                  subtitle:
-                      'A Home mostra só o essencial. Fonte, regras e automações ficam recolhidas abaixo.',
+                  subtitle: 'Câmera, consumo e configuração em três atalhos.',
                   trailing: VigiaStatusPill(
                     label: _schedule.enabled ? 'Agendado' : 'Pronto',
                     icon: _schedule.enabled
@@ -168,14 +167,7 @@ extension _HomeRedesign on _HomeScreenState {
                   ),
                 ),
                 const SizedBox(height: 10),
-                _buildCurrentMonitorCard(sourceText, activeZones),
-                const SizedBox(height: 10),
-                DataUsageCompactCard(
-                  snapshot: _dataUsage.snapshot,
-                  onTap: () => _openScreen(const DataUsageScreen()),
-                ),
-                const SizedBox(height: 10),
-                _buildMonitorPreparation(activeZones),
+                _buildCompactMonitorCards(sourceText, activeZones),
               ],
             ),
           ),
@@ -320,7 +312,7 @@ extension _HomeRedesign on _HomeScreenState {
           ),
           (
             icon: Icons.monitor_heart_outlined,
-            label: 'Diagnóstico',
+            label: 'Telemetria',
             onTap: () => _openScreen(const ErrorCenterScreen()),
           ),
           (
@@ -338,7 +330,7 @@ extension _HomeRedesign on _HomeScreenState {
             crossAxisCount: 5,
             crossAxisSpacing: spacing,
             mainAxisSpacing: spacing,
-            mainAxisExtent: constraints.maxWidth < 380 ? 82 : 86,
+            mainAxisExtent: constraints.maxWidth < 380 ? 72 : 76,
           ),
           itemBuilder: (context, index) {
             final action = actions[index];
@@ -353,78 +345,105 @@ extension _HomeRedesign on _HomeScreenState {
     );
   }
 
-  Widget _buildCurrentMonitorCard(String sourceText, int activeZones) {
-    return VigiaSurfaceCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.shield_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+  Widget _buildCompactMonitorCards(String sourceText, int activeZones) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final spacing = constraints.maxWidth < 360 ? 6.0 : 9.0;
+        final itemWidth = (constraints.maxWidth - (spacing * 2)) / 3;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: itemWidth,
+              child: _HomeDashboardCard(
+                icon: Icons.videocam_outlined,
+                title: sourceText,
+                value: 'Iniciar',
+                description: activeZones == 0 ? 'IA pronta' : '$activeZones área(s)',
+                onTap: () => unawaited(_start()),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      sourceText,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      activeZones == 0
-                          ? 'IA observando a imagem inteira'
-                          : '$activeZones área(s) de vigilância ativa(s)',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+            ),
+            SizedBox(width: spacing),
+            SizedBox(
+              width: itemWidth,
+              child: _HomeDashboardCard(
+                icon: Icons.data_usage_rounded,
+                title: 'Uso de dados',
+                value: DataUsageService.formatBytes(_dataUsage.snapshot.today.total),
+                description: 'Hoje',
+                onTap: () => _openScreen(const DataUsageScreen()),
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: _start,
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: const Text('Iniciar monitoramento'),
-          ),
-        ],
-      ),
+            ),
+            SizedBox(width: spacing),
+            SizedBox(
+              width: itemWidth,
+              child: _HomeDashboardCard(
+                icon: Icons.tune_rounded,
+                title: 'Ajuste',
+                value: 'Configurar',
+                description: 'Fonte e IA',
+                onTap: () => unawaited(_openMonitorAdjustments()),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildMonitorPreparation(int activeZones) {
-    return VigiaSurfaceCard(
-      padding: EdgeInsets.zero,
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-        shape: const Border(),
-        collapsedShape: const Border(),
-        leading: const Icon(Icons.tune_rounded),
-        title: const Text(
-          'Preparar monitoramento',
-          style: TextStyle(fontWeight: FontWeight.w900),
+  Future<void> _openMonitorAdjustments() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.88,
+        minChildSize: 0.50,
+        maxChildSize: 0.97,
+        builder: (context, scrollController) => ValueListenableBuilder<int>(
+          valueListenable: _monitorEditorVersion,
+          builder: (context, _, child) {
+            final activeZones =
+                _monitoringZones.where((zone) => zone.enabled).length;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 8, 8),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.tune_rounded),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Ajuste do monitoramento',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Fechar ajustes',
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                    children: _monitorConfiguration(activeZones),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-        subtitle: const Text('Fonte, objetos, regras, agenda e automações'),
-        children: _monitorConfiguration(activeZones),
       ),
     );
   }

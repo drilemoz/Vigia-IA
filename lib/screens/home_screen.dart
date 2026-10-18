@@ -90,10 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _voiceEnabled = true;
   bool _autoStartTriggered = false;
   final DataUsageService _dataUsage = DataUsageService.instance;
+  final ValueNotifier<int> _monitorEditorVersion = ValueNotifier<int>(0);
 
   void _updateHomeState(VoidCallback update) {
     if (!mounted) return;
     setState(update);
+    _monitorEditorVersion.value++;
   }
 
   @override
@@ -111,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _persistDebounce?.cancel();
     _dataUsage.removeListener(_onDataUsageChanged);
+    _monitorEditorVersion.dispose();
     _rtspController
       ..removeListener(_onSourceDetailsChanged)
       ..dispose();
@@ -191,7 +194,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _persist() => _settingsService.saveProfile(_currentProfile());
 
-  void _updateSourcePanelState(VoidCallback update) => setState(update);
+  void _updateSourcePanelState(VoidCallback update) {
+    if (!mounted) return;
+    setState(update);
+    _monitorEditorVersion.value++;
+  }
 
   PersistedMonitorProfile _currentProfile() {
     final rtsp = _rtspController.text.trim();
@@ -249,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
       selectedLabels: _alertLabels,
     );
     if (result == null || !mounted) return;
-    setState(() => _alertLabels = <String>{...result});
+    _updateHomeState(() => _alertLabels = <String>{...result});
     _schedulePersist();
   }
 
@@ -259,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
       initialRules: _smartAlertRules,
     );
     if (result == null || !mounted) return;
-    setState(() => _smartAlertRules = result);
+    _updateHomeState(() => _smartAlertRules = result);
     _schedulePersist();
   }
 
@@ -380,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (result == null || !mounted) return;
-    setState(() => _schedule = result);
+    _updateHomeState(() => _schedule = result);
     _schedulePersist();
   }
 
@@ -409,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final pairing = RemoteCameraPairingService.decode(raw);
-      setState(() {
+      _updateSourcePanelState(() {
         _sourceType = VideoSourceType.remotePhone;
         _remoteUrlController.text = pairing.address;
         _remoteKeyController.text = pairing.accessKey;
