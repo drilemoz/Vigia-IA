@@ -20,6 +20,7 @@ import '../services/native_platform_service.dart';
 import '../services/remote_camera_pairing_service.dart';
 import '../core/vigia_design.dart';
 import '../widgets/main_navigation_bar.dart';
+import '../widgets/main_navigation_routes.dart';
 import '../widgets/vigia_ui.dart';
 import '../widgets/object_filter_dialog.dart';
 import '../widgets/smart_alert_rules_dialog.dart';

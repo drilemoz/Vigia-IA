@@ -1,3 +1,11 @@
+## 1.0.279+279: navegação principal com Mapas (2026-10-18)
+
+- Barra inferior com seis destinos nas seções principais: Início, Histórico, Ao vivo, Câmeras, Mapas e Ajustes.
+- Monitor Ao vivo mostra barra fixa em retrato e trilho em largura maior; barra fica oculta em vídeo tela cheia.
+- Área Mapas, Ajustes e transmissor nativo passam a apresentar a navegação, com conteúdo adaptado à altura disponível.
+- Rotas das áreas principais centralizadas e testes de interface e navegação atualizados.
+- Nenhuma alteração nos motores de vídeo, IA, serviço Kotlin ou dados de rotas offline.
+
 ## 1.0.278+278: rota única para transmissão nativa (2026-10-17)
 
 - Substituídos os quatro pontos de entrada que abriam a transmissão Flutter antiga pelo modo nativo MCRP com Controles locais de emergência.

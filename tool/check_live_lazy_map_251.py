@@ -17,8 +17,10 @@ def validate(read):
     assert "id: '__local__'" in home
     assert 'type: CameraEndpointType.local' in home
     assert 'unawaited(_startLocalCamera());' in ui
+    # As telas compartilham agora um roteador em vez de duplicar o destino Ao vivo.
     for other in ('lib/screens/events_screen.dart', 'lib/screens/multi_camera_screen.dart'):
-        assert 'HomeScreen(startMonitorOnLoad: true)' in read(other)
+        assert 'navigateToMainDestination(context, index' in read(other)
+    assert 'HomeScreen(startMonitorOnLoad: true)' in read('lib/widgets/main_navigation_routes.dart')
     assert 'onTap: () => unawaited(_startLocalCamera()),' in ui
     assert 'onTap: () => unawaited(_chooseCameraForLive()),' not in ui
     assert 'resumeMonitorOnLoad' in home

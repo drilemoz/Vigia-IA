@@ -1,3 +1,11 @@
+## 1.0.279+279: barra de navegação fixa e acesso a Mapas (2026-10-18)
+
+- Adicionada a seção **Mapas** à navegação principal: Início, Histórico, Ao vivo, Câmeras, Mapas e Ajustes.
+- A barra permanece nas seis áreas principais e no transmissor nativo; Ao vivo a oculta apenas em tela cheia e usa trilho lateral nas larguras maiores.
+- Mantidos QR/pareamento, controles MCRP, transmissor nativo e o mapa offline. Destinos usam navegação centralizada, sem acumular múltiplas telas principais.
+- Os fluxos auxiliares, leitores QR, diálogos e experiências imersivas conservam suas barras/rotas específicas.
+- Flutter/Android precisam de validação no GitHub Actions.
+
 ## 1.0.278+278: transmissor nativo único nas telas do aplicativo (2026-10-17)
 
 - O botão Transmissão, o seletor inicial, Ajustes e os acessos da Home passam a abrir diretamente o transmissor Kotlin/MCRP, com estado, QR recolhível e Controles locais de emergência.
@@ -223,7 +231,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.278+278`
+**Versão atual:** `1.0.279+279`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

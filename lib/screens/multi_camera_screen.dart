@@ -19,9 +19,8 @@ import '../services/remote_camera_pairing_service.dart';
 import '../services/error_log_service.dart';
 import '../services/rtsp_diagnostics_service.dart';
 import '../widgets/main_navigation_bar.dart';
-import 'events_screen.dart';
+import '../widgets/main_navigation_routes.dart';
 import 'esp32_settings_screen.dart';
-import 'home_screen.dart';
 import 'monitor_screen.dart';
 import 'settings_screen.dart';
 import 'phone_pairing_scanner_screen.dart';
@@ -518,23 +517,8 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
     return null;
   }
 
-  void _navigateMain(int index) {
-    if (index == 4) {
-      _openSettings();
-      return;
-    }
-    if (index == 3) return;
-    final Widget target = switch (index) {
-      0 => const HomeScreen(),
-      1 => const EventsScreen(),
-      2 => const HomeScreen(startMonitorOnLoad: true),
-      _ => const MultiCameraScreen(),
-    };
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => target),
-      (route) => false,
-    );
-  }
+  void _navigateMain(int index) =>
+      navigateToMainDestination(context, index, currentIndex: 3);
 
   void _openSettings() {
     Navigator.of(context).push(

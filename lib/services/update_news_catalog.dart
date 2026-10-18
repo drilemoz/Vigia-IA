@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.278', build: 278);
+      AppBuildVersion(version: '1.0.279', build: 279);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.278', build: 278),
+      version: AppBuildVersion(version: '1.0.279', build: 279),
       changes: <String>[
-        'Transmissão simplificada em uma única tela com os controles locais.',
-        'Mesmo nome para a câmera remota ao conectar ou cadastrar.',
-        'Pareamento por QR e gravação remota pelo Ao vivo mantidos.',
+        'A barra inferior agora tem acesso direto a Mapas e às outras áreas principais.',
+        'Navegação mais prática entre Ao vivo, Histórico, Câmeras e Ajustes.',
+        'Vídeo em tela cheia continua sem menus na imagem.',
       ],
     ),
   ]);

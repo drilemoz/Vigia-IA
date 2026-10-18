@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../widgets/main_navigation_bar.dart';
+import '../widgets/main_navigation_routes.dart';
 import '../services/mcrp_client.dart';
 import '../services/native_camera_transmitter_service.dart';
 import '../services/native_platform_service.dart';
@@ -172,7 +174,10 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
     final model = _details['x-device-model'];
     final temperature = int.tryParse(_details['x-battery-temp-tenths'] ?? '');
     final camera = _details['x-camera-facing'] == '1' ? 'Frontal' : 'Traseira';
-    return Scaffold(
+    return AdaptiveMainScaffold(
+      currentIndex: 3,
+      onDestinationSelected: (index) =>
+          navigateToMainDestination(context, index, currentIndex: -1),
       appBar: AppBar(
         title: const Text('Vigia IA · transmissor'),
         actions: [

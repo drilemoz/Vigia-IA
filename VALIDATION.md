@@ -1,3 +1,10 @@
+# Validação Vigia IA 1.0.279+279
+
+- `tool/test_main_navigation_six_279.py` cobre presença das seis seções, rotas, mapas e ocultação em tela cheia.
+- `test/main_navigation_bar_test.dart` agora verifica seis destinos e seleção de Mapas.
+- `tool/verify_project.sh` atualizado e aprovado integralmente em 2026-10-18, incluindo suites de regressão, contratos MCRP, IA, mapas, navegação e sincronização de versão.
+- Executar `flutter analyze`, `flutter test` e a compilação Android em GitHub Actions: SDK Flutter não disponível neste ambiente.
+
 # Validação Vigia IA 1.0.278+278
 
 - Novo teste `tool/test_native_default_transmitter_278.py` exige todos os quatro pontos de entrada no transmissor nativo e rótulos consistentes de câmera remota.

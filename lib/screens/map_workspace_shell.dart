@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../models/map_workspace_mode.dart';
+import '../widgets/main_navigation_bar.dart';
+import '../widgets/main_navigation_routes.dart';
 import '../services/map_route_service.dart';
 import '../widgets/map_workspace_mode_picker.dart';
 import 'bike_mode_screen.dart';
@@ -112,12 +114,17 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
       );
 
   @override
-  Widget build(BuildContext context) => MapMonitoringScreen(
+  Widget build(BuildContext context) => AdaptiveMainScaffold(
+    currentIndex: 4,
+    onDestinationSelected: (index) =>
+        navigateToMainDestination(context, index, currentIndex: 4),
+    body: MapMonitoringScreen(
     key: const ValueKey<String>('workspace-map'),
     workspaceVisible: !_toolVisible,
     navigationSearchRequests: _destinationSearchRequests,
     onChooseWorkspaceMode: () => unawaited(_chooseMode()),
     onOpenWorkspaceTools: () => unawaited(_showTools()),
     workspaceModeLabel: _mode.label,
+    ),
   );
 }

@@ -77,7 +77,7 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.278',
+          version: '1.0.279',
           current: true,
           changes: [
             'A transmissão abre direto no modo com controles locais de emergência.',
@@ -2480,7 +2480,7 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.278',
+          version: '1.0.279',
           current: true,
           changes: [
             'A transmissão abre direto no modo com controles locais de emergência.',

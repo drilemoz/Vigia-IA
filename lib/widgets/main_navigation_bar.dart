@@ -7,6 +7,7 @@ const _mainDestinations = <({IconData icon, IconData selectedIcon, String label}
   (icon: Icons.history_outlined, selectedIcon: Icons.history_rounded, label: 'Histórico'),
   (icon: Icons.videocam_outlined, selectedIcon: Icons.videocam_rounded, label: 'Ao vivo'),
   (icon: Icons.video_library_outlined, selectedIcon: Icons.video_library_rounded, label: 'Câmeras'),
+  (icon: Icons.map_outlined, selectedIcon: Icons.map_rounded, label: 'Mapas'),
   (icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded, label: 'Ajustes'),
 ];
 
@@ -22,7 +23,16 @@ class MainNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
+    return NavigationBarTheme(
+      data: const NavigationBarThemeData(
+        labelTextStyle: WidgetStatePropertyAll<TextStyle>(
+          TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+        ),
+        iconTheme: WidgetStatePropertyAll<IconThemeData>(
+          IconThemeData(size: 22),
+        ),
+      ),
+      child: NavigationBar(
       selectedIndex: currentIndex,
       onDestinationSelected: onDestinationSelected,
       height: 68,
@@ -35,6 +45,7 @@ class MainNavigationBar extends StatelessWidget {
             label: destination.label,
           ),
       ],
+      ),
     );
   }
 }
@@ -56,6 +67,7 @@ class MainNavigationRail extends StatelessWidget {
       onDestinationSelected: onDestinationSelected,
       labelType: NavigationRailLabelType.selected,
       minWidth: 70,
+      scrollable: true,
       groupAlignment: -0.65,
       destinations: [
         for (final destination in _mainDestinations)
@@ -69,7 +81,7 @@ class MainNavigationRail extends StatelessWidget {
   }
 }
 
-/// Shared shell for the five primary destinations.
+/// Shared shell for the six primary destinations.
 ///
 /// Portrait phones keep the bottom NavigationBar. Landscape phones and tablets
 /// move navigation to a compact left rail so the limited vertical space is not
@@ -82,6 +94,8 @@ class AdaptiveMainScaffold extends StatelessWidget {
     required this.body,
     this.appBar,
     this.backgroundColor,
+    this.hideNavigation = false,
+    this.extendBodyBehindAppBar = false,
   });
 
   final int currentIndex;
@@ -89,14 +103,17 @@ class AdaptiveMainScaffold extends StatelessWidget {
   final Widget body;
   final PreferredSizeWidget? appBar;
   final Color? backgroundColor;
+  final bool hideNavigation;
+  final bool extendBodyBehindAppBar;
 
   @override
   Widget build(BuildContext context) {
-    final useRail = AdaptiveLayout.useNavigationRail(context);
+    final useRail = !hideNavigation && AdaptiveLayout.useNavigationRail(context);
     return Scaffold(
       backgroundColor: backgroundColor,
+      extendBodyBehindAppBar: extendBodyBehindAppBar,
       appBar: appBar,
-      bottomNavigationBar: useRail
+      bottomNavigationBar: hideNavigation || useRail
           ? null
           : MainNavigationBar(
               currentIndex: currentIndex,

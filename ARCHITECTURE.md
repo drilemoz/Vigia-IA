@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.279+279
+
+## Navegação persistente das seis áreas principais
+
+`MainNavigationBar`, `MainNavigationRail` e `AdaptiveMainScaffold` compartilham Início(0), Histórico(1), Ao vivo(2), Câmeras(3), Mapas(4) e Ajustes(5). `navigateToMainDestination` centraliza substituição da pilha entre áreas principais, evitando empilhar abas. Home continua iniciando Ao vivo pela câmera local e permissões existentes. `MapWorkspaceShell` conserva o mapa em uma única instância enquanto é a tela ativa. A opção de vídeo em tela cheia suprime a barra até a saída do modo imersivo. Em tablets e paisagem, o menu é convertido em `NavigationRail`. Telas de onboarding, scanners, diálogos e ferramentas auxiliares não recebem uma segunda barra aninhada.
+
 # Arquitetura — Vigia IA 1.0.278+278
 
 ## Transmissão padrão (1.0.278)

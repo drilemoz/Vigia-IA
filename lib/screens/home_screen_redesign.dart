@@ -7,18 +7,7 @@ extension _HomeRedesign on _HomeScreenState {
       unawaited(_startLocalCamera());
       return;
     }
-    if (index == 4) {
-      unawaited(_openSettings());
-      return;
-    }
-    final Widget target = switch (index) {
-      1 => const EventsScreen(),
-      3 => const MultiCameraScreen(),
-      _ => const HomeScreen(),
-    };
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => target),
-    );
+    navigateToMainDestination(context, index, currentIndex: 0);
   }
 
   Future<void> _openSettings() async {

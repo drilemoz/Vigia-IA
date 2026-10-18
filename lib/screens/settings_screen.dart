@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_metadata.dart';
+import '../widgets/main_navigation_bar.dart';
+import '../widgets/main_navigation_routes.dart';
 import '../services/export_preferences_service.dart';
 import 'access_guide_screen.dart';
 import 'advanced_settings_screen.dart';
@@ -243,7 +245,10 @@ class SettingsScreen extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
+    return AdaptiveMainScaffold(
+      currentIndex: 5,
+      onDestinationSelected: (index) =>
+          navigateToMainDestination(context, index, currentIndex: 5),
       appBar: AppBar(
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,

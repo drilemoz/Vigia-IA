@@ -9,9 +9,8 @@ import '../models/object_filter_catalog.dart';
 import '../services/event_history_service.dart';
 import '../services/native_platform_service.dart';
 import '../widgets/main_navigation_bar.dart';
+import '../widgets/main_navigation_routes.dart';
 import '../widgets/export_destination_dialog.dart';
-import 'home_screen.dart';
-import 'multi_camera_screen.dart';
 import 'settings_screen.dart';
 
 part 'events_screen_components.dart';
@@ -84,23 +83,8 @@ class _EventsScreenState extends State<EventsScreen> {
     }).toList(growable: false);
   }
 
-  void _navigateMain(int index) {
-    if (index == 4) {
-      _openSettings();
-      return;
-    }
-    if (index == 1) return;
-    final Widget target = switch (index) {
-      0 => const HomeScreen(),
-      2 => const HomeScreen(startMonitorOnLoad: true),
-      3 => const MultiCameraScreen(),
-      _ => const EventsScreen(),
-    };
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => target),
-      (route) => false,
-    );
-  }
+  void _navigateMain(int index) =>
+      navigateToMainDestination(context, index, currentIndex: 1);
 
   void _openSettings() {
     Navigator.of(context).push(

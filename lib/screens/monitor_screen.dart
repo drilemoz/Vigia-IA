@@ -37,6 +37,8 @@ import '../widgets/mcrp_remote_controls.dart';
 import '../widgets/detection_overlay.dart';
 import '../widgets/bike_approach_banner.dart';
 import '../widgets/bike_ride_hud.dart';
+import '../widgets/main_navigation_bar.dart';
+import '../widgets/main_navigation_routes.dart';
 import '../widgets/monitoring_zone_overlay.dart';
 import '../widgets/object_filter_dialog.dart';
 import '../widgets/remote_bike_status_panel.dart';
@@ -1020,7 +1022,11 @@ class _MonitorScreenState extends State<MonitorScreen>
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _fullscreen) unawaited(_toggleFullscreen());
       },
-      child: Scaffold(
+      child: AdaptiveMainScaffold(
+        currentIndex: 2,
+        onDestinationSelected: (index) =>
+            navigateToMainDestination(context, index, currentIndex: 2),
+        hideNavigation: _fullscreen,
         extendBodyBehindAppBar: landscape || _fullscreen,
         appBar: _fullscreen || landscape
             ? null
