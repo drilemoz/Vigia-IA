@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'transmitter_exclusive_policy.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -214,7 +216,15 @@ class BikePressureSafetyService extends ChangeNotifier {
 
   bool get hasRapidPressureLoss => _detector.active.isNotEmpty;
 
+  void suspendForTransmitter() {
+    for (final timer in _prominentTimers.values) {
+      timer.cancel();
+    }
+    _prominentTimers.clear();
+  }
+
   Future<void> initialize() {
+    if (TransmitterExclusivePolicy.enabled) return Future<void>.value();
     if (_initialized) return Future<void>.value();
     return _initializing ??= _initialize();
   }
@@ -235,6 +245,7 @@ class BikePressureSafetyService extends ChangeNotifier {
   }
 
   void _onSensorChanged() {
+    if (TransmitterExclusivePolicy.enabled) return;
     final snapshot = _sensors.snapshot;
     if (snapshot == null) return;
     if (_lastProcessedAt == snapshot.capturedAt) return;
@@ -285,6 +296,7 @@ class BikePressureSafetyService extends ChangeNotifier {
   }
 
   Future<void> _deliverAlert(BikeRapidPressureLoss event) async {
+    if (TransmitterExclusivePolicy.enabled) return;
     final now = DateTime.now();
     final previous = _lastAlertAt[event.tire];
     if (previous != null && now.difference(previous) < alertCooldown) return;

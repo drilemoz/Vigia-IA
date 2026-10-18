@@ -237,7 +237,40 @@ class PhoneCameraBackgroundService : Service() {
             mainHandler.postDelayed(this, 6000)
         }
     }
-    private var heatState = PhoneHeatState.NORMAL
+    @Volatile private var heatState = PhoneHeatState.NORMAL
+    @Volatile private var thermalStatus = -1
+    private var lastThermalReadAt = 0L
+    private var lastIdlePreviewAt = 0L
+
+    /** O sensor termico do SoC nao e o termometro da bateria. Consulta <=1/5s. */
+    private fun updateThermalPolicy(now: Long) {
+        if (now - lastThermalReadAt < 5_000L) return
+        lastThermalReadAt = now
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            thermalStatus = try {
+                (getSystemService(Context.POWER_SERVICE) as PowerManager).currentThermalStatus
+            } catch (_: Exception) { -1 }
+        }
+        val thermalHeat = when {
+            thermalStatus >= PowerManager.THERMAL_STATUS_SEVERE -> PhoneHeatState.HOT
+            thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE -> PhoneHeatState.WARM
+            else -> PhoneHeatState.NORMAL
+        }
+        val batteryHeat = PhoneEcoPolicy.heatState(cachedBattery?.temperatureTenthsC, heatState)
+        val next = if (thermalHeat.ordinal > batteryHeat.ordinal) thermalHeat else batteryHeat
+        if (heatState != next) {
+            heatState = next
+            torch.onStateChanged()
+            PhoneStreamDiagnostics.add("Termica: estado=$next, statusAndroid=$thermalStatus")
+            mainHandler.post { applyCameraFpsRange() }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            thermalStatus >= PowerManager.THERMAL_STATUS_EMERGENCY && !closing) {
+            lastError = "Temperatura critica: captura encerrada para proteger o aparelho"
+            PhoneStreamDiagnostics.add("Protecao termica critica: interrompendo captura/gravação com finalizacao segura")
+            mainHandler.post { if (!closing) stopCaptureAndFinish() }
+        }
+    }
     private var lastBatteryReadAt = 0L
     private var cachedBattery: PhoneBatteryReading? = null
     @Volatile private var ecoEnabled = false
@@ -314,7 +347,7 @@ class PhoneCameraBackgroundService : Service() {
                     foregroundStarted = true
                     startupPhase = "preparando superfície EGL"
                     PhoneStreamDiagnostics.add("Tela apagada: foreground iniciado; preparando EGL")
-                    ecoEnabled = getSharedPreferences("phone_video", MODE_PRIVATE).getBoolean("eco_enabled", false)
+                    ecoEnabled = getSharedPreferences("phone_video", MODE_PRIVATE).getBoolean("eco_enabled", true)
                     requestedQuality = getSharedPreferences("phone_video", MODE_PRIVATE).getInt("remote_quality", 480)
                     fpsLimit = getSharedPreferences("phone_video", MODE_PRIVATE).getInt("remote_fps", 10)
                     liveCodec = getSharedPreferences("phone_video", MODE_PRIVATE).getString("stream_codec", "mjpeg")
@@ -470,6 +503,7 @@ class PhoneCameraBackgroundService : Service() {
             changeEco = { desired ->
                 if (!running || closing) false else {
                     ecoEnabled = desired
+                    mainHandler.post { applyCameraFpsRange() }
                     getSharedPreferences("phone_video", MODE_PRIVATE).edit().putBoolean("eco_enabled", desired).apply()
                     true
                 }
@@ -503,6 +537,7 @@ class PhoneCameraBackgroundService : Service() {
                 else { takingPhoto = true; mainHandler.post { captureFullPhoto() }; true }
             }, mediaIndex = { remoteLibrary.json() }, mediaOpen = { remoteLibrary.open(it) },
             transmissionActive = { running && !closing },
+            thermalStatus = { thermalStatus },
             changeTransmission = { wanted ->
                 if (closing || releasing || switching || takingPhoto || recording ||
                     pendingCameraStart || starting || server == null) false
@@ -699,8 +734,9 @@ class PhoneCameraBackgroundService : Service() {
         params.setRotation(PhoneOrientationMode.frameDegrees(pictureInfo.orientation,
             pictureInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT,
             PhoneOrientationMode.deviceDegrees(currentOrientationMode, physicalDegrees)))
+        val initialFps = effectiveCameraFps()
         val range = params.supportedPreviewFpsRange.orEmpty().minByOrNull {
-            kotlin.math.abs(it[0] - fpsLimit * 1000) + kotlin.math.abs(it[1] - fpsLimit * 1000)
+            kotlin.math.abs(it[0] - initialFps * 1000) + kotlin.math.abs(it[1] - initialFps * 1000)
         }
         if (range != null) try { params.setPreviewFpsRange(range[0], range[1]) } catch (_: Exception) { }
         if (params.supportedFocusModes?.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) == true)
@@ -725,12 +761,20 @@ class PhoneCameraBackgroundService : Service() {
         lastCapture = 0L
         lastPublishedAtMs = SystemClock.elapsedRealtime()
         opened.setPreviewCallbackWithBuffer { bytes, source ->
-            if (bytes != null) { lastCaptureAtMs = SystemClock.elapsedRealtime(); frameCount++
-                pipelineProbe.callback(lastCaptureAtMs) }
+            if (bytes != null) {
+                lastCaptureAtMs = SystemClock.elapsedRealtime()
+                frameCount++
+                pipelineProbe.callback(lastCaptureAtMs)
+                updateThermalPolicy(lastCaptureAtMs)
+            }
+            // Sem visualizador: 1 quadro a cada 2,5 s para status, foto e reconexao.
+            // REC local nao fica limitado por essa politica de ociosidade.
+            val idle = session.activeVideoViewers() == 0 && !recording
+            val interval = if (idle) 2_500L else
+                PhoneEcoPolicy.streamIntervalMs(fpsLimit, ecoEnabled, heatState)
             if (bytes != null && server === session && !closing && !switching &&
                 bytes.size >= byteCount &&
-                SystemClock.elapsedRealtime() - lastCapture >=
-                    PhoneEcoPolicy.streamIntervalMs(fpsLimit, ecoEnabled, heatState) &&
+                SystemClock.elapsedRealtime() - lastCapture >= interval &&
                 encoding.compareAndSet(false, true)) {
                 lastCapture = SystemClock.elapsedRealtime()
                 pipelineProbe.accepted(lastCapture)
@@ -763,7 +807,13 @@ class PhoneCameraBackgroundService : Service() {
         selectedFacing = facing
         requestedQuality = quality
         getSharedPreferences("phone_video", MODE_PRIVATE).edit().putInt("remote_quality", quality).apply()
-        heatState = PhoneHeatState.NORMAL
+        // Preserve degradacao termica durante reinicio do preview.
+    }
+
+    private fun effectiveCameraFps(): Int = when {
+        heatState == PhoneHeatState.HOT -> minOf(fpsLimit, 3)
+        heatState == PhoneHeatState.WARM || ecoEnabled -> minOf(fpsLimit, 5)
+        else -> fpsLimit
     }
 
     private fun applyCameraFpsRange() {
@@ -771,8 +821,9 @@ class PhoneCameraBackgroundService : Service() {
         if (switching || takingPhoto || closing) return
         try {
             val params = opened.parameters
+            val effectiveFps = effectiveCameraFps()
             val range = params.supportedPreviewFpsRange.orEmpty().minByOrNull {
-                kotlin.math.abs(it[0] - fpsLimit * 1000) + kotlin.math.abs(it[1] - fpsLimit * 1000)
+                kotlin.math.abs(it[0] - effectiveFps * 1000) + kotlin.math.abs(it[1] - effectiveFps * 1000)
             } ?: return
             params.setPreviewFpsRange(range[0], range[1])
             opened.parameters = params
@@ -835,11 +886,7 @@ class PhoneCameraBackgroundService : Service() {
         // Relata a geometria PUBLICADA (não a dimensão bruta do sensor).
         remoteResolution = "${width}x${height}"
         session.updateBattery(reading)
-        val newHeat = PhoneEcoPolicy.heatState(reading.temperatureTenthsC, heatState)
-        if (heatState != newHeat) {
-            heatState = newHeat
-            torch.onStateChanged()
-        }
+        updateThermalPolicy(now)
         if (liveCodec == "h264") {
             try {
                 if (liveEncoder == null) {
@@ -1025,7 +1072,9 @@ class PhoneCameraBackgroundService : Service() {
         "modo=${if (running) "ativo" else "parado"}, codec=$liveCodec, gravando=$recording, " +
             "eco=$ecoEnabled, lanterna=${torch.mode}/${torch.enabled}, capturados=$frameCount, ultimoCallbackMs=${SystemClock.elapsedRealtime()-lastCaptureAtMs}, " +
             "ultimoCodificadoMs=${SystemClock.elapsedRealtime()-lastPublishedAtMs}, tentativas=$watchdogRestarts, " +
-            "fase=$startupPhase, iniciando=$starting, liberando=$releasing, primeiroQuadro=$firstFramePublished, " +
+            "fase=$startupPhase, termicaAndroid=$thermalStatus, estadoTermico=$heatState, " +
+            "visualizadores=${server?.activeVideoViewers() ?: 0}, " +
+            "iniciando=$starting, liberando=$releasing, primeiroQuadro=$firstFramePublished, " +
             (headlessPreview?.health() ?: "surface=inativa")
     )
 

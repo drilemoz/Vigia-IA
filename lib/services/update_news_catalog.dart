@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.289', build: 289);
+      AppBuildVersion(version: '1.0.290', build: 290);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.289', build: 289),
+      version: AppBuildVersion(version: '1.0.290', build: 290),
       changes: <String>[
-        'Escanear rede combina ONVIF, Vigia IA e busca TCP por IP no Wi-Fi.',
-        'Identifica RTSP confirmado e portas TCP ainda nao verificadas.',
-        'Lista mostra progresso, estado da rede e dispositivos deduplicados.',
+        'Transmissão exclusiva mantém câmera e MCRP sem abrir outros módulos.',
+        'Menos processamento quando ninguém acompanha, preservando gravações.',
+        'Restaura a última escolha e adapta a captura à condição térmica.',
       ],
     ),
   ]);

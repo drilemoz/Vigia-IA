@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'transmitter_exclusive_policy.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -158,7 +160,24 @@ class DataUsageService extends ChangeNotifier {
   bool get refreshing => _refreshing;
   DataUsageSnapshot get snapshot => _buildSnapshot();
 
+  void suspendForTransmitter() {
+    _timer?.cancel();
+    _timer = null;
+    final hadPendingWrite = _persistDebounce?.isActive == true;
+    _persistDebounce?.cancel();
+    _persistDebounce = null;
+    if (hadPendingWrite) unawaited(_persistNow());
+  }
+
+  void resumeAfterTransmitter() {
+    if (!_initialized || TransmitterExclusivePolicy.enabled ||
+        _timer?.isActive == true) return;
+    _timer = Timer.periodic(refreshInterval, (_) => unawaited(refresh()));
+    unawaited(refresh());
+  }
+
   Future<void> initialize() {
+    if (TransmitterExclusivePolicy.enabled) return Future<void>.value();
     if (_initialized) return Future<void>.value();
     return _initializing ??= _initializeInternal().whenComplete(
           () => _initializing = null,

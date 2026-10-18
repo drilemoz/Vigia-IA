@@ -1,4 +1,7 @@
-# Arquitetura — Vigia IA 1.0.289+289
+# Arquitetura — Vigia IA 1.0.290+290
+
+**Transmissor Exclusivo:** `AppLaunchModeService` salva o papel e sincroniza `TransmitterExclusivePolicy` (`vigiaia/transmitter_exclusive`) na inicialização e na troca. Android `TransmitterExclusiveMode` persiste o guard em SharedPreferences, encerra outros foreground services e recusa novos leases. UI transmissor usa PopScope + Scaffold sem outros destinos e exige parada segura para mudar modo. `PhoneCameraServer` conta espectadores de vídeo separadamente de requests HTTP; `PhoneCameraBackgroundService` reduz JPEG ocioso e amostra status térmico Android, sem bloquear gravação local. Os modelos e mapas permanecem disponíveis em outros papéis.
+
 
 **Descoberta híbrida LAN:** `LanCameraDiscoveryService` continua ouvindo anúncios UDP ONVIF/Vigia IA; `LanCameraSubnetScanner` consulta `LanScanSupport.range()` pelo canal Android (Wi-Fi `LinkProperties`, `/24` limitado para sub-redes grandes, hotspot por interface WLAN/AP), sonda portas TCP em pool limitado e identifica RTSP por OPTIONS sem autenticação. `LanScanSupport.multicast()` mantém multicast lock durante scan, devolvido em `finally`; o bootstrap restaura Manifest e classe Kotlin. A lista deduplica pelo host e prioriza Vigia IA/ONVIF sobre sondas TCP. Nenhuma porta aberta garante RTSP funcional, que depende de URL/permissão e teste real.
 

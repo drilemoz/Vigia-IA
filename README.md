@@ -1,4 +1,12 @@
-## 1.0.289+289 · Descoberta de rede corrigida
+## 1.0.290+290 · Transmissor Exclusivo e autonomia
+
+- O papel Transmissão salvo é restaurado ao abrir o Vigia IA e sincronizado com o guard nativo antes de criar a UI. Mudar de papel finaliza serviço e gravação com confirmação.
+- O transmissor fica sem barra para mapas/IA/câmeras receptoras e impede inicializações paralelas de monitoramento, rádio, telemetria ESP32, segurança Bike e uso de dados.
+- Servidor MCRP preserva pareamento; usa contador de espectadores reais, com redução de compressão de quadros sem espectadores e sem REC. A câmera permanece aberta para reconexão rápida, portanto não há promessa de consumo zero.
+- Política térmica usa estado do Android e temperatura da bateria; reduz FPS/qualidade em calor elevado, protegendo gravações em eventos críticos.
+- A economia/aquecimento ainda exigem comparação física no Redmi A3.
+
+## 1.0.290+290 · Descoberta de rede corrigida
 
 - Escanear rede executa WS-Discovery ONVIF e anúncio Vigia IA em paralelo a varredura TCP controlada das portas 554, 8554, 10554, 8555, 7447, 80, 8080 e 5000, inspirada no Minha Câmera 1.4.76.
 - Intervalo calculado pelo IPv4/máscara real da rede Wi-Fi via Android. Sub-redes grandes limitadas a 254 endereços próximos; hotspot WLAN/AP aceito e nenhuma sondagem em redes móveis públicas.
@@ -6,7 +14,7 @@
 - Permissão `CHANGE_WIFI_MULTICAST_STATE` e multicast lock temporário; contrato do canal nativo sincronizado com bootstrap Android.
 - Descoberta Vigia IA continua informativa: pareamento MCRP requer QR e nunca transmite chaves.
 
-## 1.0.289+289 · Controle remoto e retomada de câmera
+## 1.0.290+290 · Controle remoto e retomada de câmera
 
 - Ao vivo recorda a última câmera escolhida, inclusive depois de navegar entre abas. Quando ela estiver inacessível, abre a local sem substituir a preferência anterior.
 - Transmissor nativo MCRP expõe comandos autenticados `transmission/stop` e `transmission/start`. O primeiro **pausa a captura**, não encerra a escuta do serviço; é possível reiniciar enquanto o foreground service estiver vivo e o Android permitir.
@@ -14,7 +22,7 @@
 - A temperatura exibida é da bateria fornecida pelo Android, não a do processador. Sem medições em aparelho real não é possível afirmar a redução efetiva em °C ou mAh.
 - Protocolos anteriores sem `X-Transmitting` preservam seus controles existentes sem oferecer botões de transmissão incompatíveis.
 
-## 1.0.289+289 · Rede, câmeras e monitoramento
+## 1.0.290+290 · Rede, câmeras e monitoramento
 
 - Escanear rede Wi-Fi manualmente: Vigia IA identificado sem expor token, ONVIF via WS-Discovery.
 - RTSP: nome/URL/usuário/senha separados, caixa maior, configuração assistida.
@@ -308,7 +316,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.289+289`
+**Versão atual:** `1.0.290+290`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 
@@ -2175,3 +2183,5 @@ O empacotador preserva `.github/workflows/android-apk.yml`, `.gitignore`, script
 - fotos, clipes, eventos, configurações e estatísticas ficam no aparelho;
 - credenciais RTSP persistidas no Android são protegidas pelo Keystore;
 - backups portáteis não incluem credenciais sensíveis.
+
+Detalhes técnicos: `docs/TRANSMITTER_EXCLUSIVE_290.md`.

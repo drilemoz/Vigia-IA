@@ -77,11 +77,11 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.289',
+          version: '1.0.290',
           current: true,
           changes: [
-            'Busca Wi-Fi combina ONVIF, anúncios Vigia IA e varredura IP/RTSP sem internet.',
-            'Resultados distinguem RTSP confirmado de portas TCP/HTTP não verificadas.',
+            'Modo Transmissor Exclusivo bloqueia outros recursos e reduz trabalho ocioso.',
+            'Última escolha restaurada e proteção térmica ampliada com sinais do Android.',
           ],
         ),
         SizedBox(height: 10),

@@ -13,6 +13,8 @@ import java.util.Calendar
 
 class MonitorRecoveryReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
+        // O modo camera isolado nao pode disparar alertas para abrir monitoramento.
+        if (TransmitterExclusiveMode.enabled(context)) return
         val prefs = context.getSharedPreferences("monitor_recovery", Context.MODE_PRIVATE)
         if (!prefs.getBoolean("enabled", false)) return
         if (!scheduleIsActive(prefs.getString("schedule", "") ?: "")) return

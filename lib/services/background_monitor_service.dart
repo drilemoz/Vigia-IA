@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 import '../models/monitor_schedule.dart';
+import 'transmitter_exclusive_policy.dart';
 
 class BackgroundMonitorStatus {
   const BackgroundMonitorStatus({
@@ -59,7 +60,7 @@ class BackgroundMonitorService {
     bool usesCamera = true,
     String? statusText,
   }) async {
-    if (!Platform.isAndroid) return false;
+    if (!Platform.isAndroid || TransmitterExclusivePolicy.enabled) return false;
     final normalizedOwner = owner.trim();
     if (normalizedOwner.isEmpty) return false;
     try {

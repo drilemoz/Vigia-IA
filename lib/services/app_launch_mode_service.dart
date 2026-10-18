@@ -5,6 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'error_log_service.dart';
+import 'transmitter_exclusive_policy.dart';
+import 'esp32_telemetry_service.dart';
+import 'data_usage_service.dart';
+import 'global_audio_service.dart';
+import 'bike_pressure_safety_service.dart';
 
 enum AppLaunchMode {
   normal,
@@ -64,11 +69,26 @@ class AppLaunchModeService extends ChangeNotifier {
       }
     }
     _initialized = true;
+    // Mesmo apos fechar o processo, retoma a ultima escolha e o guard nativo.
+    await TransmitterExclusivePolicy.apply(_mode == AppLaunchMode.transmission);
     return _mode;
   }
 
   Future<void> save(AppLaunchMode mode) async {
     await initialize();
+    final previous = _mode;
+    await TransmitterExclusivePolicy.apply(mode == AppLaunchMode.transmission);
+    if (previous == AppLaunchMode.transmission &&
+        mode != AppLaunchMode.transmission) {
+      Esp32TelemetryService.instance.resumeAfterTransmitter();
+      DataUsageService.instance.resumeAfterTransmitter();
+    }
+    if (mode == AppLaunchMode.transmission) {
+      Esp32TelemetryService.instance.suspendForTransmitter();
+      BikePressureSafetyService.instance.suspendForTransmitter();
+      DataUsageService.instance.suspendForTransmitter();
+      await GlobalAudioService.instance.stop();
+    }
     _mode = mode;
     final file = _file!;
     final temporary = File('${file.path}.tmp');

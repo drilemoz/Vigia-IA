@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'transmitter_exclusive_policy.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -87,9 +89,29 @@ class Esp32TelemetryService extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  /// Desliga consultas programadas ao entrar no modo Transmissor Exclusivo.
+  void suspendForTransmitter() {
+    _foreground = false;
+    for (final timer in _timers.values) {
+      timer.cancel();
+    }
+    _timers.clear();
+    _client?.close(force: true);
+    _client = null;
+  }
+
+  /// Restaura polling apenas apos o usuario sair do papel Transmissao.
+  void resumeAfterTransmitter() {
+    if (!_initialized || TransmitterExclusivePolicy.enabled) return;
+    _client ??= HttpClient()..connectionTimeout = const Duration(seconds: 2);
+    _foreground = true;
+    _syncModules(forceImmediate: true);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final foreground = state == AppLifecycleState.resumed;
+    final foreground = state == AppLifecycleState.resumed &&
+        !TransmitterExclusivePolicy.enabled;
     if (_foreground == foreground) return;
     _foreground = foreground;
     if (foreground) {
@@ -120,7 +142,7 @@ class Esp32TelemetryService extends ChangeNotifier with WidgetsBindingObserver {
   void _onRegistryChanged() => _syncModules(forceImmediate: true);
 
   void _syncModules({bool forceImmediate = false}) {
-    if (!_initialized) return;
+    if (!_initialized || TransmitterExclusivePolicy.enabled) return;
     final modules = _registry.modules;
     final ids = modules.map((item) => item.id).toSet();
 
@@ -158,7 +180,7 @@ class Esp32TelemetryService extends ChangeNotifier with WidgetsBindingObserver {
 
   void _schedule(Esp32Module module, Duration delay) {
     _timers.remove(module.id)?.cancel();
-    if (!_foreground || !module.enabled) return;
+    if (!_foreground || !module.enabled || TransmitterExclusivePolicy.enabled) return;
     _timers[module.id] = Timer(
       delay,
       () {
@@ -172,7 +194,7 @@ class Esp32TelemetryService extends ChangeNotifier with WidgetsBindingObserver {
     Esp32Module module, {
     required bool scheduleAfter,
   }) async {
-    if (!_foreground || !module.enabled) return;
+    if (!_foreground || !module.enabled || TransmitterExclusivePolicy.enabled) return;
     if (_inFlight.contains(module.id)) {
       if (scheduleAfter) _schedule(module, const Duration(milliseconds: 500));
       return;

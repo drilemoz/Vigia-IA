@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../widgets/main_navigation_bar.dart';
-import '../widgets/main_navigation_routes.dart';
 import '../services/mcrp_client.dart';
 import '../services/native_camera_transmitter_service.dart';
 import '../services/native_platform_service.dart';
+import '../services/app_launch_mode_service.dart';
 import 'launch_mode_screen.dart';
 
 /// Transmissor Kotlin/MCRP v1, sem prévia Flutter ou câmera duplicada.
@@ -296,14 +295,51 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     if (action != null && mounted && action != selected) await _command(action);
   }
 
-  void _changeMode() {
-    // Nao interromper o servico nem descadastrar receptores ao navegar.
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(
-        builder: (_) => const LaunchModeScreen(manualReview: false),
+  Future<void> _changeMode() async {
+    if (_busy || _status?.busy == true) return;
+    final recording = _status?.recording == true || _details['x-recording'] == '1';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Sair do modo Transmissão?'),
+        content: Text(recording
+            ? 'A gravação será finalizada antes de liberar os outros módulos. Deseja continuar?'
+            : 'O serviço de câmera será encerrado antes de liberar IA, mapas e outros módulos.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Encerrar e sair')),
+        ],
       ),
-      (_) => false,
     );
+    if (confirmed != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await NativeCameraTransmitterService.stop();
+      // O servico finaliza o MP4 de forma assincrona: aguardar a liberacao real.
+      var released = false;
+      for (var attempt = 0; attempt < 30; attempt++) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        final status = await NativeCameraTransmitterService.status();
+        if (!status.running && !status.starting && !status.releasing &&
+            status.url == null) {
+          released = true;
+          break;
+        }
+      }
+      if (!released) throw StateError('A camera ainda esta liberando recursos.');
+      await AppLaunchModeService.instance.save(AppLaunchMode.normal);
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const LaunchModeScreen()),
+        (_) => false,
+      );
+    } catch (error) {
+      if (mounted) setState(() => _error = 'Nao foi possivel sair: $error');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Widget _controlTile({required String label, required IconData icon,
@@ -417,12 +453,14 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     final scheme = Theme.of(context).colorScheme;
     final model = _details['x-device-model'];
     final temperature = int.tryParse(_details['x-battery-temp-tenths'] ?? '');
+    final thermal = int.tryParse(_details['x-thermal-status'] ?? '');
+    const thermalLabels = <String>['Normal', 'Leve', 'Moderado',
+      'Alto', 'Crítico', 'Emergência', 'Desligamento'];
     final camera = _details['x-camera-facing'] == '1' ? 'Frontal' : 'Traseira';
     final recordSeconds = int.tryParse(_details['x-recording-seconds'] ?? '');
-    return AdaptiveMainScaffold(
-      currentIndex: 3,
-      onDestinationSelected: (index) =>
-          navigateToMainDestination(context, index, currentIndex: -1),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Vigia IA · Transmissão',
           maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -485,6 +523,9 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
                   if (temperature != null)
                     _metric(Icons.thermostat_outlined,
                         '${(temperature / 10).toStringAsFixed(1)} °C'),
+                  if (thermal != null && thermal >= 0 && thermal < thermalLabels.length)
+                    _metric(Icons.device_thermostat_rounded,
+                        'Térmico: ${thermalLabels[thermal]}'),
                   if (_details['x-fps-measured'] != null)
                     _metric(Icons.speed_rounded, '${_details['x-fps-measured']} FPS'),
                   if (_details['x-quality-profile'] != null)
@@ -528,6 +569,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
             style: Theme.of(context).textTheme.bodySmall,
           )),
         ],
+      ),
       ),
     );
   }

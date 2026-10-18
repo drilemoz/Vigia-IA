@@ -18,6 +18,7 @@ import '../services/global_audio_service.dart';
 import '../services/data_usage_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/startup_guard.dart';
+import '../services/transmitter_exclusive_policy.dart';
 import '../widgets/update_news_host.dart';
 
 class VigiaIaApp extends StatelessWidget {
@@ -106,7 +107,7 @@ class _StartupGateState extends State<_StartupGate> {
       _launchModeLoaded = true;
     });
 
-    if (completed) {
+    if (completed && launchMode != AppLaunchMode.transmission) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         unawaited(_initializeOptionalServices());
@@ -115,8 +116,12 @@ class _StartupGateState extends State<_StartupGate> {
   }
 
   Future<void> _initializeOptionalServices() async {
+    if (TransmitterExclusivePolicy.enabled ||
+        _launchMode == AppLaunchMode.transmission) return;
     await Future.wait<void>(<Future<void>>[
-      if (_launchMode != AppLaunchMode.normal && _launchMode != AppLaunchMode.bike) ...[
+      if (_launchMode != AppLaunchMode.normal &&
+        _launchMode != AppLaunchMode.bike &&
+        _launchMode != AppLaunchMode.transmission) ...[
         _initializeOptionalService(
           'ESP32',
           Esp32TelemetryService.instance.initialize,
@@ -142,7 +147,10 @@ class _StartupGateState extends State<_StartupGate> {
     Future<void> Function() initialize,
   ) =>
       _startupGuard.runOptional(
-        initialize,
+        () async {
+          if (TransmitterExclusivePolicy.enabled) return;
+          await initialize();
+        },
         timeout: _optionalStartupTimeout,
         onError: (error, stackTrace) =>
             _traceStartupIssue(name, error, stackTrace),
@@ -179,6 +187,7 @@ class _StartupGateState extends State<_StartupGate> {
       return _PermissionReminderHost(
         checkCameraAndNetwork: launchMode == AppLaunchMode.monitor ||
             launchMode == AppLaunchMode.transmission || _resumeMonitoring,
+        transmitterExclusive: launchMode == AppLaunchMode.transmission,
         child: destination,
       );
     }
@@ -192,10 +201,12 @@ class _PermissionReminderHost extends StatefulWidget {
   const _PermissionReminderHost({
     required this.child,
     required this.checkCameraAndNetwork,
+    required this.transmitterExclusive,
   });
 
   final Widget child;
   final bool checkCameraAndNetwork;
+  final bool transmitterExclusive;
 
   @override
   State<_PermissionReminderHost> createState() => _PermissionReminderHostState();
@@ -250,8 +261,7 @@ class _PermissionReminderHostState extends State<_PermissionReminderHost> {
   }
 
   @override
-  Widget build(BuildContext context) => UpdateNewsHost(
-        onHandled: _checkPermissions,
-        child: widget.child,
-      );
+  Widget build(BuildContext context) => widget.transmitterExclusive
+      ? widget.child
+      : UpdateNewsHost(onHandled: _checkPermissions, child: widget.child);
 }

@@ -133,6 +133,10 @@ class RadioPlaybackService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        if (TransmitterExclusiveMode.enabled(this)) {
+            stopSelf()
+            return
+        }
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(channelId, "Rádio online", NotificationManager.IMPORTANCE_LOW),
         )
@@ -148,6 +152,10 @@ class RadioPlaybackService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (TransmitterExclusiveMode.enabled(this)) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         if (intent?.action == actionStop || intent == null) {
             stopSelf()
             return START_NOT_STICKY

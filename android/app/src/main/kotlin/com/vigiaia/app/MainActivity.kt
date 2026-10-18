@@ -153,10 +153,26 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "vigiaia/transmitter_exclusive")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "setExclusive" -> {
+                        val enabled = call.argument<Boolean>("enabled") == true
+                        TransmitterExclusiveMode.apply(this, enabled)
+                        result.success(null)
+                    }
+                    "isExclusive" -> result.success(TransmitterExclusiveMode.enabled(this))
+                    else -> result.notImplemented()
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, backgroundChannelName)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "acquire", "start" -> {
+                        if (TransmitterExclusiveMode.enabled(this)) {
+                            result.success(false)
+                            return@setMethodCallHandler
+                        }
                         val usesCamera = call.argument<Boolean>("usesCamera") ?: true
                         if (usesCamera && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                             result.success(false)
@@ -263,7 +279,8 @@ class MainActivity : FlutterActivity() {
                     "stop" -> {
                         try {
                             val service = com.minhacamera.PhoneCameraBackgroundService
-                            if (service.running || service.starting || service.releasing) {
+                            // streamUrl continua presente em pausa remota, mesmo com running=false.
+                            if (service.running || service.starting || service.releasing || service.streamUrl != null) {
                                 service.command(this, service.ACTION_STOP)
                             }
                             result.success(true)
@@ -290,6 +307,12 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "vigiaia/radio")
             .setMethodCallHandler { call, result ->
+                // Bloqueia na ponte, antes mesmo de criar o servico e seu callback de rede.
+                if (TransmitterExclusiveMode.enabled(this) &&
+                    call.method != "status" && call.method != "stop") {
+                    result.success(false)
+                    return@setMethodCallHandler
+                }
                 when (call.method) {
                     "play" -> {
                         val url = call.argument<String>("url").orEmpty()

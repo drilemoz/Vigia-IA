@@ -28,14 +28,15 @@ internal object PhoneEcoPolicy {
      */
     fun streamIntervalMs(targetFps: Int, ecoEnabled: Boolean, state: PhoneHeatState): Long =
         maxOf(1000L / targetFps.coerceIn(1, 30), when {
-            state == PhoneHeatState.HOT -> 300L
+            state == PhoneHeatState.HOT -> 500L
+            state == PhoneHeatState.WARM -> 200L
             ecoEnabled -> 200L
-            state == PhoneHeatState.WARM -> 66L
             else -> 0L
         })
 
     fun jpegQuality(ecoEnabled: Boolean, state: PhoneHeatState): Int = when {
-        state == PhoneHeatState.HOT -> 45
+        state == PhoneHeatState.HOT -> 40
+        state == PhoneHeatState.WARM -> 50
         ecoEnabled -> 50
         else -> 72
     }

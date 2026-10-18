@@ -1,3 +1,12 @@
+## 1.0.290+290: isolamento do transmissor e proteção térmica (2026-10-18)
+
+- Persistência do último modo na inicialização com sincronização de estado ao Android antes de inicializar módulos opcionais.
+- Modo transmissor bloqueia navegação para outras telas, exige saída confirmada com encerramento ordenado da captura e REC, e recusa novos leases de monitoramento e rádio enquanto exclusivo.
+- Ao trocar papel no mesmo processo, cancela timers da telemetria ESP32/Bike/uso de dados e interrompe áudio em curso. Bootstrap Android recria os mesmos guardas e motor de captura.
+- Sem espectadores, reduz compressões/cópias NV21 mantendo quadros ocasionais para conexões futuras; gravação local não recebe a cadência ociosa.
+- Consulta status térmico Android além de temperatura da bateria e reduz FPS/qualidade sob aquecimento; alerta e interrompe com liberação segura em emergência térmica.
+- Testes reais de bateria/temperatura e compilação Flutter/Android pendentes.
+
 ## 1.0.289+289: varredura Wi-Fi híbrida para câmeras (2026-10-18)
 
 - Scanner anterior só esperava broadcast Vigia IA e WS-Discovery ONVIF. Acrescentada busca TCP por subnet Wi-Fi a partir de `LinkProperties`, como no Minha Câmera 1.4.76.

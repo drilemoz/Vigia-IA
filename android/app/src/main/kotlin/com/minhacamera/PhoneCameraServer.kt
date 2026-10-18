@@ -51,7 +51,8 @@ class PhoneCameraServer(
     private val torchMode: (() -> String)? = null,
     private val appVersion: (() -> String)? = null,
     private val transmissionActive: (() -> Boolean)? = null,
-    private val changeTransmission: ((Boolean) -> Boolean)? = null
+    private val changeTransmission: ((Boolean) -> Boolean)? = null,
+    private val thermalStatus: (() -> Int)? = null
 ) {
     init { require(token.matches(Regex("[0-9a-f]{32}"))) }
     // A porta e o token permanecem os mesmos na troca entre Activity e Service.
@@ -63,6 +64,9 @@ class PhoneCameraServer(
     val url: String = "http://${address.hostAddress}:${server.localPort}/live/$token"
     private val peers = ConcurrentHashMap.newKeySet<Socket>()
     private val peerCount = AtomicInteger()
+    // Apenas conexoes de VIDEO; requests /status e /control nao sao espectadores.
+    private val videoViewers = AtomicInteger()
+    fun activeVideoViewers(): Int = videoViewers.get().coerceAtLeast(0)
     private val frameLock = java.lang.Object()
     private var sequence = 0L
     private var latest: ByteArray? = null
@@ -285,6 +289,9 @@ class PhoneCameraServer(
                         latestBattery?.temperatureTenthsC?.let { append("X-Battery-Temp-Tenths: $it\r\n") }
                         latestBattery?.charging?.let { append("X-Battery-Charging: ${if (it) 1 else 0}\r\n") }
                     }
+                    thermalStatus?.invoke()?.takeIf { it >= 0 }?.let {
+                        append("X-Thermal-Status: $it\r\n")
+                    }
                     append("X-Transmitting: ${if (transmissionActive?.invoke() != false) 1 else 0}\r\n")
                     append("X-Transmission-Seconds: ${transmissionSeconds?.invoke() ?: 0}\r\n")
                     recordingSeconds?.let { append("X-Recording-Seconds: ${it()}\r\n") }
@@ -379,6 +386,8 @@ class PhoneCameraServer(
                 "X-Server-Elapsed-Ms: ${SystemClock.elapsedRealtime()}\r\n" +
                 "Connection: close\r\n\r\n").toByteArray(Charsets.US_ASCII))
             var last = 0L
+            videoViewers.incrementAndGet()
+            try {
             while (running && transmissionActive?.invoke() != false && !peer.isClosed) {
                 val next = synchronized(frameLock) {
                     if (running && last == sequence) frameLock.wait(1500)
@@ -407,6 +416,7 @@ class PhoneCameraServer(
                 out.write("\r\n".toByteArray(Charsets.US_ASCII))
                 out.flush()
             }
+            } finally { videoViewers.decrementAndGet() }
         } catch (_: Exception) {
             // Desconexão normal do visualizador; não registrar URL/token nos logs.
         } finally {
@@ -475,6 +485,8 @@ class PhoneCameraServer(
         // Fluxo H.264 Annex-B contínuo; LibVLC usa demux=h264 no cliente.
         peer.getOutputStream().write(("HTTP/1.1 200 OK\r\nContent-Type: video/h264\r\n" +
             "Cache-Control: no-store\r\nConnection: close\r\n\r\n").toByteArray(Charsets.US_ASCII))
+        videoViewers.incrementAndGet()
+        try {
         requestKeyframe?.invoke()
         var last = 0L
         val out = peer.getOutputStream()
@@ -489,6 +501,7 @@ class PhoneCameraServer(
             out.write(packet)
             out.flush()
         }
+        } finally { videoViewers.decrementAndGet() }
     }
 
     private fun readLine(input: BufferedInputStream): String? {

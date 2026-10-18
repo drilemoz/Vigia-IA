@@ -1,4 +1,7 @@
-# Validação Vigia IA 1.0.289+289
+# Validação Vigia IA 1.0.290+290
+
+- Transmissor Exclusivo: auditar guard Flutter/Kotlin, reboot com último modo salvo, impedir outro FGS e dados/ESP32, validar callbacks de vídeo, contador de espectadores, gravação e proteção térmica. APK/FPS/temperatura/energia no Redmi A3 pendentes até testes reais.
+
 
 - Scanner Wi-Fi: comparado com o Minha Câmera 1.4.76 (NetUtil.scanRange, WsDiscovery, RtspProbe e RtspServiceDetector). Ponte Android `LanScanSupport.kt` compilada isoladamente com stubs Android. `python3 -m unittest discover -s tool -p test_*.py -q`: **223 testes passaram**, com 8 novos contratos de busca híbrida. `tool/verify_project.sh`: **exit code 0**. `check_version_sync.py` aprovado, `tool/android/MainActivity.kt` e `LanScanSupport.kt` sincronizados com as fontes Android. Testes reais no Android e `flutter analyze`/`flutter test` dependem do SDK e de dispositivos. Nenhuma varredura física de rede foi executada neste ambiente.
 

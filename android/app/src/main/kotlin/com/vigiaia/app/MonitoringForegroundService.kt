@@ -141,6 +141,10 @@ class MonitoringForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (TransmitterExclusiveMode.enabled(this)) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         isRunning = true
         if (intent == null) {
             // Reinício START_STICKY após o processo Flutter ter sido removido.
