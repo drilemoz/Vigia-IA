@@ -77,7 +77,7 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.286',
+          version: '1.0.287',
           current: true,
           changes: [
             'Planejamento de rotas mais estável ao utilizar GPS e editar preferências.',

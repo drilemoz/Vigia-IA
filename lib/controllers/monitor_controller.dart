@@ -215,12 +215,13 @@ class MonitorController extends ChangeNotifier {
   bool get processing => _processing;
   bool get detectionDelayed => (_lastEndToEndMs ?? 0) > 5000;
   String get lastAlertDecision => _lastAlertDecision;
-  bool get voiceEnabled => _speech.enabled;
-  bool get voiceLanguageInstalled => _speech.languageInstalled;
-  bool get motionOnly => _settings.motionOnly;
-  bool get motionActive => _motionActive;
-  bool get cameraMotion => _cameraMotion;
-  double get motionScore => _motionScore;
+  bool _partialPersonHintsEnabled = false;
+  bool get partialPersonHintsEnabled => _partialPersonHintsEnabled;
+  void setPartialPersonHintsEnabled(bool enabled) {
+    if (_partialPersonHintsEnabled == enabled) return;
+    _partialPersonHintsEnabled = enabled;
+    notifyListeners();
+  }
   Set<String> get alertLabels => Set<String>.unmodifiable(_alertLabels);
   SmartAlertRules get smartAlertRules => _smartAlertRules;
   List<MonitoringZoneProfile> get monitoringZones =>
@@ -532,7 +533,6 @@ class MonitorController extends ChangeNotifier {
       _notify();
     }
   }
-
   void _startScheduleTimer() {
     _scheduleTimer?.cancel();
     _backgroundHealthTimer?.cancel();
@@ -1080,7 +1080,7 @@ class MonitorController extends ChangeNotifier {
               )
               .toList(growable: false);
       final syntheticPeople = _detectionFilter.confirmPersonHints(
-        _alertLabels.contains('person')
+        _partialPersonHintsEnabled && _alertLabels.contains('person')
             ? PartialPersonDetectionService.infer(frame, motionResult, selectedGlobal)
             : const <Detection>[],
         now: now,

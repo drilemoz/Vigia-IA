@@ -2,6 +2,8 @@ package com.minhacamera
 
 import android.os.SystemClock
 import java.io.BufferedInputStream
+import java.net.DatagramPacket
+import java.net.DatagramSocket
 import java.net.Inet4Address
 import java.net.ServerSocket
 import java.net.Socket
@@ -68,8 +70,41 @@ class PhoneCameraServer(
     private var latestAtMs = 0L
     private var latestBattery: PhoneBatteryReading? = null
     @Volatile private var running = true
+    @Volatile private var discoverySocket: DatagramSocket? = null
 
     fun start() {
+        // Identidade publica sem token. QR continua obrigatorio para conectar.
+        Thread({
+            try {
+                DatagramSocket(null).use { socket ->
+                    socket.reuseAddress = true
+                    socket.bind(java.net.InetSocketAddress("0.0.0.0", 8766))
+                    socket.soTimeout = 1000
+                    discoverySocket = socket
+                    val packet = DatagramPacket(ByteArray(100), 100)
+                    while (running) {
+                        try { socket.receive(packet) } catch (_: java.net.SocketTimeoutException) { continue }
+                        if (!running) break
+                        val request = String(packet.data, packet.offset, packet.length, Charsets.US_ASCII)
+                        val remote = (packet.address as? Inet4Address)?.address
+                        val first = remote?.get(0)?.toInt()?.and(255) ?: -1
+                        val second = remote?.get(1)?.toInt()?.and(255) ?: -1
+                        val localPeer = first == 10 || (first == 172 && second in 16..31) ||
+                            (first == 192 && second == 168) ||
+                            (first == 169 && second == 254) ||
+                            (first == 100 && second in 64..127)
+                        if (request == "VIGIAIA_DISCOVER_V1" && localPeer) {
+                            val model = (deviceModel?.invoke() ?: "Android")
+                                .replace(Regex("[^A-Za-z0-9 _.-]"), "").take(48)
+                            val response = "VIGIAIA_HERE_V1|$model".toByteArray(Charsets.UTF_8)
+                            socket.send(DatagramPacket(response, response.size, packet.address, packet.port))
+                        }
+                        packet.length = packet.data.size
+                    }
+                }
+            } catch (_: Exception) { /* Descoberta opcional; video segue ativo. */ }
+            finally { discoverySocket = null }
+        }, "vigia-discovery").apply { isDaemon = true; start() }
         Thread({
             while (running) {
                 val peer = try { server.accept() } catch (_: SocketException) { break }
@@ -447,6 +482,7 @@ class PhoneCameraServer(
 
     fun stop() {
         running = false
+        try { discoverySocket?.close() } catch (_: Exception) { }
         try { server.close() } catch (_: Exception) { }
         synchronized(frameLock) { latest = null; latestBattery = null; frameLock.notifyAll() }
         synchronized(codecLock) { latestAvc = null; codecLock.notifyAll() }

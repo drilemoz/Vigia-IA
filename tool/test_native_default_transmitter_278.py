@@ -32,7 +32,7 @@ class NativeTransmitterDefault278(unittest.TestCase):
 
     def test_registration_names_are_consistent(self):
         monitor=read('lib/screens/monitor_connect_screen.dart')
-        multicam=read('lib/screens/multi_camera_screen.dart')
+        multicam=read('lib/screens/multi_camera_screen.dart')+read('lib/screens/multi_camera_screen_editor.dart')
         self.assertIn("displayName: _pairedCameraName ?? 'Câmera remota'",monitor)
         self.assertIn("_pairedCameraName = pairing.name",monitor)
         self.assertIn("'Câmera remota'",multicam)

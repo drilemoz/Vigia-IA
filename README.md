@@ -1,3 +1,10 @@
+## 1.0.287+287 · Rede, câmeras e monitoramento
+
+- Escanear rede Wi-Fi manualmente: Vigia IA identificado sem expor token, ONVIF via WS-Discovery.
+- RTSP: nome/URL/usuário/senha separados, caixa maior, configuração assistida.
+- Monitor em tela cheia com rotação horizontal, contraste, atalhos Foto/REC e painel remoto MCRP.
+- Detector auxiliar Possível pessoa fica opt-in; modelo IA principal permanece.
+
 ## 1.0.286+286 · Estabilidade do Planejamento (build 239)
 
 - Corrigidos os três avisos `curly_braces_in_flow_control_structures` apontados pelo Flutter Analyzer em `trip_planning_screen.dart` (GPS, ajuste de ritmo e exclusão de viagem).
@@ -285,7 +292,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.286+286`
+**Versão atual:** `1.0.287+287`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

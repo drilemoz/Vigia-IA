@@ -1,3 +1,12 @@
+## 1.0.287+287: descobrimento de rede, tela cheia e IA auxiliar (2026-10-18)
+
+- Central Câmeras agora oferece Escanear rede Wi-Fi sob demanda, com prazo curto e respostas UDP para transmissores Vigia IA e WS-Discovery ONVIF para câmeras compatíveis.
+- Transmissor Kotlin anuncia somente nome/modelo e IP na busca: controle exige QR original e chave privada intacta, inclusive em rede local.
+- Cadastro RTSP em diálogo responsivo com nome, URL, usuário padrão editável admin e senha oculta. Credenciais entram na URL RTSP protegida pelo armazenamento já existente; descoberta ONVIF não inventa caminho do stream.
+- Tela cheia do Ao vivo libera orientação paisagem e restaura retrato ao sair; HUD sobre vídeo com contraste alto e atalhos Foto/REC e acesso ao painel MCRP sem interromper prévia/IA.
+- Telemetria identifica modelo do aparelho remoto quando disponível. Detecção indireta 'Possível pessoa' desligada por padrão e opt-in experimental no menu, sem afetar objetos classificados pelo modelo principal.
+- Build Flutter e teste físico de WS-Discovery, rotação e reprodução RTSP pendentes do GitHub Actions e aparelhos reais.
+
 ## 1.0.286+286: correção de análise estática do APK 239 (2026-10-18)
 
 - Build 239: `tool/verify_project.sh` aprovado, com 201 testes Python; `flutter analyze --fatal-infos --fatal-warnings` interrompido por três `curly_braces_in_flow_control_structures` em `trip_planning_screen.dart`.

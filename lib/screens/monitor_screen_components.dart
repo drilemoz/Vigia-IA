@@ -72,6 +72,7 @@ class _CameraPaneLabel extends StatelessWidget {
 class _CompactMonitorTopHud extends StatelessWidget {
   const _CompactMonitorTopHud({
     required this.sourceStatus,
+    this.deviceModel,
     required this.detectionCount,
     required this.bikeSnapshot,
     required this.approach,
@@ -91,6 +92,7 @@ class _CompactMonitorTopHud extends StatelessWidget {
   });
 
   final VideoSourceStatus sourceStatus;
+  final String? deviceModel;
   final int detectionCount;
   final BikeSensorSnapshot? bikeSnapshot;
   final BikeApproachStatus approach;
@@ -111,12 +113,16 @@ class _CompactMonitorTopHud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streaming = sourceStatus.state == VideoSourceState.streaming;
-    final title = sourceStatus.message ?? (streaming ? 'Ao vivo' : 'Monitor');
+    final detectedModel = deviceModel?.trim() ?? '';
+    final title = detectedModel.isNotEmpty && streaming
+        ? '$detectedModel · Ao vivo'
+        : (sourceStatus.message ?? (streaming ? 'Ao vivo' : 'Monitor'));
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 520;
         return Material(
-          color: Colors.black.withValues(alpha: 0.50),
+          textStyle: const TextStyle(color: Colors.white),
+          color: Colors.black.withValues(alpha: 0.78),
           borderRadius: BorderRadius.circular(18),
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -294,7 +300,10 @@ class _DeviceStatusStrip extends StatelessWidget {
               remoteStatus?.isStale() != true
         : sourceStatus.state == VideoSourceState.streaming;
     final transmitterLabel = switch (sourceType) {
-      VideoSourceType.remotePhone => 'Transmissor',
+      VideoSourceType.remotePhone =>
+        (remoteStatus?.device?.deviceModel?.trim().isNotEmpty == true)
+            ? remoteStatus!.device!.deviceModel!.trim()
+            : 'Transmissor',
       VideoSourceType.localCamera => 'Local',
       VideoSourceType.rtsp => 'Câmera RTSP',
       VideoSourceType.esp32 => 'ESP32',

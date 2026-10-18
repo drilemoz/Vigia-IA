@@ -106,6 +106,7 @@ class _MonitorScreenState extends State<MonitorScreen>
   bool _fullscreen = false;
   bool _fullscreenChanging = false;
   bool _fullscreenControlsVisible = true;
+  bool _fullscreenRemoteCommandBusy = false;
   bool _fillBeforeFullscreen = false;
   Timer? _fullscreenControlsTimer;
   _AiDiagnosticRun? _aiDiagnostic;

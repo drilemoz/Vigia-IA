@@ -7,6 +7,7 @@ class _CentralHeader extends StatelessWidget {
     required this.disabled,
     required this.lastRefresh,
     required this.onScanPhone,
+    required this.onScanNetwork,
     required this.onAddPhone,
     required this.onAddRtsp,
     required this.onManageEsp32,
@@ -17,6 +18,7 @@ class _CentralHeader extends StatelessWidget {
   final int disabled;
   final DateTime? lastRefresh;
   final VoidCallback onScanPhone;
+  final VoidCallback onScanNetwork;
   final VoidCallback onAddPhone;
   final VoidCallback onAddRtsp;
   final VoidCallback onManageEsp32;
@@ -122,6 +124,12 @@ class _CentralHeader extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: onScanNetwork,
+              icon: const Icon(Icons.radar_rounded),
+              label: const Text('Escanear rede Wi-Fi'),
             ),
           ],
         ),

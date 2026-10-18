@@ -1,6 +1,13 @@
 part of 'monitor_controller.dart';
 
 extension MonitorControllerStateSupport on MonitorController {
+  bool get voiceEnabled => _speech.enabled;
+  bool get voiceLanguageInstalled => _speech.languageInstalled;
+  bool get motionOnly => _settings.motionOnly;
+  bool get motionActive => _motionActive;
+  bool get cameraMotion => _cameraMotion;
+  double get motionScore => _motionScore;
+
   MonitorAiPipStatus get aiPipStatus {
     final errorText = _error?.trim();
     final normalizedError = errorText?.toLowerCase() ?? '';

@@ -543,6 +543,7 @@ extension _MonitorMulticamera on _MonitorScreenState {
               top: 6 + insets.top,
               child: _CompactMonitorTopHud(
                 sourceStatus: status,
+                deviceModel: _controller.remotePhoneStatus?.device?.deviceModel,
                 detectionCount: _currentDetectionCount,
                 bikeSnapshot: bikeSnapshot,
                 approach: approach,
@@ -910,6 +911,7 @@ extension _MonitorMulticamera on _MonitorScreenState {
               top: 6 + insets.top,
               child: _CompactMonitorTopHud(
                 sourceStatus: status,
+                deviceModel: remoteStatus?.device?.deviceModel,
                 detectionCount: _currentDetectionCount,
                 bikeSnapshot: bikeSnapshot,
                 approach: approach,

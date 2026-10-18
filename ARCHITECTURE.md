@@ -1,4 +1,6 @@
-# Arquitetura — Vigia IA 1.0.286+286
+# Arquitetura — Vigia IA 1.0.287+287
+
+Descoberta LAN: WS-Discovery multicast temporário e anúncio UDP sem chave pelo transmissor Kotlin. RTSP mantém URL protegida pelo CameraRegistryService. Tela cheia libera orientação apenas na visualização ativa; IA auxiliar experimental opt-in.
 
 **Fluxo Planejamento:** tela inicial mostra biblioteca e CTA Nova rota, assistente `showDialog` (seleção de pontos e preferências), seguida de cálculo via `MapCyclingRouteService` e painel de geometria. `LocationTrackingService.ensureAvailable` e `currentPosition` são chamados apenas ao tocar Meu local, sem assinatura `positionStream`, sem serviço permanente.
 

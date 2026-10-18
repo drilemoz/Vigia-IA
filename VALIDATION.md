@@ -1,4 +1,13 @@
-# Validação Vigia IA 1.0.286+286
+# Validação Vigia IA 1.0.287+287
+
+- `tool/verify_project.sh`: aprovado, código de saída 0, incluindo limites de tamanho dos arquivos e testes preventivos históricos atualizados para os módulos extraídos.
+- `python3 -m unittest discover -s tool -p 'test_*.py' -q`: **209 testes aprovados**, incluindo descoberta segura, pareamento, RTSP, orientação e IA auxiliar.
+- `python3 tool/check_version_sync.py`, `python3 tool/check_import_targets.py`, `python3 tool/check_ci_contract.py`: aprovados.
+- Compilação Kotlin isolada de `PhoneCameraServer.kt` com stubs de Android/SystemClock/PhoneBatteryReading: aprovada, não substitui o build Android real.
+- Testes Flutter (`test/lan_camera_discovery_service_test.dart`), análise estática Dart e uso físico do scanner em diferentes roteadores/hotspots: **pendentes** até CI/aparelho.
+- RTSP ONVIF anuncia serviço HTTP, não confirma stream nem credenciais; exige caminho RTSP válido. Transmissor UDP nunca distribui token de controle.
+
+## Validação histórica Vigia IA 1.0.286+286
 
 - Workflow APK 239 da 1.0.285: **201 testes Python aprovados** e `tool/verify_project.sh` aprovado. Falha em `flutter analyze --fatal-infos --fatal-warnings` devido a **3 lints** `curly_braces_in_flow_control_structures` em `lib/screens/trip_planning_screen.dart:251,505,579`.
 - Corrigidos os três `if` com blocos explícitos; sem mudança de semântica em GPS, atualização de preferências ou exclusão de rota.

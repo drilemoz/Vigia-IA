@@ -16,7 +16,8 @@ extension _MonitorFullscreen on _MonitorScreenState {
     });
     try {
       if (entering) {
-        // Tela inteira preserva a política global: o Monitor continua em retrato.
+        // Ao vivo em tela inteira acompanha a rotacao do aparelho.
+        await AppOrientationService.allowTransmissionRotation();
         if (mounted) await SystemUiService.immersive();
         _revealFullscreenControls();
       } else {
@@ -36,6 +37,66 @@ extension _MonitorFullscreen on _MonitorScreenState {
     _fullscreenControlsTimer = Timer(const Duration(seconds: 4), () {
       if (mounted && _fullscreen) _updateFullscreenState(() => _fullscreenControlsVisible = false);
     });
+  }
+
+  Future<void> _showFullscreenRemoteControls() async {
+    final url = _activeMcrpLiveUrl;
+    if (url == null || !mounted) return;
+    _fullscreenControlsTimer?.cancel();
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: FractionallySizedBox(
+          heightFactor: 0.72,
+          child: ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              Text('Controles do transmissor',
+                  style: Theme.of(sheetContext).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              McrpLiveRemoteControls(liveUrl: url),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (mounted && _fullscreen) _revealFullscreenControls();
+  }
+
+  Future<void> _fullscreenQuickCommand(String action) async {
+    final url = _activeMcrpLiveUrl;
+    if (url == null || !mounted || _fullscreenRemoteCommandBusy) return;
+    _fullscreenRemoteCommandBusy = true;
+    final client = McrpClient(McrpAddress.parse(url));
+    try {
+      var command = action;
+      if (action == 'record/toggle') {
+        final state = await client.status();
+        command = state['x-recording'] == '1' ? 'record/stop' : 'record/start';
+      }
+      await client.command(command);
+      if (!mounted) return;
+      _revealFullscreenControls();
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(
+          command == 'photo' ? 'Foto solicitada ao transmissor.'
+          : command == 'record/start' ? 'Gravação iniciada no transmissor.'
+          : 'Gravação encerrada no transmissor.',
+        )));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Comando remoto não confirmado. Verifique a conexão.'),
+        ));
+      }
+    } finally {
+      client.close();
+      _fullscreenRemoteCommandBusy = false;
+    }
   }
 
   Future<void> _changeMode() async {
@@ -102,6 +163,12 @@ extension _MonitorFullscreen on _MonitorScreenState {
           );
           return;
         }
+        if (value == 'aux_person') {
+          _controller.setPartialPersonHintsEnabled(
+            !_controller.partialPersonHintsEnabled,
+          );
+          return;
+        }
         if (value == 'mcrp') {
           unawaited(_showMcrpRemoteSheet());
           return;
@@ -132,6 +199,11 @@ extension _MonitorFullscreen on _MonitorScreenState {
             value: 'map_auto',
             child: Text('Mapa automático'),
           ),
+        CheckedPopupMenuItem<String>(
+          value: 'aux_person',
+          checked: _controller.partialPersonHintsEnabled,
+          child: const Text('Possivel pessoa (experimental)'),
+        ),
         const PopupMenuDivider(),
         if (_activeMcrpLiveUrl != null)
           const PopupMenuItem(value: 'mcrp', child: Text('Controle remoto da câmera')),
@@ -156,7 +228,34 @@ extension _MonitorFullscreen on _MonitorScreenState {
     behavior: HitTestBehavior.translucent,
     onPointerDown: (_) => _revealFullscreenControls(),
     child: Stack(fit: StackFit.expand, children: [
-      _buildAdaptiveCameraStage(context),
+      Theme(
+        data: ThemeData.dark(useMaterial3: true),
+        child: _buildAdaptiveCameraStage(context),
+      ),
+      if (_fullscreenControlsVisible && _activeMcrpLiveUrl != null)
+        Positioned(
+          left: 12,
+          right: 12,
+          bottom: 82,
+          child: Center(child: Material(
+            color: Colors.black.withValues(alpha: 0.82),
+            borderRadius: BorderRadius.circular(24),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              TextButton.icon(
+                onPressed: _fullscreenRemoteCommandBusy
+                    ? null : () => unawaited(_fullscreenQuickCommand('photo')),
+                icon: const Icon(Icons.photo_camera_outlined, color: Colors.white),
+                label: const Text('Foto', style: TextStyle(color: Colors.white)),
+              ),
+              TextButton.icon(
+                onPressed: _fullscreenRemoteCommandBusy
+                    ? null : () => unawaited(_fullscreenQuickCommand('record/toggle')),
+                icon: const Icon(Icons.fiber_manual_record, color: Color(0xFFFF7979)),
+                label: const Text('REC', style: TextStyle(color: Colors.white)),
+              ),
+            ]),
+          )),
+        ),
       if (_fullscreenControlsVisible)
         Positioned(left: 0, right: 0, bottom: 0, child: SafeArea(
           top: false,
@@ -164,7 +263,9 @@ extension _MonitorFullscreen on _MonitorScreenState {
           child: Material(
             color: Colors.black.withValues(alpha: 0.72),
             borderRadius: BorderRadius.circular(16),
-            child: Row(children: [
+            child: Theme(
+              data: ThemeData.dark(useMaterial3: true),
+              child: Row(children: [
               IconButton(
                 tooltip: 'Sair do monitoramento',
                 onPressed: () => unawaited(_closeMonitor()),
@@ -182,9 +283,15 @@ extension _MonitorFullscreen on _MonitorScreenState {
                 onPressed: () => _updateFullscreenState(() => _fillPreview = !_fillPreview),
                 icon: Icon(_fillPreview ? Icons.fit_screen_rounded : Icons.crop_free_rounded),
               ),
+              if (_activeMcrpLiveUrl != null)
+                IconButton(
+                  tooltip: 'Controles do transmissor',
+                  onPressed: () => unawaited(_showFullscreenRemoteControls()),
+                  icon: const Icon(Icons.tune_rounded, color: Colors.white),
+                ),
               _voiceButton(),
               _monitorMenu(),
-            ]),
+            ])),
           ),
         )),
     ]),

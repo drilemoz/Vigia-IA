@@ -19,7 +19,7 @@ class PartialPersonDetectionService {
   static const String displayLabel = 'Possível pessoa';
 
   /// Proporção mínima de pixels com cor de pele na região em movimento.
-  static const double minimumSkinRatio = 0.22;
+  static const double minimumSkinRatio = 0.34;
 
   static List<Detection> infer(
     RgbFrame frame,

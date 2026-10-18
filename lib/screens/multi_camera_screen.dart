@@ -18,6 +18,7 @@ import '../services/native_platform_service.dart';
 import '../services/remote_camera_pairing_service.dart';
 import '../services/error_log_service.dart';
 import '../services/rtsp_diagnostics_service.dart';
+import '../services/lan_camera_discovery_service.dart';
 import '../widgets/main_navigation_bar.dart';
 import '../widgets/main_navigation_routes.dart';
 import 'esp32_settings_screen.dart';
@@ -29,6 +30,8 @@ part 'multi_camera_screen_components.dart';
 part 'multi_camera_screen_details.dart';
 part 'multi_camera_screen_monitoring.dart';
 part 'multi_camera_screen_saved_support.dart';
+part 'multi_camera_screen_lan_discovery.dart';
+part 'multi_camera_screen_editor.dart';
 
 class MultiCameraScreen extends StatefulWidget {
   const MultiCameraScreen({super.key});
@@ -291,185 +294,6 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
     await _refreshStatuses();
   }
 
-  Future<CameraEndpoint?> _showCameraEditor({
-    required CameraEndpointType type,
-    CameraEndpoint? existing,
-  }) async {
-    final isRtsp = type == CameraEndpointType.rtsp;
-    final isMinha = MinhaCameraLiveUrl.isValid(existing?.address);
-    final sourceTitle = isRtsp ? 'Câmera RTSP' : 'Celular transmissor';
-    final sourceDescription = isRtsp
-        ? 'Conecta uma câmera IP ou DVR pela URL RTSP.'
-        : 'Recebe a imagem enviada por outro celular na mesma rede.';
-    final name = TextEditingController(
-      text: existing?.name ?? (isRtsp ? 'Câmera RTSP' : 'Câmera remota'),
-    );
-    final address = TextEditingController(text: existing?.address ?? '');
-    final key = TextEditingController(text: existing?.accessKey ?? '');
-    String? error;
-    bool softwareDecoding = existing?.rtspSoftwareDecoding ?? false;
-
-    final result = await showDialog<CameraEndpoint>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(
-            existing == null
-                ? (isRtsp ? 'Adicionar câmera RTSP' : 'Adicionar celular remoto')
-                : 'Editar ${existing.name}',
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(dialogContext)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        isRtsp
-                            ? Icons.router_outlined
-                            : Icons.phone_android_rounded,
-                        color: Theme.of(dialogContext).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              sourceTitle,
-                              style: const TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(sourceDescription),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: name,
-                  decoration: const InputDecoration(labelText: 'Nome da câmera'),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: address,
-                  keyboardType: TextInputType.url,
-                  autocorrect: false,
-                  decoration: InputDecoration(
-                    labelText: isRtsp ? 'URL RTSP' : 'Endereço local',
-                    hintText: isRtsp
-                        ? 'rtsp://192.168.1.20/stream'
-                        : 'http://192.168.1.10:8765/live/TOKEN',
-                  ),
-                ),
-                if (isRtsp) ...[
-                  const SizedBox(height: 10),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Compatibilidade (decodificação por software)'),
-                    subtitle: const Text(
-                      'Teste se o vídeo fechar o app. Pode usar mais CPU e bateria.',
-                    ),
-                    value: softwareDecoding,
-                    onChanged: (value) => setDialogState(() => softwareDecoding = value),
-                  ),
-                ],
-                if (type == CameraEndpointType.remotePhone) ...[
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: key,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: InputDecoration(
-                      labelText: 'Chave (não precisa para URL /live/)',
-                      helperText: isMinha ? 'A chave já está incluída na URL.' : null,
-                    ),
-                  ),
-                ],
-                if (error != null) ...[
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      error!,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final value = address.text.trim();
-                final uri = Uri.tryParse(value);
-                final validRtsp = isRtsp &&
-                    uri != null &&
-                    uri.scheme.toLowerCase() == 'rtsp' &&
-                    uri.host.isNotEmpty;
-                final minha = MinhaCameraLiveUrl.parse(value);
-                final validRemote = !isRtsp &&
-                    (minha != null || (uri != null &&
-                    (uri.scheme == 'http' || uri.scheme == 'https') &&
-                    uri.host.isNotEmpty &&
-                    key.text.trim().isNotEmpty));
-                if (!(validRtsp || validRemote)) {
-                  setDialogState(() {
-                    error = isRtsp
-                        ? 'Informe uma URL RTSP válida.'
-                        : 'Informe uma URL /live/ privada ou endereço HTTP com chave.';
-                  });
-                  return;
-                }
-                Navigator.pop(
-                  dialogContext,
-                  CameraEndpoint(
-                    id: existing?.id ??
-                        'cam_${DateTime.now().microsecondsSinceEpoch}',
-                    name: name.text.trim().isEmpty
-                        ? (isRtsp ? 'Câmera RTSP' : 'Câmera remota')
-                        : name.text.trim(),
-                    type: type,
-                    address: value,
-                    accessKey: type == CameraEndpointType.remotePhone
-                        ? (minha?.pathSegments.last ?? key.text.trim())
-                        : null,
-                    enabled: existing?.enabled ?? true,
-                    rtspSoftwareDecoding: isRtsp && softwareDecoding,
-                  ),
-                );
-              },
-              child: const Text('Salvar'),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    name.dispose();
-    address.dispose();
-    key.dispose();
-    return result;
-  }
-
   Future<void> _toggleCamera(CameraEndpoint camera) async {
     await _registry.save(camera.copyWith(enabled: !camera.enabled));
     if (mounted) setState(() {});
@@ -635,6 +459,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                           disabled: disabled,
                           lastRefresh: _lastRefresh,
                           onScanPhone: _scanPhoneQr,
+                          onScanNetwork: _scanLocalNetwork,
                           onAddPhone: () => _addCamera(CameraEndpointType.remotePhone),
                           onAddRtsp: () => _addCamera(CameraEndpointType.rtsp),
                           onManageEsp32: _openEsp32Settings,
