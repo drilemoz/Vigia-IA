@@ -49,8 +49,8 @@ class HomeDashboard281(unittest.TestCase):
         self.assertIn('class _HomeDashboardCard extends StatelessWidget', read('lib/screens/home_screen_components.dart'))
 
     def test_public_version(self):
-        self.assertIn('version: 1.0.288+288', read('pubspec.yaml'))
-        self.assertIn("version: '1.0.288'", read('lib/screens/app_info_screen_components.dart'))
+        self.assertIn('version: 1.0.289+289', read('pubspec.yaml'))
+        self.assertIn("version: '1.0.289'", read('lib/screens/app_info_screen_components.dart'))
 
 if __name__ == '__main__':
     unittest.main()

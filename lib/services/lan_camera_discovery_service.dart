@@ -5,7 +5,7 @@ import 'dart:math';
 
 /// Descoberta acionada pelo usuario e limitada no tempo. Nunca devolve tokens,
 /// senhas ou URLs /live/ protegidas; pareamento Vigia IA continua por QR.
-enum LanCameraKind { vigiaIa, onvif }
+enum LanCameraKind { vigiaIa, onvif, rtsp, network }
 
 class LanCameraCandidate {
   const LanCameraCandidate({
@@ -13,11 +13,15 @@ class LanCameraCandidate {
     required this.kind,
     required this.name,
     this.onvifServiceUrl,
+    this.port,
+    this.protocol,
   });
   final String host;
   final LanCameraKind kind;
   final String name;
   final String? onvifServiceUrl;
+  final int? port;
+  final String? protocol;
   String get key => '${kind.name}:$host';
 }
 
@@ -83,6 +87,9 @@ class LanCameraDiscoveryService {
   static Future<List<LanCameraCandidate>> discover({
     Duration timeout = const Duration(seconds: 5),
     void Function(LanCameraCandidate candidate)? onFound,
+    void Function(String status)? onStatus,
+    bool Function()? cancelled,
+    List<String>? targetBroadcasts,
   }) async {
     final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
     final results = <String, LanCameraCandidate>{};
@@ -108,10 +115,9 @@ class LanCameraDiscoveryService {
       });
       final probe = utf8.encode(_vigiaProbe);
       // Broadcast IPv4 funciona em varias redes hotspot e LAN simples.
-      try {
-        socket.send(probe, InternetAddress('255.255.255.255'), _vigiaPort);
-      } on SocketException {
-        // Hotspot ou rede celular pode bloquear broadcast.
+      for (final address in <String>{'255.255.255.255', ...?targetBroadcasts}) {
+        try { socket.send(probe, InternetAddress(address), _vigiaPort); }
+        on SocketException { /* Broadcast bloqueado por interface. */ }
       }
       final random = Random.secure();
       final uuid = List<int>.generate(16, (_) => random.nextInt(256))
@@ -131,7 +137,11 @@ class LanCameraDiscoveryService {
       } on SocketException {
         // Algumas interfaces nao permitem multicast.
       }
-      await Future<void>.delayed(timeout);
+      onStatus?.call('Aguardando respostas de ONVIF e Vigia IA…');
+      final waitUntil = DateTime.now().add(timeout);
+      while (cancelled?.call() != true && DateTime.now().isBefore(waitUntil)) {
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+      }
       return List<LanCameraCandidate>.unmodifiable(results.values);
     } finally {
       await subscription?.cancel();

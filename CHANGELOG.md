@@ -1,3 +1,11 @@
+## 1.0.289+289: varredura Wi-Fi híbrida para câmeras (2026-10-18)
+
+- Scanner anterior só esperava broadcast Vigia IA e WS-Discovery ONVIF. Acrescentada busca TCP por subnet Wi-Fi a partir de `LinkProperties`, como no Minha Câmera 1.4.76.
+- Multicast lock Android apenas durante busca; varredura simultânea limitada a 24 workers/254 IPs e oito portas conhecidas, sem tarefas permanentes nem busca celular.
+- Classificação da resposta RTSP OPTIONS separa stream possivelmente acessível de TCP/HTTP não confirmado. ONVIF conserva XAddr HTTP sem inventar caminho de stream.
+- Pop-up mostra progresso, erros diagnósticos de Wi-Fi e resultado deduplicado. Senhas e tokens não são enviados na descoberta.
+- CI Flutter/Android e validação real em diferentes roteadores/hotspots ainda pendentes.
+
 ## 1.0.288+288: transmissão remota, economia em espera e última câmera (2026-10-18)
 
 - Pausa e retomada remotas autenticadas no MCRP v1, preservando porta/QR/token durante o estado de espera (serviço permanece visível na notificação).

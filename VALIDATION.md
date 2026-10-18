@@ -1,4 +1,7 @@
-# Validação Vigia IA 1.0.288+288
+# Validação Vigia IA 1.0.289+289
+
+- Scanner Wi-Fi: comparado com o Minha Câmera 1.4.76 (NetUtil.scanRange, WsDiscovery, RtspProbe e RtspServiceDetector). Ponte Android `LanScanSupport.kt` compilada isoladamente com stubs Android. `python3 -m unittest discover -s tool -p test_*.py -q`: **223 testes passaram**, com 8 novos contratos de busca híbrida. `tool/verify_project.sh`: **exit code 0**. `check_version_sync.py` aprovado, `tool/android/MainActivity.kt` e `LanScanSupport.kt` sincronizados com as fontes Android. Testes reais no Android e `flutter analyze`/`flutter test` dependem do SDK e de dispositivos. Nenhuma varredura física de rede foi executada neste ambiente.
+
 
 - `python3 -m unittest discover -s tool -p test_*.py -q`: **215 testes aprovados**; novos contratos de MCRP, gravação, fallback e Keystore.
 - `tool/check_version_sync.py`, imports e CI aprovados. `tool/verify_project.sh` **aprovado integralmente (exit code 0)** na segunda execução, após interrupção por limite de tempo na primeira tentativa.

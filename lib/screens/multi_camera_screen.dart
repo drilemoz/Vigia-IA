@@ -20,6 +20,7 @@ import '../services/remote_camera_pairing_service.dart';
 import '../services/error_log_service.dart';
 import '../services/rtsp_diagnostics_service.dart';
 import '../services/lan_camera_discovery_service.dart';
+import '../services/lan_camera_subnet_scanner.dart';
 import '../widgets/main_navigation_bar.dart';
 import '../widgets/main_navigation_routes.dart';
 import 'esp32_settings_screen.dart';

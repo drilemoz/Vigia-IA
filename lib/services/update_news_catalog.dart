@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.288', build: 288);
+      AppBuildVersion(version: '1.0.289', build: 289);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.288', build: 288),
+      version: AppBuildVersion(version: '1.0.289', build: 289),
       changes: <String>[
-        'Ao vivo lembra a ultima camera e usa a local se a remota estiver offline.',
-        'Iniciar e parar transmissao pela rede local mantendo o pareamento.',
-        'Modo de espera com menor consumo ao pausar a captura do transmissor.',
+        'Escanear rede combina ONVIF, Vigia IA e busca TCP por IP no Wi-Fi.',
+        'Identifica RTSP confirmado e portas TCP ainda nao verificadas.',
+        'Lista mostra progresso, estado da rede e dispositivos deduplicados.',
       ],
     ),
   ]);

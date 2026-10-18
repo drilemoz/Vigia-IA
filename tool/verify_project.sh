@@ -16,8 +16,8 @@ fail() {
 python3 -m unittest -q tool/test_yolo_export_264.py || fail 'APK 218: exportacao YOLO26s nao foi estabilizada.'
 
 python3 -m unittest -q tool/test_yolo_default_263.py || fail 'YOLO26s deve ser padrão com release validada.'
-python3 tool/check_monitor_layout_262.py || fail 'Ao vivo 1.0.288: interface de duas cameras divergente.'
-python3 -m unittest -q tool/test_monitor_layout_262.py || fail 'Ao vivo 1.0.288: regressao visual.'
+python3 tool/check_monitor_layout_262.py || fail 'Ao vivo 1.0.289: interface de duas cameras divergente.'
+python3 -m unittest -q tool/test_monitor_layout_262.py || fail 'Ao vivo 1.0.289: regressao visual.'
 python3 tool/check_build215_camera_lint_261.py || fail 'APK 215: if de selecao da camera local sem chaves.'
 python3 -m unittest -q tool/test_build215_camera_lint_261.py || fail 'APK 215: regressao do lint da camera.'
 python3 -m unittest -q tool/test_camera_primary_perf_260.py || fail 'Câmera frontal principal e cadência local (260).'
@@ -35,8 +35,8 @@ python3 -m unittest -q tool/test_build227_lints_274.py || fail 'Regressao dos er
 python3 -m unittest -q tool/test_build230_native_status_lint_277.py || fail 'APK 230: acesso redundante ao status nativo retornou.'
 python3 -m unittest -q tool/test_main_navigation_six_279.py || fail 'Navegacao de seis abas regrediu.'
 python3 -m unittest -q tool/test_camera_compact_280.py || fail 'Central de Câmeras 1.0.280: layout compacto regrediu.'
-python3 -m unittest -q tool/test_home_dashboard_281.py || fail 'Home 1.0.288: cartões e ajustes modais regrediram.'
-python3 -m unittest -q tool/test_home_organization_282.py || fail 'Home 1.0.288: organizacao e Telemetria regrediram.'
+python3 -m unittest -q tool/test_home_dashboard_281.py || fail 'Home 1.0.289: cartões e ajustes modais regrediram.'
+python3 -m unittest -q tool/test_home_organization_282.py || fail 'Home 1.0.289: organizacao e Telemetria regrediram.'
 python3 -m unittest -q tool/test_native_default_transmitter_278.py || fail 'Fluxo unico de transmissao nativa regrediu.'
 python3 tool/check_build209_analyzer_255.py || fail 'Build 209: analyzer encontra regressões na tela Ao vivo.'
 python3 -m unittest -q tool/test_build209_analyzer_255.py || fail 'Regressões do analyzer 209.'
@@ -49,6 +49,7 @@ python3 tool/check_ai_controls_258.py || fail 'Selecao e diagnostico de IA 258 r
 python3 -m unittest -q tool/test_ai_controls_258.py || fail 'Testes da IA 258 falharam.'
 python3 -m unittest -q tool/test_build239_trip_lint_286.py || fail 'APK 239: condicionais do Planejamento sem chaves exigidas pelo Flutter Analyzer.'
 python3 -m unittest -q tool/test_network_cameras_287.py || fail 'Descoberta, RTSP, fullscreen e IA auxiliar 287 divergentes.'
+python3 -m unittest -q tool/test_lan_scan_289.py || fail 'Scanner Wi-Fi hibrido 289 divergiu da implementação de referencia.'
 python3 -m unittest -q tool/test_remote_transmission_288.py || fail 'MCRP de transmissão, economia em espera e última câmera 288 divergentes.'
 python3 tool/check_version_sync.py || fail 'Metadados de versao nao estao sincronizados.'
 python3 -m unittest -q tool/test_build223_version_sync_270.py || fail 'Build 223: metadados Android precisam acompanhar pubspec.'
@@ -67,7 +68,7 @@ if find . -type f \( -name '*.apk' -o -name '*.aab' \) -print -quit | grep -q .;
 fi
 
 grep -q '^name: vigiaia$' pubspec.yaml || fail 'Nome tecnico Dart esperado vigiaia nao encontrado.'
-grep -Fxq 'version: 1.0.288+288' pubspec.yaml || fail 'Versao esperada 1.0.288+288 nao encontrada.'
+grep -Fxq 'version: 1.0.289+289' pubspec.yaml || fail 'Versao esperada 1.0.289+289 nao encontrada.'
 grep -q 'class Esp32CapabilityObservation' lib/models/esp32_capability_status.dart || fail 'Modelo de estado por sensor ESP32 1.0.124 ausente.'
 grep -q 'Esp32CapabilityActivity.live' lib/screens/esp32_settings_screen.dart || fail 'Tela ESP32 nao renderiza estado de leitura ativa 1.0.124.'
 grep -q 'Detectado · não configurado' lib/models/esp32_capability_status.dart || fail 'Estado de sensor novo ESP32 1.0.124 ausente.'
@@ -75,7 +76,7 @@ grep -q 'firmware legado' test/esp32_capability_status_test.dart || fail 'Teste 
 grep -Fq '## 1.0.199+199' CHANGELOG.md || fail 'CHANGELOG nao documenta 1.0.199.'
 [[ -f RELEASE-1.0.199.md ]] || fail 'Notas da entrega 1.0.199 ausentes.'
 grep -q "version: '1.0.199'" lib/screens/app_info_screen_components.dart || fail 'Tela Mudancas nao marca a versao 1.0.199.'
-grep -q "AppBuildVersion(version: '1.0.288', build: 288)" lib/services/update_news_catalog.dart || fail 'Catalogo de Novidades nao identifica 1.0.288.'
+grep -q "AppBuildVersion(version: '1.0.289', build: 289)" lib/services/update_news_catalog.dart || fail 'Catalogo de Novidades nao identifica 1.0.289.'
 [[ -f test/map_speed_policy_test.dart ]] || fail 'Teste Bike/GPS ausente.'
 [[ -f test/map_road_overlay_service_test.dart ]] || fail 'Teste de vias OSM ausente.'
 grep -q 'MapSpeedPolicy.select' lib/screens/map_monitoring_screen.dart || fail 'Fallback ESP32/GPS ausente.'
@@ -263,7 +264,7 @@ grep -q "message: 'Ver plano por dias'" lib/screens/map_monitoring_screen.dart |
 [[ -f test/bike_trip_planner_test.dart ]] || fail 'Teste de planejamento Bike 1.0.174/175 ausente.'
 grep -q '150 km a 15 km/h com 4 h por dia vira 3 dias' test/bike_trip_planner_test.dart || fail 'Teste de divisao realista em dias ausente.'
 grep -q 'não inventa serviço' test/bike_trip_planner_test.dart || fail 'Teste de parada sem servico inventado ausente.'
-grep -q 'VigiaIA/1.0.288 map-search' lib/services/map_destination_search_service.dart || fail 'User-Agent da pesquisa nao acompanha 1.0.256.'
+grep -q 'VigiaIA/1.0.289 map-search' lib/services/map_destination_search_service.dart || fail 'User-Agent da pesquisa nao acompanha 1.0.256.'
 
 # Regressao de busca automatica de cidades - 1.0.238
 [[ -f lib/services/nearby_place_query.dart ]] || fail 'Consulta regional bbox ausente.'
@@ -359,7 +360,7 @@ grep -q "title: 'Clima'" lib/screens/map_monitoring_screen.dart || fail 'Control
 grep -q 'setWeatherVoiceEnabled' lib/services/map_view_settings_service.dart lib/screens/map_monitoring_screen.dart || fail 'Preferencia de voz do clima 1.0.166 ausente.'
 grep -q 'Temperatura medida pelo sensor' lib/services/map_weather_policy.dart || fail 'Fala de temperatura ESP32 1.0.166 ausente.'
 grep -q 'Previsão online' lib/services/map_weather_policy.dart || fail 'Fala de previsao online 1.0.166 ausente.'
-grep -q 'VigiaIA/1.0.288 (weather)' lib/services/map_weather_service.dart || fail 'User-Agent do clima nao acompanha a versao atual.'
+grep -q 'VigiaIA/1.0.289 (weather)' lib/services/map_weather_service.dart || fail 'User-Agent do clima nao acompanha a versao atual.'
 grep -Fq "import '../models/esp32_telemetry.dart';" lib/services/map_weather_service.dart || fail 'MapWeatherService usa Esp32ConnectionState sem importar esp32_telemetry.dart.'
 if grep -Eq "HttpException\([^)]*uri:[[:space:]]*uri" lib/services/map_weather_service.dart; then
   fail 'Clima 1.0.166 nao deve anexar URL potencialmente sensivel ao erro HTTP.'
@@ -562,7 +563,7 @@ if grep -q 'catch (_) {}' lib/widgets/map_navigation_3d_view.dart; then
   fail 'Renderer MapLibre voltou a conter catch silencioso.'
 fi
 [[ -f github-manager.json ]] || fail 'github-manager.json ausente em 1.0.167.'
-grep -q '"version": "1.0.288"' github-manager.json || fail 'github-manager.json nao esta na versao 1.0.256.'
+grep -q '"version": "1.0.289"' github-manager.json || fail 'github-manager.json nao esta na versao 1.0.256.'
 # Version code is validated dynamically by check_version_sync.py against pubspec.yaml.
 python3 tool/check_version_sync.py || fail 'github-manager.json: versionCode/versionName ou build divergente do pubspec.'
 [[ -f test/map_travel_mode_test.dart ]] || fail 'Teste de perfis de transporte 1.0.152 ausente.'
@@ -724,7 +725,7 @@ grep -q 'recalculationCooldown = Duration(seconds: 45)' lib/services/map_navigat
 grep -q '_maybeRecalculateCyclingRoute' lib/screens/map_monitoring_screen.dart || fail 'Recalculo automatico 1.0.136 nao esta ligado ao GPS.'
 grep -q 'Rota recalculada a partir da posição atual' lib/screens/map_monitoring_screen.dart || fail 'Feedback de recalculo 1.0.136 ausente.'
 grep -q 'guidance: _navigationProgress' lib/screens/map_monitoring_screen.dart || fail 'HUD de navegacao 1.0.136 nao recebe progresso.'
-grep -q 'VigiaIA/1.0.288' lib/services/map_cycling_route_service.dart || fail 'User-Agent do roteamento ciclavel nao acompanha a versao atual.'
+grep -q 'VigiaIA/1.0.289' lib/services/map_cycling_route_service.dart || fail 'User-Agent do roteamento ciclavel nao acompanha a versao atual.'
 
 grep -q 'extendBody: true' lib/screens/map_monitoring_screen.dart || fail 'Mapa 1.0.125 nao usa superficie edge-to-edge.'
 grep -q "tooltip: 'Aumentar zoom'" lib/widgets/map_zoom_controls.dart || fail 'Controle flutuante de zoom 1.0.125 ausente.'
@@ -1157,7 +1158,7 @@ grep -q 'velocityY = instantY;' lib/services/object_tracker.dart \
 [[ -f app_identity.json ]] || fail 'Arquivo central de identidade futura nao encontrado.'
 grep -q '"displayName": "Vigia IA"' app_identity.json \
   || fail 'Nome atual nao esta registrado em app_identity.json.'
-grep -q "static const String version = '1.0.288';" lib/core/app_metadata.dart \
+grep -q "static const String version = '1.0.289';" lib/core/app_metadata.dart \
   || fail 'AppMetadata nao esta em 1.0.256.'
 # Build numerico validado contra pubspec, AppMetadata e JSON pelo check_version_sync.py.
 grep -q "version: '1.0.123'" lib/screens/app_info_screen*.dart \
@@ -1329,7 +1330,7 @@ grep -q 'flutter test --reporter expanded --coverage' .github/workflows/android-
   || fail 'Workflow nao gera cobertura expandida dos testes.'
 grep -q 'flutter-test-coverage' .github/workflows/android-apk.yml \
   || fail 'Artifact de cobertura nao encontrado no workflow.'
-grep -Fq 'version: 1.0.288+288' pubspec.yaml \
+grep -Fq 'version: 1.0.289+289' pubspec.yaml \
   || fail 'pubspec.yaml nao esta em 1.0.213+213.'
 
 # Identidade tecnica 1.0.28
@@ -1337,7 +1338,7 @@ grep -q '^name: vigiaia$' pubspec.yaml \
   || fail 'Pacote Dart nao usa vigiaia.'
 grep -q '"projectName": "vigiaia"' app_identity.json \
   || fail 'app_identity.json nao usa projectName vigiaia.'
-grep -q '"version": "1.0.288"' app_identity.json \
+grep -q '"version": "1.0.289"' app_identity.json \
   || fail 'app_identity.json nao esta na versao 1.0.213.'
 # Identidade e build Android validados dinamicamente pelo check_version_sync.py.
 grep -q '"applicationId": "com.vigiaia.app"' app_identity.json \
@@ -1656,7 +1657,7 @@ grep -q 'lite-model_efficientdet_lite0_detection_metadata_1.tflite' tool/fetch_m
 [[ -f test/detection_merger_test.dart ]] || fail 'Teste da segunda passagem nao encontrado.'
 grep -q '^## 1.0.34+34' CHANGELOG.md || fail 'CHANGELOG nao documenta 1.0.34.'
 grep -q 'Evolução 1.0.34' README.md || fail 'README nao documenta 1.0.34.'
-grep -Fq 'Vigia IA 1.0.288+288' ARCHITECTURE.md || fail 'ARCHITECTURE nao esta em 1.0.288+280.'
+grep -Fq 'Vigia IA 1.0.289+289' ARCHITECTURE.md || fail 'ARCHITECTURE nao esta em 1.0.289+280.'
 
 # Evolucao da deteccao 1.0.36
 [[ -f lib/services/detection_scan_planner.dart ]] \
@@ -3209,7 +3210,7 @@ grep -q 'this.dense = false' lib/widgets/vigia_ui.dart || fail 'VigiaStatusPill 
 grep -q 'dense: compact' lib/widgets/vigia_ui.dart || fail 'Card compacto nao usa pills densas.'
 grep -q 'padding: EdgeInsets.all(compact ? 9 : 18)' lib/widgets/vigia_ui.dart || fail 'Card compacto nao recebeu padding seguro do Android-APK-84.'
 grep -q 'final compact = constraints.maxWidth < 66' lib/widgets/vigia_ui.dart || fail 'Acesso rapido nao possui compactacao adaptativa.'
-grep -q 'VigiaIA/1.0.288' lib/services/route_explorer_service.dart || fail 'User-Agent do RouteExplorer nao acompanha a versao atual.'
+grep -q 'VigiaIA/1.0.289' lib/services/route_explorer_service.dart || fail 'User-Agent do RouteExplorer nao acompanha a versao atual.'
 grep -q "modo compacto cabe em celula estreita da Home" test/vigia_ui_test.dart || fail 'Teste de overflow do card compacto ausente.'
 grep -q "acao rapida Diagnostico cabe na grade responsiva" test/vigia_ui_test.dart || fail 'Teste de overflow do acesso rapido ausente.'
 

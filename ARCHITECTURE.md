@@ -1,4 +1,7 @@
-# Arquitetura — Vigia IA 1.0.288+288
+# Arquitetura — Vigia IA 1.0.289+289
+
+**Descoberta híbrida LAN:** `LanCameraDiscoveryService` continua ouvindo anúncios UDP ONVIF/Vigia IA; `LanCameraSubnetScanner` consulta `LanScanSupport.range()` pelo canal Android (Wi-Fi `LinkProperties`, `/24` limitado para sub-redes grandes, hotspot por interface WLAN/AP), sonda portas TCP em pool limitado e identifica RTSP por OPTIONS sem autenticação. `LanScanSupport.multicast()` mantém multicast lock durante scan, devolvido em `finally`; o bootstrap restaura Manifest e classe Kotlin. A lista deduplica pelo host e prioriza Vigia IA/ONVIF sobre sondas TCP. Nenhuma porta aberta garante RTSP funcional, que depende de URL/permissão e teste real.
+
 
 **Transmissão/standby:** o serviço nativo mantém HTTP privado 8765 + anúncio UDP quando pausa a captura via POST MCRP autenticado. Status inclui `X-Transmitting`; câmera/EGL/encoder/locks só ativos durante transmissão. A ação local de encerrar serviço fecha também o listener. REC em andamento bloqueia pausa. Despertar remoto requer serviço foreground existente e políticas de câmera permissivas no Android. Nenhum wake lock durante standby, logo alcance remoto com tela apagada depende de Wi-Fi/Doze.
 

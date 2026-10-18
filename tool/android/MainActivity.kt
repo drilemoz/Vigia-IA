@@ -78,6 +78,7 @@ class MainActivity : FlutterActivity() {
 
     private val backgroundChannelName = "vigiaia/background"
     private val nativeChannelName = "vigiaia/native"
+    private val lanScanSupport by lazy { LanScanSupport(this) }
     private val compassChannelName = "vigiaia/compass"
     private var pendingNotificationPermission: MethodChannel.Result? = null
     private var pendingCameraPermission: MethodChannel.Result? = null
@@ -131,6 +132,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
+        lanScanSupport.multicast(false)
         compassStreamHandler?.dispose()
         compassStreamHandler = null
         alertAudio.close()
@@ -355,6 +357,13 @@ class MainActivity : FlutterActivity() {
 
     private fun handleNativeCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
+            "lanScanRange" -> {
+                try { result.success(lanScanSupport.range()) }
+                catch (error: Exception) { result.error("lan_range", error.message, null) }
+            }
+            "lanMulticastLock" -> {
+                result.success(lanScanSupport.multicast(call.argument<Boolean>("enabled") == true))
+            }
             "markRtspStage" -> {
                 try {
                     val stage = call.argument<String>("stage").orEmpty()

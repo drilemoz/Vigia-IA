@@ -77,11 +77,11 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.288',
+          version: '1.0.289',
           current: true,
           changes: [
-            'Ao vivo lembra a última câmera e usa a local quando a remota estiver indisponível.',
-            'Controle remoto inicia ou pausa a transmissão sem reiniciar o pareamento.',
+            'Busca Wi-Fi combina ONVIF, anúncios Vigia IA e varredura IP/RTSP sem internet.',
+            'Resultados distinguem RTSP confirmado de portas TCP/HTTP não verificadas.',
           ],
         ),
         SizedBox(height: 10),
