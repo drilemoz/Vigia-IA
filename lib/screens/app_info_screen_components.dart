@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.273',
+          version: '1.0.274',
           current: true,
+          changes: [
+            'Corrigida a análise estática Flutter que interrompia o APK 227.',
+            'O transmissor nativo agora consulta o estado de gravação sem acesso nulo.',
+            'Mantida a integração MCRP e os modos de transmissão anteriores.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.273',
           changes: [
             'Modo de transmissão nativa experimental integrado ao Vigia IA.',
             'Serviço de câmera Android com QR MCRP e envio com a tela apagada.',
@@ -2435,8 +2444,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.273',
+          version: '1.0.274',
           current: true,
+          changes: [
+            'Corrigida a análise estática Flutter que interrompia o APK 227.',
+            'O transmissor nativo agora consulta o estado de gravação sem acesso nulo.',
+            'Mantida a integração MCRP e os modos de transmissão anteriores.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.273',
           changes: [
             'Modo de transmissão nativa experimental integrado ao Vigia IA.',
             'Serviço de câmera Android com QR MCRP e envio com a tela apagada.',

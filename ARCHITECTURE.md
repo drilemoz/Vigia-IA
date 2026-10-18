@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.274+274
+
+## Buildfix 227 (1.0.274)
+
+A migração do transmissor nativo permanece opcional: nenhuma mudança no protocolo MCRP ou no serviço Android. O estado da gravação na tela Flutter agora é lido com acesso seguro para valores nulos, e a checagem de câmera remota mantém o fluxo condicional com chaves.
+
 # Arquitetura — Vigia IA 1.0.273+273
 
 ## Modo transmissor nativo experimental (1.0.273)

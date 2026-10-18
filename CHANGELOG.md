@@ -1,3 +1,9 @@
+## 1.0.274+274: correção de análise estática do workflow APK 227 (2026-10-17)
+
+- Corrigidos dois erros `unchecked_use_of_nullable_value` em `native_transmitter_screen.dart`.
+- Corrigido `curly_braces_in_flow_control_structures` em `camera_mode_screen.dart`.
+- Receptor, transmissor nativo experimental e modo Flutter legado preservados; compilar novamente no CI.
+
 ## 1.0.273+273: transmissor nativo experimental (2026-10-17)
 
 - Migração inicial do serviço Kotlin do Minha Câmera, com captura Android independente da Activity do Flutter e controle MCRP v1.

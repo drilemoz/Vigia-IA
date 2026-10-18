@@ -1,3 +1,11 @@
+# Validação Vigia IA 1.0.274+274
+
+## 1.0.274: análise do workflow APK 227 (2026-10-17)
+
+- O log enviado documenta 3 ocorrências fatais em `flutter analyze --fatal-infos --fatal-warnings` na versão 1.0.273: 2 acessos nulos à propriedade `recording` (linhas 153 e 154 da tela nativa) e 1 if sem chaves (linha 101 da tela de transmissão).
+- Correção: `s?.recording == true` e bloco `if (mounted) { ... }`; teste preventivo próprio impede regressão no mesmo trecho.
+- Não há evidência de execução de compilação Kotlin/Android no APK 227, pois o workflow parou antes. A compilação final, funcionamento da captura com tela apagada e integração no Redmi A3 ainda precisam de validação em CI e aparelho.
+
 # Validação Vigia IA 1.0.273+273
 
 ## 1.0.273: migração do motor nativo MCRP (2026-10-17)

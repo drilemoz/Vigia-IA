@@ -1,3 +1,9 @@
+## 1.0.274+274: correção do Flutter Analyze, APK 227 (2026-10-17)
+
+- Corrigido acesso anulável ao estado de gravação do transmissor nativo em duas expressões Dart.
+- Adicionadas chaves no bloco condicional do alerta na tela de transmissão, atendendo à análise com lint fatal.
+- Preservados serviços Kotlin MCRP e controles remotos; o build Android ainda deve validar a compilação nativa.
+
 ## 1.0.273+273: transmissor nativo experimental (2026-10-17)
 
 - Migração inicial do serviço Kotlin do Minha Câmera, com captura Android independente da Activity do Flutter e controle MCRP v1.
@@ -191,7 +197,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.273+273`
+**Versão atual:** `1.0.274+274`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

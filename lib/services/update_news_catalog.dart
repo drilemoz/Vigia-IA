@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.273', build: 273);
+      AppBuildVersion(version: '1.0.274', build: 274);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.273', build: 273),
+      version: AppBuildVersion(version: '1.0.274', build: 274),
       changes: <String>[
-        'Transmissor nativo experimental com câmera e vídeo no próprio Vigia IA.',
-        'Compartilhe o QR MCRP entre dois celulares com o Vigia IA instalado.',
-        'Transmissão com serviço Android independente e controles de qualidade e gravação.',
+        'Indicador de gravação do transmissor nativo atualizado.',
+        'Controles do transmissor nativo agora tratam estados ainda indisponíveis.',
+        'Integração MCRP e modo de transmissão anterior permanecem disponíveis.',
       ],
     ),
   ]);

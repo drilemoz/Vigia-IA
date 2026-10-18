@@ -150,8 +150,8 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
                   onPressed: busy || !s!.ready ? null : _record,
-                  icon: Icon(s.recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record_rounded),
-                  label: Text(s.recording ? 'Parar gravação' : 'Gravar no transmissor'),
+                  icon: Icon(s?.recording == true ? Icons.stop_circle_outlined : Icons.fiber_manual_record_rounded),
+                  label: Text(s?.recording == true ? 'Parar gravação' : 'Gravar no transmissor'),
                 ),
               ],
             ]),

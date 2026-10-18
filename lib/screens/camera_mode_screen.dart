@@ -98,9 +98,11 @@ class _CameraModeScreenState extends State<CameraModeScreen> {
     if (!_server.running) {
       final native = await NativeCameraTransmitterService.status();
       if (native.running || native.starting || native.releasing) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Desligue o transmissor nativo antes de iniciar o antigo.'),
-        ));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Desligue o transmissor nativo antes de iniciar o antigo.'),
+          ));
+        }
         return;
       }
     }
