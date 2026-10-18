@@ -72,7 +72,7 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
         ? current.first.name
         : (fallbackName != null && fallbackName.isNotEmpty
             ? fallbackName
-            : 'Minha Câmera (${client.address.liveUrl.host})');
+            : 'Câmera remota (${client.address.liveUrl.host})');
     final controller = TextEditingController(text: suggestedName);
     String? name;
     try {
@@ -374,10 +374,10 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
     final codec = _status['x-stream-codec'] ?? 'mjpeg';
     final model = (_info?['device'] is Map) ? (_info!['device'] as Map)['model']?.toString() : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Câmera remota · Minha Câmera')),
+      appBar: AppBar(title: const Text('Câmera remota · Vigia IA')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         if (client == null) ...[
-        const Text('Conecte o QR exibido pelo Minha Câmera ou informe a URL /live/ completa. Funciona pela rede Wi-Fi local, sem internet.'),
+        const Text('Conecte o QR do transmissor ou informe a URL /live/ completa. Funciona pela rede Wi-Fi local, sem internet.'),
         const SizedBox(height: 12),
         TextField(controller: _input, keyboardType: TextInputType.url,
           decoration: const InputDecoration(labelText: 'URL da câmera', hintText: 'http://192.168.1.2:8765/live/…', border: OutlineInputBorder())),
@@ -510,7 +510,7 @@ class _McrpQrScannerState extends State<_McrpQrScanner> {
   bool done = false;
   @override void dispose() { unawaited(scanner.dispose()); super.dispose(); }
   @override Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Ler QR do Minha Câmera')),
+    appBar: AppBar(title: const Text('Ler QR do transmissor')),
     body: MobileScanner(controller: scanner, onDetect: (capture) {
       if (done) return;
       for (final code in capture.barcodes) {

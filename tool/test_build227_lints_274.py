@@ -10,8 +10,9 @@ class Build227LintContract(unittest.TestCase):
         source = (ROOT / 'lib/screens/native_transmitter_screen.dart').read_text()
         self.assertNotIn('icon: Icon(s.recording ?', source)
         self.assertNotIn('label: Text(s.recording ?', source)
-        self.assertIn('icon: Icon(s?.recording == true ?', source)
-        self.assertIn('label: Text(s?.recording == true ?', source)
+        self.assertIn('s?.recording == true', source)
+        self.assertIn('icon: Icon(recording ?', source)
+        self.assertIn('label: Text(recording ?', source)
 
     def test_mounted_snackbar_condition_is_braced(self):
         source = (ROOT / 'lib/screens/camera_mode_screen.dart').read_text()

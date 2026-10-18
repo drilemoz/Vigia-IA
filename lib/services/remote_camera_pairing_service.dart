@@ -45,7 +45,7 @@ class RemoteCameraPairingService {
       return RemoteCameraPairingData(
         address: raw,
         accessKey: minha.pathSegments.last,
-        name: 'Minha Câmera',
+        name: 'Câmera remota',
       );
     }
     final uri = Uri.tryParse(raw);

@@ -570,8 +570,8 @@ class _MonitorScreenState extends State<MonitorScreen>
                   const SizedBox(height: 8),
                   _SourceOptionTile(
                     icon: Icons.phone_android_rounded,
-                    title: 'Outro celular / Minha Câmera',
-                    subtitle: 'Aceita QR do Vigia IA e do Minha Câmera (MJPEG).',
+                    title: 'Outro celular / câmera remota',
+                    subtitle: 'Aceita QR do Vigia IA e do transmissor MCRP (MJPEG).',
                     selected: type == VideoSourceType.remotePhone,
                     onTap: () => setDialogState(
                       () => type = VideoSourceType.remotePhone,

@@ -50,6 +50,9 @@ class CameraRegistryService {
             final protectedKey = map['accessKeySecret'] as String?;
             _items.add(
               endpoint.copyWith(
+                name: endpoint.type == CameraEndpointType.remotePhone &&
+                        endpoint.name == 'Minha Câmera'
+                    ? 'Câmera remota' : endpoint.name,
                 address: await _native.unprotectSecret(protectedAddress) ?? endpoint.address,
                 accessKey: await _native.unprotectSecret(protectedKey) ?? endpoint.accessKey,
               ),
@@ -144,8 +147,8 @@ class CameraRegistryService {
         return CameraProbeResult(
           response.statusCode == HttpStatus.ok,
           message: response.statusCode == HttpStatus.ok
-              ? 'Minha Câmera online (stream não verificado)'
-              : 'Minha Câmera indisponível (HTTP ${response.statusCode})',
+              ? 'Câmera remota online (stream não verificado)'
+              : 'Câmera remota indisponível (HTTP ${response.statusCode})',
           checkedAt: checkedAt,
           latency: stopwatch.elapsed,
         );

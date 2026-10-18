@@ -303,7 +303,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
         ? 'Conecta uma câmera IP ou DVR pela URL RTSP.'
         : 'Recebe a imagem enviada por outro celular na mesma rede.';
     final name = TextEditingController(
-      text: existing?.name ?? (isRtsp ? 'Câmera RTSP' : 'Minha Câmera / celular'),
+      text: existing?.name ?? (isRtsp ? 'Câmera RTSP' : 'Câmera remota / celular'),
     );
     final address = TextEditingController(text: existing?.address ?? '');
     final key = TextEditingController(text: existing?.accessKey ?? '');

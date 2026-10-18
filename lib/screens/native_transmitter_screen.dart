@@ -24,6 +24,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
   Timer? _timer;
   bool _busy = false;
   bool _refreshing = false;
+  bool _localCommandBusy = false;
   String? _error;
 
   @override
@@ -92,21 +93,33 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
   }
 
   Future<void> _record() async {
-    try { await NativeCameraTransmitterService.toggleRecording(); await _refresh(); }
-    catch (error) { if (mounted) setState(() => _error = 'Falha na gravação: $error'); }
+    if (_localCommandBusy || _busy) return;
+    setState(() { _localCommandBusy = true; _error = null; });
+    try {
+      await NativeCameraTransmitterService.toggleRecording();
+      await _refresh();
+    } catch (error) {
+      if (mounted) setState(() => _error = 'Estado de gravação não confirmado: $error');
+    } finally {
+      if (mounted) setState(() => _localCommandBusy = false);
+    }
   }
 
   Future<void> _command(String action) async {
     final url = _status?.url;
-    if (url == null) return;
+    if (url == null || _localCommandBusy || _busy) return;
     McrpClient? client;
+    setState(() { _localCommandBusy = true; _error = null; });
     try {
       client = McrpClient(McrpAddress.parse(url));
       await client.command(action);
       await _refresh();
     } catch (error) {
-      if (mounted) setState(() => _error = 'Comando rejeitado: $error');
-    } finally { client?.close(); }
+      if (mounted) setState(() => _error = 'Comando não confirmado: $error');
+    } finally {
+      client?.close();
+      if (mounted) setState(() => _localCommandBusy = false);
+    }
   }
 
   Future<void> _copy(String value) async {
@@ -114,101 +127,159 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link privado copiado.')));
   }
 
+  String _elapsed(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final sec = seconds % 60;
+    if (hours > 0) return '${hours}h ${minutes.toString().padLeft(2, '0')}min';
+    return '${minutes}min ${sec.toString().padLeft(2, '0')}s';
+  }
+
+  Widget _metric(IconData icon, String label) {
+    return Chip(
+      avatar: Icon(icon, size: 17),
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide.none,
+    );
+  }
+
+  Widget _localButton(String label, String command) => ActionChip(
+    label: Text(label),
+    onPressed: _localCommandBusy || _busy ? null : () => _command(command),
+  );
+
   @override
   Widget build(BuildContext context) {
     final s = _status;
     final running = s?.running == true;
     final busy = _busy || (s?.busy == true);
     final url = s?.ready == true ? s?.url : null;
+    final recording = _details['x-recording'] == '1' || s?.recording == true;
     final scheme = Theme.of(context).colorScheme;
+    final model = _details['x-device-model'];
+    final temperature = int.tryParse(_details['x-battery-temp-tenths'] ?? '');
+    final camera = _details['x-camera-facing'] == '1' ? 'Frontal' : 'Traseira';
     return Scaffold(
-      appBar: AppBar(title: const Text('Transmissor nativo · experimental')),
+      appBar: AppBar(title: const Text('Vigia IA · transmissor')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         children: [
           Card(child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Icon(running ? Icons.sensors : Icons.videocam_off_outlined,
+                Icon(running ? Icons.sensors_rounded : Icons.videocam_off_outlined,
                     color: running ? scheme.primary : scheme.onSurfaceVariant),
-                const SizedBox(width: 8),
-                Expanded(child: Text(running ? 'Serviço Android ativo' : 'Transmissão desligada',
-                    style: const TextStyle(fontWeight: FontWeight.bold))),
+                const SizedBox(width: 10),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(running ? 'Transmissão ativa' : 'Transmissão desligada',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(running ? 'O outro Vigia IA pode assistir e controlar'
+                      : 'Inicie com a câmera e a rede local autorizadas',
+                      style: Theme.of(context).textTheme.bodySmall),
+                ])),
               ]),
-              const SizedBox(height: 8),
-              Text('Estado: ${s?.phase ?? 'consultando…'}'),
-              if (running) Text('Tempo de transmissão: ${s!.seconds}s'),
-              if (running && !s!.ready) const Text('Aguardando o primeiro quadro da câmera…'),
+              if (running) ...[
+                const SizedBox(height: 10),
+                Wrap(spacing: 6, runSpacing: 2, children: [
+                  _metric(Icons.timer_outlined, _elapsed(s!.seconds)),
+                  _metric(recording ? Icons.fiber_manual_record : Icons.videocam_outlined,
+                      recording ? 'REC ativo' : 'REC desligado'),
+                  if (_details['x-battery-level'] != null)
+                    _metric(Icons.battery_std, '${_details['x-battery-level']}%'),
+                  if (temperature != null)
+                    _metric(Icons.thermostat_outlined, '${(temperature / 10).toStringAsFixed(1)} °C'),
+                  if (_details['x-fps-measured'] != null)
+                    _metric(Icons.speed, '${_details['x-fps-measured']} FPS'),
+                  if (_details['x-quality-profile'] != null)
+                    _metric(Icons.high_quality_outlined, '${_details['x-quality-profile']}p'),
+                  if (_details['x-camera-facing'] != null)
+                    _metric(Icons.cameraswitch_outlined, camera),
+                ]),
+                if (model != null && model.isNotEmpty)
+                  Padding(padding: const EdgeInsets.only(top: 6),
+                    child: Text('Aparelho: $model', style: Theme.of(context).textTheme.bodySmall)),
+                if (s?.ready != true)
+                  const Padding(padding: EdgeInsets.only(top: 8),
+                    child: Text('Aguardando a câmera disponibilizar quadros…')),
+              ],
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: busy ? null : (running ? _stop : _start),
                 icon: Icon(running ? Icons.stop_rounded : Icons.play_arrow_rounded),
-                label: Text(busy ? 'Aguarde…' : running ? 'Parar transmissão' : 'Iniciar transmissão nativa'),
+                label: Text(busy ? 'Aguarde…' : running ? 'Parar transmissão' : 'Iniciar transmissão'),
               ),
               if (running) ...[
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: busy || !s!.ready ? null : _record,
-                  icon: Icon(s?.recording == true ? Icons.stop_circle_outlined : Icons.fiber_manual_record_rounded),
-                  label: Text(s?.recording == true ? 'Parar gravação' : 'Gravar no transmissor'),
-                ),
+                const SizedBox(height: 9),
+                Text('A gravação pode ser iniciada ou parada pelo painel Ao vivo do receptor. '
+                    'Depois de iniciada, continua no transmissor mesmo se o Wi-Fi cair.',
+                    style: Theme.of(context).textTheme.bodySmall),
               ],
             ]),
           )),
           if (_error != null || s?.error != null) ...[
             const SizedBox(height: 8),
-            Text(_error ?? s!.error!, style: TextStyle(color: scheme.error)),
+            Card(child: Padding(padding: const EdgeInsets.all(12), child: Text(
+              _error ?? s!.error!, style: TextStyle(color: scheme.error)))),
           ],
           if (url != null) ...[
-            const SizedBox(height: 12),
-            Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [
-              const Text('Conecte o segundo celular pelo QR',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Container(color: Colors.white, padding: const EdgeInsets.all(12),
-                  child: QrImageView(data: url, size: 200, backgroundColor: Colors.white)),
-              const SizedBox(height: 8),
-              SelectableText(url, textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12)),
-              TextButton.icon(onPressed: () => _copy(url),
-                  icon: const Icon(Icons.copy), label: const Text('Copiar endereço privado')),
-              const Text('Não compartilhe este QR fora da sua rede local. Ele contém a chave de controle.',
-                  textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
-            ]))),
-            const SizedBox(height: 12),
-            Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 8),
+            Card(child: ExpansionTile(
+              key: const PageStorageKey<String>('vigia-transmitter-pairing'),
+              leading: const Icon(Icons.qr_code_2_outlined),
+              title: const Text('Parear outro celular'),
+              subtitle: const Text('QR e endereço privado · toque para mostrar'),
+              childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
               children: [
-                const Text('Controle local MCRP', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('FPS medido: ${_details['x-fps-measured'] ?? '...'} · '
-                    'Bateria: ${_details['x-battery-level'] ?? '...'}% · '
-                    'REC: ${s?.recording == true ? 'sim' : 'não'}'),
-                const SizedBox(height: 12),
-                Wrap(spacing: 8, runSpacing: 6, children: [
-                  ActionChip(label: const Text('Foto'), onPressed: () => _command('photo')),
-                  ActionChip(label: const Text('Câmera traseira'), onPressed: () => _command('camera/back')),
-                  ActionChip(label: const Text('Câmera frontal'), onPressed: () => _command('camera/front')),
-                  ActionChip(label: const Text('Eco'), onPressed: () => _command('eco/enable')),
-                  ActionChip(label: const Text('Normal'), onPressed: () => _command('eco/disable')),
-                  ActionChip(label: const Text('FPS 5'), onPressed: () => _command('fps/5')),
-                  ActionChip(label: const Text('FPS 10'), onPressed: () => _command('fps/10')),
-                  ActionChip(label: const Text('480p'), onPressed: () => _command('quality/480')),
-                  ActionChip(label: const Text('720p'), onPressed: () => _command('quality/720')),
-                  ActionChip(label: const Text('Lanterna 30s'), onPressed: () => _command('torch/30')),
-                  ActionChip(label: const Text('Lanterna off'), onPressed: () => _command('torch/off')),
+                const SizedBox(height: 4),
+                Container(color: Colors.white, padding: const EdgeInsets.all(10),
+                    child: QrImageView(data: url, size: 196, backgroundColor: Colors.white)),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(onPressed: () => _copy(url),
+                  icon: const Icon(Icons.copy), label: const Text('Copiar endereço privado')),
+                Text('O QR contém a chave de controle. Não o compartilhe fora da rede local.',
+                    textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              ],
+            )),
+            const SizedBox(height: 8),
+            Card(child: ExpansionTile(
+              key: const PageStorageKey<String>('vigia-transmitter-fallback'),
+              leading: const Icon(Icons.tune_outlined),
+              title: const Text('Controles locais de emergência'),
+              subtitle: const Text('Use normalmente o controle remoto no Ao vivo'),
+              childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+              children: [
+                const SizedBox(height: 5),
+                OutlinedButton.icon(
+                  onPressed: busy || _localCommandBusy || s?.ready != true ? null : _record,
+                  icon: Icon(recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record_rounded),
+                  label: Text(recording ? 'Parar gravação local' : 'Iniciar gravação local'),
+                ),
+                const SizedBox(height: 5),
+                Wrap(spacing: 7, runSpacing: 5, children: [
+                  _localButton('Foto', 'photo'),
+                  _localButton('Traseira', 'camera/back'),
+                  _localButton('Frontal', 'camera/front'),
+                  _localButton('Eco', 'eco/enable'),
+                  _localButton('Normal', 'eco/disable'),
+                  _localButton('5 FPS', 'fps/5'),
+                  _localButton('10 FPS', 'fps/10'),
+                  _localButton('480p', 'quality/480'),
+                  _localButton('720p', 'quality/720'),
+                  _localButton('Lanterna 30s', 'torch/30'),
+                  _localButton('Lanterna off', 'torch/off'),
                 ]),
               ],
-            ))),
+            )),
           ],
-          const SizedBox(height: 12),
-          const Text('Nesta etapa o serviço Kotlin opera sem prévia local para reduzir consumo. '
-              'Os quadros são transmitidos em MJPEG e podem ser vistos no Ao vivo do outro Vigia IA. '
-              'Ao sair desta tela, o serviço continua até você tocar em Parar ou na notificação Android.'),
-          const SizedBox(height: 8),
-          const Text('Beta: use o modo de transmissão Flutter anterior caso o serviço nativo '
-              'apresente incompatibilidade no seu aparelho.'),
+          const SizedBox(height: 10),
+          Text('O serviço Android transmite sem prévia local. Ele continua ativo '
+              'ao sair desta tela, até ser interrompido aqui ou pela notificação do Android.',
+              style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 6),
+          Text('Transmissor nativo em teste. O modo Flutter anterior permanece disponível.',
+              style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );

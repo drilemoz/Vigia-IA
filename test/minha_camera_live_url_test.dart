@@ -11,7 +11,7 @@ void main() {
     final pair = RemoteCameraPairingService.decode(valid);
     expect(pair.address, valid);
     expect(pair.accessKey, token);
-    expect(pair.name, 'Minha Câmera');
+    expect(pair.name, 'Câmera remota');
   });
   test('faixas privadas compatíveis com PhoneCameraUrls 1.4.35', () {
     for (final ip in ['10.0.0.7','172.16.0.1','172.31.255.1',

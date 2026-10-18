@@ -29,6 +29,7 @@ class McrpControlPanel extends StatelessWidget {
   final bool compact;
 
   bool get _recording => status['x-recording'] == '1';
+  bool get _recordingKnown => status['x-recording'] == '0' || status['x-recording'] == '1';
   bool get _eco => status['x-eco'] == '1';
   bool get _torchSupported => status['x-torch-supported'] == '1';
   bool get _torchEnabled => status['x-torch-enabled'] == '1';
@@ -70,8 +71,9 @@ class McrpControlPanel extends StatelessWidget {
         final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
         final actions = <Widget>[
           _action(context, _recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record,
-            _recording ? 'Parar REC' : 'Gravar',
-            () => onCommand(_recording ? 'record/stop' : 'record/start'), selected: _recording),
+            _recording ? 'Parar REC' : 'Iniciar REC',
+            _recordingKnown ? () => onCommand(_recording ? 'record/stop' : 'record/start') : null,
+            selected: _recording),
           _action(context, Icons.photo_camera_outlined, 'Foto', () => onCommand('photo')),
           _action(context, Icons.cameraswitch_outlined, 'Câmera', () => onCommand(
             status['x-camera-facing'] == '1' ? 'camera/back' : 'camera/front')),
@@ -112,6 +114,14 @@ class McrpControlPanel extends StatelessWidget {
       ]),
       const SizedBox(height: 8),
       Wrap(spacing: 12, runSpacing: 4, children: [
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(_recording ? Icons.fiber_manual_record : Icons.radio_button_unchecked,
+            size: 14, color: _recording ? scheme.error : scheme.onSurfaceVariant),
+          const SizedBox(width: 4),
+          Text(_recordingKnown ? (_recording ? 'Gravando no transmissor' : 'Gravação desligada')
+              : 'Gravação sem confirmação',
+            style: TextStyle(fontSize: 12, color: _recording ? scheme.error : scheme.onSurfaceVariant)),
+        ]),
         Text('Zoom: ${_zoomSupported ? '$_zoom%' : 'indisponível'}',
           style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
         Text('FPS medido: ${status['x-fps-measured'] ?? '—'}',
@@ -197,6 +207,8 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
     _client?.close();
     _status = const {};
     _ready = false;
+    _busy = false;
+    _polling = false;
     _error = null;
     try {
       _client = McrpClient(McrpAddress.parse(widget.liveUrl));
@@ -227,7 +239,7 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
       setState(() { _status = status; _ready = true; _error = null; });
     } catch (_) {
       if (mounted && current == _generation && client == _client) {
-        setState(() { _ready = false; _error = 'Sem resposta do controle remoto. Verifique a câmera e a rede.'; });
+        setState(() { _ready = false; _error = 'Sem comunicação com o transmissor. Uma gravação já iniciada pode continuar no aparelho.'; });
       }
     } finally {
       _polling = false;
@@ -237,20 +249,41 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
   Future<void> _command(String action) async {
     final client = _client;
     if (client == null || _busy || !_ready) return;
+    final generation = _generation;
+    final recordingCommand = action == 'record/start' || action == 'record/stop';
+    final expectedRecording = action == 'record/start' ? '1' : '0';
     setState(() { _busy = true; _error = null; });
-    var commandFailed = false;
+    var sent = false;
     try {
       await client.command(action);
+      sent = true;
+      // Confirma o estado real no transmissor. Não envia o POST de novo
+      // quando um pacote de resposta ou a conexão se perde.
+      for (var attempt = 0; attempt < (recordingCommand ? 5 : 1); attempt++) {
+        if (attempt > 0) await Future<void>.delayed(const Duration(milliseconds: 450));
+        final state = await client.status();
+        if (!mounted || _generation != generation || client != _client) return;
+        setState(() { _status = state; _ready = true; _error = null; });
+        if (!recordingCommand || state['x-recording'] == expectedRecording) return;
+      }
+      if (mounted && _generation == generation && client == _client) {
+        setState(() => _error = 'Comando enviado, aguardando confirmação do estado REC.');
+      }
     } catch (error) {
-      commandFailed = true;
-      if (mounted && client == _client) {
-        setState(() => _error = error is StateError ? error.message.toString()
-            : 'O Redmi A3 não confirmou o comando.');
+      if (mounted && _generation == generation && client == _client) {
+        setState(() {
+          if (sent) _ready = false;
+          _error = sent
+            ? 'Comando enviado, mas não foi possível confirmar REC. Reconecte para consultar o estado.'
+            : error is StateError ? error.message.toString()
+            : 'O transmissor não confirmou o comando. Verifique a rede.';
+        });
       }
     } finally {
-      if (mounted && client == _client) setState(() => _busy = false);
+      if (mounted && _generation == generation && client == _client) {
+        setState(() => _busy = false);
+      }
     }
-    if (!commandFailed) await _refresh();
   }
 
   @override
@@ -274,16 +307,21 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
           Row(children: [
             Icon(Icons.settings_remote_outlined, color: scheme.primary),
             const SizedBox(width: 8),
-            const Expanded(child: Text('Controle remoto · Minha Câmera',
-              style: TextStyle(fontWeight: FontWeight.w800))),
+            Expanded(child: Text(
+              'Controle remoto · ${_status['x-device-model']?.trim().isNotEmpty == true ? _status['x-device-model'] : 'Vigia IA'}',
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w800))),
             Icon(_ready ? Icons.wifi : Icons.wifi_off,
-              size: 17, color: _ready ? Colors.green : scheme.error),
+              size: 17, color: _ready ? scheme.primary : scheme.error),
           ]),
           if (_error != null) ...[
             const SizedBox(height: 7),
             Text(_error!, style: TextStyle(fontSize: 12, color: scheme.error)),
           ],
           const SizedBox(height: 9),
+          if (!_ready)
+            Text('REC: estado desconhecido durante a desconexão.',
+              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
           if (!_ready)
             OutlinedButton.icon(onPressed: _busy ? null : () => unawaited(_refresh()),
               icon: const Icon(Icons.refresh), label: const Text('Conectar controles'))
@@ -292,8 +330,9 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
               compact: true, onCommand: _command,
               onReconnect: () => unawaited(_refresh())),
           const SizedBox(height: 5),
-          Text('Os comandos controlam o transmissor; IA e vídeo continuam no Vigia IA. '
-              'A visualização Ao vivo usa MJPEG.',
+          Text('Iniciar/Parar REC grava no celular transmissor. Uma gravação ativa '
+              'não depende da conexão com o receptor. Para enviar novos comandos, '
+              'os aparelhos precisam estar conectados na rede local.',
             style: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant)),
         ]),
       ),

@@ -28,7 +28,7 @@ Future<int> migrateMinhaCameraSavedEntries({
     if (!exists) {
       await cameras.save(CameraEndpoint(
         id: 'cam_${DateTime.now().microsecondsSinceEpoch}_$transferred',
-        name: saved.name,
+        name: saved.name == 'Minha Câmera' ? 'Câmera remota' : saved.name,
         type: CameraEndpointType.remotePhone,
         address: pairing.address,
         accessKey: pairing.accessKey,

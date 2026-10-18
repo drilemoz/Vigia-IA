@@ -26,7 +26,7 @@ class MinhaCameraTelemetry {
       receivedAt: now,
       online: true,
       bikeMode: false,
-      name: 'Minha Câmera',
+      name: 'Câmera remota',
       networkLatencyMs: networkLatencyMs,
       device: DeviceTelemetrySnapshot(
         createdAt: now,

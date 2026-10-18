@@ -63,14 +63,14 @@ class MinhaCameraMjpegSource implements VideoSource {
   Future<void> start() async {
     if (_disposed) return;
     if (MinhaCameraLiveUrl.parse(liveUrl) == null) {
-      throw const FormatException('QR do Minha Câmera inválido ou fora da rede local.');
+      throw const FormatException('QR da câmera remota inválido ou fora da rede local.');
     }
     await stop();
     final generation = _generation;
     _client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 5)
       ..autoUncompress = false;
-    _status(VideoSourceState.connecting, 'Conectando ao Minha Câmera…');
+    _status(VideoSourceState.connecting, 'Conectando à câmera remota…');
     // A leitura de /status é opcional. Nenhuma falha de telemetria interrompe MJPEG.
     try {
       _telemetryClient = McrpClient(McrpAddress.parse(liveUrl));
@@ -96,7 +96,7 @@ class MinhaCameraMjpegSource implements VideoSource {
       if (response.statusCode == HttpStatus.conflict) {
         await response.drain<void>();
         _status(VideoSourceState.error,
-            'Minha Câmera está em H.264. Selecione MJPEG no transmissor.');
+            'A câmera remota está em H.264. Selecione MJPEG no transmissor.');
         return;
       }
       if (response.statusCode != HttpStatus.ok ||
@@ -114,8 +114,8 @@ class MinhaCameraMjpegSource implements VideoSource {
           receivedAny = true;
           _failures = 0;
           _status(VideoSourceState.streaming, emitFrames
-              ? 'Minha Câmera online • IA no Vigia'
-              : 'Minha Câmera online • somente vídeo');
+              ? 'Câmera remota online • IA no Vigia'
+              : 'Câmera remota online • somente vídeo');
           final now = DateTime.now();
           if (_lastPreview == null ||
               now.difference(_lastPreview!) >= const Duration(milliseconds: 100)) {
@@ -136,7 +136,7 @@ class MinhaCameraMjpegSource implements VideoSource {
       if (_disposed || generation != _generation) return;
       _failures++;
       _status(VideoSourceState.reconnecting,
-          'Reconectando ao Minha Câmera na rede local…');
+          'Reconectando à câmera remota na rede local…');
       _retry?.cancel();
       _retry = Timer(Duration(seconds: (_failures * 2).clamp(2, 12).toInt()),
           () => unawaited(_receive(generation)));
@@ -194,7 +194,7 @@ class MinhaCameraMjpegSource implements VideoSource {
   Widget buildPreview() => ValueListenableBuilder<Uint8List?>(
         valueListenable: _preview,
         builder: (context, bytes, _) => bytes == null
-            ? const Center(child: Text('Aguardando vídeo do Minha Câmera…'))
+            ? const Center(child: Text('Aguardando vídeo da câmera remota…'))
             : Center(child: Image.memory(
                 bytes, fit: BoxFit.contain, gaplessPlayback: true,
                 filterQuality: FilterQuality.low,
@@ -218,7 +218,7 @@ class MinhaCameraMjpegSource implements VideoSource {
     _lastAnalysis = null;
     _preview.value = null;
     _failures = 0;
-    _status(VideoSourceState.stopped, 'Minha Câmera desconectada');
+    _status(VideoSourceState.stopped, 'Câmera remota desconectada');
   }
 
   @override

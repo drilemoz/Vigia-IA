@@ -487,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         CameraEndpointType.rtsp => 'RTSP',
                         CameraEndpointType.remotePhone =>
                           MinhaCameraLiveUrl.isValid(camera.address)
-                              ? 'Minha Câmera · MJPEG'
+                              ? 'Câmera remota · MJPEG'
                               : 'Celular remoto',
                         CameraEndpointType.esp32 => 'ESP32',
                       }),

@@ -1,4 +1,14 @@
-# Validação Vigia IA 1.0.275+275
+# Validação Vigia IA 1.0.276+276
+
+## Transmissor compacto e gravação via Ao vivo
+
+- Verificador `tool/verify_project.sh`: aprovado, incluindo 165 testes Python na suíte preventiva principal e 270 testes somados nas suítes emitidas pelo script.
+
+- Contratos de interface verificam QR e controles locais expansíveis e ausência de prévia local.
+- Cliente MCRP usa `record/start` e `record/stop`, consulta `x-recording` e trata ausência de confirmação sem repetição de POST.
+- Identidade de câmera remota atualizada nas telas ativas, sem alterar endpoints ou token do QR.
+- Flutter Analyze, Flutter Test, compilação Android e testes no Redmi A3 ainda devem ser confirmados em CI/aparelho.
+
 
 ## APK 228: correção de símbolo Kotlin ausente (2026-10-17)
 

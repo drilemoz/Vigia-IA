@@ -17,7 +17,7 @@ class McrpAddress {
         uri.query.isNotEmpty || uri.fragment.isNotEmpty || uri.port != 8765 ||
         !RegExp(r'^/live/[0-9a-f]{32}$').hasMatch(uri.path) ||
         !_isLocalIpv4(uri.host)) {
-      throw const FormatException('Informe o QR ou URL privada /live/ do Minha Câmera na rede local.');
+      throw const FormatException('Informe o QR ou URL privada /live/ do transmissor na rede local.');
     }
     return McrpAddress(uri);
   }

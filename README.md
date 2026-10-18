@@ -1,4 +1,11 @@
-## 1.0.275+275: integração NV21 do transmissor nativo, APK 228 (2026-10-17)
+## 1.0.276+276: controle remoto e transmissor simplificado (2026-10-17)
+
+- Modo transmissor nativo exibe estado, duração, bateria, temperatura, FPS e REC sem prévia local. QR e controles locais foram organizados em painéis expansíveis.
+- O painel **Ao vivo** inicia e para a gravação no transmissor por MCRP, consulta o estado real após o comando e sinaliza perda de comunicação sem assumir que REC parou.
+- Câmeras remotas ganham identificação Vigia IA/celular remoto nas telas ativas; o formato do QR MCRP v1 e sua compatibilidade com o aplicativo legado permanecem intactos.
+- Testes completos Flutter/Android e validação de transmissão no Redmi A3 continuam necessários.
+
+## 1.0.276+276: integração NV21 do transmissor nativo, APK 228 (2026-10-17)
 
 - Corrigida a classe ausente `Nv21Frames`, utilizada na captura MJPEG do serviço nativo para rotacionar os quadros em 0°, 90°, 180° e 270°.
 - Fonte Kotlin preservada também em `tool/android/native_transmitter`, permitindo recriar o Android sem perder a implementação.
@@ -203,7 +210,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.275+275`
+**Versão atual:** `1.0.276+276`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

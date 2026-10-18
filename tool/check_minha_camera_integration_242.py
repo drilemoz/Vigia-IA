@@ -17,7 +17,7 @@ def check():
       assert (R/path).is_file(), path
     qr=file('lib/services/remote_camera_pairing_service.dart')
     assert 'MinhaCameraLiveUrl.parse(raw)' in qr
-    assert "name: 'Minha Câmera'" in qr
+    assert "name: 'Câmera remota'" in qr
     scanner=file('lib/screens/phone_pairing_scanner_screen.dart')
     assert 'RemoteCameraPairingService.decode(raw)' in scanner
     source=file('lib/sources/minha_camera_mjpeg_source.dart')
@@ -44,7 +44,7 @@ def check():
     registry=file('lib/services/camera_registry_service.dart')
     assert "replaceFirst('/live/', '/control/')" in registry
     assert "'$controlPath/status'" in registry
-    assert "'Minha Câmera online (stream não verificado)'" in registry
+    assert "'Câmera remota online (stream não verificado)'" in registry
     assert re.search(r'^version: 1\.0\.(\d+)\+(\d+)$', file('pubspec.yaml'), re.M) is not None
     vers = re.search(r'^version: 1\.0\.(\d+)\+(\d+)$', file('pubspec.yaml'), re.M)
     assert vers and int(vers.group(1)) >= 242 and vers.group(1) == vers.group(2)

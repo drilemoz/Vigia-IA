@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.275',
+          version: '1.0.276',
           current: true,
+          changes: [
+            'Tela do transmissor com status e pareamento mais organizados.',
+            'Gravação controlada pelo Ao vivo com confirmação do transmissor.',
+            'Câmeras remotas com identificação clara do aparelho.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.275',
           changes: [
             'Transmissor nativo inclui a rotação dos quadros da câmera.',
             'Mantidos a visualização ao vivo e os comandos remotos MCRP.',
@@ -2453,8 +2462,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.275',
+          version: '1.0.276',
           current: true,
+          changes: [
+            'Tela do transmissor com status e pareamento mais organizados.',
+            'Gravação controlada pelo Ao vivo com confirmação do transmissor.',
+            'Câmeras remotas com identificação clara do aparelho.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.275',
           changes: [
             'Transmissor nativo inclui a rotação dos quadros da câmera.',
             'Mantidos a visualização ao vivo e os comandos remotos MCRP.',

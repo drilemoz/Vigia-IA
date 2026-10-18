@@ -17,7 +17,7 @@ void main() {
         onCommand: (action) async => commands.add(action),
       ),
     ))));
-    await tester.tap(find.text('Gravar'));
+    await tester.tap(find.text('Iniciar REC'));
     await tester.pump();
     await tester.tap(find.text('Zoom +'));
     await tester.pump();
@@ -26,7 +26,21 @@ void main() {
     expect(commands, ['record/start', 'zoom/50', 'torch/30']);
     expect(find.text('Zoom: 40%'), findsOneWidget);
     expect(find.text('FPS medido: 12'), findsOneWidget);
+    expect(find.text('Gravação desligada'), findsOneWidget);
     expect(find.text('Codec'), findsNothing);
+  });
+
+  testWidgets('REC ativo muda o botão para parada remota', (tester) async {
+    final commands = <String>[];
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: McrpControlPanel(
+      status: const {'x-recording': '1'},
+      working: false,
+      onCommand: (action) async => commands.add(action),
+    ))));
+    expect(find.text('Gravando no transmissor'), findsOneWidget);
+    await tester.tap(find.text('Parar REC'));
+    await tester.pump();
+    expect(commands, ['record/stop']);
   });
 
   testWidgets('lanterna e zoom indisponíveis ficam desabilitados', (tester) async {
@@ -38,6 +52,8 @@ void main() {
     ))));
     await tester.tap(find.text('Lanterna'));
     await tester.tap(find.text('Zoom +'));
+    await tester.pump();
+    await tester.tap(find.text('Iniciar REC'));
     await tester.pump();
     expect(commands, isEmpty);
   });

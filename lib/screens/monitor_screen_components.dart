@@ -447,12 +447,12 @@ class _DeviceStatusStrip extends StatelessWidget {
   }) {
     final scheme = Theme.of(context).colorScheme;
     final firstName = primaryLabel?.trim();
-    final cameraName = firstName != null && firstName.isNotEmpty && firstName != 'Local'
+    final cameraName = firstName != null && firstName.isNotEmpty && firstName != 'Local' && firstName != 'Minha Câmera'
         ? firstName
         : switch (sourceType) {
             VideoSourceType.localCamera => 'Câmera local',
             VideoSourceType.rtsp => 'Câmera RTSP',
-            VideoSourceType.remotePhone => 'Minha Câmera',
+            VideoSourceType.remotePhone => 'Câmera remota',
             VideoSourceType.esp32 => 'Câmera ESP32',
           };
     return Container(

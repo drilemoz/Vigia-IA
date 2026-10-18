@@ -1,4 +1,9 @@
-# Arquitetura — Vigia IA 1.0.275+275
+# Arquitetura — Vigia IA 1.0.276+276
+
+## Transmissor nativo: interface mínima e comando REC confirmado
+
+O motor `com.minhacamera` permanece com o mesmo protocolo MCRP v1/URL privada `/live/<token>` para não quebrar receptores existentes. A interface Flutter `native_transmitter_screen.dart` mostra apenas status, telemetria e botões de início/parada; QR/token e controles de fallback ficam em painéis expansíveis por privacidade e economia de espaço. Nenhuma prévia de vídeo é criada nesse modo. `McrpLiveRemoteControls` continua vinculado exclusivamente a fontes `/live/` compatíveis, sem enviar comandos a RTSP/ESP32. Ao usar `record/start` ou `record/stop`, só exibe o novo estado após consultar `X-Recording` do transmissor, sem repetir automaticamente POSTs em desconexões. O transmissor mantém uma gravação já iniciada enquanto a sessão continua ativa independentemente do receptor; iniciar novos comandos requer rede local funcional.
+
 
 ## Buildfix APK 228: conversão NV21 compartilhada
 

@@ -118,7 +118,7 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
       type: VideoSourceType.remotePhone,
       remoteBaseUrl: address,
       remoteAccessKey: key,
-      displayName: isMinhaCamera ? 'Minha Câmera' : 'Celular remoto',
+      displayName: isMinhaCamera ? 'Câmera remota' : 'Celular remoto',
       analysisEnabled: _analyze,
       analysisInterval: profile.source.analysisInterval,
     );
@@ -221,14 +221,14 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
                     enableSuggestions: false,
                     decoration: const InputDecoration(
                       labelText: 'Chave de sessão',
-                      helperText: 'Para Minha Câmera, o QR contém a chave automaticamente.',
+                      helperText: 'Para a câmera remota, o QR contém a chave automaticamente.',
                     ),
                   ),
                   SwitchListTile.adaptive(
                     value: _analyze,
                     onChanged: (value) => setState(() => _analyze = value),
                     title: const Text('Analisar vídeo com IA neste aparelho'),
-                    subtitle: const Text('Desligado: somente imagem ao vivo, sem inferência por quadro do Minha Câmera.'),
+                    subtitle: const Text('Desligado: somente imagem ao vivo, sem análise por IA dos quadros remotos.'),
                   ),
                   const SizedBox(height: 18),
                   FilledButton.icon(

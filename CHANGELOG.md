@@ -1,3 +1,10 @@
+## 1.0.276+276: transmissor compacto e gravação MCRP controlada no Ao vivo (2026-10-17)
+
+- Reorganizada a tela nativa em status e telemetria compactos, QR expansível e controles locais de emergência.
+- O receptor consulta o estado real de REC após iniciar/parar por MCRP v1, sem repetir POST e com indicação de desconexão/estado não confirmado.
+- Nova identidade de câmera remota nas interfaces ativas, preservando compatibilidade com QR antigo, motor Kotlin e transmissor Flutter legado.
+- Compilação Android e validação no Redmi A3 ainda pendentes.
+
 ## 1.0.275+275: Kotlin NV21 ausente no APK 228 (2026-10-17)
 
 - APK 228 ultrapassou o Flutter Analyze e os testes; falhou na compilação Kotlin em `PhoneCameraBackgroundService.kt:642` (`Unresolved reference 'Nv21Frames'`).
