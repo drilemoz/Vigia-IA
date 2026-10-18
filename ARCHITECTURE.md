@@ -1,4 +1,11 @@
-# Arquitetura — Vigia IA 1.0.284+284
+# Arquitetura — Vigia IA 1.0.285+285
+
+**Fluxo Planejamento:** tela inicial mostra biblioteca e CTA Nova rota, assistente `showDialog` (seleção de pontos e preferências), seguida de cálculo via `MapCyclingRouteService` e painel de geometria. `LocationTrackingService.ensureAvailable` e `currentPosition` são chamados apenas ao tocar Meu local, sem assinatura `positionStream`, sem serviço permanente.
+
+**Exportação:** `PlannedTripExportService` compõe GPX 1.1 de track com pontos reais e JSON da viagem usando `PlannedBikeTrip.toJson()`. `NativePlatformService.saveBytesWithPicker` usa o SAF ACTION_CREATE_DOCUMENT existente, sem permissão de armazenamento amplo. Apagar só altera a biblioteca após confirmação.
+
+## Base da versão 1.0.284
+
 
 **Planejamento modular:** `TripPlanningScreen` só monta os serviços de busca/rota quando acessada pela Home. `MapDestinationSearchService` preserva o cache local e requer submissão explícita para Nominatim. `MapCyclingRouteService` consulta Valhalla sob ação do usuário. `BikeTripPlanner`/`BikeTripSchedule` calculam dias/horários, com pernoites marcados aproximados se não houver local validado.
 

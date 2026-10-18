@@ -8,16 +8,16 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.284', build: 284);
+      AppBuildVersion(version: '1.0.285', build: 285);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.284', build: 284),
+      version: AppBuildVersion(version: '1.0.285', build: 285),
       changes: <String>[
-        'Novo Planejamento de cicloviagens na tela inicial.',
-        'Calcule rotas, organize dias e pausas e compare percursos.',
-        'Salve viagens para consultar trajetos sem internet.',
-        'Tema inicial acompanha o modo do aparelho.',
+        'Planejamento com assistente em etapas para criar rotas.',
+        'Comece a viagem pela localização atual ou escolha cidades.',
+        'Veja o mapa da viagem e salve ou exporte seus roteiros.',
+        'Exporte em GPX ou JSON e consulte viagens salvas offline.',
       ],
     ),
   ]);

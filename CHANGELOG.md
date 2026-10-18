@@ -1,3 +1,12 @@
+## 1.0.285+285: Planejamento com wizard, GPS opcional e exportação (2026-10-18)
+
+- Planejamento abre com uma tela limpa, ação Nova rota e biblioteca local de viagens.
+- Assistente modal em duas etapas: origem/destino e ritmo da pedalada, incluindo Meu local com GPS solicitado só após toque explícito.
+- Após o cálculo online, prévia mostra mapa do trajeto, alternativas, dias e três ações próximas: Salvar, Apagar e Exportar.
+- Exportação para GPX (trajeto real em formato aberto) ou JSON integral (cidades, alternativas e preferências), pelo seletor de documentos Android já existente.
+- Nenhum download de mapa ou recálculo offline foi introduzido; biblioteca JSON esquema 1 permanece compatível.
+- Compatibilidade com câmeras, IA, MCRP, temas e mapas offline preservada.
+
 ## 1.0.284+284: Planejamento de cicloviagens e verificador de tema (2026-10-18)
 
 - Corrigido o verificador preventivo que ainda exigia Escuro como tema padrão. Agora exige Sistema na primeira instalação sem afetar preferências existentes.

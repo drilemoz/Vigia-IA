@@ -1,3 +1,10 @@
+## 1.0.285+285 · Planejamento em assistente
+
+- Abra **Planejamento** na Home e escolha **Nova rota**. A tela inicial conserva a lista de viagens salvas sem mostrar formulário antes da ação.
+- Assistente de duas etapas: origem/destino (incluindo **Meu local** por GPS voluntário) e velocidade, jornada, pausas e saída.
+- Após a consulta online, o resultado traz mapa, distâncias e divisão em dias. Ações **Salvar**, **Apagar** e **Exportar** (GPX/JSON) ficam junto ao mapa.
+- Traçados salvos permanecem consultáveis offline, mas recálculo e busca de cidade nova exigem internet.
+
 ## 1.0.284+284 · Planejamento na Home
 
 - Card **Planejamento**: escolha cidades sem GPS, consulte sugestões locais e pesquise online somente ao confirmar.
@@ -271,7 +278,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.284+284`
+**Versão atual:** `1.0.285+285`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

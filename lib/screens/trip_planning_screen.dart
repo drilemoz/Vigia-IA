@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,6 +15,9 @@ import '../models/map_travel_mode.dart';
 import '../models/planned_bike_trip.dart';
 import '../services/bike_trip_planner.dart';
 import '../services/bike_trip_schedule.dart';
+import '../services/location_tracking_service.dart';
+import '../services/native_platform_service.dart';
+import '../services/planned_trip_export_service.dart';
 import '../services/map_cycling_route_service.dart';
 import '../services/map_destination_search_service.dart';
 import '../services/map_view_settings_service.dart';
@@ -34,6 +39,7 @@ class TripPlanningScreen extends StatefulWidget {
 }
 
 class _TripPlanningScreenState extends State<TripPlanningScreen> {
+  final _previewKey = GlobalKey();
   final _originField = TextEditingController();
   final _destinationField = TextEditingController();
   final _citySearch = MapDestinationSearchService.instance;
@@ -48,6 +54,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   PlannedBikeTrip? _draft;
   List<PlannedBikeTrip> _saved = const <PlannedBikeTrip>[];
   bool _lookingForOrigin = true;
+  bool _locating = false;
+  StateSetter? _wizardRefresh;
   bool _busy = false;
   bool _loadingLibrary = true;
   bool _libraryReadFailed = false;
@@ -95,7 +103,14 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   }
 
   void _searchChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    _refreshWizard();
+  }
+
+  void _refreshWizard() {
+    final refresh = _wizardRefresh;
+    if (mounted && refresh != null) refresh(() {});
   }
 
   @override
@@ -125,6 +140,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _draft = null;
       _message = null;
     });
+    _refreshWizard();
     _citySearch.updateLocalQuery(
       query: value,
       current: _reference,
@@ -142,6 +158,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       return;
     }
     setState(() => _lookingForOrigin = origin);
+    _refreshWizard();
     await _citySearch.searchSubmitted(
       query: text,
       current: _reference,
@@ -166,6 +183,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _draft = null;
       _message = null;
     });
+    _refreshWizard();
+    FocusManager.instance.primaryFocus?.unfocus();
     unawaited(_citySearch.rememberRecentPlace(place));
     _citySearch.updateLocalQuery(
       query: '', current: _reference,
@@ -173,6 +192,256 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       offlinePoiPackages: const [], onlyDownloaded: true,
     );
   }
+
+  void _activateCityField({required bool origin}) {
+    setState(() => _lookingForOrigin = origin);
+    _citySearch.updateLocalQuery(
+      query: (origin ? _originField : _destinationField).text,
+      current: _reference,
+      offlineMaps: _offlineMaps.packages,
+      offlinePoiPackages: const [],
+      onlyDownloaded: true,
+    );
+    _refreshWizard();
+  }
+
+  /// GPS só é ligado nesta ação explícita. Sem escuta contínua nem geocoding.
+  Future<void> _useCurrentLocation() async {
+    if (_locating) return;
+    setState(() { _locating = true; _message = null; });
+    _refreshWizard();
+    try {
+      final service = LocationTrackingService.instance;
+      final availability = await service.ensureAvailable(requestPermission: true);
+      if (availability != LocationTrackingAvailability.ready) {
+        final detail = switch (availability) {
+          LocationTrackingAvailability.servicesDisabled =>
+            'Ative a localização do Android e tente novamente.',
+          LocationTrackingAvailability.permissionDeniedForever =>
+            'Autorize a localização para o Vigia IA nas configurações do Android.',
+          _ => 'Permissão de localização não concedida. Use uma cidade manualmente.',
+        };
+        if (mounted) setState(() => _message = detail);
+        return;
+      }
+      final position = await service.currentPosition().timeout(const Duration(seconds: 20));
+      if (!mounted) return;
+      final location = MapDestinationSearchResult(
+        id: 'gps:${position.latitude.toStringAsFixed(6)},${position.longitude.toStringAsFixed(6)}',
+        title: 'Meu local',
+        subtitle: 'GPS: ${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}',
+        latitude: position.latitude,
+        longitude: position.longitude,
+        distanceMeters: 0,
+        kind: MapDestinationKind.place,
+        source: 'gps',
+      );
+      setState(() {
+        _origin = location;
+        _originField.text = 'Meu local (GPS)';
+        _lookingForOrigin = true;
+        _draft = null;
+        _message = null;
+      });
+      _citySearch.updateLocalQuery(
+        query: '', current: _reference, offlineMaps: _offlineMaps.packages,
+        offlinePoiPackages: const [], onlyDownloaded: true,
+      );
+    } catch (_) {
+      if (mounted) setState(() => _message =
+          'Não foi possível obter uma posição GPS atual. Confira sinal e permissão.');
+    } finally {
+      if (mounted) {
+        setState(() => _locating = false);
+        _refreshWizard();
+      }
+    }
+  }
+
+  Future<void> _newRouteWizard() async {
+    if (_busy || _loadingLibrary) return;
+    _originField.clear();
+    _destinationField.clear();
+    setState(() {
+      _origin = null;
+      _destination = null;
+      _draft = null;
+      _message = null;
+      _lookingForOrigin = true;
+    });
+    _citySearch.updateLocalQuery(
+      query: '', current: _reference, offlineMaps: _offlineMaps.packages,
+      offlinePoiPackages: const [], onlyDownloaded: true,
+    );
+    var step = 0;
+    var shouldCalculate = false;
+    try {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (ctx, dialogSetState) {
+            _wizardRefresh = dialogSetState;
+            final validCities = _origin != null && _destination != null &&
+                (_origin!.latitude - _destination!.latitude).abs() +
+                (_origin!.longitude - _destination!.longitude).abs() > 0.000002;
+            return AlertDialog(
+              icon: Icon(step == 0 ? Icons.route_rounded : Icons.directions_bike_rounded),
+              title: Text(step == 0 ? 'Nova rota · 1 de 2' : 'Ritmo da pedalada · 2 de 2'),
+              content: SizedBox(
+                width: 540,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.55),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: step == 0 ? <Widget>[
+                        Text('Selecione origem e destino. A lupa pesquisa online; itens salvos aparecem offline.',
+                          style: Theme.of(ctx).textTheme.bodySmall),
+                        const SizedBox(height: 14),
+                        _cityField(origin: true),
+                        const SizedBox(height: 6),
+                        OutlinedButton.icon(
+                          onPressed: _locating ? null : () => unawaited(_useCurrentLocation()),
+                          icon: Icon(_locating ? Icons.hourglass_top : Icons.my_location_rounded),
+                          label: Text(_locating ? 'Localizando…' : 'Usar meu local como origem'),
+                        ),
+                        const SizedBox(height: 12),
+                        _cityField(origin: false),
+                        const SizedBox(height: 8),
+                        _searchResults(),
+                        if (_message != null) Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Text(_message!, style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+                        ),
+                      ] : <Widget>[
+                        Text('${_origin!.title} → ${_destination!.title}',
+                            textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleSmall),
+                        const SizedBox(height: 10),
+                        _settings(),
+                        const SizedBox(height: 6),
+                        Text('Os tempos são estimativas, não incluem relevo e vento.',
+                            style: Theme.of(ctx).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancelar'),
+                ),
+                if (step == 1)
+                  OutlinedButton(
+                    onPressed: () => dialogSetState(() => step = 0),
+                    child: const Text('Voltar'),
+                  ),
+                FilledButton.icon(
+                  onPressed: step == 0
+                      ? (validCities && !_locating
+                          ? () { FocusManager.instance.primaryFocus?.unfocus(); dialogSetState(() => step = 1); }
+                          : null)
+                      : () { shouldCalculate = true; Navigator.pop(ctx); },
+                  icon: Icon(step == 0 ? Icons.arrow_forward_rounded : Icons.route_rounded),
+                  label: Text(step == 0 ? 'Avançar' : 'Ver trajeto'),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    } finally {
+      _wizardRefresh = null;
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    if (shouldCalculate && mounted) await _calculate();
+  }
+
+  Future<void> _exportTrip(PlannedBikeTrip trip, String format) async {
+    try {
+      final isGpx = format == 'gpx';
+      final content = isGpx
+          ? PlannedTripExportService.toGpx(trip)
+          : PlannedTripExportService.toJson(trip);
+      final name = 'vigiaia_viagem_${DateTime.now().millisecondsSinceEpoch}.$format';
+      final saved = await NativePlatformService.instance.saveBytesWithPicker(
+        fileName: name,
+        mimeType: isGpx ? 'application/gpx+xml' : 'application/json',
+        bytes: Uint8List.fromList(utf8.encode(content)),
+      );
+      if (!mounted) return;
+      if (saved != null && saved.isNotEmpty) {
+        _notify('Arquivo .$format exportado com sucesso.');
+      } else {
+        _notify('Exportação cancelada ou não concluída.');
+      }
+    } catch (_) {
+      _notify('Não foi possível exportar esta rota.');
+    }
+  }
+
+  Future<void> _discardOrDeleteCurrent(PlannedBikeTrip trip) async {
+    final alreadySaved = _saved.any((saved) => saved.id == trip.id);
+    if (alreadySaved) {
+      await _delete(trip);
+      return;
+    }
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Descartar rota?'),
+        content: const Text('Esta rota ainda não foi salva. Descartar o resultado atual?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Descartar')),
+        ],
+      ),
+    );
+    if (discard == true && mounted) setState(() => _draft = null);
+  }
+
+  Widget _routeActions(PlannedBikeTrip trip) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Row(children: [
+      Expanded(child: FilledButton.icon(
+        onPressed: _libraryReadFailed ? null : () => unawaited(_save()),
+        icon: const Icon(Icons.save_outlined, size: 19),
+        label: const Text('Salvar'),
+      )),
+      const SizedBox(width: 6),
+      Expanded(child: OutlinedButton.icon(
+        onPressed: _libraryReadFailed && _saved.any((t) => t.id == trip.id)
+            ? null : () => unawaited(_discardOrDeleteCurrent(trip)),
+        icon: const Icon(Icons.delete_outline_rounded, size: 19),
+        label: const Text('Apagar'),
+      )),
+      const SizedBox(width: 6),
+      Expanded(child: PopupMenuButton<String>(
+        tooltip: 'Exportar planejamento',
+        onSelected: (format) => unawaited(_exportTrip(trip, format)),
+        itemBuilder: (ctx) => const [
+          PopupMenuItem(value: 'gpx', child: Text('Exportar trajeto GPX')),
+          PopupMenuItem(value: 'json', child: Text('Exportar planejamento JSON')),
+        ],
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(Icons.ios_share_rounded, size: 19),
+              SizedBox(width: 4),
+              Flexible(child: Text('Exportar', maxLines: 1)),
+            ]),
+          ),
+        ),
+      )),
+    ]),
+  );
 
   void _notify(String message) {
     if (!mounted) return;
@@ -233,8 +502,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
 
   void _refreshDraftPreferences() {
     final draft = _draft;
-    if (draft == null) return;
-    setState(() => _draft = draft.copyWith(
+    if (draft != null) setState(() => _draft = draft.copyWith(
       averageSpeedKmh: _speedKmh,
       ridingHoursPerDay: _hoursPerDay,
       departureMinute: _departure.hour * 60 + _departure.minute,
@@ -242,6 +510,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       breakMinutes: _breakMinutes,
       lunchMinutes: _lunchMinutes,
     ));
+    _refreshWizard();
   }
 
   Future<void> _findStops({required bool online}) async {
@@ -307,7 +576,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     try {
       final updated = _saved.where((item) => item.id != trip.id).toList();
       await _library.saveAll(updated);
-      if (mounted) setState(() => _saved = updated);
+      if (mounted) setState(() {
+        _saved = updated;
+        if (_draft?.id == trip.id) _draft = null;
+      });
     } catch (_) {
       _notify('Não foi possível excluir a viagem.');
     }
@@ -328,6 +600,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _breakMinutes = trip.breakMinutes;
       _lunchMinutes = trip.lunchMinutes;
       _message = null;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final previewContext = _previewKey.currentContext;
+      if (mounted && previewContext != null) {
+        Scrollable.ensureVisible(previewContext,
+          duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
+      }
     });
   }
 
@@ -370,7 +649,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           ),
         ),
         textInputAction: TextInputAction.search,
-        onTap: () => setState(() => _lookingForOrigin = origin),
+        onTap: () => _activateCityField(origin: origin),
         onChanged: (text) => _typing(text, origin: origin),
         onSubmitted: (_) => unawaited(_searchCity(origin: origin)),
       ),
@@ -484,10 +763,23 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final route = trip.selectedRoute;
     final plan = _plan(trip);
     final estimate = plan.estimate;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+    return Column(key: _previewKey, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SizedBox(height: 12),
       Text('Resultado do planejamento', style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 8),
+      if (trip.routes.length > 1)
+        SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
+          for (var i = 0; i < trip.routes.length; i++)
+            Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(
+              label: Text('Rota ${i + 1} · ${(trip.routes[i].distanceMeters / 1000).toStringAsFixed(0)} km'),
+              selected: trip.selectedIndex == i,
+              onSelected: (_) => setState(() => _draft = trip.copyWith(selectedIndex: i, places: const [])),
+            )),
+        ])),
+      const SizedBox(height: 8),
+      _routeMap(route),
+      _routeActions(trip),
+      const SizedBox(height: 6),
       Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
         Text('${trip.origin.title} → ${trip.destination.title}',
           style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
@@ -501,17 +793,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         const Text('Estimativas com velocidade definida. Relevo, vento, segurança e desvios não foram avaliados.',
           style: TextStyle(fontSize: 11), textAlign: TextAlign.center),
       ]))),
-      if (trip.routes.length > 1)
-        SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
-          for (var i = 0; i < trip.routes.length; i++)
-            Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(
-              label: Text('Rota ${i + 1} · ${(trip.routes[i].distanceMeters / 1000).toStringAsFixed(0)} km'),
-              selected: trip.selectedIndex == i,
-              onSelected: (_) => setState(() => _draft = trip.copyWith(selectedIndex: i, places: const [])),
-            )),
-        ])),
-      const SizedBox(height: 8),
-      _routeMap(route),
       const SizedBox(height: 6),
       Text(_showOnlineBaseMap
         ? 'Mapa online: OpenStreetMap. A geometria da rota permanece salva offline.'
@@ -555,12 +836,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       Text('Etapas da viagem', style: Theme.of(context).textTheme.titleMedium),
       for (final day in plan.days)
         _dayCard(day, trip),
-      const SizedBox(height: 8),
-      FilledButton.icon(
-        onPressed: () => unawaited(_save()),
-        icon: const Icon(Icons.save_outlined),
-        label: const Text('Salvar viagem para consultar offline'),
-      ),
       const SizedBox(height: 8),
       OutlinedButton.icon(
         onPressed: () => unawaited(_openMap(trip)),
@@ -697,23 +972,33 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     body: SafeArea(child: Center(child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 760),
       child: ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 32), children: [
-        Text('Nova cicloviagem', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 4),
-        const Text('Escolha cidades independentes da posição GPS. A busca online é acionada pela lupa.'),
-        const SizedBox(height: 14),
-        _cityField(origin: true),
-        const SizedBox(height: 12),
-        _cityField(origin: false),
-        _searchResults(),
-        const SizedBox(height: 10),
-        _settings(),
-        const SizedBox(height: 8),
-        FilledButton.icon(
-          onPressed: _busy ? null : () => unawaited(_calculate()),
-          icon: const Icon(Icons.route_rounded),
-          label: Text(_busy ? 'Calculando rota…' : 'Calcular rotas para bicicleta'),
-        ),
-        if (_busy) const LinearProgressIndicator(),
+        Card(child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              Icon(Icons.route_rounded, color: Theme.of(context).colorScheme.primary, size: 28),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Planeje sua próxima viagem', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 3),
+                Text('Escolha duas cidades ou use seu local atual. Ajuste o ritmo e visualize o trajeto.',
+                    style: Theme.of(context).textTheme.bodySmall),
+              ])),
+            ]),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: _busy || _loadingLibrary ? null : () => unawaited(_newRouteWizard()),
+              icon: const Icon(Icons.add_road_rounded),
+              label: const Text('Nova rota'),
+            ),
+          ]),
+        )),
+        if (_busy) ...[
+          const SizedBox(height: 12),
+          const LinearProgressIndicator(),
+          const SizedBox(height: 6),
+          const Text('Calculando alternativas pela rede. Nenhuma distância será inventada.'),
+        ],
         if (_message != null) Padding(padding: const EdgeInsets.only(top: 8),
           child: Text(_message!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
         if (_draft != null) _preview(_draft!),

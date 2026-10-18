@@ -1,4 +1,12 @@
-# Validação Vigia IA 1.0.284+284
+# Validação Vigia IA 1.0.285+285
+
+- Assistente novo: regressão de wizard, seleção manual, GPS sob ação explícita, exportação GPX/JSON via SAF, preservação de bibliotecas.
+- `python3 -m unittest discover -s tool -p 'test_*.py' -q`: **201 testes aprovados** em 9,2 s.
+- `python3 tool/check_version_sync.py`, `python3 tool/check_import_targets.py`, `python3 tool/check_ci_contract.py` e `bash -n tool/verify_project.sh` aprovados.
+- `tool/verify_project.sh` passou os gates iniciais e a sincronização de versão; interrompido pelo limite de execução disponível durante a checagem de modelos em modo fonte. Não há confirmação de execução integral.
+- Flutter SDK ausente no ambiente; `flutter analyze`, `flutter test`, geração de APK e teste físico do diálogo com teclado/GPS/exportação pendentes de CI e aparelho.
+
+# Validação histórica Vigia IA 1.0.284+284
 
 - Falha do workflow APK 237 diagnosticada: antiga asserção exigia tema Escuro, incompatível com a preferência inicial Sistema introduzida na 283. Contratos atualizados sem desfazer a personalização.
 - Módulo Planejamento implementado com reuso de roteamento, busca, estimador e armazenamento local separado; 5 testes preventivos próprios e 4 testes Flutter novos (estes ainda precisam ser executados em CI).

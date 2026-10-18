@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.284',
+          version: '1.0.285',
           current: true,
+          changes: [
+            'Planejamento abre limpo, com Nova rota e assistente por etapas.',
+            'Meu local usa GPS só por escolha explícita na origem.',
+            'Mapa de resultado com Salvar, Apagar e Exportar GPX/JSON.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.284',
           changes: [
             'Planejamento de cicloviagens acessível pela Home.',
             'Rotas alternativas, etapas diárias e pausas configuráveis.',
