@@ -3,58 +3,89 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vigiaia/widgets/mcrp_remote_controls.dart';
 
 void main() {
-  testWidgets('controles MCRP usam ações remotas e zoom absoluto', (tester) async {
+  testWidgets('zoom modal restaura 1× e resolução ocupa o lugar de Atualizar', (tester) async {
     final commands = <String>[];
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: SingleChildScrollView(
       child: McrpControlPanel(
         status: const {
-          'x-recording': '0', 'x-eco': '0', 'x-camera-facing': '0',
+          'x-transmitting': '1', 'x-recording': '0', 'x-eco': '0',
+          'x-camera-facing': '0', 'x-quality-profile': '720p',
           'x-zoom-supported': '1', 'x-zoom-percent': '40',
           'x-torch-supported': '1', 'x-torch-enabled': '0', 'x-torch-mode': 'off',
           'x-fps-target': '15', 'x-fps-measured': '12', 'x-battery-level': '84',
         },
         working: false,
-        onCommand: (action) async => commands.add(action),
+        onCommand: (action) async { commands.add(action); },
       ),
     ))));
     await tester.tap(find.text('Iniciar REC'));
     await tester.pump();
-    await tester.tap(find.text('Zoom +'));
-    await tester.pump();
+    await tester.tap(find.text('Zoom'));
+    await tester.pumpAndSettle();
+    expect(find.text('Zoom da câmera'), findsOneWidget);
+    expect(find.text('40%'), findsOneWidget);
+    await tester.tap(find.byTooltip('Aumentar zoom'));
+    await tester.pumpAndSettle();
+    expect(find.text('50%'), findsOneWidget);
+    await tester.tap(find.text('Tamanho original (1×)'));
+    await tester.pumpAndSettle();
+    expect(find.text('0%'), findsOneWidget);
+    await tester.tap(find.text('Fechar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Resolução'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('480p'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Lanterna'));
     await tester.pump();
-    expect(commands, ['record/start', 'zoom/50', 'torch/30']);
-    expect(find.text('Zoom: 40%'), findsOneWidget);
-    expect(find.text('FPS medido: 12'), findsOneWidget);
-    expect(find.text('Gravação desligada'), findsOneWidget);
+    expect(commands, ['record/start', 'zoom/50', 'zoom/0', 'quality/480', 'torch/30']);
+    expect(find.text('Atualizar'), findsNothing);
+    expect(find.text('FPS medido: 12'), findsNothing);
+    expect(find.text('Gravação desligada'), findsNothing);
     expect(find.text('Codec'), findsNothing);
   });
 
-  testWidgets('REC ativo muda o botão para parada remota', (tester) async {
+  testWidgets('transmissão pausada mostra somente Iniciar, sem aviso repetido', (tester) async {
     final commands = <String>[];
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: McrpControlPanel(
-      status: const {'x-recording': '1'},
+      status: const {'x-transmitting': '0', 'x-recording': '0'},
       working: false,
-      onCommand: (action) async => commands.add(action),
+      onCommand: (action) async { commands.add(action); },
     ))));
-    expect(find.text('Gravando no transmissor'), findsOneWidget);
+    expect(find.text('Iniciar'), findsOneWidget);
+    expect(find.textContaining('Transmissão pausada'), findsNothing);
+    await tester.tap(find.text('Iniciar'));
+    await tester.pump();
+    expect(commands, ['transmission/start']);
+  });
+
+  testWidgets('REC ativo preserva o controle de parada', (tester) async {
+    final commands = <String>[];
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: McrpControlPanel(
+      status: const {'x-transmitting': '1', 'x-recording': '1'},
+      working: false,
+      onCommand: (action) async { commands.add(action); },
+    ))));
+    expect(find.text('Gravando no transmissor'), findsNothing);
     await tester.tap(find.text('Parar REC'));
     await tester.pump();
     expect(commands, ['record/stop']);
   });
 
-  testWidgets('lanterna e zoom indisponíveis ficam desabilitados', (tester) async {
+  testWidgets('lanterna e zoom sem suporte ficam desabilitados', (tester) async {
     final commands = <String>[];
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: McrpControlPanel(
-      status: const {'x-torch-supported': '0', 'x-zoom-supported': '0'},
+      status: const {'x-transmitting': '1', 'x-recording': '0',
+        'x-torch-supported': '0', 'x-zoom-supported': '0'},
       working: false,
-      onCommand: (action) async => commands.add(action),
+      onCommand: (action) async { commands.add(action); },
     ))));
-    await tester.tap(find.text('Lanterna'));
-    await tester.tap(find.text('Zoom +'));
-    await tester.pump();
-    await tester.tap(find.text('Iniciar REC'));
-    await tester.pump();
+    final zoomButton = tester.widget<OutlinedButton>(find.ancestor(
+      of: find.text('Zoom'), matching: find.byType(OutlinedButton)).first);
+    expect(zoomButton.onPressed, isNull);
+    final torchButton = tester.widget<OutlinedButton>(find.ancestor(
+      of: find.text('Lanterna'), matching: find.byType(OutlinedButton)).first);
+    expect(torchButton.onPressed, isNull);
     expect(commands, isEmpty);
   });
 }

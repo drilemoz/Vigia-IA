@@ -1,4 +1,4 @@
-"""Valida YOLO26s como padrão e build fail-closed em caso de exportação ausente."""
+"""Valida EfficientDet-Lite0 como padrão e build fail-closed em caso de exportação ausente."""
 import unittest
 from pathlib import Path
 
@@ -6,20 +6,21 @@ ROOT = Path(__file__).resolve().parents[1]
 def read(path): return (ROOT/path).read_text(encoding='utf-8')
 
 class YoloDefault263(unittest.TestCase):
-    def test_default_model_is_yolo26s(self):
-        self.assertIn('this.detectorModel = DetectorModelPreference.yolo26s', read('lib/models/video_source_config.dart'))
-        self.assertIn('orElse: () => DetectorModelPreference.yolo26s', read('lib/services/app_settings_service.dart'))
+    def test_default_model_is_lite0(self):
+        self.assertIn('this.detectorModel = DetectorModelPreference.efficientDetLite0', read('lib/models/video_source_config.dart'))
+        self.assertIn('orElse: () => DetectorModelPreference.efficientDetLite0', read('lib/services/app_settings_service.dart'))
 
-    def test_auto_still_prioritizes_yolo(self):
+    def test_auto_starts_with_lite0(self):
         assets=read('lib/services/object_detection_assets.dart')
-        self.assertLess(assets.index("('YOLO26s',"), assets.index("('EfficientDet-Lite2',"))
+        self.assertIn('modelIndex++ < firstIndex', assets)
+        self.assertIn('DetectorModelPreference.automatic || DetectorModelPreference.efficientDetLite0 => 2', assets)
         self.assertIn('if (preference != DetectorModelPreference.automatic)',assets)
         self.assertIn('models.removeRange(0, index)',assets)
 
     def test_ui_explains_actual_preference(self):
         screen=read('lib/screens/monitor_screen_ai_tools.dart')
         self.assertIn('Padrão do Vigia IA',screen)
-        self.assertIn('Tenta YOLO26s primeiro',screen)
+        self.assertIn('Começa no Lite0',screen)
         self.assertIn('_controller.activeDetectorModel',screen)
 
     def test_build_requires_real_yolo(self):

@@ -53,7 +53,7 @@ class RemoteTransmission288(unittest.TestCase):
         self.assertIn("state['x-transmitting'] == expectedTransmission",controls)
         self.assertIn('Parar transmissão',controls)
         self.assertIn('if (_transmitting)',controls)
-        self.assertIn('Iniciar transmissão',controls)
+        self.assertIn("_transmitting ? 'Parar' : 'Iniciar'", controls)
         native=read('lib/screens/native_transmitter_screen.dart')
         self.assertIn('Aguardando comando remoto',native)
         self.assertIn('if (status.url != null && !status.releasing)',native)
@@ -83,7 +83,8 @@ class RemoteTransmission288(unittest.TestCase):
         self.assertIn('tempTenthsC >= 450',eco)
         self.assertIn('state == PhoneHeatState.HOT -> 300L',eco)
         ui=read('lib/widgets/mcrp_remote_controls.dart')
-        self.assertIn('x-battery-temp-tenths',ui)
+        self.assertNotIn('FPS medido:', ui)
+        self.assertIn('x-battery-temp-tenths',read('lib/services/mcrp_client.dart'))
         self.assertIn('>= 420',ui)
 
 if __name__=='__main__':unittest.main()

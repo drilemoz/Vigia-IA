@@ -1078,7 +1078,7 @@ extension _MonitorMulticamera on _MonitorScreenState {
                 ],
               ),
             ),
-          if (portraitEmbedded)
+          if (portraitEmbedded && _controller.sourceConfig.type != VideoSourceType.remotePhone)
             Positioned(
               left: 10,
               bottom: 10,

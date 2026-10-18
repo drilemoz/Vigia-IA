@@ -9,7 +9,7 @@ CHECK = ROOT / 'tool' / 'check_build219_yolo_default_test_265.py'
 class YoloDefaultFlutterRegressionTest(unittest.TestCase):
     def test_flutter_default_is_yolo26s(self):
         content = (ROOT / 'test' / 'detector_model_preference_test.dart').read_text(encoding='utf8')
-        self.assertIn('expect(settings.detectorModel, DetectorModelPreference.yolo26s)', content)
+        self.assertIn('expect(settings.detectorModel, DetectorModelPreference.efficientDetLite0)', content)
         self.assertNotIn('expect(settings.detectorModel, DetectorModelPreference.automatic)', content)
 
     def test_automatic_option_remains_available(self):

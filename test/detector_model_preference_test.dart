@@ -2,16 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vigiaia/models/video_source_config.dart';
 
 void main() {
-  test('modelo de IA padrao e YOLO26s; automatico continua opcional', () {
+  test('modelo de IA padrao e EfficientDet-Lite0; automatico continua opcional', () {
     const settings = MonitorSettings();
-    expect(settings.detectorModel, DetectorModelPreference.yolo26s);
-    expect(settings.detectorModel.label, 'YOLO26s');
+    expect(settings.detectorModel, DetectorModelPreference.efficientDetLite0);
+    expect(settings.detectorModel.label, 'EfficientDet-Lite0');
     final automatic = settings.copyWith(
       detectorModel: DetectorModelPreference.automatic,
     );
     expect(automatic.detectorModel, DetectorModelPreference.automatic);
     expect(automatic.detectorModel.label, 'Automático');
-    expect(settings.detectorModel, DetectorModelPreference.yolo26s);
+    expect(settings.detectorModel, DetectorModelPreference.efficientDetLite0);
   });
 
   test('preferencia manual nao muda outros ajustes da IA', () {

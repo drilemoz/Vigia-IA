@@ -77,11 +77,19 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.292',
+          version: '1.0.293',
           current: true,
           changes: [
-            'Melhorias de estabilidade ao iniciar o aplicativo e retomar serviços.',
-            'Transmissor Exclusivo e descoberta de câmeras mantidos.',
+            'EfficientDet-Lite0 padrão e automático, com YOLO manual.',
+            'Controles remotos Zoom e Resolução em janelas; ajuda compacta e contraste corrigido.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.292',
+          changes: [
+            'Correções de análise Flutter das guardas do Transmissor Exclusivo.',
+            'Compatibilidade do scanner RTSP e demais módulos preservada.',
           ],
         ),
         SizedBox(height: 10),

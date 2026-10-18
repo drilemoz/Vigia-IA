@@ -31,7 +31,7 @@ class TransmitterRemoteRec276(unittest.TestCase):
         self.assertIn("final state = await client.status();", panel)
         self.assertIn("state['x-recording'] == expectedRecording", panel)
         self.assertIn('var sent = false;', panel)
-        self.assertIn('REC: estado desconhecido durante a desconexão.', panel)
+        self.assertIn('Conectar controles', panel)
         self.assertIn('Uma gravação ativa', panel)
         self.assertIn("'x-recording'", client)
         self.assertIn('await _http.postUrl(uri)', client)
@@ -46,7 +46,7 @@ class TransmitterRemoteRec276(unittest.TestCase):
         self.assertIn("'Controle remoto · ${_status", read('lib/widgets/mcrp_remote_controls.dart'))
         self.assertIn('MinhaCameraLiveUrl.isValid(url)', read('lib/screens/monitor_screen_mcrp_support.dart'))
         self.assertIn("^/live/[0-9a-f]{32}$", read('lib/services/mcrp_client.dart'))
-        self.assertIn("'1.0.292'", read('lib/core/app_metadata.dart'))
+        self.assertIn("'1.0.293'", read('lib/core/app_metadata.dart'))
 
 if __name__ == '__main__':
     unittest.main()

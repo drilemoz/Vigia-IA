@@ -1,3 +1,7 @@
+# Arquitetura — Vigia IA 1.0.293+293
+
+O controle remoto MCRP no Ao vivo usa comandos autenticados existentes e diálogos locais. Zoom (0–100%, passos de 10%, 0=1×) e Resolução (360/480/720/768/1080p) não alteram o protocolo. O HUD remoto do modo retrato não repete o nome da câmera. O estado de desconexão mantém botão de reconectar e não envia comandos sem autenticação. O padrão da análise no receptor muda para EfficientDet-Lite0 e a ordem do modo Automático evita carregar YOLO ou Lite2; perfis v8 com antigo default YOLO migram para esquema v9 e novas escolhas manuais permanecem persistidas.
+
 # Arquitetura — Vigia IA 1.0.292+292
 
 **Build 245:** duas guardas de exclusividade (`app.dart` e `data_usage_service.dart`) retornam por blocos completos para cumprir o lint obrigatório de Dart; sem mudar a inicialização de serviços opcionais nem a reativação do monitor de dados.

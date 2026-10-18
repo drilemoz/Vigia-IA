@@ -46,6 +46,7 @@ class _CameraPaneLabel extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w900,
+                    color: Colors.white,
                   ),
                 ),
                 if (secondary != null && secondary.isNotEmpty) ...[

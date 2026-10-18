@@ -174,7 +174,7 @@ class AppSettingsService {
       }
     }
     return <String, Object?>{
-      'version': 8,
+      'version': 9,
       'source': source,
       'settings': <String, Object?>{
         'confidenceThreshold': settings.confidenceThreshold,
@@ -308,10 +308,15 @@ class AppSettingsService {
         clipDuration: Duration(milliseconds: ((settingsJson['clipDurationMs'] as num?)?.toInt() ?? 8000).clamp(3000, 20000).toInt()),
         clipFormatPreference: clipFormat,
         aiEnabled: settingsJson['aiEnabled'] as bool? ?? true,
-        detectorModel: DetectorModelPreference.values.firstWhere(
-          (value) => value.name == settingsJson['detectorModel'],
-          orElse: () => DetectorModelPreference.yolo26s,
-        ),
+        // Arquivos antigos usavam YOLO26s como padrão implícito. Migrar
+        // uma vez ao Lite0 para que aparelhos já instalados economizem CPU.
+        // Após salvar no esquema 9, uma seleção manual de YOLO é respeitada.
+        detectorModel: profileVersion < 9 && settingsJson['detectorModel'] == 'yolo26s'
+            ? DetectorModelPreference.efficientDetLite0
+            : DetectorModelPreference.values.firstWhere(
+                (value) => value.name == settingsJson['detectorModel'],
+                orElse: () => DetectorModelPreference.efficientDetLite0,
+              ),
         trackingEnabled: settingsJson['trackingEnabled'] as bool? ?? true,
         announceEntryExit: settingsJson['announceEntryExit'] as bool? ?? true,
         backgroundMonitoringEnabled: settingsJson['backgroundMonitoringEnabled'] as bool? ?? false,

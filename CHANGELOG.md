@@ -1,3 +1,11 @@
+## 1.0.293+293: controle remoto compacto e EfficientDet-Lite0 padrão (2026-10-18)
+
+- Grade MCRP: Zoom abre pop-up com aumentar, diminuir e restaurar 1×; Atualizar sai e Resolução abre seletor modal no quadrinho.
+- Barra remota: ajuda '?' ao lado do Wi-Fi substitui explicação longa; removidos status redundantes de REC/zoom/FPS/bateria, texto de pausa e legenda duplicada no vídeo remoto.
+- Textos 'Iniciar'/'Parar'; maior contraste em botões e legendas. Estados erro/desconectado preservam reconexão.
+- EfficientDet-Lite0 inicia no novo padrão e no Automático, sem carregar YOLO na memória; manual YOLO continua disponível. Migração única de perfis antigos com YOLO implicitamente padrão para schema 9.
+- Metadados, Novidades, verificadores e testes sincronizados; sem mudanças no protocolo, captura, REC ou IA do transmissor.
+
 ## 1.0.292+292: build 245, blocos explícitos nas guardas do transmissor (2026-10-18)
 
 - `lib/app/app.dart`: fechamento do `if` do modo Transmissor Exclusivo em bloco completo `{ return; }`.

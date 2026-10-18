@@ -47,17 +47,21 @@ class McrpControlPanel extends StatelessWidget {
       child: OutlinedButton(
         onPressed: working ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          backgroundColor: selected ? theme.colorScheme.primaryContainer : theme.colorScheme.surface,
+          backgroundColor: selected ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerLowest,
           foregroundColor: selected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           side: BorderSide(color: theme.colorScheme.outlineVariant),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(icon, size: compact ? 20 : 24),
+          Icon(icon, size: compact ? 20 : 24,
+            color: working || onPressed == null ? theme.colorScheme.onSurface.withValues(alpha: 0.45)
+                : selected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface),
           const SizedBox(height: 3),
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: compact ? 10 : 11, fontWeight: FontWeight.w600)),
+            style: TextStyle(fontSize: compact ? 10 : 11, fontWeight: FontWeight.w700,
+              color: working || onPressed == null ? theme.colorScheme.onSurface.withValues(alpha: 0.45)
+                : selected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface)),
         ]),
       ),
     );
@@ -65,7 +69,6 @@ class McrpControlPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       LayoutBuilder(builder: (context, constraints) {
         final columns = constraints.maxWidth >= 420 ? 5 : 4;
@@ -74,7 +77,7 @@ class McrpControlPanel extends StatelessWidget {
         final actions = <Widget>[
           if (_transmittingKnown)
             _action(context, _transmitting ? Icons.pause_circle_outline : Icons.play_circle_outline,
-              _transmitting ? 'Parar transmissão' : 'Iniciar transmissão',
+              _transmitting ? 'Parar' : 'Iniciar',
               !_recording ? () => onCommand(_transmitting ? 'transmission/stop' : 'transmission/start') : null,
               selected: !_transmitting),
           if (_transmitting) _action(context, _recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record,
@@ -89,11 +92,10 @@ class McrpControlPanel extends StatelessWidget {
           if (_transmitting) _action(context, _torchEnabled ? Icons.flash_on : Icons.flash_off, 'Lanterna',
             _torchSupported ? () => onCommand(_torchEnabled ? 'torch/off' : 'torch/30') : null,
             selected: _torchEnabled),
-          if (_transmitting) _action(context, Icons.zoom_out, 'Zoom −',
-            _zoomSupported && _zoom > 0 ? () => onCommand('zoom/${(_zoom - 10).clamp(0, 100)}') : null),
-          if (_transmitting) _action(context, Icons.zoom_in, 'Zoom +',
-            _zoomSupported && _zoom < 100 ? () => onCommand('zoom/${(_zoom + 10).clamp(0, 100)}') : null),
-          _action(context, Icons.refresh, 'Atualizar', onReconnect),
+          if (_transmitting) _action(context, Icons.zoom_in_map_outlined, 'Zoom',
+            _zoomSupported ? () => _openZoomDialog(context) : null),
+          if (_transmitting) _action(context, Icons.high_quality_outlined, 'Resolução',
+            () => _openResolutionDialog(context)),
           if (onMedia != null)
             _action(context, Icons.video_library_outlined, 'Mídias', onMedia),
           if (onDiagnostic != null)
@@ -105,9 +107,6 @@ class McrpControlPanel extends StatelessWidget {
       }),
       const SizedBox(height: 10),
       Wrap(spacing: 8, runSpacing: 7, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        if (_transmitting) _setting(context, 'Resolução', status['x-quality-profile'],
-          const <String, String>{'360p': 'quality/360', '480p': 'quality/480',
-            '720p': 'quality/720', '768p': 'quality/768', '1080p': 'quality/1080'}),
         if (_transmitting) _setting(context, 'FPS', status['x-fps-target'],
           const <String, String>{'5 FPS': 'fps/5', '10 FPS': 'fps/10',
             '15 FPS': 'fps/15', '24 FPS': 'fps/24', '30 FPS': 'fps/30'}),
@@ -119,32 +118,88 @@ class McrpControlPanel extends StatelessWidget {
           _setting(context, 'Codec', _codec.toUpperCase(),
             const <String, String>{'MJPEG': 'codec/mjpeg', 'H.264': 'codec/h264'}),
       ]),
-      const SizedBox(height: 8),
-      if (_transmittingKnown && !_transmitting)
-        Text('Transmissão pausada. Câmera e codificação desligadas; controle local ainda disponível.',
-          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-      Wrap(spacing: 12, runSpacing: 4, children: [
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(_recording ? Icons.fiber_manual_record : Icons.radio_button_unchecked,
-            size: 14, color: _recording ? scheme.error : scheme.onSurfaceVariant),
-          const SizedBox(width: 4),
-          Text(_recordingKnown ? (_recording ? 'Gravando no transmissor' : 'Gravação desligada')
-              : 'Gravação sem confirmação',
-            style: TextStyle(fontSize: 12, color: _recording ? scheme.error : scheme.onSurfaceVariant)),
-        ]),
-        Text('Zoom: ${_zoomSupported ? '$_zoom%' : 'indisponível'}',
-          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-        Text('FPS medido: ${status['x-fps-measured'] ?? '—'}',
-          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-        Text('Bateria: ${status['x-battery-level'] ?? '—'}%',
-          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-        if (int.tryParse(status['x-battery-temp-tenths'] ?? '') != null)
-          Text('Bateria: ${(int.parse(status['x-battery-temp-tenths']!) / 10).toStringAsFixed(1)} °C',
-            style: TextStyle(fontSize: 12,
-              color: (int.parse(status['x-battery-temp-tenths']!) >= 420)
-                  ? scheme.error : scheme.onSurfaceVariant)),
-      ]),
     ]);
+  }
+
+
+  Future<void> _openZoomDialog(BuildContext context) async {
+    var zoom = _zoom;
+    var sending = false;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, update) {
+          Future<void> adjust(int next) async {
+            if (sending || working) return;
+            final target = next.clamp(0, 100).toInt();
+            if (target == zoom) return;
+            update(() => sending = true);
+            try {
+              await onCommand('zoom/$target');
+              if (dialogContext.mounted) update(() => zoom = target);
+            } finally {
+              if (dialogContext.mounted) update(() => sending = false);
+            }
+          }
+          return AlertDialog(
+            title: const Text('Zoom da câmera'),
+            content: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text('$zoom%', style: Theme.of(dialogContext).textTheme.headlineMedium),
+              const SizedBox(height: 12),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                IconButton.filledTonal(
+                  tooltip: 'Diminuir zoom',
+                  onPressed: !sending && zoom > 0 ? () => unawaited(adjust(zoom - 10)) : null,
+                  icon: const Icon(Icons.zoom_out),
+                ),
+                IconButton.filledTonal(
+                  tooltip: 'Aumentar zoom',
+                  onPressed: !sending && zoom < 100 ? () => unawaited(adjust(zoom + 10)) : null,
+                  icon: const Icon(Icons.zoom_in),
+                ),
+              ]),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: !sending && zoom > 0 ? () => unawaited(adjust(0)) : null,
+                icon: const Icon(Icons.restart_alt),
+                label: const Text('Tamanho original (1×)'),
+              ),
+            ]),
+            actions: [TextButton(
+              onPressed: sending ? null : () => Navigator.of(dialogContext).pop(),
+              child: const Text('Fechar'),
+            )],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _openResolutionDialog(BuildContext context) async {
+    const choices = <String, String>{
+      '360p': 'quality/360', '480p': 'quality/480',
+      '720p': 'quality/720', '768p': 'quality/768', '1080p': 'quality/1080',
+    };
+    final current = status['x-quality-profile'];
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Resolução da transmissão'),
+        children: [
+          for (final entry in choices.entries)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(entry.value),
+              child: Row(children: [
+                Icon(current == entry.key || current == entry.key.replaceAll('p', '')
+                    ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+                const SizedBox(width: 10),
+                Text(entry.key),
+              ]),
+            ),
+        ],
+      ),
+    );
+    if (selected != null && context.mounted) await onCommand(selected);
   }
 
   Widget _setting(BuildContext context, String label, String? current,
@@ -315,6 +370,26 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
     super.dispose();
   }
 
+  void _showControlHelp(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Ajuda do controle remoto'),
+        content: const SingleChildScrollView(child: Text(
+          'Parar transmissão libera câmera e encoder; o serviço mantém a escuta local. '
+          'Iniciar vídeo requer que o serviço esteja ativo e o Android permita reabrir a câmera. '
+          'Iniciar/Parar REC grava no celular transmissor. Uma gravação ativa '
+          'não depende da conexão com o receptor. Para enviar novos comandos, '
+          'os aparelhos precisam estar conectados na rede local.',
+        )),
+        actions: [TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('Entendi'),
+        )],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -331,8 +406,15 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
               'Controle remoto · ${_status['x-device-model']?.trim().isNotEmpty == true ? _status['x-device-model'] : 'Vigia IA'}',
               maxLines: 1, overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w800))),
+            IconButton(
+              iconSize: 19,
+              visualDensity: VisualDensity.compact,
+              tooltip: 'Ajuda dos controles da câmera',
+              onPressed: () => _showControlHelp(context),
+              icon: Icon(Icons.help_outline, color: scheme.onSurface),
+            ),
             Icon(_ready ? Icons.wifi : Icons.wifi_off,
-              size: 17, color: _ready ? scheme.primary : scheme.error),
+              size: 19, color: _ready ? scheme.primary : scheme.error),
           ]),
           if (_error != null) ...[
             const SizedBox(height: 7),
@@ -340,22 +422,11 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
           ],
           const SizedBox(height: 9),
           if (!_ready)
-            Text('REC: estado desconhecido durante a desconexão.',
-              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-          if (!_ready)
             OutlinedButton.icon(onPressed: _busy ? null : () => unawaited(_refresh()),
               icon: const Icon(Icons.refresh), label: const Text('Conectar controles'))
           else
             McrpControlPanel(status: _status, working: _busy,
-              compact: true, onCommand: _command,
-              onReconnect: () => unawaited(_refresh())),
-          const SizedBox(height: 5),
-          Text('Parar transmissão libera câmera e encoder; o serviço mantém a escuta local. '
-              'Iniciar vídeo requer que o serviço esteja ativo e o Android permita reabrir a câmera. '
-              'Iniciar/Parar REC grava no celular transmissor. Uma gravação ativa '
-              'não depende da conexão com o receptor. Para enviar novos comandos, '
-              'os aparelhos precisam estar conectados na rede local.',
-            style: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant)),
+              compact: true, onCommand: _command),
         ]),
       ),
     );

@@ -1,3 +1,10 @@
+# Validação Vigia IA 1.0.293+293
+
+- **245 testes Python aprovados** (`python3 -m unittest discover -s tool -p test_*.py -q`), incluindo 4 novos testes da 1.0.293.
+- **`tool/verify_project.sh`: aprovado, exit code 0**; `check_version_sync.py`, `check_import_targets.py`, `check_ci_contract.py` e `bash -n` também aprovados.
+- Testes estruturais validam Zoom/Resolução e padrão Lite0, sem substituir `flutter analyze` e `flutter test`.
+- Build Flutter, teste interativo dos pop-ups e teste Android em aparelho pendentes do GitHub Actions.
+
 # Validação Vigia IA 1.0.292+292
 
 - **Validação local 1.0.292:** `python3 -m unittest discover -s tool -p test_*.py -q`: 241 testes aprovados. `check_version_sync.py`, `check_import_targets.py`, `check_ci_contract.py` e `bash -n tool/verify_project.sh` aprovados. O verificador integral avançou por blocos de testes, mas a execução não foi concluída dentro do limite de 160 segundos; resultado integral pendente. Sem Flutter SDK no ambiente; `flutter analyze`, `flutter test` e APK aguardam GitHub Actions.

@@ -4,12 +4,23 @@ Future<List<Map<String, Object>>> _loadDetectorAssets(
   DetectorModelPreference preference,
 ) async {
   final models = <Map<String, Object>>[];
+  // Automático também começa no Lite0, sem alocar YOLO ou Lite2.
+  // Preferências manuais começam no modelo escolhido e só recuam a opções
+  // mais leves se o arquivo estiver ausente ou falhar na inicialização.
+  final firstIndex = switch (preference) {
+    DetectorModelPreference.yolo26s => 0,
+    DetectorModelPreference.efficientDetLite2 => 1,
+    DetectorModelPreference.automatic || DetectorModelPreference.efficientDetLite0 => 2,
+    DetectorModelPreference.ssdMobileNetV1 => 3,
+  };
+  var modelIndex = 0;
   for (final entry in const <(String, String)>[
       ('YOLO26s', ObjectDetectionService._yoloModelAsset),
       ('EfficientDet-Lite2', ObjectDetectionService._lite2ModelAsset),
       ('EfficientDet-Lite0', ObjectDetectionService._primaryModelAsset),
       ('SSD MobileNet V1', ObjectDetectionService._fallbackModelAsset),
   ]) {
+    if (modelIndex++ < firstIndex) continue;
     ByteData modelData;
     try {
       modelData = await rootBundle.load(entry.$2);
