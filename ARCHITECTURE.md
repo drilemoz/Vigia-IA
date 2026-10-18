@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.277+277
+# Arquitetura — Vigia IA 1.0.278+278
+
+## Transmissão padrão (1.0.278)
+
+O transmissor nativo é o único fluxo de interface em AppLaunchMode.transmission e nos acessos da Home e Ajustes. O legado `CameraModeScreen`/`RemoteCameraServerService` permanece como código de reserva sem rota pública. Vídeo MJPEG e MCRP não mudam; gravar/parar REC é comandado pelo receptor, e o pareamento expõe token privado somente no cartão expansível.
 
 ## Transmissor nativo: interface mínima e comando REC confirmado
 

@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.277',
+          version: '1.0.278',
           current: true,
+          changes: [
+            'A transmissão abre direto no modo com controles locais de emergência.',
+            'Câmera remota aparece com nomes consistentes no cadastro e no Ao vivo.',
+            'Gravação remota e QR continuam disponíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.277',
           changes: [
             'Atualização de estabilidade da tela do transmissor nativo.',
             'Gravação remota pelo Ao vivo e pareamento continuam disponíveis.',
@@ -2471,8 +2480,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.277',
+          version: '1.0.278',
           current: true,
+          changes: [
+            'A transmissão abre direto no modo com controles locais de emergência.',
+            'Câmera remota aparece com nomes consistentes no cadastro e no Ao vivo.',
+            'Gravação remota e QR continuam disponíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.277',
           changes: [
             'Atualização de estabilidade da tela do transmissor nativo.',
             'Gravação remota pelo Ao vivo e pareamento continuam disponíveis.',
@@ -2488,16 +2506,6 @@ class _ChangesPanel extends StatelessWidget {
             'Câmeras remotas com identificação clara do aparelho.',
           ],
         ),
-        SizedBox(height: 10),
-        _ReleaseCard(
-          version: '1.0.275',
-          changes: [
-            'Transmissor nativo inclui a rotação dos quadros da câmera.',
-            'Mantidos a visualização ao vivo e os comandos remotos MCRP.',
-            'O modo anterior de transmissão continua disponível.',
-          ],
-        ),
-
         SizedBox(height: 10),
         _ReleaseCard(
           version: '1.0.274',

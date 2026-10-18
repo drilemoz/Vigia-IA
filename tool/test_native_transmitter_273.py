@@ -46,10 +46,10 @@ class NativeTransmitterContracts(unittest.TestCase):
         self.assertEqual((ROOT / 'tool/AndroidManifest.xml').read_bytes(),
                          (ROOT / 'android/app/src/main/AndroidManifest.xml').read_bytes())
 
-    def test_native_mode_remains_opt_in_with_legacy_fallback(self):
+    def test_native_is_exposed_by_default_and_legacy_is_unrouted(self):
         screen = (ROOT / 'lib/screens/camera_mode_screen.dart').read_text()
         native = (ROOT / 'lib/screens/native_transmitter_screen.dart').read_text()
-        self.assertIn('NativeTransmitterScreen()', screen)
+        self.assertIn('NativeTransmitterScreen()', (ROOT / 'lib/screens/launch_mode_screen.dart').read_text())
         self.assertIn('_server.start()', screen)
         self.assertIn('native.running || native.starting || native.releasing', screen)
         self.assertIn('McrpAddress.parse(status.url!)', native)

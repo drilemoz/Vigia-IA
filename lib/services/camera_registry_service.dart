@@ -51,7 +51,12 @@ class CameraRegistryService {
             _items.add(
               endpoint.copyWith(
                 name: endpoint.type == CameraEndpointType.remotePhone &&
-                        endpoint.name == 'Minha Câmera'
+                        <String>{
+                          'Minha Câmera',
+                          'Celular remoto',
+                          'Câmera remota / celular',
+                          'Vigia IA - celular remoto',
+                        }.contains(endpoint.name)
                     ? 'Câmera remota' : endpoint.name,
                 address: await _native.unprotectSecret(protectedAddress) ?? endpoint.address,
                 accessKey: await _native.unprotectSecret(protectedKey) ?? endpoint.accessKey,

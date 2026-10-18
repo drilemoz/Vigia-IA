@@ -9,7 +9,7 @@ import 'alerts_clips_screen.dart';
 import 'app_info_screen.dart';
 import 'appearance_settings_screen.dart';
 import 'bike_mode_screen.dart';
-import 'camera_mode_screen.dart';
+import 'native_transmitter_screen.dart';
 import 'error_center_screen.dart';
 import 'google_maps_key_screen.dart';
 import 'launch_mode_screen.dart';
@@ -109,7 +109,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.video_camera_front_outlined,
             title: 'Modo Câmera',
             subtitle: 'Use este celular como câmera na rede local.',
-            onTap: () => _push(context, const CameraModeScreen()),
+            onTap: () => _push(context, const NativeTransmitterScreen()),
           ),
           _SettingsTile(
             icon: Icons.dashboard_customize_outlined,

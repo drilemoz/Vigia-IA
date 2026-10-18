@@ -7,9 +7,10 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../services/mcrp_client.dart';
 import '../services/native_camera_transmitter_service.dart';
 import '../services/native_platform_service.dart';
+import 'launch_mode_screen.dart';
 
-/// Primeira etapa da migracao do Minha Camera: motor nativo em paralelo ao legado.
-/// MCRP v1, MJPEG, controle remoto e captura com tela apagada (a validar no A3).
+/// Modo transmissor padrão do Vigia IA: serviço nativo MCRP v1 e MJPEG.
+/// A transmissão continua ao sair desta tela, até parada explícita.
 class NativeTransmitterScreen extends StatefulWidget {
   const NativeTransmitterScreen({super.key});
 
@@ -149,6 +150,17 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
     onPressed: _localCommandBusy || _busy ? null : () => _command(command),
   );
 
+  void _changeMode() {
+    // Não interromper o serviço: o receptor pode continuar assistindo enquanto
+    // o usuário navega. A parada exige ação explícita na tela ou notificação.
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (_) => const LaunchModeScreen(manualReview: false),
+      ),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = _status;
@@ -161,7 +173,16 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
     final temperature = int.tryParse(_details['x-battery-temp-tenths'] ?? '');
     final camera = _details['x-camera-facing'] == '1' ? 'Frontal' : 'Traseira';
     return Scaffold(
-      appBar: AppBar(title: const Text('Vigia IA · transmissor')),
+      appBar: AppBar(
+        title: const Text('Vigia IA · transmissor'),
+        actions: [
+          IconButton(
+            onPressed: _changeMode,
+            tooltip: 'Alterar modo',
+            icon: const Icon(Icons.swap_horiz_rounded),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
@@ -278,7 +299,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen> {
               'ao sair desta tela, até ser interrompido aqui ou pela notificação do Android.',
               style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 6),
-          Text('Transmissor nativo em teste. O modo Flutter anterior permanece disponível.',
+          Text('Transmissão pela rede local. Ajustes e REC remoto disponíveis no Ao vivo.',
               style: Theme.of(context).textTheme.bodySmall),
         ],
       ),

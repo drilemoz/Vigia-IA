@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../core/vigia_design.dart';
 import '../screens/access_guide_screen.dart';
-import '../screens/camera_mode_screen.dart';
+import '../screens/native_transmitter_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/map_workspace_shell.dart';
 import '../services/background_monitor_service.dart';
@@ -173,7 +173,7 @@ class _StartupGateState extends State<_StartupGate> {
             : const HomeScreen(),
         AppLaunchMode.monitor => const MonitorConnectScreen(),
         AppLaunchMode.bike => const MapWorkspaceShell(),
-        AppLaunchMode.transmission => const CameraModeScreen(),
+        AppLaunchMode.transmission => const NativeTransmitterScreen(),
         null => const LaunchModeScreen(),
       };
       return _PermissionReminderHost(

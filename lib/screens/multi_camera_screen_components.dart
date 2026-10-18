@@ -179,7 +179,7 @@ class _CameraCard extends StatelessWidget {
       CameraEndpointType.local => 'Local',
       CameraEndpointType.rtsp => 'RTSP',
       CameraEndpointType.remotePhone =>
-          MinhaCameraLiveUrl.isValid(camera.address) ? 'Câmera remota' : 'Celular remoto',
+          'Câmera remota',
       CameraEndpointType.esp32 => 'ESP32',
     };
 

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/app_launch_mode_service.dart';
-import 'camera_mode_screen.dart';
+import 'native_transmitter_screen.dart';
 import 'home_screen.dart';
 import 'map_workspace_shell.dart';
 import 'monitor_connect_screen.dart';
@@ -63,7 +63,7 @@ class _LaunchModeScreenState extends State<LaunchModeScreen> {
             : const HomeScreen(),
         AppLaunchMode.monitor => const MonitorConnectScreen(),
         AppLaunchMode.bike => const MapWorkspaceShell(),
-        AppLaunchMode.transmission => const CameraModeScreen(),
+        AppLaunchMode.transmission => const NativeTransmitterScreen(),
       };
 
   @override

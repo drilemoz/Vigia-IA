@@ -28,6 +28,7 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
   bool _loading = true;
   bool _opening = false;
   bool _analyze = true;
+  String? _pairedCameraName;
 
   @override
   void initState() {
@@ -49,6 +50,12 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
       _addressController.text = profile.source.remoteBaseUrl ?? '';
       _keyController.text = profile.source.remoteAccessKey ?? '';
       _analyze = profile.source.analysisEnabled;
+      final previousName = profile.source.displayName?.trim();
+      _pairedCameraName = previousName == null || previousName.isEmpty ||
+              previousName == 'Celular remoto' ||
+              previousName == 'Câmera remota / celular'
+          ? null
+          : previousName;
       _loading = false;
     });
   }
@@ -81,6 +88,9 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
       setState(() {
         _addressController.text = pairing.address;
         _keyController.text = pairing.accessKey;
+        _pairedCameraName = pairing.name == 'Celular remoto'
+            ? 'Câmera remota'
+            : pairing.name;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Transmissor preenchido: ${pairing.name}.')),
@@ -118,7 +128,7 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
       type: VideoSourceType.remotePhone,
       remoteBaseUrl: address,
       remoteAccessKey: key,
-      displayName: isMinhaCamera ? 'Câmera remota' : 'Celular remoto',
+      displayName: _pairedCameraName ?? 'Câmera remota',
       analysisEnabled: _analyze,
       analysisInterval: profile.source.analysisInterval,
     );
@@ -207,6 +217,7 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
                   const SizedBox(height: 18),
                   TextField(
                     controller: _addressController,
+                    onChanged: (_) => _pairedCameraName = null,
                     autocorrect: false,
                     enableSuggestions: false,
                     decoration: const InputDecoration(

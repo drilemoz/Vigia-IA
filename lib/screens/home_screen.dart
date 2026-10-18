@@ -23,7 +23,7 @@ import '../widgets/main_navigation_bar.dart';
 import '../widgets/vigia_ui.dart';
 import '../widgets/object_filter_dialog.dart';
 import '../widgets/smart_alert_rules_dialog.dart';
-import 'camera_mode_screen.dart';
+import 'native_transmitter_screen.dart';
 import 'data_usage_screen.dart';
 import 'error_center_screen.dart';
 import 'events_screen.dart';
@@ -486,9 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         CameraEndpointType.local => 'Câmera local',
                         CameraEndpointType.rtsp => 'RTSP',
                         CameraEndpointType.remotePhone =>
-                          MinhaCameraLiveUrl.isValid(camera.address)
-                              ? 'Câmera remota · MJPEG'
-                              : 'Celular remoto',
+                          'Câmera remota · rede local',
                         CameraEndpointType.esp32 => 'ESP32',
                       }),
                       trailing: const Icon(Icons.play_arrow_rounded),

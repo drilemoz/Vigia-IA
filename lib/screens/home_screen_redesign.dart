@@ -271,7 +271,7 @@ extension _HomeRedesign on _HomeScreenState {
             title: 'Transmissão',
             subtitle: 'Enviar imagem',
             accent: VigiaColors.blue,
-            onTap: () => _openScreen(const CameraModeScreen()),
+            onTap: () => _openScreen(const NativeTransmitterScreen()),
           ),
           VigiaModeCard(
             compact: true,

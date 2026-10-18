@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.278+278
+
+- Novo teste `tool/test_native_default_transmitter_278.py` exige todos os quatro pontos de entrada no transmissor nativo e rótulos consistentes de câmera remota.
+- O modo Flutter legado permanece no código-fonte como fallback não exposto. Não inicia em paralelo com o serviço Kotlin.
+- Executar `tool/verify_project.sh`. Flutter Analyze, Flutter Test, build Android e confirmação física com Redmi A3 continuam pendentes se SDK não estiver disponível.
+
 # Validação Vigia IA 1.0.277+277
 
 ## APK 230: aviso de análise estática na tela nativa

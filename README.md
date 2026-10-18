@@ -1,3 +1,10 @@
+## 1.0.278+278: transmissor nativo único nas telas do aplicativo (2026-10-17)
+
+- O botão Transmissão, o seletor inicial, Ajustes e os acessos da Home passam a abrir diretamente o transmissor Kotlin/MCRP, com estado, QR recolhível e Controles locais de emergência.
+- A prévia e o transmissor Dart antigo deixam de ter rotas visíveis; o código legado é preservado temporariamente para rollback, mas não é iniciado por nenhum ponto de entrada.
+- Cadastro de câmera remota e conexão direta no Ao vivo usam o rótulo padrão Câmera remota, preservando nomes personalizados e compatibilidade do QR anterior.
+- Motor MJPEG, token de pareamento e comando REC seguem inalterados. Build Flutter/Android e validação com os dois celulares devem ser confirmados.
+
 ## 1.0.277+277: ajuste de análise estática no transmissor (2026-10-17)
 
 - O APK 230 chegou à análise Flutter com os testes preventivos aprovados; havia um aviso `invalid_null_aware_operator` na tela de transmissão.
@@ -216,7 +223,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.277+277`
+**Versão atual:** `1.0.278+278`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

@@ -1,3 +1,10 @@
+## 1.0.278+278: rota única para transmissão nativa (2026-10-17)
+
+- Substituídos os quatro pontos de entrada que abriam a transmissão Flutter antiga pelo modo nativo MCRP com Controles locais de emergência.
+- Adicionado Alterar modo na tela nativa, inclusive quando é a tela inicial; a transmissão só para mediante comando explícito.
+- Uniformizados os rótulos padrão para Câmera remota na conexão do Ao vivo e no cadastro; preservados nomes personalizados e QR de câmeras já pareadas.
+- Mantidos o motor Kotlin, MJPEG, gravação MCRP remota, pareamento seguro e código Dart anterior apenas como reserva interna sem rota pública.
+
 ## 1.0.277+277: análise Flutter do APK 230 (2026-10-17)
 
 - Logs do APK 230: verificações preventivas e 165 testes Python passaram; `flutter analyze --fatal-infos --fatal-warnings` interrompeu o workflow em `native_transmitter_screen.dart:203` por `invalid_null_aware_operator`.
