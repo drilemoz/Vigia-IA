@@ -69,7 +69,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     try {
       final status = await NativeCameraTransmitterService.status();
       Map<String, String> details = const {};
-      if (status.ready && status.url != null) {
+      if (status.url != null && !status.releasing) {
         McrpClient? client;
         try {
           client = McrpClient(McrpAddress.parse(status.url!));
@@ -412,7 +412,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     final s = _status;
     final running = s?.running == true;
     final busy = _busy || (s?.busy == true);
-    final url = s?.ready == true ? s?.url : null;
+    final url = s?.releasing == true ? null : s?.url;
     final recording = _details['x-recording'] == '1' || s?.recording == true;
     final scheme = Theme.of(context).colorScheme;
     final model = _details['x-device-model'];
@@ -458,9 +458,9 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
                 ),
                 const SizedBox(width: 12),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(running ? 'Transmissão ativa' : 'Transmissão desligada',
+                  Text(running ? 'Transmissão ativa' : url != null ? 'Aguardando comando remoto' : 'Transmissão desligada',
                       style: Theme.of(context).textTheme.titleMedium),
-                  Text(running ? 'Disponível na rede local' : 'Inicie a câmera para transmitir',
+                  Text(running ? 'Disponível na rede local' : url != null ? 'Câmera pausada · pareamento mantido' : 'Inicie a câmera para transmitir',
                       style: Theme.of(context).textTheme.bodySmall),
                 ])),
                 if (running)

@@ -1,3 +1,12 @@
+## 1.0.288+288: transmissão remota, economia em espera e última câmera (2026-10-18)
+
+- Pausa e retomada remotas autenticadas no MCRP v1, preservando porta/QR/token durante o estado de espera (serviço permanece visível na notificação).
+- Pausa libera captura, EGL, encoder, wake lock e Wi-Fi lock; REC ativo impede parar vídeo até finalizar gravação.
+- Reinício usa a mesma sessão HTTP com recuperação de falhas e conferência de estado real. Android pode proibir reabrir câmera em determinadas restrições de segundo plano.
+- Ao vivo agora tenta a última câmera escolhida ao navegar entre abas; se estiver offline usa a câmera local sem esquecer a preferida. IDs são salvos sem credenciais ou tokens.
+- Painel remoto mostra temperatura de bateria e estado da transmissão; nenhum número de economia foi estimado sem teste físico.
+- Build Flutter/Android e testes físicos com tela apagada pendentes do CI/dispositivo.
+
 ## 1.0.287+287: descobrimento de rede, tela cheia e IA auxiliar (2026-10-18)
 
 - Central Câmeras agora oferece Escanear rede Wi-Fi sob demanda, com prazo curto e respostas UDP para transmissores Vigia IA e WS-Discovery ONVIF para câmeras compatíveis.

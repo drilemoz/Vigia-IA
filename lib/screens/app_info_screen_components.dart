@@ -77,11 +77,11 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.287',
+          version: '1.0.288',
           current: true,
           changes: [
-            'Planejamento de rotas mais estável ao utilizar GPS e editar preferências.',
-            'Assistente, biblioteca e exportação de viagens preservados.',
+            'Ao vivo lembra a última câmera e usa a local quando a remota estiver indisponível.',
+            'Controle remoto inicia ou pausa a transmissão sem reiniciar o pareamento.',
           ],
         ),
         SizedBox(height: 10),

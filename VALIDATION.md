@@ -1,4 +1,10 @@
-# Validação Vigia IA 1.0.287+287
+# Validação Vigia IA 1.0.288+288
+
+- `python3 -m unittest discover -s tool -p test_*.py -q`: **215 testes aprovados**; novos contratos de MCRP, gravação, fallback e Keystore.
+- `tool/check_version_sync.py`, imports e CI aprovados. `tool/verify_project.sh` **aprovado integralmente (exit code 0)** na segunda execução, após interrupção por limite de tempo na primeira tentativa.
+- Aquecimento e consumo: apenas auditoria de código (wake locks, intervalo de quadros e política térmica); nenhuma medição real de CPU, corrente ou temperatura foi executada.
+- A API 29+ exige revalidar o desbloqueio da câmera em foreground service sob tela apagada em aparelhos reais. Durante espera remota, Android Doze/rede Wi-Fi podem impedir a chegada do comando de início; operação remota exige serviço acessível e permissão Android.
+
 
 - `tool/verify_project.sh`: aprovado, código de saída 0, incluindo limites de tamanho dos arquivos e testes preventivos históricos atualizados para os módulos extraídos.
 - `python3 -m unittest discover -s tool -p 'test_*.py' -q`: **209 testes aprovados**, incluindo descoberta segura, pareamento, RTSP, orientação e IA auxiliar.

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/video_source_config.dart';
 import '../services/app_settings_service.dart';
+import '../services/last_live_camera_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/remote_camera_pairing_service.dart';
 import '../services/minha_camera_live_url.dart';
@@ -133,6 +134,7 @@ class _MonitorConnectScreenState extends State<MonitorConnectScreen> {
       analysisInterval: profile.source.analysisInterval,
     );
     await _settings.updateRuntime(source: source);
+    await LastLiveCameraService.instance.rememberManual(source);
     if (!mounted) return;
     setState(() => _opening = false);
     await Navigator.of(context).push(

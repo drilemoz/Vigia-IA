@@ -1,4 +1,9 @@
-# Arquitetura — Vigia IA 1.0.287+287
+# Arquitetura — Vigia IA 1.0.288+288
+
+**Transmissão/standby:** o serviço nativo mantém HTTP privado 8765 + anúncio UDP quando pausa a captura via POST MCRP autenticado. Status inclui `X-Transmitting`; câmera/EGL/encoder/locks só ativos durante transmissão. A ação local de encerrar serviço fecha também o listener. REC em andamento bloqueia pausa. Despertar remoto requer serviço foreground existente e políticas de câmera permissivas no Android. Nenhum wake lock durante standby, logo alcance remoto com tela apagada depende de Wi-Fi/Doze.
+
+**Memória do Ao vivo:** `LastLiveCameraService` armazena apenas ID de câmeras cadastradas, ou fonte manual inteira criptografada via Android Keystore; o `CameraRegistryService` fornece URLs/tokens protegidos para câmeras registradas. Se o probe não alcançar a fonte, Ao vivo usa câmera local na sessão sem alterar a preferência. `MonitorController` continua persistindo ajustes e fonte ativa para compatibilidade.
+
 
 Descoberta LAN: WS-Discovery multicast temporário e anúncio UDP sem chave pelo transmissor Kotlin. RTSP mantém URL protegida pelo CameraRegistryService. Tela cheia libera orientação apenas na visualização ativa; IA auxiliar experimental opt-in.
 

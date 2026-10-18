@@ -6,6 +6,7 @@ import '../models/monitor_schedule.dart';
 import '../models/camera_endpoint.dart';
 import '../models/camera_source_selector.dart';
 import '../services/minha_camera_live_url.dart';
+import '../services/last_live_camera_service.dart';
 import '../services/minha_camera_registry_migration.dart';
 import '../models/monitoring_zone.dart';
 import '../models/object_filter_catalog.dart';
@@ -172,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Retomada de serviço preserva a câmera e a configuração anteriores.
           unawaited(_start());
         } else {
-          unawaited(_startLocalCamera());
+          unawaited(_startRememberedCamera());
         }
       });
     }
@@ -431,15 +432,79 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// Ação Ao vivo da Home e navegação: ignora a fonte persistida, iniciando
-  /// diretamente a câmera local com a permissão já tratada por _start().
-  Future<void> _startLocalCamera() => _start(
+  /// Fallback local explícito, com opção de não substituir a última câmera
+  /// escolhida quando a remota está temporariamente inacessível.
+  Future<void> _startLocalCamera({bool rememberSelection = true}) => _start(
         camera: const CameraEndpoint(
           id: '__local__',
           name: 'Câmera deste aparelho',
           type: CameraEndpointType.local,
         ),
+        rememberSelection: rememberSelection,
       );
+
+  /// Ao vivo tenta a última câmera escolhida, sem usar automaticamente GPS.
+  /// Se a câmera salva estiver offline, abre a local SEM alterar a preferência.
+  Future<void> _startRememberedCamera() async {
+    await _cameraRegistry.initialize();
+    final id = await LastLiveCameraService.instance.read();
+    if (!mounted) return;
+    CameraEndpoint? selected;
+    if (id == '__local__') {
+      await _startLocalCamera();
+      return;
+    }
+    for (final camera in _cameraRegistry.items) {
+      if (camera.id == id && camera.enabled) {
+        selected = camera;
+        break;
+      }
+    }
+    // Compatibilidade com versões que gravavam só o source no perfil.
+    final saved = _settingsService.profile.source;
+    final manual = id == '__manual__'
+        ? await LastLiveCameraService.instance.readManual() : null;
+    final rememberedSource = manual ?? saved;
+    if (selected == null && (id == null || id == '__manual__') &&
+        rememberedSource.type != VideoSourceType.localCamera) {
+      if (rememberedSource.cameraId != null) {
+        for (final camera in _cameraRegistry.items) {
+          if (camera.id == rememberedSource.cameraId && camera.enabled) {
+            selected = camera;
+            break;
+          }
+        }
+      }
+      selected ??= CameraEndpoint(
+        id: '__previous__', name: rememberedSource.displayName ?? 'Última câmera',
+        type: switch (rememberedSource.type) {
+          VideoSourceType.rtsp => CameraEndpointType.rtsp,
+          VideoSourceType.esp32 => CameraEndpointType.esp32,
+          _ => CameraEndpointType.remotePhone,
+        },
+        address: rememberedSource.type == VideoSourceType.rtsp ? rememberedSource.rtspUrl : rememberedSource.remoteBaseUrl,
+        accessKey: rememberedSource.remoteAccessKey,
+        rtspSoftwareDecoding: rememberedSource.rtspSoftwareDecoding,
+        esp32CameraEnabled: true,
+      );
+    }
+    if (selected == null) {
+      await _startLocalCamera();
+      return;
+    }
+    final check = await _cameraRegistry.probe(selected);
+    if (!mounted) return;
+    if (check.online) {
+      await _start(camera: selected);
+    } else {
+      // O fallback não troca o ID lembrado, mesmo se a fonte local persistir
+      // dados de sessão em monitor_settings.json.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${selected.name} indisponível. Exibindo a câmera deste aparelho.'),
+      ));
+      await _startLocalCamera(rememberSelection: false);
+    }
+  }
 
   /// Seletor legado mantido para fluxos de cadastro/seleção explícita.
   /// Ao vivo nunca presume que um endereço RTSP antigo seja a câmera desejada.
@@ -520,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await _start(camera: selected);
   }
 
-  Future<void> _start({CameraEndpoint? camera}) async {
+  Future<void> _start({CameraEndpoint? camera, bool rememberSelection = true}) async {
     final current = _currentProfile();
     final profile = camera == null ? current : PersistedMonitorProfile(
       source: sourceForRegisteredCamera(camera, current.source.analysisInterval),
@@ -600,6 +665,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     await _settingsService.saveProfile(profile);
+    if (rememberSelection && camera != null && camera.id == '__previous__') {
+      await LastLiveCameraService.instance.rememberManual(profile.source);
+    } else if (rememberSelection && camera != null) {
+      await LastLiveCameraService.instance.remember(camera.id);
+    }
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(

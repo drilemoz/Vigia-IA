@@ -111,7 +111,7 @@ class McrpClient {
     final headers = <String, String>{};
     for (final name in <String>['x-stream-codec', 'x-device-model', 'x-resolution',
       'x-battery-level', 'x-battery-temp-tenths', 'x-recording', 'x-recording-seconds',
-      'x-transmission-seconds', 'x-eco', 'x-camera-facing', 'x-quality-profile', 'x-fps-target',
+      'x-transmission-seconds', 'x-transmitting', 'x-eco', 'x-camera-facing', 'x-quality-profile', 'x-fps-target',
       'x-fps-measured', 'x-torch-supported', 'x-torch-enabled', 'x-torch-mode',
       'x-zoom-supported', 'x-zoom-percent', 'x-zoom-ratio-100', 'x-zoom-max-ratio-100']) {
       final value = response.headers.value(name);
@@ -125,7 +125,7 @@ class McrpClient {
   }
 
   Future<void> command(String action) async {
-    const actions = <String>{'record/start', 'record/stop', 'eco/enable', 'eco/disable',
+    const actions = <String>{'transmission/start', 'transmission/stop', 'record/start', 'record/stop', 'eco/enable', 'eco/disable',
       'camera/back', 'camera/front', 'photo', 'codec/mjpeg', 'codec/h264',
       'quality/360', 'quality/480', 'quality/720', 'quality/768', 'quality/1080',
       'fps/5', 'fps/10', 'fps/15', 'fps/24', 'fps/30',

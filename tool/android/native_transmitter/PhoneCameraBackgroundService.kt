@@ -289,6 +289,10 @@ class PhoneCameraBackgroundService : Service() {
                 if (!changeStreamCodec(desired)) PhoneStreamDiagnostics.add("Troca de codec rejeitada durante outra operação")
             }
             ACTION_START -> {
+                if (server != null && !running && !closing) {
+                    resumeRemoteCapture()
+                    return START_NOT_STICKY
+                }
                 if (running || closing || pendingCameraStart || starting || releasing) return START_NOT_STICKY
                 starting = true
                 lastError = null
@@ -413,13 +417,17 @@ class PhoneCameraBackgroundService : Service() {
         return NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Vigia IA · Transmissão nativa")
-            .setContentText((if (recording) "Gravando e transmitindo" else "Transmitindo por Wi-Fi local"))
+            .setContentText(when {
+                recording -> "Gravando e transmitindo"
+                running -> "Transmitindo por Wi-Fi local"
+                else -> "Câmera pausada · controle remoto disponível"
+            })
             .setContentIntent(open)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .addAction(0, (if (recording) "Parar REC" else "Gravar"), pending(ACTION_RECORD, 2))
+            .apply { if (running) addAction(0, (if (recording) "Parar REC" else "Gravar"), pending(ACTION_RECORD, 2)) }
             .addAction(0, "Parar transmissão", pending(ACTION_STOP, 3))
             .build()
     }
@@ -442,7 +450,7 @@ class PhoneCameraBackgroundService : Service() {
             changeRecording = { desired ->
                 if (!running || closing || switching || (desired && latestJpeg == null)) false
                 else { if (recording != desired) mainHandler.post {
-                    if (!closing && recording != desired) toggleRecording()
+                    if (!closing && running && recording != desired) toggleRecording()
                 }; true }
             }, recordingStatus = { recording },
             changeTorch = { torch.setMode(it) },
@@ -479,7 +487,7 @@ class PhoneCameraBackgroundService : Service() {
                     true
                 }
             }, fpsStatus = { fpsLimit },
-            measuredFpsStatus = { publishedFps.measured(SystemClock.elapsedRealtime()) },
+            measuredFpsStatus = { if (running) publishedFps.measured(SystemClock.elapsedRealtime()) else 0 },
             changeZoom = { percent -> setServiceZoom(percent) },
             zoomStatus = { if (running && liveCodec == "mjpeg" && zoomAvailable && !switching) zoomPercent else null },
             zoomRatioStatus = { if (running && liveCodec == "mjpeg" && zoomAvailable && !switching) zoomRatio100 else null },
@@ -493,7 +501,21 @@ class PhoneCameraBackgroundService : Service() {
             takePhoto = {
                 if (!running || closing || switching || recording || takingPhoto || camera == null) false
                 else { takingPhoto = true; mainHandler.post { captureFullPhoto() }; true }
-            }, mediaIndex = { remoteLibrary.json() }, mediaOpen = { remoteLibrary.open(it) })
+            }, mediaIndex = { remoteLibrary.json() }, mediaOpen = { remoteLibrary.open(it) },
+            transmissionActive = { running && !closing },
+            changeTransmission = { wanted ->
+                if (closing || releasing || switching || takingPhoto || recording ||
+                    pendingCameraStart || starting || server == null) false
+                else if (wanted == running) true
+                else {
+                    mainHandler.post {
+                        if (!closing && !releasing && !recording && server != null) {
+                            if (wanted) resumeRemoteCapture() else pauseRemoteCapture()
+                        }
+                    }
+                    true
+                }
+            })
         try {
             server = session
             openPreview(session, facing, requestedQuality, prepared)
@@ -529,6 +551,86 @@ class PhoneCameraBackgroundService : Service() {
         val info = Camera.CameraInfo()
         Camera.getCameraInfo(id, info)
         info.facing == facing
+    }
+
+    /** Pausa apenas a captura. HTTP/MCRP e token continuam ativos enquanto o
+     *  serviço autorizado estiver vivo. Não interrompe uma gravação em andamento. */
+    private fun pauseRemoteCapture() {
+        if (!running || closing || recording || switching || takingPhoto || server == null) return
+        running = false
+        firstFramePublished = false
+        transmissionStartedMs = 0L
+        latestJpeg = null
+        remoteResolution = ""
+        startupPhase = "aguardando controle remoto"
+        orientationSensor.disable()
+        mainHandler.removeCallbacks(frameWatchdog)
+        releasePreview()
+        server?.clearFrame()
+        server?.clearAvc()
+        try { if (wifiLock?.isHeld == true) wifiLock?.release() } catch (_: Exception) { }
+        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (_: Exception) { }
+        wifiLock = null
+        wakeLock = null
+        PhoneStreamDiagnostics.add("Captura pausada remotamente; controle disponível sem câmera")
+        updateNotification()
+    }
+
+    /** Reabre câmera sem reiniciar servidor/porta/token; o EGL é preparado fora da UI. */
+    private fun resumeRemoteCapture() {
+        val session = server ?: return
+        if (running || starting || closing || releasing || recording || pendingCameraStart) return
+        starting = true
+        pendingCameraStart = true
+        startupPhase = "retomando a câmera"
+        val generation = ++startGeneration
+        Thread({
+            val prepared = try { PhoneHeadlessPreview.create(640, 480) }
+                catch (e: Exception) {
+                    mainHandler.post {
+                        if (generation == startGeneration) {
+                            starting = false
+                            pendingCameraStart = false
+                            lastError = "Retomada EGL: ${e.javaClass.simpleName}"
+                            startupPhase = "retomada falhou"
+                            updateNotification()
+                        }
+                    }
+                    return@Thread
+                }
+            mainHandler.post {
+                if (closing || generation != startGeneration || server !== session) {
+                    prepared.close()
+                    return@post
+                }
+                try {
+                    openPreview(session, selectedFacing, requestedQuality, prepared)
+                    running = true
+                    firstFramePublished = false
+                    lastError = null
+                    startupPhase = "aguardando primeiro quadro"
+                    transmissionStartedMs = SystemClock.elapsedRealtime()
+                    pipelineProbe.reset(transmissionStartedMs)
+                    lastPublishedAtMs = transmissionStartedMs
+                    watchdogRestarts = 0
+                    if (orientationSensor.canDetectOrientation()) orientationSensor.enable()
+                    acquireLocks()
+                    mainHandler.postDelayed(frameWatchdog, 6000)
+                    PhoneStreamDiagnostics.add("Captura retomada por comando remoto")
+                } catch (e: Exception) {
+                    lastError = "Retomada da câmera: ${e.javaClass.simpleName}"
+                    startupPhase = "retomada falhou"
+                    PhoneStreamDiagnostics.add("Falha na retomada remota: ${e.javaClass.simpleName}")
+                    releasePreview()
+                    session.clearFrame()
+                    session.clearAvc()
+                } finally {
+                    starting = false
+                    pendingCameraStart = false
+                    updateNotification()
+                }
+            }
+        }, "camera-remote-resume").apply { isDaemon = true; start() }
     }
 
     private fun releasePreview() {
@@ -724,7 +826,7 @@ class PhoneCameraBackgroundService : Service() {
     }
 
     private fun publish(session: PhoneCameraServer, frame: ByteArray, width: Int, height: Int) {
-        if (server !== session || closing) return
+        if (server !== session || closing || !running) return
         val now = SystemClock.elapsedRealtime()
         val reading = if (cachedBattery == null || now - lastBatteryReadAt >= 2000L) {
             battery.read().also { cachedBattery = it; lastBatteryReadAt = now }

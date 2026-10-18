@@ -145,6 +145,7 @@ extension _MultiCameraMonitoring on _MultiCameraScreenState {
       await _settings.saveProfile(PersistedMonitorProfile(
         source: source, settings: profile.settings,
       ));
+      await LastLiveCameraService.instance.remember(camera.id);
     }
     final secondarySource = secondary == null
         ? null

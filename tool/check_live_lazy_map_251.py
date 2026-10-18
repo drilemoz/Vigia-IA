@@ -13,15 +13,15 @@ def validate(read):
     map_panel = read('lib/screens/monitor_screen_portrait.dart')
     map_primary = read('lib/screens/monitor_screen_multicamera.dart')
     explorer = read('lib/screens/monitor_screen_map_explorer.dart')
-    assert 'Future<void> _startLocalCamera() => _start(' in home
+    assert 'Future<void> _startLocalCamera({bool rememberSelection = true}) => _start(' in home
     assert "id: '__local__'" in home
     assert 'type: CameraEndpointType.local' in home
-    assert 'unawaited(_startLocalCamera());' in ui
+    assert 'unawaited(_startRememberedCamera());' in ui
     # As telas compartilham agora um roteador em vez de duplicar o destino Ao vivo.
     for other in ('lib/screens/events_screen.dart', 'lib/screens/multi_camera_screen.dart'):
         assert 'navigateToMainDestination(context, index' in read(other)
     assert 'HomeScreen(startMonitorOnLoad: true)' in read('lib/widgets/main_navigation_routes.dart')
-    assert 'onTap: () => unawaited(_startLocalCamera()),' in ui
+    assert 'onTap: () => unawaited(_startRememberedCamera()),' in ui
     assert 'onTap: () => unawaited(_chooseCameraForLive()),' not in ui
     assert 'resumeMonitorOnLoad' in home
     assert 'widget.resumeMonitorOnLoad || resumeRequested' in home

@@ -4,7 +4,7 @@ extension _HomeRedesign on _HomeScreenState {
   void _navigateMain(int index) {
     if (index == 0) return;
     if (index == 2) {
-      unawaited(_startLocalCamera());
+      unawaited(_startRememberedCamera());
       return;
     }
     navigateToMainDestination(context, index, currentIndex: 0);
@@ -371,7 +371,7 @@ extension _HomeRedesign on _HomeScreenState {
             title: 'Monitorar',
             subtitle: 'Câmera + IA',
             accent: VigiaColors.cyan,
-            onTap: () => unawaited(_startLocalCamera()),
+            onTap: () => unawaited(_startRememberedCamera()),
           ),
           VigiaModeCard(
             compact: true,

@@ -13,7 +13,7 @@ for title in ('Monitorar','Transmitir','Receber','ESP32'):
 assert "title: 'Minha Câmera'" not in home
 assert 'McrpCameraScreen' not in home
 assert "import 'mcrp_camera_screen.dart';" not in master
-assert "onTap: () => unawaited(_startLocalCamera())" in home
+assert "onTap: () => unawaited(_startRememberedCamera())" in home
 assert 'navigateToMainDestination(context, index, currentIndex: 0)' in home
 assert '_buildQuickActions()' not in home
 assert 'McrpCameraScreen(' in hub and 'onMcrpControls:' in hub

@@ -1,4 +1,12 @@
-## 1.0.287+287 · Rede, câmeras e monitoramento
+## 1.0.288+288 · Controle remoto e retomada de câmera
+
+- Ao vivo recorda a última câmera escolhida, inclusive depois de navegar entre abas. Quando ela estiver inacessível, abre a local sem substituir a preferência anterior.
+- Transmissor nativo MCRP expõe comandos autenticados `transmission/stop` e `transmission/start`. O primeiro **pausa a captura**, não encerra a escuta do serviço; é possível reiniciar enquanto o foreground service estiver vivo e o Android permitir.
+- Na pausa, câmera/EGL, codificação e wakelocks são liberados; gravação ativa bloqueia a pausa para preservar o arquivo. O token privado não é anunciado pelo scanner.
+- A temperatura exibida é da bateria fornecida pelo Android, não a do processador. Sem medições em aparelho real não é possível afirmar a redução efetiva em °C ou mAh.
+- Protocolos anteriores sem `X-Transmitting` preservam seus controles existentes sem oferecer botões de transmissão incompatíveis.
+
+## 1.0.288+288 · Rede, câmeras e monitoramento
 
 - Escanear rede Wi-Fi manualmente: Vigia IA identificado sem expor token, ONVIF via WS-Discovery.
 - RTSP: nome/URL/usuário/senha separados, caixa maior, configuração assistida.
@@ -292,7 +300,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.287+287`
+**Versão atual:** `1.0.288+288`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

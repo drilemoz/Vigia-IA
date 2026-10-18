@@ -28,6 +28,8 @@ class McrpControlPanel extends StatelessWidget {
   final bool allowCodecChange;
   final bool compact;
 
+  bool get _transmitting => status['x-transmitting'] != '0';
+  bool get _transmittingKnown => status['x-transmitting'] == '0' || status['x-transmitting'] == '1';
   bool get _recording => status['x-recording'] == '1';
   bool get _recordingKnown => status['x-recording'] == '0' || status['x-recording'] == '1';
   bool get _eco => status['x-eco'] == '1';
@@ -70,21 +72,26 @@ class McrpControlPanel extends StatelessWidget {
         const gap = 7.0;
         final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
         final actions = <Widget>[
-          _action(context, _recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record,
+          if (_transmittingKnown)
+            _action(context, _transmitting ? Icons.pause_circle_outline : Icons.play_circle_outline,
+              _transmitting ? 'Parar transmissão' : 'Iniciar transmissão',
+              !_recording ? () => onCommand(_transmitting ? 'transmission/stop' : 'transmission/start') : null,
+              selected: !_transmitting),
+          if (_transmitting) _action(context, _recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record,
             _recording ? 'Parar REC' : 'Iniciar REC',
             _recordingKnown ? () => onCommand(_recording ? 'record/stop' : 'record/start') : null,
             selected: _recording),
-          _action(context, Icons.photo_camera_outlined, 'Foto', () => onCommand('photo')),
-          _action(context, Icons.cameraswitch_outlined, 'Câmera', () => onCommand(
+          if (_transmitting) _action(context, Icons.photo_camera_outlined, 'Foto', () => onCommand('photo')),
+          if (_transmitting) _action(context, Icons.cameraswitch_outlined, 'Câmera', () => onCommand(
             status['x-camera-facing'] == '1' ? 'camera/back' : 'camera/front')),
-          _action(context, Icons.battery_saver_outlined, 'Eco', () => onCommand(
+          if (_transmitting) _action(context, Icons.battery_saver_outlined, 'Eco', () => onCommand(
             _eco ? 'eco/disable' : 'eco/enable'), selected: _eco),
-          _action(context, _torchEnabled ? Icons.flash_on : Icons.flash_off, 'Lanterna',
+          if (_transmitting) _action(context, _torchEnabled ? Icons.flash_on : Icons.flash_off, 'Lanterna',
             _torchSupported ? () => onCommand(_torchEnabled ? 'torch/off' : 'torch/30') : null,
             selected: _torchEnabled),
-          _action(context, Icons.zoom_out, 'Zoom −',
+          if (_transmitting) _action(context, Icons.zoom_out, 'Zoom −',
             _zoomSupported && _zoom > 0 ? () => onCommand('zoom/${(_zoom - 10).clamp(0, 100)}') : null),
-          _action(context, Icons.zoom_in, 'Zoom +',
+          if (_transmitting) _action(context, Icons.zoom_in, 'Zoom +',
             _zoomSupported && _zoom < 100 ? () => onCommand('zoom/${(_zoom + 10).clamp(0, 100)}') : null),
           _action(context, Icons.refresh, 'Atualizar', onReconnect),
           if (onMedia != null)
@@ -98,21 +105,24 @@ class McrpControlPanel extends StatelessWidget {
       }),
       const SizedBox(height: 10),
       Wrap(spacing: 8, runSpacing: 7, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        _setting(context, 'Resolução', status['x-quality-profile'],
+        if (_transmitting) _setting(context, 'Resolução', status['x-quality-profile'],
           const <String, String>{'360p': 'quality/360', '480p': 'quality/480',
             '720p': 'quality/720', '768p': 'quality/768', '1080p': 'quality/1080'}),
-        _setting(context, 'FPS', status['x-fps-target'],
+        if (_transmitting) _setting(context, 'FPS', status['x-fps-target'],
           const <String, String>{'5 FPS': 'fps/5', '10 FPS': 'fps/10',
             '15 FPS': 'fps/15', '24 FPS': 'fps/24', '30 FPS': 'fps/30'}),
-        if (_torchSupported)
+        if (_transmitting && _torchSupported)
           _setting(context, 'Lanterna', status['x-torch-mode'],
             const <String, String>{'Desligar': 'torch/off', '30 s': 'torch/30',
               '120 s': 'torch/120', 'Durante REC': 'torch/record'}),
-        if (allowCodecChange)
+        if (_transmitting && allowCodecChange)
           _setting(context, 'Codec', _codec.toUpperCase(),
             const <String, String>{'MJPEG': 'codec/mjpeg', 'H.264': 'codec/h264'}),
       ]),
       const SizedBox(height: 8),
+      if (_transmittingKnown && !_transmitting)
+        Text('Transmissão pausada. Câmera e codificação desligadas; controle local ainda disponível.',
+          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
       Wrap(spacing: 12, runSpacing: 4, children: [
         Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(_recording ? Icons.fiber_manual_record : Icons.radio_button_unchecked,
@@ -128,6 +138,11 @@ class McrpControlPanel extends StatelessWidget {
           style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
         Text('Bateria: ${status['x-battery-level'] ?? '—'}%',
           style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+        if (int.tryParse(status['x-battery-temp-tenths'] ?? '') != null)
+          Text('Bateria: ${(int.parse(status['x-battery-temp-tenths']!) / 10).toStringAsFixed(1)} °C',
+            style: TextStyle(fontSize: 12,
+              color: (int.parse(status['x-battery-temp-tenths']!) >= 420)
+                  ? scheme.error : scheme.onSurfaceVariant)),
       ]),
     ]);
   }
@@ -251,6 +266,8 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
     if (client == null || _busy || !_ready) return;
     final generation = _generation;
     final recordingCommand = action == 'record/start' || action == 'record/stop';
+    final transmissionCommand = action == 'transmission/start' || action == 'transmission/stop';
+    final expectedTransmission = action == 'transmission/start' ? '1' : '0';
     final expectedRecording = action == 'record/start' ? '1' : '0';
     setState(() { _busy = true; _error = null; });
     var sent = false;
@@ -259,22 +276,25 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
       sent = true;
       // Confirma o estado real no transmissor. Não envia o POST de novo
       // quando um pacote de resposta ou a conexão se perde.
-      for (var attempt = 0; attempt < (recordingCommand ? 5 : 1); attempt++) {
+      for (var attempt = 0; attempt < (transmissionCommand ? 12 : recordingCommand ? 5 : 1); attempt++) {
         if (attempt > 0) await Future<void>.delayed(const Duration(milliseconds: 450));
         final state = await client.status();
         if (!mounted || _generation != generation || client != _client) return;
         setState(() { _status = state; _ready = true; _error = null; });
-        if (!recordingCommand || state['x-recording'] == expectedRecording) return;
+        if (transmissionCommand && state['x-transmitting'] == expectedTransmission) return;
+        if (!transmissionCommand && (!recordingCommand || state['x-recording'] == expectedRecording)) return;
       }
       if (mounted && _generation == generation && client == _client) {
-        setState(() => _error = 'Comando enviado, aguardando confirmação do estado REC.');
+        setState(() => _error = transmissionCommand
+            ? 'Comando enviado; aguardando confirmação da transmissão.'
+            : 'Comando enviado, aguardando confirmação do estado REC.');
       }
     } catch (error) {
       if (mounted && _generation == generation && client == _client) {
         setState(() {
           if (sent) _ready = false;
           _error = sent
-            ? 'Comando enviado, mas não foi possível confirmar REC. Reconecte para consultar o estado.'
+            ? 'Comando enviado, mas não foi possível confirmar o estado. Reconecte para consultar.'
             : error is StateError ? error.message.toString()
             : 'O transmissor não confirmou o comando. Verifique a rede.';
         });
@@ -330,7 +350,9 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
               compact: true, onCommand: _command,
               onReconnect: () => unawaited(_refresh())),
           const SizedBox(height: 5),
-          Text('Iniciar/Parar REC grava no celular transmissor. Uma gravação ativa '
+          Text('Parar transmissão libera câmera e encoder; o serviço mantém a escuta local. '
+              'Iniciar vídeo requer que o serviço esteja ativo e o Android permita reabrir a câmera. '
+              'Iniciar/Parar REC grava no celular transmissor. Uma gravação ativa '
               'não depende da conexão com o receptor. Para enviar novos comandos, '
               'os aparelhos precisam estar conectados na rede local.',
             style: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant)),

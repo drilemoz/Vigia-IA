@@ -13,6 +13,7 @@ import '../models/remote_phone_status.dart';
 import '../models/video_source_config.dart';
 import '../services/app_settings_service.dart';
 import '../services/camera_registry_service.dart';
+import '../services/last_live_camera_service.dart';
 import '../services/event_history_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/remote_camera_pairing_service.dart';

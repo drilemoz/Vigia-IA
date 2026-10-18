@@ -22,7 +22,7 @@ class LiveLazyMap251(unittest.TestCase):
 
     def test_detects_live_picker_regression(self):
         ui = self.read('lib/screens/home_screen_redesign.dart')
-        ui = ui.replace('onTap: () => unawaited(_startLocalCamera()),',
+        ui = ui.replace('onTap: () => unawaited(_startRememberedCamera()),',
                         'onTap: () => unawaited(_chooseCameraForLive()),')
         with self.assertRaises(AssertionError):
             validate(lambda f: ui if f == 'lib/screens/home_screen_redesign.dart' else self.read(f))

@@ -255,6 +255,7 @@ extension _MonitorMulticamera on _MonitorScreenState {
     await _replaceSecondarySource(null);
     if (!mounted) return;
     await _controller.switchSource(source);
+    unawaited(LastLiveCameraService.instance.remember('__local__'));
   }
 
   Future<void> _selectPrimaryCamera(CameraEndpoint camera) async {
@@ -268,6 +269,7 @@ extension _MonitorMulticamera on _MonitorScreenState {
       await _replaceSecondarySource(null);
     }
     await _controller.switchSource(next);
+    unawaited(LastLiveCameraService.instance.remember(camera.id));
   }
 
   Future<void> _selectSecondaryCamera(VideoSourceConfig source) async {

@@ -31,6 +31,7 @@ import '../services/offline_map_service.dart';
 import '../services/route_explorer_service.dart';
 import '../services/camera_registry_service.dart';
 import '../services/remote_camera_pairing_service.dart';
+import '../services/last_live_camera_service.dart';
 import '../services/minha_camera_live_url.dart';
 import '../services/mcrp_client.dart';
 import '../widgets/mcrp_remote_controls.dart';
@@ -766,6 +767,11 @@ class _MonitorScreenState extends State<MonitorScreen>
         await _replaceSecondarySource(null);
       }
       await _controller.switchSource(next);
+      if (next.cameraId != null) {
+        unawaited(LastLiveCameraService.instance.remember(next.cameraId));
+      } else {
+        unawaited(LastLiveCameraService.instance.rememberManual(next));
+      }
     }
   }
 
