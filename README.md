@@ -1,3 +1,10 @@
+## 1.0.284+284 · Planejamento na Home
+
+- Card **Planejamento**: escolha cidades sem GPS, consulte sugestões locais e pesquise online somente ao confirmar.
+- Calcule rotas alternativas para bicicleta, ajuste velocidade e horas por dia, veja pernoites aproximados, pausas e horários.
+- Biblioteca de viagens salva geometrias, manobras e preferências para visualização offline, sem prometer roteamento offline.
+- Tema inicial Sistema preservado; verificador legado de tema sincronizado com esse padrão.
+
 ## 1.0.283+283: transmissão renovada e tema do sistema (2026-10-18)
 
 - Tela `Vigia IA · Transmissão`: QR no cabeçalho, acessível em janela central tematizada, com código azul de alto contraste e pequeno selo Vigia IA; endereço privado e token MCRP inalterados.
@@ -264,7 +271,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.283+283`
+**Versão atual:** `1.0.284+284`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

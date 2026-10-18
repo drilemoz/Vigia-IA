@@ -25,6 +25,7 @@ import '../widgets/vigia_ui.dart';
 import '../widgets/object_filter_dialog.dart';
 import '../widgets/smart_alert_rules_dialog.dart';
 import 'native_transmitter_screen.dart';
+import 'trip_planning_screen.dart';
 import 'data_usage_screen.dart';
 import 'error_center_screen.dart';
 import 'esp32_settings_screen.dart';

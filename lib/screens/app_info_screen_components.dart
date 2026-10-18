@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.283',
+          version: '1.0.284',
           current: true,
+          changes: [
+            'Planejamento de cicloviagens acessível pela Home.',
+            'Rotas alternativas, etapas diárias e pausas configuráveis.',
+            'Biblioteca local para consultar viagens sem internet.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.283',
           changes: [
             'Transmissão com QR azul em janela e controles organizados.',
             'Tempo do REC e status separados no painel principal.',

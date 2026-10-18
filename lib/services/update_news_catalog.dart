@@ -8,16 +8,16 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.283', build: 283);
+      AppBuildVersion(version: '1.0.284', build: 284);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.283', build: 283),
+      version: AppBuildVersion(version: '1.0.284', build: 284),
       changes: <String>[
-        'Transmissão renovada com QR azul em janela própria.',
-        'Controles locais com ícones e escolhas organizadas.',
-        'Tempos separados de transmissão e gravação.',
-        'Tema inicial acompanha o modo do Android.',
+        'Novo Planejamento de cicloviagens na tela inicial.',
+        'Calcule rotas, organize dias e pausas e compare percursos.',
+        'Salve viagens para consultar trajetos sem internet.',
+        'Tema inicial acompanha o modo do aparelho.',
       ],
     ),
   ]);

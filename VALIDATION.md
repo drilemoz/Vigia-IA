@@ -1,3 +1,12 @@
+# Validação Vigia IA 1.0.284+284
+
+- Falha do workflow APK 237 diagnosticada: antiga asserção exigia tema Escuro, incompatível com a preferência inicial Sistema introduzida na 283. Contratos atualizados sem desfazer a personalização.
+- Módulo Planejamento implementado com reuso de roteamento, busca, estimador e armazenamento local separado; 5 testes preventivos próprios e 4 testes Flutter novos (estes ainda precisam ser executados em CI).
+- `python3 -m unittest discover -s tool -p 'test_*.py' -q`: **194 testes aprovados** em 9,8 s.
+- `python tool/check_version_sync.py`, `python tool/check_ci_contract.py`, `python tool/check_import_targets.py`, `bash -n tool/verify_project.sh` e checagens estruturais de Home/MCRP aprovados.
+- `tool/verify_project.sh` foi iniciado e não acusou falha nos gates concluídos, mas excedeu o limite de 200 s após o controle de versão; execução completa não confirmada.
+- Flutter SDK não disponível no ambiente, portanto `flutter analyze`, `flutter test`, Android APK, chamadas reais a Nominatim/Valhalla e medições físicas exigem CI/aparelho.
+
 # Validação Vigia IA 1.0.283+283
 
 - Testes de contratos para QR modal, comandos MCRP, painel REC e preferência de tema do sistema; verificadores preventivos da versão precedente adaptados sem afrouxar a preservação de protocolo.

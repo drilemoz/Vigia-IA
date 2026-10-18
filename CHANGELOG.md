@@ -1,3 +1,14 @@
+## 1.0.284+284: Planejamento de cicloviagens e verificador de tema (2026-10-18)
+
+- Corrigido o verificador preventivo que ainda exigia Escuro como tema padrão. Agora exige Sistema na primeira instalação sem afetar preferências existentes.
+- Home recebeu card Planejamento, independente dos quatro modos de monitoramento e da barra com seis destinos.
+- Origem e destino digitáveis sem GPS; sugestões de cidades salvas instantâneas e busca online por ação explícita, reutilizando índice existente e limite do Nominatim.
+- Rotas para bicicleta e alternativas pelo serviço Valhalla já usado em Mapas; distâncias retornadas pelo servidor, tempo calculado pela velocidade média configurada.
+- Cronograma por dias, saída, almoço e paradas, com avisos quando ponto de apoio/pernoite for apenas aproximado.
+- Prévia do traçado offline, mapa-base online opcional, biblioteca local de até 40 viagens com rotas/instruções persistidas, acesso manual ao mapa existente pela função Rota salva.
+- Busca explícita de pontos de apoio na rota com dados salvos ou internet; verificação de acesso e segurança segue sendo necessária.
+- Nenhum motor de recálculo offline foi incluído: MBTiles existentes continuam sob gerenciamento de Mapas; módulos de câmera e IA intactos.
+
 ## 1.0.283+283: transmissão renovada e tema do sistema (2026-10-18)
 
 - Tela `Vigia IA · Transmissão`: QR no cabeçalho, acessível em janela central tematizada, com código azul de alto contraste e pequeno selo Vigia IA; endereço privado e token MCRP inalterados.

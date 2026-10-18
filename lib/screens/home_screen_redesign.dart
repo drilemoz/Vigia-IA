@@ -159,6 +159,8 @@ extension _HomeRedesign on _HomeScreenState {
                             const SizedBox(height: 10),
                             _buildModeCards(compactHeight: compactHeight),
                             SizedBox(height: gap),
+                            _buildTripPlanningCard(),
+                            SizedBox(height: gap),
                             VigiaSectionHeading(
                               title: 'Monitoramento atual',
                               subtitle: 'Operações e ajustes deste monitor.',
@@ -193,6 +195,50 @@ extension _HomeRedesign on _HomeScreenState {
               },
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTripPlanningCard() {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surface,
+      borderRadius: BorderRadius.circular(17),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(17),
+        onTap: () => _openScreen(const TripPlanningScreen()),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            border: Border.all(color: scheme.outline.withValues(alpha: 0.18)),
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: Row(children: [
+            Container(
+              width: 46, height: 46,
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(Icons.route_rounded, color: scheme.onPrimaryContainer),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Planejamento', style: TextStyle(
+                  fontWeight: FontWeight.w800, fontSize: 15,
+                  color: scheme.onSurface,
+                )),
+                const SizedBox(height: 3),
+                Text('Cicloviagens · rotas, dias e paradas offline',
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+              ],
+            )),
+            Icon(Icons.chevron_right_rounded, color: scheme.primary),
+          ]),
         ),
       ),
     );

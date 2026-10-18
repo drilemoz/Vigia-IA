@@ -364,6 +364,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     required bool onlineAllowed,
     required List<OfflineMapPackage> offlineMaps,
     required List<OfflinePoiPackage> offlinePoiPackages,
+    bool preferRegion = true,
   }) async {
     await initialize();
     final revision = ++_searchRevision;
@@ -396,6 +397,7 @@ class MapDestinationSearchService extends ChangeNotifier {
       final remote = await _fetchNominatim(
         text,
         current,
+        preferRegion: preferRegion,
       ).timeout(const Duration(seconds: 10));
       _mergeKnownPlaces(remote.where((item) => item.kind != MapDestinationKind.pointOfInterest));
       if (revision != _searchRevision) return;
@@ -535,7 +537,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.283');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.284');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -615,7 +617,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.283');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.284');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -748,7 +750,7 @@ class MapDestinationSearchService extends ChangeNotifier {
 
   Future<String> _readNearbyResponse(Uri endpoint, String query) async {
     final request = await _client.postUrl(endpoint);
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.283');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.284');
     request.headers.contentType = ContentType(
       'application', 'x-www-form-urlencoded', charset: 'utf-8',
     );
@@ -834,7 +836,7 @@ class MapDestinationSearchService extends ChangeNotifier {
         final request = await _client.getUrl(uri).timeout(const Duration(seconds: 6));
         request.headers.set(
           HttpHeaders.userAgentHeader,
-          'VigiaIA/1.0.283 map-reverse-search',
+          'VigiaIA/1.0.284 map-reverse-search',
         );
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
         final response = await request.close().timeout(const Duration(seconds: 8));
@@ -893,10 +895,13 @@ class MapDestinationSearchService extends ChangeNotifier {
 
   Future<List<MapDestinationSearchResult>> _fetchNominatim(
     String query,
-    MapRoutePoint current,
-  ) async {
-    final cacheKey = '${MapDestinationRanking.fold(query)}:'
-        '${(current.latitude * 2).round()}:${(current.longitude * 2).round()}';
+    MapRoutePoint current, {
+    bool preferRegion = true,
+  }) async {
+    final regionKey = preferRegion
+        ? '${(current.latitude * 2).round()}:${(current.longitude * 2).round()}'
+        : 'global';
+    final cacheKey = '${MapDestinationRanking.fold(query)}:$regionKey';
     final cached = _queryCache[cacheKey];
     if (cached != null &&
         DateTime.now().difference(cached.at) < const Duration(hours: 1)) {
@@ -911,7 +916,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     // bounded=0: preferência geográfica, sem bloquear lugares remotos.
     final approxLat = (current.latitude * 2).round() / 2;
     final approxLon = (current.longitude * 2).round() / 2;
-    final regionalBox = approxLon.abs() < 170 && approxLat.abs() < 80
+    final regionalBox = preferRegion && approxLon.abs() < 170 && approxLat.abs() < 80
         ? <String, String>{
             'viewbox': '${approxLon - 2.5},${approxLat + 2.0},'
                 '${approxLon + 2.5},${approxLat - 2.0}',
@@ -932,7 +937,7 @@ class MapDestinationSearchService extends ChangeNotifier {
       },
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.283 map-search');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.284 map-search');
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     final response = await request.close().timeout(const Duration(seconds: 15));
     final body = await utf8.decoder.bind(response).join();

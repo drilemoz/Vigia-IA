@@ -1,3 +1,11 @@
+# Arquitetura — Vigia IA 1.0.284+284
+
+**Planejamento modular:** `TripPlanningScreen` só monta os serviços de busca/rota quando acessada pela Home. `MapDestinationSearchService` preserva o cache local e requer submissão explícita para Nominatim. `MapCyclingRouteService` consulta Valhalla sob ação do usuário. `BikeTripPlanner`/`BikeTripSchedule` calculam dias/horários, com pernoites marcados aproximados se não houver local validado.
+
+**Persistência:** `PlannedBikeTripService` mantém arquivo versionado distinto da última rota do mapa, com limite de 40 viagens e validação de schema/limite de bytes; gravação temporária e rename atômico no Android. Reaproveita serialização de `SavedBikeRouteService`; a opção Abrir nos Mapas prepara a rota no formato legado, sem iniciar GPS automaticamente. Prévia FlutterMap sem tiles funciona offline, enquanto tiles online só são consultados por ação explícita. Não há motor offline de recálculo. Módulo sem câmera, IA ou GPS em background.
+
+**Build 237:** `tool/verify_project.sh` tinha expectativas antigas `AppThemePreference.dark`; verificador corrigido para `system` conforme comportamento implementado na 1.0.283.
+
 # Arquitetura — Vigia IA 1.0.283+283
 
 **Transmissão nativa:** a tela Flutter agora contém status e controles locais sempre visíveis, com QR privado apresentado apenas mediante ação no AppBar, e modal de opções. O MCRP v1, a URL/token `/live/`, a captura Kotlin sem prévia e o serviço em foreground não foram alterados. A UI consulta `X-Recording-Seconds` para mostrar o relógio de REC, sem estimativa fictícia. Consultas de telemetria são suspensas quando a Activity está fora de foco.
