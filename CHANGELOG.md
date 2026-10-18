@@ -1,3 +1,11 @@
+## 1.0.280+280: Central de Câmeras compacta (2026-10-18)
+
+- Cabeçalho de Câmeras reúne indicadores e ajuda contextual em uma única linha.
+- Ações QR, Celular, RTSP e ESP32 redesenhadas como quatro botões compactos lado a lado.
+- A câmera local recebe o rótulo Câmera celular, sem cartão redundante de informações do dispositivo.
+- Lista de cartões em celular agora utiliza altura dinâmica, reduzindo espaço ocioso e subindo último evento.
+- Mantidos monitoramento, cadastro, pareamento, status, eventos e compatibilidade MCRP.
+
 ## 1.0.279+279: navegação principal com Mapas (2026-10-18)
 
 - Barra inferior com seis destinos nas seções principais: Início, Histórico, Ao vivo, Câmeras, Mapas e Ajustes.

@@ -16,8 +16,7 @@ class _CameraDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final detail = switch (camera.type) {
-      CameraEndpointType.local =>
-        'Dispositivo: este celular · sensor disponível ao iniciar',
+      CameraEndpointType.local => '',
       CameraEndpointType.rtsp =>
         'Endereço RTSP cadastrado · teste online verifica só a porta. ${camera.rtspSoftwareDecoding ? 'Decodificação por software ativa. ' : ''}Falhas: Diagnóstico.',
       CameraEndpointType.esp32 => _esp32Detail(),

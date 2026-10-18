@@ -1,3 +1,11 @@
+## 1.0.280+280: Central de Câmeras mais compacta (2026-10-18)
+
+- Aviso de independência/contagem movido para botão de ajuda na mesma linha dos indicadores.
+- QR, Celular, RTSP e ESP32 agora cabem numa linha em telas de celular com ícones acima do texto.
+- Câmera local agora aparece como **Câmera celular**, sem linha técnica redundante.
+- Cartões em uma coluna têm altura natural; último evento sobe para perto do cabeçalho.
+- Compatibilidade de cadastro, status e pareamento preservada.
+
 ## 1.0.279+279: barra de navegação fixa e acesso a Mapas (2026-10-18)
 
 - Adicionada a seção **Mapas** à navegação principal: Início, Histórico, Ao vivo, Câmeras, Mapas e Ajustes.
@@ -231,7 +239,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.279+279`
+**Versão atual:** `1.0.280+280`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

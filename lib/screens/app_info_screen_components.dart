@@ -77,12 +77,21 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.279',
+          version: '1.0.280',
           current: true,
           changes: [
-            'A transmissão abre direto no modo com controles locais de emergência.',
-            'Câmera remota aparece com nomes consistentes no cadastro e no Ao vivo.',
-            'Gravação remota e QR continuam disponíveis.',
+            'Atalhos QR, Celular, RTSP e ESP32 lado a lado em Câmeras.',
+            'Informações sobre contagem disponíveis no ícone de ajuda.',
+            'Câmera celular com cartão menor e evento em destaque.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.279',
+          changes: [
+            'A barra de navegação ganhou acesso direto a Mapas.',
+            'Os seis destinos principais ficam acessíveis no menu inferior.',
+            'Tela cheia continua reservada para o conteúdo principal.',
           ],
         ),
         SizedBox(height: 10),
@@ -2480,12 +2489,21 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.279',
+          version: '1.0.280',
           current: true,
           changes: [
-            'A transmissão abre direto no modo com controles locais de emergência.',
-            'Câmera remota aparece com nomes consistentes no cadastro e no Ao vivo.',
-            'Gravação remota e QR continuam disponíveis.',
+            'Atalhos QR, Celular, RTSP e ESP32 lado a lado em Câmeras.',
+            'Informações sobre contagem disponíveis no ícone de ajuda.',
+            'Câmera celular com cartão menor e evento em destaque.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.279',
+          changes: [
+            'A barra de navegação ganhou acesso direto a Mapas.',
+            'Os seis destinos principais ficam acessíveis no menu inferior.',
+            'Tela cheia continua reservada para o conteúdo principal.',
           ],
         ),
         SizedBox(height: 10),

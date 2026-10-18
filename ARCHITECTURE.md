@@ -1,4 +1,6 @@
-# Arquitetura — Vigia IA 1.0.279+279
+# Arquitetura — Vigia IA 1.0.280+280
+
+- Central de Câmeras: `multi_camera_screen_components.dart` apresenta indicadores/ajuda e botões de fonte em linha; `multi_camera_screen.dart` troca grid fixo por lista de altura natural quando há uma coluna. Nenhuma mudança nas operações de câmera ou no protocolo.
 
 ## Navegação persistente das seis áreas principais
 

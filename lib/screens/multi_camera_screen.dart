@@ -88,7 +88,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
   List<CameraEndpoint> get _cameras => <CameraEndpoint>[
         const CameraEndpoint(
           id: '__local__',
-          name: 'Câmera deste aparelho',
+          name: 'Câmera celular',
           type: CameraEndpointType.local,
         ),
         ..._registry.items,
@@ -583,6 +583,47 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                   return camera.enabled && (_status[camera.id]?.online ?? false);
                 }).length;
                 final disabled = cameras.where((camera) => !camera.enabled).length;
+                Widget cameraCardAt(BuildContext context, int index) {
+                  final camera = cameras[index];
+                  return _CameraCard(
+                    camera: camera,
+                    cameraAvailable:
+                        camera.type != CameraEndpointType.esp32 ||
+                            camera.esp32CameraEnabled,
+                    status: _status[camera.id],
+                    lastEvent: _lastEvent(camera),
+                    onOpen: () => _open(camera),
+                    onMcrpControls: MinhaCameraLiveUrl.isValid(camera.address)
+                        ? () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => McrpCameraScreen(
+                                  initialLiveUrl: camera.address,
+                                ),
+                              ),
+                            )
+                        : null,
+                    onOpenWithSecond: cameras.any(
+                      (item) =>
+                          item.enabled &&
+                          item.id != camera.id &&
+                          (item.type != CameraEndpointType.esp32 ||
+                              item.esp32CameraEnabled),
+                    )
+                        ? () => _openWithSecond(camera)
+                        : null,
+                    onEdit: camera.id == '__local__'
+                        ? null
+                        : camera.type == CameraEndpointType.esp32
+                            ? _openEsp32Settings
+                            : () => _editCamera(camera),
+                    onToggle: camera.id == '__local__'
+                        ? null
+                        : () => _toggleCamera(camera),
+                    onDelete: camera.id == '__local__'
+                        ? null
+                        : () => _deleteCamera(camera),
+                  );
+                }
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
@@ -602,58 +643,25 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                     ),
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 28),
-                      sliver: SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columns,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          mainAxisExtent: 220,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final camera = cameras[index];
-                            return _CameraCard(
-                              camera: camera,
-                              cameraAvailable:
-                                  camera.type != CameraEndpointType.esp32 ||
-                                      camera.esp32CameraEnabled,
-                              status: _status[camera.id],
-                              lastEvent: _lastEvent(camera),
-                              onOpen: () => _open(camera),
-                              onMcrpControls: MinhaCameraLiveUrl.isValid(camera.address)
-                                  ? () => Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => McrpCameraScreen(
-                                          initialLiveUrl: camera.address,
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                              onOpenWithSecond: cameras.any(
-                                (item) =>
-                                    item.enabled &&
-                                    item.id != camera.id &&
-                                    (item.type != CameraEndpointType.esp32 ||
-                                        item.esp32CameraEnabled),
-                              )
-                                  ? () => _openWithSecond(camera)
-                                  : null,
-                              onEdit: camera.id == '__local__'
-                                  ? null
-                                  : camera.type == CameraEndpointType.esp32
-                                      ? _openEsp32Settings
-                                      : () => _editCamera(camera),
-                              onToggle: camera.id == '__local__'
-                                  ? null
-                                  : () => _toggleCamera(camera),
-                              onDelete: camera.id == '__local__'
-                                  ? null
-                                  : () => _deleteCamera(camera),
-                            );
-                          },
-                          childCount: cameras.length,
-                        ),
-                      ),
+                      sliver: columns == 1
+                          ? SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                cameraCardAt,
+                                childCount: cameras.length,
+                              ),
+                            )
+                          : SliverGrid(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columns,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                mainAxisExtent: 220,
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                cameraCardAt,
+                                childCount: cameras.length,
+                              ),
+                            ),
                     ),
                   ],
                 );

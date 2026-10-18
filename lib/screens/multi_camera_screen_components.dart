@@ -29,20 +29,46 @@ class _CentralHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            Row(
               children: [
-                _MetricChip(icon: Icons.videocam_outlined, label: '$total câmeras'),
-                _MetricChip(icon: Icons.wifi_rounded, label: '$online online'),
-                if (disabled > 0)
-                  _MetricChip(
-                    icon: Icons.pause_circle_outline_rounded,
-                    label: '$disabled desativadas',
+                Expanded(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      _MetricChip(icon: Icons.videocam_outlined, label: '$total câmeras'),
+                      _MetricChip(icon: Icons.wifi_rounded, label: '$online online'),
+                      if (disabled > 0)
+                        _MetricChip(
+                          icon: Icons.pause_circle_outline_rounded,
+                          label: '$disabled desativadas',
+                        ),
+                    ],
                   ),
+                ),
+                IconButton(
+                  tooltip: 'Sobre as câmeras e a contagem',
+                  icon: const Icon(Icons.help_outline_rounded),
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: const Text('Sobre as câmeras'),
+                      content: const Text(
+                        'Cada câmera é independente. Adicionar outra câmera não ativa contador. '
+                        'Uma futura contagem poderá ser habilitada por câmera, separadamente.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          child: const Text('Entendi'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
             Text(
               lastRefresh == null
                   ? 'Verificando disponibilidade…'
@@ -50,82 +76,110 @@ class _CentralHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info_outline_rounded, size: 19),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Cada câmera é independente. Adicionar outra câmera não ativa contador. Uma futura contagem poderá ser habilitada por câmera, separadamente.',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
             Text(
               'Adicionar fonte',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
             ),
-            const SizedBox(height: 8),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final wideActions = constraints.maxWidth >= 720;
-                final scan = FilledButton.icon(
-                  onPressed: onScanPhone,
-                  icon: const Icon(Icons.qr_code_scanner_rounded),
-                  label: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(wideActions ? 'Escanear QR' : 'QR'),
+            const SizedBox(height: 7),
+            Row(
+              children: [
+                Expanded(
+                  child: _SourceAction(
+                    icon: Icons.qr_code_scanner_rounded,
+                    label: 'QR',
+                    tooltip: 'Adicionar câmera por QR',
+                    onPressed: onScanPhone,
+                    primary: true,
                   ),
-                );
-                final manual = OutlinedButton.icon(
-                  onPressed: onAddPhone,
-                  icon: const Icon(Icons.edit_rounded),
-                  label: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(wideActions ? 'Adicionar celular' : 'Celular'),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _SourceAction(
+                    icon: Icons.phone_android_rounded,
+                    label: 'Celular',
+                    tooltip: 'Cadastrar câmera de outro celular',
+                    onPressed: onAddPhone,
                   ),
-                );
-                final rtsp = OutlinedButton.icon(
-                  onPressed: onAddRtsp,
-                  icon: const Icon(Icons.router_outlined),
-                  label: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text('RTSP'),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _SourceAction(
+                    icon: Icons.router_outlined,
+                    label: 'RTSP',
+                    tooltip: 'Adicionar câmera RTSP',
+                    onPressed: onAddRtsp,
                   ),
-                );
-                final esp32 = OutlinedButton.icon(
-                  onPressed: onManageEsp32,
-                  icon: const Icon(Icons.memory_rounded),
-                  label: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(wideActions ? 'Gerenciar ESP32' : 'ESP32'),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _SourceAction(
+                    icon: Icons.memory_rounded,
+                    label: 'ESP32',
+                    tooltip: 'Configurar câmera e sensores ESP32',
+                    onPressed: onManageEsp32,
                   ),
-                );
-                return GridView.count(
-                  crossAxisCount: wideActions ? 4 : 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: wideActions ? 2.45 : 2.9,
-                  children: [scan, manual, rtsp, esp32],
-                );
-              },
+                ),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+
+class _SourceAction extends StatelessWidget {
+  const _SourceAction({
+    required this.icon,
+    required this.label,
+    required this.tooltip,
+    required this.onPressed,
+    this.primary = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(height: 3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            maxLines: 1,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+    final style = primary
+        ? FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+            minimumSize: const Size(0, 58),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          )
+        : OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+            minimumSize: const Size(0, 58),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          );
+    return Tooltip(
+      message: tooltip,
+      child: primary
+          ? FilledButton(onPressed: onPressed, style: style, child: content)
+          : OutlinedButton(onPressed: onPressed, style: style, child: content),
     );
   }
 }
@@ -186,7 +240,7 @@ class _CameraCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -297,14 +351,16 @@ class _CameraCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 12),
-            _CameraDetails(
-              camera: camera,
-              cameraAvailable: cameraAvailable,
-              status: status,
-              remoteStatus: remoteStatus,
-            ),
-            const SizedBox(height: 10),
+            if (camera.type != CameraEndpointType.local) ...[
+              const SizedBox(height: 7),
+              _CameraDetails(
+                camera: camera,
+                cameraAvailable: cameraAvailable,
+                status: status,
+                remoteStatus: remoteStatus,
+              ),
+            ],
+            const SizedBox(height: 7),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),

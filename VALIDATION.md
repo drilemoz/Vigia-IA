@@ -1,3 +1,10 @@
+# Validação Vigia IA 1.0.280+280
+
+- Tela Câmeras: quatro atalhos em linha única, ajuda com o aviso original, câmera local renomeada e resumo do último evento mais próximo do cabeçalho.
+- Layout em celulares de uma coluna usa `SliverList` de altura intrínseca; em telas maiores preserva a grade existente.
+- Testes dirigidos: `python3 -m unittest -q tool/test_camera_compact_280.py`, `python3 tool/check_version_sync.py`.
+- `flutter analyze`, `flutter test` e build Android ainda necessitam CI, caso o SDK esteja indisponível localmente.
+
 # Validação Vigia IA 1.0.279+279
 
 - `tool/test_main_navigation_six_279.py` cobre presença das seis seções, rotas, mapas e ocultação em tela cheia.
