@@ -48,8 +48,6 @@ import '../widgets/session_status_panel.dart';
 import '../widgets/smart_alert_rules_dialog.dart';
 import 'audio_settings_screen.dart';
 import 'events_screen.dart';
-import 'home_screen.dart';
-import 'launch_mode_screen.dart';
 import 'map_monitoring_screen.dart';
 import 'phone_pairing_scanner_screen.dart';
 import 'settings_screen.dart';
@@ -775,6 +773,7 @@ class _MonitorScreenState extends State<MonitorScreen>
     }
   }
 
+  // ignore: unused_element
   Future<void> _showLanAccess() async {
     await showModalBottomSheet<void>(
       context: context,
@@ -1070,21 +1069,17 @@ class _MonitorScreenState extends State<MonitorScreen>
                 ),
                 actions: [
                   IconButton(
-                    tooltip: 'Voltar ao início',
-                    onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
-                      (_) => false,
-                    ),
-                    icon: const Icon(Icons.home_outlined),
-                  ),
-                  IconButton(
                     tooltip: 'Tela inteira',
                     onPressed: _fullscreenChanging
                         ? null
                         : () => unawaited(_toggleFullscreen()),
                     icon: const Icon(Icons.fullscreen_rounded),
                   ),
-                  _monitorMenu(),
+                  IconButton(
+                    tooltip: 'Configurações gerais',
+                    onPressed: () => unawaited(_openStandardScreen(const SettingsScreen())),
+                    icon: const Icon(Icons.settings_outlined),
+                  ),
                 ],
               ),
         body: _fullscreen

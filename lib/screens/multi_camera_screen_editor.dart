@@ -23,8 +23,10 @@ extension _CameraEditorActions on _MultiCameraScreenState {
     final name = TextEditingController(
       text: existing?.name ?? initialName ?? (isRtsp ? 'Câmera RTSP' : 'Câmera remota'),
     );
-    final safeAddress = previousUri?.replace(userInfo: '').toString();
-    final address = TextEditingController(text: safeAddress ?? initialAddress ?? existing?.address ?? '');
+    final safeAddress = (previousUri?.replace(userInfo: '').toString() ?? '').trim();
+    final address = TextEditingController(text: safeAddress.isNotEmpty
+        ? safeAddress : (initialAddress?.trim().isNotEmpty == true
+            ? initialAddress!.trim() : (existing?.address ?? '')));
     bool passwordVisible = false;
     final key = TextEditingController(text: existing?.accessKey ?? '');
     String? error;

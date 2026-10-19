@@ -114,11 +114,16 @@ class LanCameraDiscoveryService {
         }
       });
       final probe = utf8.encode(_vigiaProbe);
-      // Broadcast IPv4 funciona em varias redes hotspot e LAN simples.
-      for (final address in <String>{'255.255.255.255', ...?targetBroadcasts}) {
-        try { socket.send(probe, InternetAddress(address), _vigiaPort); }
-        on SocketException { /* Broadcast bloqueado por interface. */ }
+      // Broadcast IPv4 funciona em diversas LANs. Repetir o probe pontual
+      // evita perder o anúncio por filtragem Wi-Fi, sem varredura permanente.
+      final broadcasts = <String>{'255.255.255.255', ...?targetBroadcasts};
+      void sendVigiaProbe() {
+        for (final address in broadcasts) {
+          try { socket.send(probe, InternetAddress(address), _vigiaPort); }
+          on SocketException { /* Broadcast bloqueado por interface. */ }
+        }
       }
+      sendVigiaProbe();
       final random = Random.secure();
       final uuid = List<int>.generate(16, (_) => random.nextInt(256))
           .map((e) => e.toRadixString(16).padLeft(2, '0')).join();
@@ -139,8 +144,10 @@ class LanCameraDiscoveryService {
       }
       onStatus?.call('Aguardando respostas de ONVIF e Vigia IA…');
       final waitUntil = DateTime.now().add(timeout);
+      var ticks = 0;
       while (cancelled?.call() != true && DateTime.now().isBefore(waitUntil)) {
         await Future<void>.delayed(const Duration(milliseconds: 250));
+        if (++ticks % 6 == 0) sendVigiaProbe();
       }
       return List<LanCameraCandidate>.unmodifiable(results.values);
     } finally {

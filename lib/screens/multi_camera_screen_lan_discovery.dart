@@ -8,6 +8,7 @@ extension _LanCameraDiscoveryActions on _MultiCameraScreenState {
     String status = 'Identificando a rede Wi-Fi…';
     int checked = 0;
     int total = 0;
+    String gateway = '';
     StateSetter? updateDialog;
 
     int priority(LanCameraCandidate candidate) => switch (candidate.kind) {
@@ -68,14 +69,18 @@ extension _LanCameraDiscoveryActions on _MultiCameraScreenState {
                     itemBuilder: (_, i) {
                       final candidate = discovered[i];
                       final vigia = candidate.kind == LanCameraKind.vigiaIa;
+                      final possibleVigia = candidate.port == 8765;
+                      final router = gateway.isNotEmpty && candidate.host == gateway;
                       final onvif = candidate.kind == LanCameraKind.onvif;
                       final rtsp = candidate.kind == LanCameraKind.rtsp;
                       return Card(child: ListTile(
-                        leading: Icon(vigia ? Icons.phone_android_rounded
-                            : onvif || rtsp ? Icons.videocam_rounded : Icons.router_rounded),
-                        title: Text(candidate.name),
-                        subtitle: Text(vigia
-                            ? '${candidate.host} · exige pareamento por QR'
+                        leading: Icon(vigia || possibleVigia ? Icons.phone_android_rounded
+                            : router ? Icons.router_rounded
+                            : onvif || rtsp ? Icons.videocam_rounded : Icons.devices_other_rounded),
+                        title: Text(router && !vigia && !rtsp && !onvif
+                            ? 'Roteador da rede · ${candidate.host}' : candidate.name),
+                        subtitle: Text(vigia || possibleVigia
+                            ? '${candidate.host} · pareamento via QR necessário'
                             : onvif
                               ? '${candidate.host} · ONVIF encontrado; RTSP não verificado'
                               : '${candidate.host}:${candidate.port} · ${candidate.protocol ?? 'Serviço detectado'}'),
@@ -110,6 +115,7 @@ extension _LanCameraDiscoveryActions on _MultiCameraScreenState {
         final range = await LanCameraSubnetScanner.localRange();
         if (cancel.cancelled) return;
         total = range.hosts.length;
+        gateway = range.gateway;
         status = range.warning ?? 'Rede ${range.description}: procurando serviços locais';
         refresh();
         await LanCameraSubnetScanner.multicast(true);
@@ -152,14 +158,14 @@ extension _LanCameraDiscoveryActions on _MultiCameraScreenState {
     cancel.cancel();
     updateDialog = null;
     if (!mounted || selected == null) return;
-    if (selected.kind == LanCameraKind.vigiaIa) {
+    if (selected.kind == LanCameraKind.vigiaIa || selected.port == 8765) {
       final shouldScanQr = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text(selected.name),
-          content: const Text('Dispositivo Vigia IA localizado na rede. '
-              'A descoberta não transmite a chave de controle. Abra o QR no '
-              'transmissor e escaneie para autorizar o pareamento.'),
+          content: Text(selected.kind == LanCameraKind.vigiaIa
+              ? 'Transmissor Vigia IA anunciado na rede. Abra o QR no transmissor para parear com segurança.'
+              : 'Porta 8765 aberta: pode ser um transmissor Vigia IA, mas a identidade ainda não foi comprovada. Confira o serviço no outro aparelho e escaneie o QR para autorizar.'),
           actions: [
             TextButton(onPressed: () => Navigator.pop(dialogContext, false),
                 child: const Text('Cancelar')),
@@ -170,6 +176,18 @@ extension _LanCameraDiscoveryActions on _MultiCameraScreenState {
       );
       if (shouldScanQr == true && mounted) await _scanPhoneQr();
       return;
+    }
+    if (selected.kind == LanCameraKind.network && gateway.isNotEmpty && selected.host == gateway) {
+      final proceed = await showDialog<bool>(context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Gateway da rede'),
+          content: const Text('Este IP é o roteador/gateway detectado pelo Android. Uma porta HTTP aberta não comprova a presença de câmera RTSP. Quer tentar cadastrar uma URL RTSP manualmente?'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuar')),
+          ],
+        ));
+      if (proceed != true || !mounted) return;
     }
     final port = selected.kind == LanCameraKind.rtsp ? selected.port ?? 554 : 554;
     final candidate = await _showCameraEditor(

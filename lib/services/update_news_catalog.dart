@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.293', build: 293);
+      AppBuildVersion(version: '1.0.294', build: 294);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.293', build: 293),
+      version: AppBuildVersion(version: '1.0.294', build: 294),
       changes: <String>[
-        'EfficientDet-Lite0 agora é o modelo de IA padrão e primeiro no Automático.',
-        'Zoom e Resolução abrem janelas próprias no controle remoto.',
-        'Painel remoto compacto com ajuda, melhor contraste e menos informações repetidas.',
+        'Cinco destinos na navegação e Configurações no cabeçalho superior direito.',
+        'Lanterna, Resolução e FPS agrupados em janelas; opção experimental de pessoa por ícone.',
+        'Estados AO VIVO/pausado e cronômetros, scanner local e salvamento automático de diagnósticos.',
       ],
     ),
   ]);

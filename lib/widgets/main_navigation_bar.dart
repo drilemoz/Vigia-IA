@@ -8,7 +8,6 @@ const _mainDestinations = <({IconData icon, IconData selectedIcon, String label}
   (icon: Icons.videocam_outlined, selectedIcon: Icons.videocam_rounded, label: 'Ao vivo'),
   (icon: Icons.video_library_outlined, selectedIcon: Icons.video_library_rounded, label: 'Câmeras'),
   (icon: Icons.map_outlined, selectedIcon: Icons.map_rounded, label: 'Mapas'),
-  (icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded, label: 'Ajustes'),
 ];
 
 class MainNavigationBar extends StatelessWidget {
@@ -81,7 +80,7 @@ class MainNavigationRail extends StatelessWidget {
   }
 }
 
-/// Shared shell for the six primary destinations.
+/// Shared shell for the five primary destinations.
 ///
 /// Portrait phones keep the bottom NavigationBar. Landscape phones and tablets
 /// move navigation to a compact left rail so the limited vertical space is not

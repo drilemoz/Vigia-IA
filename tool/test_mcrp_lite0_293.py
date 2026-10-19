@@ -8,9 +8,10 @@ class CompactRemote293(unittest.TestCase):
     def test_zoom_and_resolution_keep_authenticated_commands(self):
         ui=read('lib/widgets/mcrp_remote_controls.dart')
         self.assertIn("'Zoom',",ui)
-        self.assertIn("'Resolução',",ui)
+        self.assertIn("'Vídeo',",ui)
         self.assertIn('_openZoomDialog(context)',ui)
-        self.assertIn('_openResolutionDialog(context)',ui)
+        self.assertIn('_openVideoDialog(context)',ui)
+        self.assertIn('_openTorchDialog(context)',ui)
         self.assertIn("onCommand('zoom/$target')",ui)
         self.assertIn('adjust(0)',ui)
         for command in ['quality/360','quality/480','quality/720','quality/768','quality/1080']:
@@ -40,8 +41,8 @@ class CompactRemote293(unittest.TestCase):
         self.assertIn('DetectorModelPreference.yolo26s => 0',assets)
         self.assertIn('modelIndex++ < firstIndex',assets)
     def test_metadata(self):
-        self.assertIn('version: 1.0.293+293',read('pubspec.yaml'))
-        self.assertIn("AppBuildVersion(version: '1.0.293', build: 293)",read('lib/services/update_news_catalog.dart'))
-        self.assertTrue((ROOT/'RELEASE-1.0.293.md').exists())
+        self.assertIn('version: 1.0.294+294',read('pubspec.yaml'))
+        self.assertIn("AppBuildVersion(version: '1.0.294', build: 294)",read('lib/services/update_news_catalog.dart'))
+        self.assertTrue((ROOT/'RELEASE-1.0.294.md').exists())
 
 if __name__ == '__main__': unittest.main()

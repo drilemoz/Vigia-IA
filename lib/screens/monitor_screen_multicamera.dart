@@ -568,7 +568,11 @@ extension _MonitorMulticamera on _MonitorScreenState {
                     _updateMulticameraState(() => _fillPreview = !_fillPreview),
                 onToggleVoice: () =>
                     _controller.setVoiceEnabled(!_controller.voiceEnabled),
-                menu: _monitorMenu(),
+                menu: IconButton(
+                  tooltip: 'Configurações gerais',
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () => unawaited(_openStandardScreen(const SettingsScreen())),
+                ),
               ),
             )
           else if (!portraitEmbedded)
@@ -761,6 +765,60 @@ extension _MonitorMulticamera on _MonitorScreenState {
               fillPreview: _fillPreview && _fullscreen,
               onChanged: _applyZone,
             ),
+          if (_activeMcrpLiveUrl != null)
+            Positioned.fill(child: ValueListenableBuilder<Map<String, String>>(
+              valueListenable: McrpLiveStatusCache.status,
+              builder: (context, remote, _) {
+                if (McrpLiveStatusCache.liveUrl != _activeMcrpLiveUrl) {
+                  return const SizedBox.shrink();
+                }
+                final paused = remote['x-transmitting'] == '0';
+                final alive = remote['x-transmitting'] == '1' &&
+                  _controller.sourceStatus.state == VideoSourceState.streaming;
+                final recording = remote['x-recording'] == '1';
+                if (paused) {
+                  return DecoratedBox(
+                    decoration: const BoxDecoration(color: Color(0xFF293747)),
+                    child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.pause_circle_outline_rounded, size: 48, color: Color(0xFFB8DDF8)),
+                      const SizedBox(height: 9),
+                      const Text('Transmissão pausada',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text('Use Iniciar no controle remoto para retomar',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8))),
+                    ])),
+                  );
+                }
+                return Stack(children: [
+                  if (alive)
+                    Positioned(left: 10, top: 9, child: DecoratedBox(
+                      decoration: BoxDecoration(color: const Color(0xFF173D2C),
+                        borderRadius: BorderRadius.circular(10)),
+                      child: const Padding(padding: EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Icon(Icons.circle, size: 8, color: Color(0xFF5FED9F)),
+                          SizedBox(width: 6),
+                          Text('AO VIVO', style: TextStyle(fontSize: 11,
+                            fontWeight: FontWeight.w800, color: Color(0xFFD1FFE2))),
+                        ])),
+                    )),
+                  if (alive)
+                    Positioned(left: 9, bottom: 9, child: DecoratedBox(
+                      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(11)),
+                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        child: Text(
+                          '${McrpLiveStatusCache.duration(remote['x-transmission-seconds'])}'
+                          '${recording ? '  |  REC ${McrpLiveStatusCache.duration(remote['x-recording-seconds'])}' : ''}',
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
+                            color: Colors.white),
+                        )),
+                    )),
+                ]);
+              },
+            )),
+          if (_activeMcrpLiveUrl == null)
           Positioned(
             left: 8,
             top: 8,
@@ -943,7 +1001,11 @@ extension _MonitorMulticamera on _MonitorScreenState {
                     _updateMulticameraState(() => _fillPreview = !_fillPreview),
                 onToggleVoice: () =>
                     _controller.setVoiceEnabled(!_controller.voiceEnabled),
-                menu: _monitorMenu(),
+                menu: IconButton(
+                  tooltip: 'Configurações gerais',
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () => unawaited(_openStandardScreen(const SettingsScreen())),
+                ),
               ),
             ),
           if (!portraitEmbedded && !compactTopHud && bikeHudActive)

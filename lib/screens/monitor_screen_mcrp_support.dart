@@ -23,10 +23,17 @@ extension _MonitorMcrpSupport on _MonitorScreenState {
     }
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 9),
-      child: McrpLiveRemoteControls(liveUrl: url),
+      child: McrpLiveRemoteControls(
+        liveUrl: url,
+        partialPersonEnabled: _controller.partialPersonHintsEnabled,
+        onTogglePartialPerson: () => _controller.setPartialPersonHintsEnabled(
+          !_controller.partialPersonHintsEnabled,
+        ),
+      ),
     );
   }
 
+  // ignore: unused_element
   Future<void> _showMcrpRemoteSheet() async {
     final url = _activeMcrpLiveUrl;
     if (url == null) return;
@@ -40,7 +47,13 @@ extension _MonitorMcrpSupport on _MonitorScreenState {
       builder: (_) => FractionallySizedBox(
         heightFactor: 0.75,
         child: ListView(padding: const EdgeInsets.all(12), children: [
-          McrpLiveRemoteControls(liveUrl: url),
+          McrpLiveRemoteControls(
+        liveUrl: url,
+        partialPersonEnabled: _controller.partialPersonHintsEnabled,
+        onTogglePartialPerson: () => _controller.setPartialPersonHintsEnabled(
+          !_controller.partialPersonHintsEnabled,
+        ),
+      ),
         ]),
       ),
     );

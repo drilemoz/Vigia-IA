@@ -17,7 +17,7 @@ checks={
  'não obriga URL RTSP antiga': 'if (camera == null) {\n          await _chooseCameraForLive();' in home,
  'fonte remota não é RTSP': 'CameraEndpointType.remotePhone => VideoSourceConfig(' in selector and 'type: VideoSourceType.remotePhone' in selector,
  'ao vivo salva fonte selecionada': 'sourceForRegisteredCamera(camera, current.source.analysisInterval)' in home,
- 'monitor pode voltar à Home': "tooltip: 'Voltar ao início'" in monitor and 'const HomeScreen()' in monitor,
+ 'monitor usa ajuste superior, com Início na navegação principal': "tooltip: 'Configurações gerais'" in monitor and 'navigateToMainDestination(context, index, currentIndex: 2)' in monitor,
  'câmeras admite QR e URL MJPEG': 'RemoteCameraPairingService.decode(raw)' in cameras and 'MinhaCameraLiveUrl.parse(value)' in cameras,
  'Câmeras recebe cadastros da 247': 'migrateMinhaCameraSavedEntries(registry: _registry)' in cameras and 'await legacy.remove(saved.liveUrl)' in migration,
  'migracao protege duplicatas': 'item.address == pairing.address' in migration,

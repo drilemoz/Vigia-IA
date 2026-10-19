@@ -41,12 +41,16 @@ internal class LanScanSupport(context: Context) {
         val connectivity = app.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
         var ip: Long? = null
         var prefix = 24
+        var gateway: String? = null
         try {
             val wifi = connectivity?.allNetworks?.firstOrNull { network ->
                 connectivity?.getNetworkCapabilities(network)?.hasTransport(
                     NetworkCapabilities.TRANSPORT_WIFI) == true
             }
-            val address = wifi?.let { connectivity?.getLinkProperties(it) }?.linkAddresses?.firstOrNull {
+            val wifiProperties = wifi?.let { connectivity?.getLinkProperties(it) }
+            gateway = wifiProperties?.routes?.firstOrNull { it.isDefaultRoute && it.gateway is Inet4Address }
+                ?.gateway?.hostAddress
+            val address = wifiProperties?.linkAddresses?.firstOrNull {
                 it.address is Inet4Address && !it.address.isLoopbackAddress &&
                     !it.address.isLinkLocalAddress
             }
@@ -98,6 +102,7 @@ internal class LanScanSupport(context: Context) {
             "broadcast" to ipString(if (limited) (local and 0xffffff00L) + 255L else broadcast),
             "description" to "${ipString(network)}/$prefix" + if (limited) " (TCP limitado ao /24 local)" else "",
             "limited" to limited,
+            "gateway" to (gateway ?: ""),
         )
     }
 }

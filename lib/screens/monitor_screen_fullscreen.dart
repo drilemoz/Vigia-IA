@@ -99,17 +99,6 @@ extension _MonitorFullscreen on _MonitorScreenState {
     }
   }
 
-  Future<void> _changeMode() async {
-    if (_fullscreen) await _toggleFullscreen();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(
-        builder: (_) => const LaunchModeScreen(manualReview: false),
-      ),
-      (_) => false,
-    );
-  }
-
   Future<void> _setMonitorMapVisibilityQuick(
     MonitorMapVisibilityMode mode,
   ) async {
@@ -136,86 +125,6 @@ extension _MonitorFullscreen on _MonitorScreenState {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  Widget _monitorMenu() {
-    final mapMode = _mapRoute.monitorVisibility;
-    final mapVisible = _shouldShowMonitorMap;
-    return PopupMenuButton<String>(
-      tooltip: 'Mais opções',
-      onSelected: (value) {
-        if (_fullscreenChanging) return;
-        if (value == 'toggle_map') {
-          unawaited(
-            _setMonitorMapVisibilityQuick(
-              mapVisible
-                  ? MonitorMapVisibilityMode.hidden
-                  : MonitorMapVisibilityMode.always,
-            ),
-          );
-          return;
-        }
-        if (value == 'map_auto') {
-          unawaited(
-            _setMonitorMapVisibilityQuick(
-              MonitorMapVisibilityMode.automatic,
-            ),
-          );
-          return;
-        }
-        if (value == 'aux_person') {
-          _controller.setPartialPersonHintsEnabled(
-            !_controller.partialPersonHintsEnabled,
-          );
-          return;
-        }
-        if (value == 'mcrp') {
-          unawaited(_showMcrpRemoteSheet());
-          return;
-        }
-        if (value == 'lan') {
-          unawaited(_showLanAccess());
-          return;
-        }
-        if (value == 'events') {
-          unawaited(_openStandardScreen(const EventsScreen()));
-          return;
-        }
-        if (value == 'settings') {
-          unawaited(_openStandardScreen(const SettingsScreen()));
-          return;
-        }
-        if (value == 'mode') {
-          unawaited(_changeMode());
-        }
-      },
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: 'toggle_map',
-          child: Text(mapVisible ? 'Ocultar mapa' : 'Mostrar mapa'),
-        ),
-        if (mapMode != MonitorMapVisibilityMode.automatic)
-          const PopupMenuItem(
-            value: 'map_auto',
-            child: Text('Mapa automático'),
-          ),
-        CheckedPopupMenuItem<String>(
-          value: 'aux_person',
-          checked: _controller.partialPersonHintsEnabled,
-          child: const Text('Possivel pessoa (experimental)'),
-        ),
-        const PopupMenuDivider(),
-        if (_activeMcrpLiveUrl != null)
-          const PopupMenuItem(value: 'mcrp', child: Text('Controle remoto da câmera')),
-        const PopupMenuItem(value: 'lan', child: Text('Rede local')),
-        const PopupMenuItem(value: 'events', child: Text('Eventos')),
-        const PopupMenuItem(
-          value: 'settings',
-          child: Text('Configurações'),
-        ),
-        const PopupMenuItem(value: 'mode', child: Text('Alterar modo')),
-      ],
-    );
   }
 
   Widget _voiceButton() => IconButton(
@@ -290,7 +199,11 @@ extension _MonitorFullscreen on _MonitorScreenState {
                   icon: const Icon(Icons.tune_rounded, color: Colors.white),
                 ),
               _voiceButton(),
-              _monitorMenu(),
+              IconButton(
+                tooltip: 'Configurações gerais',
+                onPressed: () => unawaited(_openStandardScreen(const SettingsScreen())),
+                icon: const Icon(Icons.settings_outlined),
+              ),
             ])),
           ),
         )),

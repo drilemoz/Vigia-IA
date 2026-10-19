@@ -118,6 +118,16 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
     currentIndex: 4,
     onDestinationSelected: (index) =>
         navigateToMainDestination(context, index, currentIndex: 4),
+    appBar: AppBar(
+      title: const Text('Mapas'),
+      actions: [
+        IconButton(
+          tooltip: 'Configurações gerais',
+          onPressed: () => unawaited(_openTool(const SettingsScreen())),
+          icon: const Icon(Icons.settings_outlined),
+        ),
+      ],
+    ),
     body: MapMonitoringScreen(
     key: const ValueKey<String>('workspace-map'),
     workspaceVisible: !_toolVisible,

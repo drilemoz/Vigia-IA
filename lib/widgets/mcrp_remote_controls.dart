@@ -4,6 +4,31 @@ import 'package:flutter/material.dart';
 
 import '../services/mcrp_client.dart';
 
+/// Telemetria compartilhada com a prévia, atualizada SOMENTE pela consulta
+/// MCRP já existente. Nunca cria um segundo polling de rede/CPU.
+class McrpLiveStatusCache {
+  static final ValueNotifier<Map<String, String>> status =
+      ValueNotifier<Map<String, String>>(const <String, String>{});
+  static String? liveUrl;
+  static void setStatus(String url, Map<String, String> data) {
+    liveUrl = url;
+    status.value = Map<String, String>.unmodifiable(data);
+  }
+  static void clear(String url) {
+    if (liveUrl == url) {
+      liveUrl = null;
+      status.value = const <String, String>{};
+    }
+  }
+  static String duration(String? raw) {
+    final seconds = (int.tryParse(raw ?? '') ?? 0).clamp(0, 315360000);
+    final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
+    final minutes = ((seconds ~/ 60) % 60).toString().padLeft(2, '0');
+    final secondPart = (seconds % 60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$secondPart';
+  }
+}
+
 /// Controles MCRP para o receptor. Não cria uma segunda conexão de vídeo,
 /// apenas consulta /status e envia POSTs autenticados ao transmissor.
 class McrpControlPanel extends StatelessWidget {
@@ -40,7 +65,7 @@ class McrpControlPanel extends StatelessWidget {
   String get _codec => status['x-stream-codec'] ?? 'mjpeg';
 
   Widget _action(BuildContext context, IconData icon, String label,
-      VoidCallback? onPressed, {bool selected = false}) {
+      VoidCallback? onPressed, {bool selected = false, String? statusText}) {
     final theme = Theme.of(context);
     return SizedBox(
       height: compact ? 58 : 72,
@@ -54,7 +79,11 @@ class McrpControlPanel extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(icon, size: compact ? 20 : 24,
+          if (statusText != null)
+            Text(statusText, style: TextStyle(fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: selected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant)),
+          Icon(icon, size: statusText != null && compact ? 17 : compact ? 20 : 24,
             color: working || onPressed == null ? theme.colorScheme.onSurface.withValues(alpha: 0.45)
                 : selected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface),
           const SizedBox(height: 3),
@@ -90,12 +119,13 @@ class McrpControlPanel extends StatelessWidget {
           if (_transmitting) _action(context, Icons.battery_saver_outlined, 'Eco', () => onCommand(
             _eco ? 'eco/disable' : 'eco/enable'), selected: _eco),
           if (_transmitting) _action(context, _torchEnabled ? Icons.flash_on : Icons.flash_off, 'Lanterna',
-            _torchSupported ? () => onCommand(_torchEnabled ? 'torch/off' : 'torch/30') : null,
-            selected: _torchEnabled),
+            _torchSupported ? () => _openTorchDialog(context) : null,
+            selected: _torchEnabled,
+            statusText: _torchEnabled ? 'Ativada' : 'Desativada'),
           if (_transmitting) _action(context, Icons.zoom_in_map_outlined, 'Zoom',
             _zoomSupported ? () => _openZoomDialog(context) : null),
-          if (_transmitting) _action(context, Icons.high_quality_outlined, 'Resolução',
-            () => _openResolutionDialog(context)),
+          if (_transmitting) _action(context, Icons.high_quality_outlined, 'Vídeo',
+            () => _openVideoDialog(context)),
           if (onMedia != null)
             _action(context, Icons.video_library_outlined, 'Mídias', onMedia),
           if (onDiagnostic != null)
@@ -106,18 +136,9 @@ class McrpControlPanel extends StatelessWidget {
         ]);
       }),
       const SizedBox(height: 10),
-      Wrap(spacing: 8, runSpacing: 7, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        if (_transmitting) _setting(context, 'FPS', status['x-fps-target'],
-          const <String, String>{'5 FPS': 'fps/5', '10 FPS': 'fps/10',
-            '15 FPS': 'fps/15', '24 FPS': 'fps/24', '30 FPS': 'fps/30'}),
-        if (_transmitting && _torchSupported)
-          _setting(context, 'Lanterna', status['x-torch-mode'],
-            const <String, String>{'Desligar': 'torch/off', '30 s': 'torch/30',
-              '120 s': 'torch/120', 'Durante REC': 'torch/record'}),
-        if (_transmitting && allowCodecChange)
-          _setting(context, 'Codec', _codec.toUpperCase(),
-            const <String, String>{'MJPEG': 'codec/mjpeg', 'H.264': 'codec/h264'}),
-      ]),
+      if (_transmitting && allowCodecChange)
+        _setting(context, 'Codec', _codec.toUpperCase(),
+          const <String, String>{'MJPEG': 'codec/mjpeg', 'H.264': 'codec/h264'}),
     ]);
   }
 
@@ -175,31 +196,107 @@ class McrpControlPanel extends StatelessWidget {
     );
   }
 
-  Future<void> _openResolutionDialog(BuildContext context) async {
-    const choices = <String, String>{
-      '360p': 'quality/360', '480p': 'quality/480',
-      '720p': 'quality/720', '768p': 'quality/768', '1080p': 'quality/1080',
+  Future<void> _openTorchDialog(BuildContext context) async {
+    final choices = <String, String>{
+      'Desligar': 'torch/off',
+      'Ligar por 30 segundos': 'torch/30',
+      'Ligar por 120 segundos': 'torch/120',
+      'Ligar durante gravação': 'torch/record',
     };
-    final current = status['x-quality-profile'];
     final selected = await showDialog<String>(
       context: context,
       builder: (dialogContext) => SimpleDialog(
-        title: const Text('Resolução da transmissão'),
+        title: const Text('Lanterna do transmissor'),
         children: [
           for (final entry in choices.entries)
             SimpleDialogOption(
               onPressed: () => Navigator.of(dialogContext).pop(entry.value),
               child: Row(children: [
-                Icon(current == entry.key || current == entry.key.replaceAll('p', '')
-                    ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+                Icon((status['x-torch-mode'] == entry.value.substring(6))
+                  ? Icons.radio_button_checked : Icons.radio_button_unchecked),
                 const SizedBox(width: 10),
-                Text(entry.key),
+                Expanded(child: Text(entry.key)),
               ]),
             ),
         ],
       ),
     );
     if (selected != null && context.mounted) await onCommand(selected);
+  }
+
+  Future<void> _openVideoDialog(BuildContext context) async {
+    const resolutions = <String, String>{
+      '360p': 'quality/360', '480p': 'quality/480',
+      '720p': 'quality/720', '768p': 'quality/768', '1080p': 'quality/1080',
+    };
+    const frameRates = <String, String>{
+      '5 FPS': 'fps/5', '10 FPS': 'fps/10', '15 FPS': 'fps/15',
+      '24 FPS': 'fps/24', '30 FPS': 'fps/30',
+    };
+    var selectedResolution = status['x-quality-profile'] ?? '';
+    var selectedFps = status['x-fps-target'] ?? '';
+    var sending = false;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, update) {
+          Future<void> send(String action, {required bool quality}) async {
+            if (sending || working) return;
+            update(() => sending = true);
+            try {
+              await onCommand(action);
+              if (dialogContext.mounted) {
+                update(() {
+                  if (quality) { selectedResolution = action.substring(8); }
+                  else { selectedFps = action.substring(4); }
+                });
+              }
+            } finally {
+              if (dialogContext.mounted) update(() => sending = false);
+            }
+          }
+          return AlertDialog(
+            title: const Text('Resolução e FPS'),
+            content: SizedBox(
+              width: 440,
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Text('Resolução', style: TextStyle(fontWeight: FontWeight.bold)),
+                  for (final entry in resolutions.entries)
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      enabled: !sending,
+                      leading: Icon(selectedResolution == entry.value.substring(8)
+                          ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+                      title: Text(entry.key, style: const TextStyle(fontSize: 12)),
+                      onTap: () => unawaited(send(entry.value, quality: true)),
+                    ),
+                ])),
+                const SizedBox(width: 10),
+                Expanded(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Text('FPS', style: TextStyle(fontWeight: FontWeight.bold)),
+                  for (final entry in frameRates.entries)
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      enabled: !sending,
+                      leading: Icon(selectedFps == entry.value.substring(4)
+                          ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+                      title: Text(entry.key, style: const TextStyle(fontSize: 12)),
+                      onTap: () => unawaited(send(entry.value, quality: false)),
+                    ),
+                ])),
+              ]),
+            ),
+            actions: [TextButton(
+              onPressed: sending ? null : () => Navigator.of(dialogContext).pop(),
+              child: const Text('Fechar'),
+            )],
+          );
+        },
+      ),
+    );
   }
 
   Widget _setting(BuildContext context, String label, String? current,
@@ -230,8 +327,13 @@ class McrpControlPanel extends StatelessWidget {
 /// Ao Vivo: consulta/controle MCRP opcional, exclusivo para URLs /live/ privadas.
 /// A prévia e a IA continuam sob responsabilidade do MonitorController.
 class McrpLiveRemoteControls extends StatefulWidget {
-  const McrpLiveRemoteControls({super.key, required this.liveUrl});
+  const McrpLiveRemoteControls({
+    super.key, required this.liveUrl,
+    this.onTogglePartialPerson, this.partialPersonEnabled = false,
+  });
   final String liveUrl;
+  final VoidCallback? onTogglePartialPerson;
+  final bool partialPersonEnabled;
 
   @override
   State<McrpLiveRemoteControls> createState() => _McrpLiveRemoteControlsState();
@@ -274,6 +376,7 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
   void _connect() {
     final generation = ++_generation;
     _poll?.cancel();
+    McrpLiveStatusCache.clear(widget.liveUrl);
     _client?.close();
     _status = const {};
     _ready = false;
@@ -306,6 +409,7 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
     try {
       final status = await client.status();
       if (!mounted || current != _generation || client != _client) return;
+      McrpLiveStatusCache.setStatus(widget.liveUrl, status);
       setState(() { _status = status; _ready = true; _error = null; });
     } catch (_) {
       if (mounted && current == _generation && client == _client) {
@@ -335,6 +439,7 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
         if (attempt > 0) await Future<void>.delayed(const Duration(milliseconds: 450));
         final state = await client.status();
         if (!mounted || _generation != generation || client != _client) return;
+        McrpLiveStatusCache.setStatus(widget.liveUrl, state);
         setState(() { _status = state; _ready = true; _error = null; });
         if (transmissionCommand && state['x-transmitting'] == expectedTransmission) return;
         if (!transmissionCommand && (!recordingCommand || state['x-recording'] == expectedRecording)) return;
@@ -366,6 +471,7 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
     WidgetsBinding.instance.removeObserver(this);
     _generation++;
     _poll?.cancel();
+    McrpLiveStatusCache.clear(widget.liveUrl);
     _client?.close();
     super.dispose();
   }
@@ -406,6 +512,17 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
               'Controle remoto · ${_status['x-device-model']?.trim().isNotEmpty == true ? _status['x-device-model'] : 'Vigia IA'}',
               maxLines: 1, overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w800))),
+            if (widget.onTogglePartialPerson != null)
+              IconButton(
+                iconSize: 21,
+                visualDensity: VisualDensity.compact,
+                tooltip: widget.partialPersonEnabled
+                    ? 'Desligar possível pessoa (experimental)'
+                    : 'Ligar possível pessoa (experimental)',
+                onPressed: widget.onTogglePartialPerson,
+                icon: Icon(Icons.face_outlined,
+                  color: widget.partialPersonEnabled ? Colors.blue : scheme.onSurfaceVariant),
+              ),
             IconButton(
               iconSize: 19,
               visualDensity: VisualDensity.compact,
@@ -414,7 +531,7 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
               icon: Icon(Icons.help_outline, color: scheme.onSurface),
             ),
             Icon(_ready ? Icons.wifi : Icons.wifi_off,
-              size: 19, color: _ready ? scheme.primary : scheme.error),
+              size: 26, color: _ready ? scheme.primary : scheme.error),
           ]),
           if (_error != null) ...[
             const SizedBox(height: 7),

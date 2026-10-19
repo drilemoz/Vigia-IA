@@ -30,5 +30,5 @@ class CameraHub248Tests(unittest.TestCase):
   self.assertIn('await legacy.remove(item.liveUrl)',service)
  def test_monitor_entry(self):
   monitor=(ROOT/'lib/screens/monitor_screen.dart').read_text()
-  self.assertIn("tooltip: 'Voltar ao início'", monitor)
+  self.assertIn("tooltip: 'Configurações gerais'", monitor)
 if __name__ == '__main__': unittest.main()

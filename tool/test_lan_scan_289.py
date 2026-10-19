@@ -47,7 +47,7 @@ class LanDiscovery289(unittest.TestCase):
         self.assertIn('checked = value',ui)
         self.assertIn('cancel.cancel()',ui)
         self.assertIn('LanCameraKind.rtsp',ui)
-        self.assertIn('exige pareamento por QR',ui)
+        self.assertIn('pareamento via QR necessário',ui)
         self.assertIn('await _scanPhoneQr()',ui)
         self.assertIn('final port = selected.kind == LanCameraKind.rtsp',ui)
     def test_onvif_udp_parallel_tcp(self):

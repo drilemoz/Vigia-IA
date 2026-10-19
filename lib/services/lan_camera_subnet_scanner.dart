@@ -13,11 +13,12 @@ class LanScanCancelToken {
 }
 
 class LanScanRange {
-  const LanScanRange(this.hosts, this.broadcast, this.description, this.warning);
+  const LanScanRange(this.hosts, this.broadcast, this.description, this.warning, [this.gateway = '']);
   final List<String> hosts;
   final String broadcast;
   final String description;
   final String? warning;
+  final String gateway;
 }
 
 /// Complemento TCP do Minha Câmera: limitado à LAN Wi-Fi atual, sem senhas.
@@ -25,7 +26,7 @@ class LanScanRange {
 class LanCameraSubnetScanner {
   const LanCameraSubnetScanner._();
   static const _channel = MethodChannel('vigiaia/native');
-  static const _ports = <int>[554, 8554, 10554, 8555, 7447, 80, 8080, 5000];
+  static const _ports = <int>[8765, 554, 8554, 10554, 8555, 7447, 80, 8080, 5000];
 
   static Future<LanScanRange> localRange() async {
     if (!Platform.isAndroid) {
@@ -40,6 +41,7 @@ class LanCameraSubnetScanner {
           data['broadcast'] as String? ?? '',
           data['description'] as String? ?? '',
           data['error'] as String?,
+          data['gateway'] as String? ?? '',
         );
       }
     } catch (_) {
@@ -111,6 +113,15 @@ class LanCameraSubnetScanner {
       Socket? socket;
       try {
         socket = await Socket.connect(host, port, timeout: const Duration(milliseconds: 320));
+        // Um Vigia IA pode responder na porta 8765 mesmo que UDP/8766 falhe.
+        // Não afirmar identidade apenas por TCP aberto; pareamento continua por QR.
+        if (port == 8765) {
+          return LanCameraCandidate(
+            host: host, kind: LanCameraKind.network, port: port,
+            protocol: 'Possível transmissor Vigia IA; confirmar via QR',
+            name: 'Possível Vigia IA · $host',
+          );
+        }
         // Nunca enviar credenciais ou iniciar fluxo de vídeo durante a busca.
         final request = 'OPTIONS rtsp://$host:$port/ RTSP/1.0\r\n'
             'CSeq: 1\r\nUser-Agent: VigiaIA-LanScan\r\n\r\n';

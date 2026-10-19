@@ -274,6 +274,23 @@ extension _MonitorAiTools on _MonitorScreenState {
       _aiDiagnostic = null;
       _lastAiDiagnostic = result;
     });
+    // Exportação única ao término, diretamente em Downloads/Vigia IA.
+    // Não escreve arquivos durante a inferência nem solicita picker.
+    unawaited(() async {
+      String? saved;
+      try {
+        saved = await PerformanceTelemetryService.instance.exportToDownloads();
+      } catch (_) {
+        // Falha de armazenamento não interrompe monitoramento nem descarta
+        // o relatório em memória; exportação manual continua disponível.
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(saved == null
+            ? 'Não foi possível salvar automaticamente; use Exportar dados.'
+            : 'Diagnóstico salvo em $saved'),
+      ));
+    }());
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Diagnóstico encerrado: ${run.elapsedSeconds} s, '
           '${run.changes} troca(s) de modelo.'),

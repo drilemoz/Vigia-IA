@@ -1,9 +1,12 @@
-# Validação Vigia IA 1.0.293+293
+# Validação Vigia IA 1.0.294+294
 
-- **245 testes Python aprovados** (`python3 -m unittest discover -s tool -p test_*.py -q`), incluindo 4 novos testes da 1.0.293.
-- **`tool/verify_project.sh`: aprovado, exit code 0**; `check_version_sync.py`, `check_import_targets.py`, `check_ci_contract.py` e `bash -n` também aprovados.
-- Testes estruturais validam Zoom/Resolução e padrão Lite0, sem substituir `flutter analyze` e `flutter test`.
-- Build Flutter, teste interativo dos pop-ups e teste Android em aparelho pendentes do GitHub Actions.
+- **251 testes Python aprovados** (`python3 -m unittest discover -s tool -p 'test_*.py' -q`), incluindo 6 testes novos de navegação, MCRP, LAN, RTSP e exportação.
+- `tool/check_version_sync.py` aprovado: versão pública/build 1.0.294+294 e arquivos JSON sincronizados.
+- `tool/verify_project.sh`: **aprovado em execução integral**; inclui contratos históricos, imports e verificação CI (registrar somente após término de execução final).
+- `tool/android/LanScanSupport.kt` é idêntico à fonte Android e é copiado pelo bootstrap do GitHub Actions.
+- Flutter SDK/Android SDK não estão disponíveis nesta sessão para `flutter analyze`, `flutter test` e APK. Build no GitHub Actions é indispensável.
+- Testes físicos pendentes: interface em dois telefones, pausa/retomada com tela apagada, descoberta de Vigia IA TCP 8765 e UDP 8766, resolução/FPS e RTSP com ONVIF e credenciais.
+- A abertura de TCP 8765 é **apenas indício**, não identificação autenticada; QR permanece obrigatório. O gateway real, quando disponível, não é confundido automaticamente com câmera RTSP.
 
 # Validação Vigia IA 1.0.292+292
 

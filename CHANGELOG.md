@@ -1,3 +1,10 @@
+## 1.0.294+294: navegação, controle remoto e descoberta LAN (2026-10-18)
+
+- Configurações no canto superior direito; barra principal reduzida a cinco abas e menu de três pontinhos removido do Ao vivo.
+- Lanterna em pop-up; Resolução e FPS unificados; ícone de possível pessoa no painel remoto; HUD com AO VIVO e cronômetros via MCRP.
+- Scanner procura possíveis servidores Vigia IA via TCP 8765 e repetição UDP, identifica gateway real e preserva QR; editor RTSP recebe IP/porta.
+- Diagnósticos de IA salvos automaticamente em Downloads/Vigia IA ao terminar.
+
 ## 1.0.293+293: controle remoto compacto e EfficientDet-Lite0 padrão (2026-10-18)
 
 - Grade MCRP: Zoom abre pop-up com aumentar, diminuir e restaurar 1×; Atualizar sai e Resolução abre seletor modal no quadrinho.

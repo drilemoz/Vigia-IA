@@ -77,11 +77,20 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.293',
+          version: '1.0.294',
           current: true,
           changes: [
-            'EfficientDet-Lite0 padrão e automático, com YOLO manual.',
-            'Controles remotos Zoom e Resolução em janelas; ajuda compacta e contraste corrigido.',
+            'Navegação compacta com 5 destinos, Ajustes no topo direito e controle de IA experimental.',
+            'Lanterna, vídeo/FPS e estados do transmissor revisados; cronômetros na prévia.',
+            'Scanner aprimorado para Vigia IA e gateway; RTSP preenchido; relatórios em Downloads.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.293',
+          changes: [
+            'EfficientDet-Lite0 como modelo padrão, YOLO opcional.',
+            'Controle remoto compacto com Zoom e Resolução em janelas.',
           ],
         ),
         SizedBox(height: 10),

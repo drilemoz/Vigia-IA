@@ -601,16 +601,6 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
                 onPressed: () => unawaited(_showPortraitQuickPanel()),
               ),
             ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: _DashboardActionButton(
-                icon: Icons.settings_outlined,
-                label: 'Ajustes',
-                compact: true,
-                onPressed: () =>
-                    unawaited(_openStandardScreen(const SettingsScreen())),
-              ),
-            ),
           ],
         ),
       ),

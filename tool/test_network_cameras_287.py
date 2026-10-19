@@ -23,7 +23,7 @@ class NetworkAndMonitor287(unittest.TestCase):
         ui = read('lib/screens/multi_camera_screen.dart') + read('lib/screens/multi_camera_screen_lan_discovery.dart')
         assert 'onScanNetwork: _scanLocalNetwork' in ui
         assert 'await _scanPhoneQr()' in ui
-        assert 'exige pareamento por QR' in ui
+        assert 'pareamento via QR necessário' in ui
         assert 'LanCameraKind.vigiaIa' in ui
         assert 'initialAddress:' in ui
 
@@ -54,7 +54,8 @@ class NetworkAndMonitor287(unittest.TestCase):
         assert 'bool _partialPersonHintsEnabled = false;' in controller
         assert '_partialPersonHintsEnabled && _alertLabels.contains' in controller
         assert 'setPartialPersonHintsEnabled' in controller
-        assert 'Possivel pessoa (experimental)' in full
+        remote = read('lib/widgets/mcrp_remote_controls.dart')
+        assert 'Icons.face_outlined' in remote and 'possível pessoa (experimental)' in remote
         assert 'deviceModel' in hud and "? '$detectedModel · Ao vivo'" in hud
 
 if __name__ == '__main__':

@@ -1,4 +1,13 @@
-# Arquitetura — Vigia IA 1.0.293+293
+# Arquitetura — Vigia IA 1.0.294+294
+
+## 1.0.294: navegação e controle remoto com baixo custo
+
+- Barra principal reduzida a cinco destinos; Configurações abre pelo topo direito em cada tela principal, sem índice inválido na barra inferior.
+- MCRP compartilha uma única consulta periódica com a prévia via `McrpLiveStatusCache` (sem polling paralelo). Estado AO VIVO requer stream real, pausa possui tela própria e os cronômetros vêm de `x-transmission-seconds` / `x-recording-seconds`.
+- Lanterna e Resolução/FPS usam seletores modais; modelo IA acessível no card superior e possível pessoa permanece experimental e opcional.
+- Descoberta Wi-Fi usa gateway reportado pelo Android, anúncio UDP repetido no tempo restrito do scan e sondagem TCP da porta 8765 como indício, nunca como autenticação. Pareamento por QR obrigatório.
+- Diagnóstico de IA grava um ZIP apenas ao concluir em Downloads/Vigia IA, sem gravação recorrente durante o processamento.
+
 
 O controle remoto MCRP no Ao vivo usa comandos autenticados existentes e diálogos locais. Zoom (0–100%, passos de 10%, 0=1×) e Resolução (360/480/720/768/1080p) não alteram o protocolo. O HUD remoto do modo retrato não repete o nome da câmera. O estado de desconexão mantém botão de reconectar e não envia comandos sem autenticação. O padrão da análise no receptor muda para EfficientDet-Lite0 e a ordem do modo Automático evita carregar YOLO ou Lite2; perfis v8 com antigo default YOLO migram para esquema v9 e novas escolhas manuais permanecem persistidas.
 

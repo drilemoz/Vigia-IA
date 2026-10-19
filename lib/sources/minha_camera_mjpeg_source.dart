@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
 import '../core/video_source.dart';
@@ -194,7 +194,16 @@ class MinhaCameraMjpegSource implements VideoSource {
   Widget buildPreview() => ValueListenableBuilder<Uint8List?>(
         valueListenable: _preview,
         builder: (context, bytes, _) => bytes == null
-            ? const Center(child: Text('Aguardando vídeo da câmera remota…'))
+            ? const ColoredBox(
+                color: Color(0xFF293747),
+                child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.videocam_off_outlined, size: 34, color: Color(0xFFBDD5E7)),
+                  SizedBox(height: 10),
+                  Text('Aguardando sinal da câmera remota',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xFFEDF5FC), fontWeight: FontWeight.w600)),
+                ])),
+              )
             : Center(child: Image.memory(
                 bytes, fit: BoxFit.contain, gaplessPlayback: true,
                 filterQuality: FilterQuality.low,
