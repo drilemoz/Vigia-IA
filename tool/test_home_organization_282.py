@@ -41,7 +41,7 @@ class HomeOrganization282(unittest.TestCase):
         self.assertIn('constraints.maxHeight < 570', ui)
 
     def test_version(self):
-        self.assertIn('version: 1.0.294+294', read('pubspec.yaml'))
+        self.assertIn('version: 1.0.295+295', read('pubspec.yaml'))
 
 if __name__ == '__main__':
     unittest.main()

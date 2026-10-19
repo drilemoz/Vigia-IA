@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vigiaia/widgets/mcrp_remote_controls.dart';
 
 void main() {
-  testWidgets('zoom modal restaura 1× e resolução ocupa o lugar de Atualizar', (tester) async {
+  testWidgets('zoom, vídeo e lanterna usam diálogos e preservam comandos', (tester) async {
     final commands = <String>[];
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: SingleChildScrollView(
       child: McrpControlPanel(
@@ -32,13 +32,26 @@ void main() {
     expect(find.text('0%'), findsOneWidget);
     await tester.tap(find.text('Fechar'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Resolução'));
+    // Na 1.0.295, o card Vídeo agrupa resolução e FPS.
+    await tester.tap(find.text('Vídeo'));
     await tester.pumpAndSettle();
+    expect(find.text('Resolução e FPS'), findsOneWidget);
     await tester.tap(find.text('480p'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('10 FPS'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fechar'));
+    await tester.pumpAndSettle();
+
+    // Lanterna abre um modal, não envia um comando automaticamente.
     await tester.tap(find.text('Lanterna'));
-    await tester.pump();
-    expect(commands, ['record/start', 'zoom/50', 'zoom/0', 'quality/480', 'torch/30']);
+    await tester.pumpAndSettle();
+    expect(find.text('Lanterna do transmissor'), findsOneWidget);
+    await tester.tap(find.text('Ligar por 30 segundos'));
+    await tester.pumpAndSettle();
+    expect(commands, [
+      'record/start', 'zoom/50', 'zoom/0', 'quality/480', 'fps/10', 'torch/30',
+    ]);
     expect(find.text('Atualizar'), findsNothing);
     expect(find.text('FPS medido: 12'), findsNothing);
     expect(find.text('Gravação desligada'), findsNothing);

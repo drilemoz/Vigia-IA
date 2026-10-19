@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.294', build: 294);
+      AppBuildVersion(version: '1.0.295', build: 295);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.294', build: 294),
+      version: AppBuildVersion(version: '1.0.295', build: 295),
       changes: <String>[
-        'Cinco destinos na navegação e Configurações no cabeçalho superior direito.',
-        'Lanterna, Resolução e FPS agrupados em janelas; opção experimental de pessoa por ícone.',
-        'Estados AO VIVO/pausado e cronômetros, scanner local e salvamento automático de diagnósticos.',
+        'Navegação com cinco destinos e Configurações no cabeçalho superior direito.',
+        'Controle remoto compacto com Zoom, Vídeo e Lanterna em janelas dedicadas.',
+        'Maior consistência entre os controles de vídeo, resolução, FPS e a interface.',
       ],
     ),
   ]);

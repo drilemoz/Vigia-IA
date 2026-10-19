@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.295+295
+
+- **Build 248 (código 1.0.294):** `flutter analyze --fatal-infos --fatal-warnings` passou sem problemas; `flutter test` falhou em `main_navigation_bar_test.dart` (esperava 6 abas, foram renderizadas 5) e `mcrp_remote_controls_test.dart` (procurava o texto `Resolução` no card, agora `Vídeo`).
+- **Correção:** os testes de widget agora refletem cinco destinos, ausência da aba Ajustes, modal Vídeo (resolução + FPS), modal Lanterna e comandos MCRP reais. O código de produção de navegação e transmissão foi preservado.
+- Repetir Flutter Test e compilação no GitHub Actions; Flutter SDK não disponível no ambiente local.
+
 # Validação Vigia IA 1.0.294+294
 
 - **251 testes Python aprovados** (`python3 -m unittest discover -s tool -p 'test_*.py' -q`), incluindo 6 testes novos de navegação, MCRP, LAN, RTSP e exportação.

@@ -1,4 +1,9 @@
-# Arquitetura — Vigia IA 1.0.294+294
+# Arquitetura — Vigia IA 1.0.295+295
+
+## 1.0.295: recuperação do fluxo de testes do build 248
+
+- Testes de interface Flutter acompanham os cinco destinos de navegação da 1.0.294.
+- Verificação MCRP exercita o modal Vídeo (resolução e FPS) e o modal Lanterna; nenhuma alteração na lógica de câmera, protocolo MCRP ou segurança.
 
 ## 1.0.294: navegação e controle remoto com baixo custo
 

@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.294',
+          version: '1.0.295',
           current: true,
+          changes: [
+            'Interface e testes alinhados à navegação principal com cinco destinos.',
+            'Painel Vídeo e Lanterna verificados com as opções de resolução e FPS.',
+            'Transmissão, IA e scanner LAN preservados da versão anterior.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.294',
           changes: [
             'Navegação compacta com 5 destinos, Ajustes no topo direito e controle de IA experimental.',
             'Lanterna, vídeo/FPS e estados do transmissor revisados; cronômetros na prévia.',

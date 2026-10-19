@@ -1,3 +1,10 @@
+## 1.0.295+295: testes Flutter alinhados ao painel e navegação (2026-10-18)
+
+- Corrigidos os dois testes Flutter que interromperam o build 248, mantendo a navegação de 5 abas e Configurações no topo direito.
+- O teste do controle MCRP agora abre o card Vídeo, valida o envio de resolução e FPS e usa o modal Lanterna para enviar o comando correto.
+- Preservadas as mudanças funcionais da 1.0.294: transmissor exclusivo, RTSP, LAN, diagnósticos, tempos AO VIVO e IA EfficientDet-Lite0.
+- Versão, changelog, novidades, metadados e verificadores sincronizados.
+
 ## 1.0.294+294: navegação, controle remoto e descoberta LAN (2026-10-18)
 
 - Configurações no canto superior direito; barra principal reduzida a cinco abas e menu de três pontinhos removido do Ao vivo.

@@ -17,9 +17,9 @@ class Build230NativeStatusLint(unittest.TestCase):
 
     def test_current_version_is_287(self):
         pubspec = (ROOT / 'pubspec.yaml').read_text(encoding='utf-8')
-        self.assertRegex(pubspec, r'(?m)^version: 1\.0\.294\+294$')
+        self.assertRegex(pubspec, r'(?m)^version: 1\.0\.295\+295$')
         news = (ROOT / 'lib/services/update_news_catalog.dart').read_text(encoding='utf-8')
-        self.assertIn("AppBuildVersion(version: '1.0.294', build: 294)", news)
+        self.assertIn("AppBuildVersion(version: '1.0.295', build: 295)", news)
 
 if __name__ == '__main__':
     unittest.main()

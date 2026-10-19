@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vigiaia/widgets/main_navigation_bar.dart';
 
 void main() {
-  testWidgets('menu principal mantem seis destinos essenciais', (tester) async {
+  testWidgets('menu principal mantém cinco destinos e abre Ajustes no topo', (tester) async {
     int? selectedIndex;
 
     await tester.pumpWidget(
@@ -17,13 +17,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(NavigationDestination), findsNWidgets(6));
+    expect(find.byType(NavigationDestination), findsNWidgets(5));
     expect(find.text('Início'), findsOneWidget);
     expect(find.text('Histórico'), findsOneWidget);
     expect(find.text('Ao vivo'), findsOneWidget);
     expect(find.text('Câmeras'), findsOneWidget);
     expect(find.text('Mapas'), findsOneWidget);
-    expect(find.text('Ajustes'), findsOneWidget);
+    expect(find.text('Ajustes'), findsNothing);
     expect(find.text('Bike'), findsNothing);
 
     await tester.tap(find.text('Câmeras'));
