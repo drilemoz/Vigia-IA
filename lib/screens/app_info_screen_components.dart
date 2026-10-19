@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.309',
+          version: '1.0.310',
           current: true,
+          changes: [
+            'APK 260: configurado R8 para OCR Latin com scripts ML Kit opcionais ausentes.',
+            'Minificação Release e assinatura preservadas, sem baixar modelos de outros idiomas.',
+            'Galeria Remota, fotos do A3, OCR e gravação preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.309',
+          current: false,
           changes: [
             'Corrigidos os 2 avisos remanescentes do Flutter Analyze no APK 259.',
             'Galeria Remota: atualização de progresso com bloco condicional explícito.',

@@ -131,6 +131,17 @@ if 'signingConfigs {\n        create("release")' not in text:
         raise SystemExit('Bloco buildTypes nao encontrado para assinatura release')
     text = text.replace(marker, signing_block + marker, 1)
 text = text.replace('signingConfig = signingConfigs.getByName("debug")', 'signingConfig = signingConfigs.getByName("release")')
+# O bootstrap apaga/recria android/; incluir as regras R8 novamente para
+# manter a release compilavel com google_mlkit_text_recognition Latin.
+if 'proguardFiles(' not in text:
+    signature = 'signingConfig = signingConfigs.getByName("release")'
+    if signature not in text:
+        raise SystemExit('Release signing ausente antes da configuracao R8')
+    text = text.replace(
+        signature,
+        signature + '\n            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")',
+        1,
+    )
 if 'signingConfig = signingConfigs.getByName("release")' not in text:
     raise SystemExit('Nao foi possivel aplicar signingConfig release')
 if 'signingConfigs.getByName("debug")' in text:
@@ -153,6 +164,9 @@ if 'androidx.media3' not in text:
     text = text.replace(flutter_marker, media_deps + flutter_marker, 1)
 path.write_text(text)
 PY
+
+# Bootstrap deve replicar as mesmas regras da arvore Android versionada.
+cp "$ROOT/tool/android/proguard-rules.pro" "$ROOT/android/app/proguard-rules.pro"
 
 cat >> android/gradle.properties <<'EOF'
 org.gradle.caching=true

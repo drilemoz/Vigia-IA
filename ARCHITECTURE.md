@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.310+310
+
+## R8 Release e OCR Latin (build 260)
+
+- O plugin Android do `google_mlkit_text_recognition: ^0.17.1` possui referências estáticas a módulos opcionais Chinese, Devanagari, Japanese e Korean; o produto usa `TextRecognitionScript.latin` para placas brasileiras.
+- O R8 Release do APK 260 reportou somente oito referências ausentes dos quatro módulos opcionais (opções e seus Builders). Adicionadas regras individuais `-dontwarn`, sem `-dontwarn com.google.mlkit.**` genérico e sem `isMinifyEnabled = false`.
+- As regras em `android/app/proguard-rules.pro` são idênticas às de `tool/android/proguard-rules.pro`, para sobreviver ao `flutter create` usado pelo bootstrap. O `android/app/build.gradle.kts` e `tool/bootstrap_android.sh` registram as regras no bloco `buildTypes.release`.
+- As classes Latin obrigatórias continuam cobertas pelas dependências existentes; novos erros de módulos necessários devem permanecer visíveis no R8. A integridade binária e compatibilidade do APK continuam sob responsabilidade do workflow.
+
 # Arquitetura — Vigia IA 1.0.309+309
 
 ## Vigia IA 1.0.309+309 · Correção de análise estática (APK 259)

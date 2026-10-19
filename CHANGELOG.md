@@ -1,3 +1,11 @@
+## 1.0.310+310 (2026-10-19)
+
+- APK 260: `flutter analyze` limpo e 579 testes Flutter aprovados; `:app:minifyReleaseWithR8` falhou com oito classes de OCR ML Kit opcionais ausentes.
+- Regras `-dontwarn` exatas para Chinese, Devanagari, Japanese e Korean TextRecognizerOptions e Builders; Latin não é suprimido nem removido.
+- Minificação do Release mantida e `proguardFiles` sincronizado com bootstrap Android, incluindo cópia autoritativa fora do diretório recriado.
+- Aplicativo, navegação, Galeria, monitoramento, fotos do A3 e gravação sem alterações de comportamento.
+- Compilação do próximo APK e testes físicos pendentes do GitHub Actions.
+
 ## 1.0.309+309 (2026-10-19)
 
 - Corrigidos os dois avisos remanescentes de `flutter analyze --fatal-infos --fatal-warnings` do workflow Android APK 259, sobre a fonte 1.0.308.

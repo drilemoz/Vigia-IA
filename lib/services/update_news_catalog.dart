@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.309', build: 309);
+      AppBuildVersion(version: '1.0.310', build: 310);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.309', build: 309),
+      version: AppBuildVersion(version: '1.0.310', build: 310),
       changes: <String>[
-        'Corrigidos os 2 avisos restantes do Flutter Analyze no APK 259.',
-        'Galeria Remota: atualização segura do progresso dos downloads.',
-        'Fotos do A3: guarda de intervalo sem alteração de funcionamento.',
+        'Corrigida falha R8 no APK 260 causada por idiomas opcionais do ML Kit.',
+        'OCR de placas brasileiras permanece local, sem módulos extras.',
+        'Galeria Remota, fotos e gravação do Redmi A3 preservadas.',
       ],
     ),
   ]);

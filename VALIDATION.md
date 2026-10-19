@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.310+310
+
+- **Origem:** workflow Android APK 260, fonte 1.0.309. Resultado factual: `flutter analyze --fatal-infos --fatal-warnings` sem problemas, 579 testes Flutter aprovados, falha em `:app:minifyReleaseWithR8` por oito classes opcionais de ML Kit OCR ausentes.
+- **Correção:** R8 Release vinculado à lista estrita de regras em `android/app/proguard-rules.pro` e cópia restaurável `tool/android/proguard-rules.pro` pelo bootstrap. Sem adicionar idiomas/modelos e sem desativar ofuscação/minificação.
+- **Validação pendente:** recompilar APK Release no GitHub Actions para comprovar a execução do R8 com as novas regras; teste real em A3 e Note 11.
+
 ## Correção APK 259 / 1.0.309+309
 
 - Workflow APK 259: execução preventiva passou; `flutter analyze --fatal-infos --fatal-warnings` encontrou apenas duas ocorrências de `curly_braces_in_flow_control_structures`: Galeria Remota (linha 251) e guard de capturas (linha 89). O APK não foi compilado.

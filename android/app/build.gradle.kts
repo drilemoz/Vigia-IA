@@ -67,6 +67,9 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // Correção APK 260: R8 mantém a minificação e respeita somente
+            // scripts ML Kit opcionais ausentes (OCR Latin permanece funcional).
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

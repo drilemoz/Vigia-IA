@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.309+309`
+**Versão atual:** `1.0.310+310`
+
+## Atualização 1.0.310+310 · Correção de minificação R8 do APK 260
+
+- O workflow 260 passou em `flutter analyze` (0 apontamentos) e nos **579 testes Flutter**, mas falhou em `:app:minifyReleaseWithR8` na compilação Release.
+- O plugin `google_mlkit_text_recognition` referencia quatro scripts opcionais ausentes (chinês, devanágari, japonês e coreano), embora a leitura de placas brasileiras use OCR Latin.
+- As oito classes ausentes registradas no log receberam `-dontwarn` específicos em `android/app/proguard-rules.pro`; a compilação usa `proguardFiles` no `release` e conserva a minificação, a assinatura e a dependência Latin.
+- A configuração também é mantida em `tool/android/proguard-rules.pro` e restaurada automaticamente por `tool/bootstrap_android.sh` quando necessário.
+- Galeria Remota, fotografia local no A3, OCR de placas e gravação anteriores preservados. Novo GitHub Actions precisa confirmar o APK Release.
 
 ## Atualização 1.0.309+309 · Correção Flutter Analyze APK 259
 
