@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.308', build: 308);
+      AppBuildVersion(version: '1.0.309', build: 309);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.308', build: 308),
+      version: AppBuildVersion(version: '1.0.309', build: 309),
       changes: <String>[
-        'Corrigidos os 8 alertas do Flutter Analyze que bloquearam o APK 258.',
-        'Histórico de veículos com atualização segura ao salvar uma placa.',
-        'Galeria Remota e fotos do A3 preservadas sem mudar o fluxo de transmissão.',
+        'Corrigidos os 2 avisos restantes do Flutter Analyze no APK 259.',
+        'Galeria Remota: atualização segura do progresso dos downloads.',
+        'Fotos do A3: guarda de intervalo sem alteração de funcionamento.',
       ],
     ),
   ]);

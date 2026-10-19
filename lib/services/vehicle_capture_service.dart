@@ -86,7 +86,9 @@ class VehicleCaptureGuard {
       }
       final lastCameraPhoto = _lastPhotoByCamera[cameraId];
       if (lastCameraPhoto != null &&
-          now.difference(lastCameraPhoto) < minimumBetweenPhotos) continue;
+          now.difference(lastCameraPhoto) < minimumBetweenPhotos) {
+        continue;
+      }
       chosen = candidate;
       match.lastSaved = now;
       _lastPhotoByCamera[cameraId] = now;

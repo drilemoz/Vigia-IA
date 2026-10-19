@@ -1,3 +1,10 @@
+## 1.0.309+309 (2026-10-19)
+
+- Corrigidos os dois avisos remanescentes de `flutter analyze --fatal-infos --fatal-warnings` do workflow Android APK 259, sobre a fonte 1.0.308.
+- `RemoteGalleryScreen`: condicional `mounted` com `{}` envolvendo a atualização de progresso de downloads, sem alterar a lógica de cancelamento.
+- `VehicleCaptureGuard`: guarda de cooldown com `{}` em volta do `continue`, preservando 8 s por câmera e 60 s por região.
+- Sem alterações nos protocolos MCRP, OCR local, gravação do A3 ou captura por movimento. Testes Flutter e APK pendentes de CI.
+
 ## 1.0.308+308 (2026-10-19)
 
 - Correção de todos os oito diagnósticos de `flutter analyze --fatal-infos --fatal-warnings` do GitHub Actions APK 258 (que compilava fonte 1.0.306): `use_build_context_synchronously`, `invalid_use_of_protected_member`, cinco `curly_braces_in_flow_control_structures` e `unnecessary_import`.

@@ -1,3 +1,9 @@
+## Correção APK 259 / 1.0.309+309
+
+- Workflow APK 259: execução preventiva passou; `flutter analyze --fatal-infos --fatal-warnings` encontrou apenas duas ocorrências de `curly_braces_in_flow_control_structures`: Galeria Remota (linha 251) e guard de capturas (linha 89). O APK não foi compilado.
+- Corrigidos ambos os `if` com blocos explícitos, sem alterar a lógica de progresso e captura. Adicionado `tool/test_build259_flutter_analyze_309.py` para prevenir regressão textual.
+- Flutter Analyze, Flutter Test, compilação APK e testes físicos ainda pendentes no GitHub Actions.
+
 ## Correção APK 258 / 1.0.308+308
 
 - O workflow APK 258 usou fonte 1.0.306, passou nos testes preventivos e falhou na etapa `flutter analyze --fatal-infos --fatal-warnings` com 8 problemas: Histórico (`BuildContext` e `setState` de extension), Galeria (3 `if` sem chaves), guard de captura (2 `if` sem chaves) e OCR (1 import redundante).
@@ -18,7 +24,7 @@
 - `test/remote_gallery_storage_test.dart` e `tool/test_remote_gallery_306.py` adicionados. Testes Flutter, lint e APK permanecem pendentes até CI (SDK Flutter não disponível neste ambiente).
 - Testar em aparelhos físicos: Wi-Fi local, 1+ fotos, 1+ vídeos, arquivos grandes, cancelamento, reabertura offline, escolha do aparelho e reprodução remota H.264/MP4.
 
-# Validação Vigia IA 1.0.308+308
+# Validação Vigia IA 1.0.309+309
 
 ## Versão 1.0.305+305 · histórico de veículos e OCR
 

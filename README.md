@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.308+308`
+**Versão atual:** `1.0.309+309`
+
+## Atualização 1.0.309+309 · Correção Flutter Analyze APK 259
+
+- O workflow APK 259 analisou a versão 1.0.308 e encerrou em `flutter analyze --fatal-infos --fatal-warnings` por duas ocorrências de `curly_braces_in_flow_control_structures`.
+- `lib/screens/remote_gallery_screen.dart`: atualização de progresso `setState` sob `if (mounted)` com bloco explícito.
+- `lib/services/vehicle_capture_service.dart`: limitação de fotos por câmera com bloco `if` e `continue` explícitos.
+- Funcionalidades de Galeria Remota, fotos por cena e gravação do A3 preservadas. APK e Flutter Test aguardam novo GitHub Actions.
 
 ## Atualização 1.0.308+308 · Correção Flutter Analyze APK 258
 

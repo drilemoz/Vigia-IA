@@ -248,12 +248,14 @@ class _RemoteGalleryScreenState extends State<RemoteGalleryScreen> {
           }
           failures++;
         }
-        if (mounted) setState(() {
-          _completed++;
-          _received = 0;
-          _expected = 0;
-          _lastProgressUiAt = null;
-        });
+        if (mounted) {
+          setState(() {
+            _completed++;
+            _received = 0;
+            _expected = 0;
+            _lastProgressUiAt = null;
+          });
+        }
       }
       final local = await _storage.savedFiles();
       if (mounted) {

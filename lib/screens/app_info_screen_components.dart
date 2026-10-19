@@ -77,12 +77,21 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.308',
+          version: '1.0.309',
           current: true,
           changes: [
-            'Corrigidos os 8 avisos fatais do Flutter Analyze no workflow APK 258.',
-            'Histórico: atualização da placa segura, sem acesso protegido incorreto ao State.',
-            'Galeria Remota e captura preservadas; nenhum ajuste no gravador nesta versão.',
+            'Corrigidos os 2 avisos remanescentes do Flutter Analyze no APK 259.',
+            'Galeria Remota: atualização de progresso com bloco condicional explícito.',
+            'Captura de veículos: intervalo mínimo preservado, com sintaxe corrigida.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.308',
+          current: false,
+          changes: [
+            'Correções dos 8 avisos do Flutter Analyze identificados no APK 258.',
+            'O Histórico, a Galeria e o OCR mantêm funcionamento local.',
           ],
         ),
         SizedBox(height: 10),

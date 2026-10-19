@@ -1,3 +1,11 @@
+# Arquitetura — Vigia IA 1.0.309+309
+
+## Vigia IA 1.0.309+309 · Correção de análise estática (APK 259)
+
+- O `flutter analyze --fatal-infos --fatal-warnings` do workflow 259 encontrou dois `curly_braces_in_flow_control_structures` na versão 1.0.308.
+- Corrigidos apenas os blocos de atualização de progresso na Galeria Remota e de cooldown em `VehicleCaptureGuard`; sem alteração funcional de MCRP, detecção e gravação no A3.
+- O build segue condicionado à execução do Flutter Analyze/Test e APK via GitHub Actions.
+
 # Arquitetura — Vigia IA 1.0.308+308
 
 ## Manutenção de compilação 1.0.308
