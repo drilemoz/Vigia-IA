@@ -20,6 +20,12 @@ class McrpLiveStatusCache {
       status.value = const <String, String>{};
     }
   }
+  /// A conexão de vídeo não é autoridade sobre REC: o serviço MCRP é.
+  /// Estado desconhecido nunca deve ser representado como AO VIVO ou PAUSADO.
+  static bool get isUnavailable => status.value['x-link-unavailable'] == '1';
+  static bool get isPaused => status.value['x-transmitting'] == '0';
+  static bool get isLive => status.value['x-transmitting'] == '1';
+
   static String duration(String? raw) {
     final seconds = (int.tryParse(raw ?? '') ?? 0).clamp(0, 315360000);
     final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
@@ -106,7 +112,7 @@ class McrpControlPanel extends StatelessWidget {
         final actions = <Widget>[
           if (_transmittingKnown)
             _action(context, _transmitting ? Icons.pause_circle_outline : Icons.play_circle_outline,
-              _transmitting ? 'Parar' : 'Iniciar',
+              _transmitting ? 'Pausar' : 'Iniciar',
               !_recording ? () => onCommand(_transmitting ? 'transmission/stop' : 'transmission/start') : null,
               selected: !_transmitting),
           if (_transmitting) _action(context, _recording ? Icons.stop_circle_outlined : Icons.fiber_manual_record,
@@ -162,34 +168,48 @@ class McrpControlPanel extends StatelessWidget {
               if (dialogContext.mounted) update(() => sending = false);
             }
           }
-          return AlertDialog(
-            title: const Text('Zoom da câmera'),
-            content: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('$zoom%', style: Theme.of(dialogContext).textTheme.headlineMedium),
-              const SizedBox(height: 12),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                IconButton.filledTonal(
-                  tooltip: 'Diminuir zoom',
-                  onPressed: !sending && zoom > 0 ? () => unawaited(adjust(zoom - 10)) : null,
-                  icon: const Icon(Icons.zoom_out),
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+              child: Material(
+                color: Theme.of(dialogContext).colorScheme.surface,
+                borderRadius: BorderRadius.circular(22),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Row(children: [
+                      const Expanded(child: Text('Zoom',
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold))),
+                      IconButton(
+                        tooltip: 'Fechar',
+                        onPressed: sending ? null : () => Navigator.of(dialogContext).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ]),
+                    Row(children: [
+                      Text('$zoom%', style: Theme.of(dialogContext).textTheme.titleLarge),
+                      const Spacer(),
+                      IconButton.filledTonal(
+                        tooltip: 'Diminuir zoom',
+                        onPressed: !sending && zoom > 0 ? () => unawaited(adjust(zoom - 10)) : null,
+                        icon: const Icon(Icons.zoom_out),
+                      ),
+                      IconButton.filledTonal(
+                        tooltip: 'Aumentar zoom',
+                        onPressed: !sending && zoom < 100 ? () => unawaited(adjust(zoom + 10)) : null,
+                        icon: const Icon(Icons.zoom_in),
+                      ),
+                      IconButton.outlined(
+                        tooltip: 'Zoom original (1×)',
+                        onPressed: !sending && zoom > 0 ? () => unawaited(adjust(0)) : null,
+                        icon: const Icon(Icons.restart_alt),
+                      ),
+                    ]),
+                  ]),
                 ),
-                IconButton.filledTonal(
-                  tooltip: 'Aumentar zoom',
-                  onPressed: !sending && zoom < 100 ? () => unawaited(adjust(zoom + 10)) : null,
-                  icon: const Icon(Icons.zoom_in),
-                ),
-              ]),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: !sending && zoom > 0 ? () => unawaited(adjust(0)) : null,
-                icon: const Icon(Icons.restart_alt),
-                label: const Text('Tamanho original (1×)'),
               ),
-            ]),
-            actions: [TextButton(
-              onPressed: sending ? null : () => Navigator.of(dialogContext).pop(),
-              child: const Text('Fechar'),
-            )],
+            ),
           );
         },
       ),
@@ -360,7 +380,10 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
   @override
   void didUpdateWidget(covariant McrpLiveRemoteControls oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.liveUrl != oldWidget.liveUrl) _connect();
+    if (widget.liveUrl != oldWidget.liveUrl) {
+      McrpLiveStatusCache.clear(oldWidget.liveUrl);
+      _connect();
+    }
   }
 
   @override
@@ -413,6 +436,10 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
       setState(() { _status = status; _ready = true; _error = null; });
     } catch (_) {
       if (mounted && current == _generation && client == _client) {
+        // Sem status atualizado não manter um selo AO VIVO nem tempo de REC
+        // de uma consulta antiga. A gravação no transmissor não é interrompida.
+        McrpLiveStatusCache.setStatus(widget.liveUrl,
+            const <String, String>{'x-link-unavailable': '1'});
         setState(() { _ready = false; _error = 'Sem comunicação com o transmissor. Uma gravação já iniciada pode continuar no aparelho.'; });
       }
     } finally {
@@ -452,7 +479,11 @@ class _McrpLiveRemoteControlsState extends State<McrpLiveRemoteControls>
     } catch (error) {
       if (mounted && _generation == generation && client == _client) {
         setState(() {
-          if (sent) _ready = false;
+          if (sent) {
+            _ready = false;
+            McrpLiveStatusCache.setStatus(widget.liveUrl,
+                const <String, String>{'x-link-unavailable': '1'});
+          }
           _error = sent
             ? 'Comando enviado, mas não foi possível confirmar o estado. Reconecte para consultar.'
             : error is StateError ? error.message.toString()

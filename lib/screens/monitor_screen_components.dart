@@ -885,7 +885,7 @@ class _RuntimeSummary extends StatelessWidget {
         ? 'Movimento da câmera ignorado'
         : controller.motionActive
         ? 'Movimento $percent%'
-        : 'Aguardando movimento';
+        : 'Vigiando cena';
     final schedule = controller.schedule.enabled
         ? (controller.scheduleActive ? 'Agenda ativa agora' : 'Fora da agenda')
         : 'Modo manual';

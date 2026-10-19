@@ -17,6 +17,7 @@ VideoSourceConfig sourceForRegisteredCamera(
       type: VideoSourceType.rtsp,
       rtspUrl: camera.address,
       rtspSoftwareDecoding: camera.rtspSoftwareDecoding,
+      rtspForceTcp: camera.rtspForceTcp,
       displayName: camera.name,
       cameraId: camera.id,
       analysisInterval: analysisInterval,

@@ -22,7 +22,10 @@ extension _MonitorDetectionPanel on _MonitorScreenState {
     final vehicles = current
         .where((item) => ObjectFilterCatalog.vehicles.contains(item.label))
         .length;
-    final others = current.length - people - vehicles;
+    final animals = current
+        .where((item) => ObjectFilterCatalog.animals.contains(item.label))
+        .length;
+    final others = current.length - people - vehicles - animals;
     final names = <String, int>{};
     for (final detection in current) {
       names.update(detection.displayLabel, (value) => value + 1,
@@ -72,6 +75,15 @@ extension _MonitorDetectionPanel on _MonitorScreenState {
                 label: 'Veículos agora',
                 count: enabled ? '$vehicles' : '—',
                 tint: scheme.tertiary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _LiveDetectionMetric(
+                icon: Icons.pets_outlined,
+                label: 'Animais agora',
+                count: enabled ? '$animals' : '—',
+                tint: Colors.deepOrange,
               ),
             ),
           ],

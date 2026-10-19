@@ -22,9 +22,9 @@ class Redesign294(unittest.TestCase):
   def test_video_paused_and_times_from_real_transmitter(self):
     ui=src('lib/screens/monitor_screen_multicamera.dart')
     self.assertIn("remote['x-transmitting'] == '0'",ui)
-    self.assertIn("remote['x-recording-seconds']",ui)
-    self.assertIn('McrpLiveStatusCache.duration',ui)
-    self.assertIn("Text('AO VIVO'",ui)
+    self.assertIn("data['x-recording-seconds']", src('lib/screens/monitor_screen_mcrp_support.dart'))
+    self.assertIn('McrpLiveStatusCache.duration',src('lib/screens/monitor_screen_mcrp_support.dart'))
+    self.assertIn("_mcrpStatusChip('AO VIVO'",ui)
     self.assertNotIn("_monitorMenu(),",ui)
   def test_tcp_8765_does_not_bypass_qr(self):
     scanner=src('lib/services/lan_camera_subnet_scanner.dart')
@@ -45,6 +45,6 @@ class Redesign294(unittest.TestCase):
     self.assertIn('exportToDownloads()',src('lib/screens/monitor_screen_ai_tools.dart'))
     self.assertIn('Downloads/Vigia IA',src('android/app/src/main/kotlin/com/vigiaia/app/MainActivity.kt'))
   def test_version(self):
-    self.assertIn('version: 1.0.296+296',src('pubspec.yaml'))
-    self.assertTrue((ROOT/'RELEASE-1.0.296.md').exists())
+    self.assertIn('version: 1.0.299+299',src('pubspec.yaml'))
+    self.assertTrue((ROOT/'RELEASE-1.0.299.md').exists())
 if __name__=='__main__': unittest.main()

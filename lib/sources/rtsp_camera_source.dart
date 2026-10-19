@@ -16,12 +16,14 @@ class RtspCameraSource implements VideoSource {
     required this.analysisInterval,
     this.emitFrames = true,
     this.softwareDecoding = false,
+    this.forceTcp = true,
   });
 
   final String url;
   final Duration analysisInterval;
   final bool emitFrames;
   final bool softwareDecoding;
+  final bool forceTcp;
   final _frames = StreamController<RgbFrame>.broadcast();
   final _statuses = StreamController<VideoSourceStatus>.broadcast();
   final ErrorLogService _logs = ErrorLogService.instance;
@@ -50,7 +52,7 @@ class RtspCameraSource implements VideoSource {
         uri: Uri.parse(url),
         mediaOptions: <String>[
           ':network-caching=500',
-          ':rtsp-tcp',
+          if (forceTcp) ':rtsp-tcp',
           ':no-audio',
           if (softwareDecoding) ...<String>[
             ':avcodec-hw=none',

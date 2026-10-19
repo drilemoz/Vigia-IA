@@ -133,6 +133,9 @@ extension _MonitorPortraitLayout on _MonitorScreenState {
                       ),
                     ),
                   ),
+                  if (_primaryContentMode == _MonitorPrimaryContentMode.camera &&
+                      secondary == null)
+                    _buildMcrpRecordingStrip(context),
                   if (showMap) ...[
                     const SizedBox(height: 8),
                     Padding(

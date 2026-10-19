@@ -1,6 +1,21 @@
 part of 'monitor_screen.dart';
 
 extension _MonitorMulticamera on _MonitorScreenState {
+  Widget _mcrpStatusChip(String text, IconData icon, Color accent) =>
+      DecoratedBox(
+        decoration: BoxDecoration(color: const Color(0xFF173D2C),
+          borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 13, color: accent),
+            const SizedBox(width: 6),
+            Text(text, style: const TextStyle(fontSize: 11,
+              fontWeight: FontWeight.w800, color: Colors.white)),
+          ]),
+        ),
+      );
+
   Future<void> _setPrimaryContentMode(_MonitorPrimaryContentMode mode) async {
     if (_primaryContentMode == mode) return;
     _updateMulticameraState(() => _primaryContentMode = mode);
@@ -29,6 +44,8 @@ extension _MonitorMulticamera on _MonitorScreenState {
         CameraEndpointType.rtsp => VideoSourceConfig(
           type: VideoSourceType.rtsp,
           rtspUrl: camera.address,
+          rtspSoftwareDecoding: camera.rtspSoftwareDecoding,
+          rtspForceTcp: camera.rtspForceTcp,
           displayName: camera.name,
           cameraId: camera.id,
           analysisInterval: _controller.sourceConfig.analysisInterval,
@@ -773,48 +790,50 @@ extension _MonitorMulticamera on _MonitorScreenState {
                   return const SizedBox.shrink();
                 }
                 final paused = remote['x-transmitting'] == '0';
-                final alive = remote['x-transmitting'] == '1' &&
-                  _controller.sourceStatus.state == VideoSourceState.streaming;
-                final recording = remote['x-recording'] == '1';
-                if (paused) {
-                  return DecoratedBox(
-                    decoration: const BoxDecoration(color: Color(0xFF293747)),
-                    child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.pause_circle_outline_rounded, size: 48, color: Color(0xFFB8DDF8)),
-                      const SizedBox(height: 9),
-                      const Text('Transmissão pausada',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      Text('Use Iniciar no controle remoto para retomar',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8))),
-                    ])),
+                final unknown = remote.isEmpty;
+                final unavailable = remote['x-link-unavailable'] == '1';
+                final transmitting = remote['x-transmitting'] == '1';
+                final videoReady = _controller.sourceStatus.state == VideoSourceState.streaming;
+                final alive = transmitting && videoReady && !unavailable;
+                // Sempre mascarar o último quadro quando o servidor pausou
+                // ou quando não há confirmação de vídeo atual. A fonte de
+                // verdade é /status do transmissor, não o último bitmap.
+                if (paused || unavailable || unknown || (transmitting && !videoReady)) {
+                  final label = paused ? 'TRANSMISSÃO PARADA'
+                      : unavailable ? 'CONEXÃO PERDIDA' : unknown ? 'CONSULTANDO CÂMERA' : 'AGUARDANDO VÍDEO';
+                  final message = paused ? 'Toque em Iniciar para retomar a câmera'
+                      : unavailable ? 'Estado da gravação desconhecido. Verifique o transmissor.'
+                      : unknown ? 'Obtendo estado do transmissor…'
+                      : 'A câmera remota está ativa; aguardando novos quadros';
+                  return ColoredBox(
+                    color: const Color(0xFF162330),
+                    child: Stack(children: [
+                      Positioned(top: 10, left: 10, child: _mcrpStatusChip(
+                        paused ? 'PAUSADO' : unavailable ? 'SEM CONEXÃO' : 'CONECTANDO',
+                        paused ? Icons.pause_circle_filled_rounded : Icons.cloud_off_rounded,
+                        const Color(0xFFFFCC85))),
+                      Center(child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          Icon(paused ? Icons.videocam_off_outlined : Icons.wifi_off_rounded,
+                            size: 52, color: const Color(0xFFB8DDF8)),
+                          const SizedBox(height: 12),
+                          Text(label, textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16, color: Colors.white,
+                              fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 6),
+                          Text(message, textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                        ]),
+                      )),
+                    ]),
                   );
                 }
+                if (!alive) return const SizedBox.shrink();
                 return Stack(children: [
-                  if (alive)
-                    Positioned(left: 10, top: 9, child: DecoratedBox(
-                      decoration: BoxDecoration(color: const Color(0xFF173D2C),
-                        borderRadius: BorderRadius.circular(10)),
-                      child: const Padding(padding: EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Icon(Icons.circle, size: 8, color: Color(0xFF5FED9F)),
-                          SizedBox(width: 6),
-                          Text('AO VIVO', style: TextStyle(fontSize: 11,
-                            fontWeight: FontWeight.w800, color: Color(0xFFD1FFE2))),
-                        ])),
-                    )),
-                  if (alive)
-                    Positioned(left: 9, bottom: 9, child: DecoratedBox(
-                      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(11)),
-                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                        child: Text(
-                          '${McrpLiveStatusCache.duration(remote['x-transmission-seconds'])}'
-                          '${recording ? '  |  REC ${McrpLiveStatusCache.duration(remote['x-recording-seconds'])}' : ''}',
-                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
-                            color: Colors.white),
-                        )),
-                    )),
+                  Positioned(left: 10, top: 9,
+                    child: _mcrpStatusChip('AO VIVO', Icons.fiber_manual_record,
+                        const Color(0xFF5FED9F))),
                 ]);
               },
             )),

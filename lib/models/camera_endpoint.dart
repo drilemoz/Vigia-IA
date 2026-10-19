@@ -10,6 +10,7 @@ class CameraEndpoint {
     this.enabled = true,
     this.countingEnabled = false,
     this.rtspSoftwareDecoding = false,
+    this.rtspForceTcp = true,
     this.esp32CameraEnabled = false,
     this.temperatureSensorEnabled = true,
     this.hallSensorEnabled = true,
@@ -33,6 +34,8 @@ class CameraEndpoint {
   final bool countingEnabled;
   /// Modo de compatibilidade VLC para RTSP H.264/H.265 (mais CPU/bateria).
   final bool rtspSoftwareDecoding;
+  /// TCP intercalado por padrão; desmarcado permite o transporte VLC padrão (UDP).
+  final bool rtspForceTcp;
   final bool esp32CameraEnabled;
   final bool temperatureSensorEnabled;
   final bool hallSensorEnabled;
@@ -50,6 +53,7 @@ class CameraEndpoint {
     bool? enabled,
     bool? countingEnabled,
     bool? rtspSoftwareDecoding,
+    bool? rtspForceTcp,
     bool? esp32CameraEnabled,
     bool? temperatureSensorEnabled,
     bool? hallSensorEnabled,
@@ -69,6 +73,7 @@ class CameraEndpoint {
         enabled: enabled ?? this.enabled,
         countingEnabled: countingEnabled ?? this.countingEnabled,
         rtspSoftwareDecoding: rtspSoftwareDecoding ?? this.rtspSoftwareDecoding,
+        rtspForceTcp: rtspForceTcp ?? this.rtspForceTcp,
         esp32CameraEnabled: esp32CameraEnabled ?? this.esp32CameraEnabled,
         temperatureSensorEnabled:
             temperatureSensorEnabled ?? this.temperatureSensorEnabled,
@@ -92,6 +97,7 @@ class CameraEndpoint {
         'enabled': enabled,
         'countingEnabled': countingEnabled,
         'rtspSoftwareDecoding': rtspSoftwareDecoding,
+        'rtspForceTcp': rtspForceTcp,
         'esp32CameraEnabled': esp32CameraEnabled,
         'temperatureSensorEnabled': temperatureSensorEnabled,
         'hallSensorEnabled': hallSensorEnabled,
@@ -136,6 +142,7 @@ class CameraEndpoint {
       enabled: json['enabled'] as bool? ?? true,
       countingEnabled: json['countingEnabled'] as bool? ?? false,
       rtspSoftwareDecoding: json['rtspSoftwareDecoding'] as bool? ?? false,
+      rtspForceTcp: json['rtspForceTcp'] as bool? ?? true,
       esp32CameraEnabled: json['esp32CameraEnabled'] as bool? ?? false,
       temperatureSensorEnabled:
           json['temperatureSensorEnabled'] as bool? ?? true,

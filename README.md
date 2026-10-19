@@ -1,3 +1,24 @@
+## 1.0.299+299: assistente de conexão RTSP (2026-10-19)
+
+- Editor RTSP simplificado, IP e porta independentes, presets de caminhos conhecidos e opção personalizada.
+- Colar URL completa preenche automaticamente host, porta, caminho e credenciais.
+- Busca Wi-Fi sob demanda com ONVIF e TCP, seleção da câmera encontrada.
+- Teste DESCRIBE/SDP sob demanda com Basic/Digest MD5; distingue perfil de vídeo, 401/403, 404 e ausência de resposta.
+- Busca de caminhos RTSP sob demanda na LAN, sem persistir estado não confirmado.
+- Transporte TCP configurável por câmera; modo padrão VLC como alternativa.
+- Corrigida exigência do caminho /stream1; pode salvar RTSP válido sem confirmar o vídeo.
+
+## 1.0.298+298: estado MCRP e tempo REC no Ao vivo (2026-10-19)
+
+- Ao vivo distingue AO VIVO, PAUSADO e SEM CONEXÃO; máscara opaca impede quadro congelado na pausa.
+- Tempo da transmissão e gravação abaixo do vídeo, obtidos do status do transmissor, mesmo sem espectadores; sem contagem fictícia no receptor.
+- Tela Transmissão mostra estado parado e tempo de REC quando aplicável. Preserva comandos e segurança.
+- Base 1.0.297: cartões Animais e zoom compacto mantidos.
+
+## 1.0.297: interface de detecções e zoom
+- Contador de animais visíveis, novo estado Vigiando cena e zoom compacto na parte inferior.
+- Sincronização de pausa/transmissão e tempo de gravação ainda pendente.
+
 ## 1.0.292+292 · Ajustes no build 245
 
 - Três erros do build 244 não se repetiram: decodificação RTSP validada; build 245 mostrou apenas dois avisos `curly_braces_in_flow_control_structures`.
@@ -330,7 +351,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.296+296`
+**Versão atual:** `1.0.299+299`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 

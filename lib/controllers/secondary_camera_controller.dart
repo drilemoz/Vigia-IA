@@ -85,6 +85,7 @@ class SecondaryCameraController extends ChangeNotifier {
       VideoSourceType.rtsp => RtspCameraSource(
           url: sourceConfig.rtspUrl ?? '',
           softwareDecoding: sourceConfig.rtspSoftwareDecoding,
+          forceTcp: sourceConfig.rtspForceTcp,
           analysisInterval: sourceConfig.analysisInterval,
           emitFrames: false,
         ),

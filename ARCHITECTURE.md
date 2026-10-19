@@ -1,6 +1,20 @@
-# Arquitetura — Vigia IA 1.0.296+296
+# Arquitetura — Vigia IA 1.0.299+299
 
-## 1.0.296: alinhamento automático de versão e build (build 249)
+## 1.0.299: RTSP LAN assistido
+
+- `RtspCameraEditorDialog` recebe URL ou host/porta separados, presets + caminho livre; user/password não expostos em preview.
+- `RtspConnectionAssistant`: normalização de URL e probe DESCRIBE/SDP; verifica vídeo apenas pela descrição SDP, não afirma RTP/PLAY/decodificação comprovados.
+- Probes/desafios Basic/Digest MD5 limitados a IP privado e acionados manualmente; socket com timeout e corpo limitado; scanner LAN também é manual, sem varredura contínua.
+- `rtspForceTcp` preserva TCP como default do aplicativo; desmarcado remove opção forçada e usa comportamento de transporte do LibVLC; persiste via CameraEndpoint -> VideoSourceConfig -> RtspCameraSource.
+- Descoberta ONVIF fornece serviço e host, **não** o URI RTSP exato; perfis ONVIF ainda não são obtidos por GetProfiles/GetStreamUri nesta versão.
+
+## 1.0.298: telemetria MCRP independente do receptor
+
+- O transmissor expõe o estado/segundos no /status autenticado, com medição SystemClock.elapsedRealtime e REC próprio.
+- O receptor mascara quadros em pausa e em falhas de telemetria; no rodapé mostra os tempos confirmados recebidos, sem capturar outra câmera.
+- Não repetir POSTs de controle em timeout; gravação pode continuar mesmo que receptor perca a rede.
+
+## 1.0.297: alinhamento automático de versão e build (build 249)
 
 - Validação preventiva compara versão e build de pubspec, AppMetadata, Novidades, Sobre, Android/GitHub Manager e notas de release, em vez de `grep` com número desatualizado.
 - Teste regressivo simula catálogo com build errado e exige falha precoce.

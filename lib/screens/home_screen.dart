@@ -485,6 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
         address: rememberedSource.type == VideoSourceType.rtsp ? rememberedSource.rtspUrl : rememberedSource.remoteBaseUrl,
         accessKey: rememberedSource.remoteAccessKey,
         rtspSoftwareDecoding: rememberedSource.rtspSoftwareDecoding,
+        rtspForceTcp: rememberedSource.rtspForceTcp,
         esp32CameraEnabled: true,
       );
     }

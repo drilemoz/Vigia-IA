@@ -23,7 +23,7 @@ class CompactRemote293(unittest.TestCase):
         ui=read('lib/widgets/mcrp_remote_controls.dart')
         self.assertIn('Icons.help_outline',ui)
         self.assertIn('_showControlHelp(context)',ui)
-        self.assertIn("_transmitting ? 'Parar' : 'Iniciar'",ui)
+        self.assertIn("_transmitting ? 'Pausar' : 'Iniciar'",ui)
         self.assertNotIn('Gravação desligada',ui)
         self.assertNotIn('FPS medido:',ui)
         self.assertNotIn('Transmissão pausada.',ui)
@@ -41,8 +41,8 @@ class CompactRemote293(unittest.TestCase):
         self.assertIn('DetectorModelPreference.yolo26s => 0',assets)
         self.assertIn('modelIndex++ < firstIndex',assets)
     def test_metadata(self):
-        self.assertIn('version: 1.0.296+296',read('pubspec.yaml'))
-        self.assertIn("AppBuildVersion(version: '1.0.296', build: 296)",read('lib/services/update_news_catalog.dart'))
-        self.assertTrue((ROOT/'RELEASE-1.0.296.md').exists())
+        self.assertIn('version: 1.0.299+299',read('pubspec.yaml'))
+        self.assertIn("AppBuildVersion(version: '1.0.299', build: 299)",read('lib/services/update_news_catalog.dart'))
+        self.assertTrue((ROOT/'RELEASE-1.0.299.md').exists())
 
 if __name__ == '__main__': unittest.main()

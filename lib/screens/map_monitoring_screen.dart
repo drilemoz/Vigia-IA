@@ -598,6 +598,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         CameraEndpointType.rtsp => VideoSourceConfig(
             type: VideoSourceType.rtsp,
             rtspUrl: camera.address,
+            rtspSoftwareDecoding: camera.rtspSoftwareDecoding,
+            rtspForceTcp: camera.rtspForceTcp,
             displayName: camera.name,
             cameraId: camera.id,
           ),

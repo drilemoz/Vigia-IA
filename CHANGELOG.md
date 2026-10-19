@@ -1,4 +1,24 @@
-## 1.0.296+296: correção da verificação preventiva do build 249 (2026-10-18)
+## 1.0.299+299: conexão RTSP assistida (2026-10-19)
+
+- Fluxo de cadastro inspirado no Minha Câmera 1.4.76, com lista de caminhos, colar URL, IP/porta separados e escolha de câmera LAN.
+- Diagnóstico por DESCRIBE/SDP antes de abrir vídeo: detecção de vídeo, autenticação, caminho e rede.
+- HTTP 401 oferece Basic e Digest MD5 para testes locais quando anunciados.
+- Perfis não comprovados são explicitamente marcados como não verificados, sem bloquear salvamento válido.
+- Ajuste opcional TCP versus transporte VLC padrão; dados gravados por câmera.
+- Preservado o monitoramento, proteção local de credenciais e versão anterior.
+
+## 1.0.298+298: transmissão e REC verificados pelo transmissor (2026-10-19)
+
+- Estado AO VIVO, PAUSADO, AGUARDANDO VÍDEO e CONEXÃO PERDIDA na prévia MCRP.
+- Prévia parada deixa de mostrar último quadro; cronômetros sob vídeo usam cabeçalhos reais, REC independente de espectadores.
+- Sem comunicação, limpa selo/cronômetros antigos, sem encerrar REC do transmissor.
+- Corrigidas expectativas de versão/build em verificações herdadas.
+
+## 1.0.297: interface de detecções e zoom
+- Contador de animais visíveis, novo estado Vigiando cena e zoom compacto na parte inferior.
+- Sincronização de pausa/transmissão e tempo de gravação ainda pendente.
+
+## 1.0.297+296: correção da verificação preventiva do build 249 (2026-10-18)
 
 - Build 249 (versão 1.0.295) interrompido antes do Flutter Analyze por um `grep` histórico que exigia build 294 no catálogo de Novidades 1.0.295.
 - Substituído o teste frágil por verificação dinâmica entre `pubspec.yaml`, AppMetadata, Novidades, Sobre, metadados JSON e versão Android.

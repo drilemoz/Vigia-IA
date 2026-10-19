@@ -53,7 +53,7 @@ class RemoteTransmission288(unittest.TestCase):
         self.assertIn("state['x-transmitting'] == expectedTransmission",controls)
         self.assertIn('Parar transmissão',controls)
         self.assertIn('if (_transmitting)',controls)
-        self.assertIn("_transmitting ? 'Parar' : 'Iniciar'", controls)
+        self.assertIn("_transmitting ? 'Pausar' : 'Iniciar'", controls)
         native=read('lib/screens/native_transmitter_screen.dart')
         self.assertIn('Aguardando comando remoto',native)
         self.assertIn('if (status.url != null && !status.releasing)',native)

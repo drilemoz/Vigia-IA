@@ -7,6 +7,7 @@ import '../models/camera_source_selector.dart';
 import '../services/minha_camera_live_url.dart';
 import '../services/minha_camera_registry_migration.dart';
 import 'mcrp_camera_screen.dart';
+import 'rtsp_camera_editor_dialog.dart';
 import '../models/monitor_event.dart';
 import '../models/object_filter_catalog.dart';
 import '../models/remote_phone_status.dart';

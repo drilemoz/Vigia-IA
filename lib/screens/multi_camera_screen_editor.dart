@@ -7,6 +7,16 @@ extension _CameraEditorActions on _MultiCameraScreenState {
     String? initialName,
     String? initialAddress,
   }) async {
+    if (type == CameraEndpointType.rtsp) {
+      return showDialog<CameraEndpoint>(
+        context: context,
+        builder: (_) => RtspCameraEditorDialog(
+          existing: existing,
+          initialName: initialName,
+          initialAddress: initialAddress,
+        ),
+      );
+    }
     final isRtsp = type == CameraEndpointType.rtsp;
     final isMinha = MinhaCameraLiveUrl.isValid(existing?.address);
     final sourceTitle = isRtsp ? 'Câmera RTSP' : 'Celular transmissor';

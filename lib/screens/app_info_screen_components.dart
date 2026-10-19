@@ -77,12 +77,13 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.296',
+          version: '1.0.299',
           current: true,
           changes: [
-            'Corrigida a validação de versão e build que interrompia o build 249.',
-            'Catálogo de Novidades, metadados e verificações passam a conferir o mesmo release.',
-            'Preservadas a interface de cinco abas, câmeras, IA e transmissão.',
+            'Cadastro RTSP com IP, porta, lista de caminhos e URL automática.',
+            'Busca no Wi-Fi e diagnóstico DESCRIBE/SDP por perfil.',
+            'Compatibilidade de transporte por câmera e opção de decodificação por software.',
+            'Ao vivo mantém os estados e cronômetros do transmissor.',
           ],
         ),
         SizedBox(height: 10),

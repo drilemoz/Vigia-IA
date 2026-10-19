@@ -30,6 +30,7 @@ class VideoSourceConfig {
     required this.type,
     this.rtspUrl,
     this.rtspSoftwareDecoding = false,
+    this.rtspForceTcp = true,
     this.remoteBaseUrl,
     this.remoteAccessKey,
     this.displayName,
@@ -41,6 +42,7 @@ class VideoSourceConfig {
   final VideoSourceType type;
   final String? rtspUrl;
   final bool rtspSoftwareDecoding;
+  final bool rtspForceTcp;
   final String? remoteBaseUrl;
   final String? remoteAccessKey;
   final String? displayName;
@@ -56,6 +58,7 @@ class VideoSourceConfig {
     String? rtspUrl,
     bool clearRtspUrl = false,
     bool? rtspSoftwareDecoding,
+    bool? rtspForceTcp,
     String? remoteBaseUrl,
     String? remoteAccessKey,
     String? displayName,
@@ -67,6 +70,7 @@ class VideoSourceConfig {
         type: type ?? this.type,
         rtspUrl: clearRtspUrl ? null : (rtspUrl ?? this.rtspUrl),
         rtspSoftwareDecoding: rtspSoftwareDecoding ?? this.rtspSoftwareDecoding,
+        rtspForceTcp: rtspForceTcp ?? this.rtspForceTcp,
         remoteBaseUrl: remoteBaseUrl ?? this.remoteBaseUrl,
         remoteAccessKey: remoteAccessKey ?? this.remoteAccessKey,
         displayName: displayName ?? this.displayName,
@@ -79,6 +83,7 @@ class VideoSourceConfig {
         'type': type.name,
         'rtspUrl': includeSensitive ? rtspUrl : null,
         'rtspSoftwareDecoding': rtspSoftwareDecoding,
+        'rtspForceTcp': rtspForceTcp,
         'remoteBaseUrl': includeSensitive || !MinhaCameraLiveUrl.isValid(remoteBaseUrl)
             ? remoteBaseUrl : null,
         'remoteAccessKey': includeSensitive ? remoteAccessKey : null,
@@ -98,6 +103,7 @@ class VideoSourceConfig {
       type: type,
       rtspUrl: json['rtspUrl'] as String?,
       rtspSoftwareDecoding: json['rtspSoftwareDecoding'] as bool? ?? false,
+      rtspForceTcp: json['rtspForceTcp'] as bool? ?? true,
       remoteBaseUrl: json['remoteBaseUrl'] as String?,
       remoteAccessKey: json['remoteAccessKey'] as String?,
       displayName: json['displayName'] as String?,

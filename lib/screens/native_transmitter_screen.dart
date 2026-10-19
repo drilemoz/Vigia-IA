@@ -504,15 +504,17 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
                 if (running)
                   Icon(Icons.circle, size: 11, color: scheme.tertiary),
               ]),
-              if (running) ...[
+              if (url != null) ...[
                 const SizedBox(height: 15),
                 Row(children: [
-                  Expanded(child: _durationPanel('TRANSMITINDO', _elapsed(s!.seconds),
-                      Icons.wifi_tethering_rounded, scheme.primary)),
+                  Expanded(child: _durationPanel(running ? 'TRANSMITINDO' : 'PAUSADO',
+                      running ? _elapsed(s!.seconds) : 'Transmissão parada',
+                      running ? Icons.wifi_tethering_rounded : Icons.pause_circle_outline,
+                      scheme.primary)),
                   const SizedBox(width: 9),
                   Expanded(child: _durationPanel(recording ? 'GRAVANDO' : 'GRAVAÇÃO',
                       recording && recordSeconds != null ? _elapsed(recordSeconds) :
-                      recording ? 'Em andamento' : 'Desligada',
+                      recording ? 'Em andamento' : 'Não gravando',
                       recording ? Icons.fiber_manual_record : Icons.videocam_off_outlined,
                       recording ? scheme.error : scheme.onSurfaceVariant)),
                 ]),
