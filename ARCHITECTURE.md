@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.301+301
+# Arquitetura — Vigia IA 1.0.302+302
 
 ## Política de release no CI
 

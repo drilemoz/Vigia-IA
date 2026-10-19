@@ -1,4 +1,4 @@
-# Vigia IA 1.0.301+301 · Correção do workflow Android APK 252
+# Vigia IA 1.0.302+301 · Correção do workflow Android APK 252
 
 - Corrigido falso positivo na verificação preventiva: um bloqueio histórico de 1.0.199 rejeitava palavras como `erro`, `falha` e `corrigido` em *qualquer* release atual.
 - A política de Novidades agora exige a versão empacotada, uma única entrada e textos descritivos, e permite mensagens legítimas de correções e estabilidade.

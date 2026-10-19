@@ -401,7 +401,7 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
             TextField(controller: _username, autocorrect: false,
               onChanged: (_) => _changed(),
               decoration: const InputDecoration(isDense: true, labelText: 'Usuário (se necessário)',
-                prefixIcon: Icon(Icons.person_outline_rounded), hintText: 'admin'))),
+                prefixIcon: Icon(Icons.person_outline_rounded), hintText: 'admin')),
             const SizedBox(height: 10),
             TextField(controller: _password, autocorrect: false,
               obscureText: !_passwordVisible, enableSuggestions: false,
@@ -489,8 +489,7 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
             Text('Salvar não confirma que o vídeo funciona. Para evitar tentativas desnecessárias, use “Testar URL” antes de abrir a câmera.',
               style: theme.textTheme.bodySmall),
           ],
-        )),
-      ),
+        ))),
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),

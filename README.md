@@ -1,6 +1,6 @@
-**Versão atual:** `1.0.301+301`
+**Versão atual:** `1.0.302+302`
 
-## Atualização 1.0.301+301 · APK 252
+## Atualização 1.0.302+302 · APK 253
 
 - Gate de Novidades corrigido: aceita notas de manutenção, verifica versão e rejeita catálogos inconsistentes.
 - Corrigido somente o processo de verificação e metadados; nenhum fluxo de câmera, RTSP ou transmissão foi alterado.

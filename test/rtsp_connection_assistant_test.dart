@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,6 +9,7 @@ Future<ServerSocket> mockRtsp(Future<String> Function(String) response) async {
   server.listen((client) async {
     try {
       final request = await client
+          .cast<List<int>>()
           .transform(utf8.decoder)
           .first.timeout(const Duration(seconds: 2));
       final reply = await response(request);

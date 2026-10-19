@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.301', build: 301);
+      AppBuildVersion(version: '1.0.302', build: 302);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.301', build: 301),
+      version: AppBuildVersion(version: '1.0.302', build: 302),
       changes: <String>[
-        'Melhoradas as verificações de atualização para evitar bloqueios incorretos na geração do aplicativo.',
-        'O catálogo de Novidades agora aceita informações sobre correções e melhorias de estabilidade.',
-        'Preservados o cadastro RTSP assistido, a transmissão e os cronômetros do Ao vivo.',
+        'Corrigidos problemas de análise estática no assistente de câmeras RTSP.',
+        'Melhorada a verificação de conexão RTSP e o tratamento de estados da transmissão.',
+        'Preservados os recursos de busca, preenchimento automático e testes de câmeras.',
       ],
     ),
   ]);

@@ -1,11 +1,11 @@
-# Validação Vigia IA 1.0.301+301 · APK 252
+# Validação Vigia IA 1.0.302+302 · APK 253
 
-- O APK 252 (1.0.300+300) foi interrompido no `tool/verify_project.sh`: guarda histórica 1.0.199 procurava palavras de manutenção no catálogo corrente e acusava falso positivo.
-- Corrigido o verificador, agora com teste unitário de regressão; metadados atualizados para 1.0.301+301.
-- `bash tool/verify_project.sh`: **aprovado integralmente (exit code 0)**, incluindo verificação de contratos, imports, CI e 263 testes Python de mutação.
-- `python3 tool/check_version_sync.py`, `python3 tool/check_release_consistency.py` e política de Novidades 301: aprovados.
-- O teste `test_build223_version_sync_270.py` passou a copiar o novo módulo de política para sua pasta temporária, preservando as provas de falha em metadados divergentes.
-- `flutter analyze`, `flutter test` e APK físico pendentes do próximo GitHub Actions.
+- APK 253 (1.0.301+301): a verificação preventiva passou, incluindo 263 testes Python, mas `flutter analyze --fatal-infos --fatal-warnings` encontrou 36 apontamentos. Nenhum APK foi compilado.
+- Correções em `lib/screens/rtsp_camera_editor_dialog.dart` (parêntese extra), `lib/screens/native_transmitter_screen.dart` (acesso nullable), `lib/services/rtsp_connection_assistant.dart` (RegExp compatível e blocos `if`) e `test/rtsp_connection_assistant_test.dart` (stream UTF-8 tipado e import desnecessário).
+- Regressões adicionadas em `tool/test_build253_analyzer_302.py` e atualizada a guarda do teste histórico `tool/test_build230_native_status_lint_277.py` para não exigir código que o próprio Dart rejeita.
+- `tool/verify_project.sh`: executado localmente, passando pelos blocos de contratos; 268 testes Python da suíte preventiva aprovados. A compilação Flutter não foi executada.
+- `tool/check_version_sync.py`, `tool/check_release_consistency.py`, `bash -n tool/verify_project.sh`: aprovados.
+- `flutter analyze`, `flutter test`, APK e testes de RTSP em câmera real continuam pendentes do GitHub Actions/aparelho.
 
 # Validação Vigia IA 1.0.300+300
 

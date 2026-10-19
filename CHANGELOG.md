@@ -1,4 +1,4 @@
-## 1.0.301+301: falso positivo do APK 252 em Novidades (2026-10-19)
+## 1.0.302+302: falso positivo do APK 252 em Novidades (2026-10-19)
 
 - Substituída a checagem antiga que proibia palavras de correção no catálogo de Novidades atual.
 - Implementado `tool/check_news_catalog_policy.py` para garantir versão atual, entrada única e textos descritivos, sem rejeitar correções legítimas.

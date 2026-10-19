@@ -181,7 +181,7 @@ class RtspConnectionProbe {
   }
 
   static RtspProbeResult _interpret(_RtspReply reply) => switch (reply.code) {
-    200 => RegExp(r'(?m)^m=video\s', caseSensitive: false).hasMatch(reply.body)
+    200 => RegExp(r'^m=video\s', multiLine: true, caseSensitive: false).hasMatch(reply.body)
         ? const RtspProbeResult(RtspProbeState.video,
             'Vídeo confirmado: DESCRIBE 200 com faixa de vídeo no SDP.', statusCode: 200)
         : const RtspProbeResult(RtspProbeState.noVideo,
@@ -205,7 +205,7 @@ class RtspConnectionProbe {
       subscription = socket.listen((chunk) {
         received.addAll(chunk);
         if (received.length > 128 * 1024) {
-          if (!result.isCompleted) result.complete(null);
+          if (!result.isCompleted) { result.complete(null); }
           return;
         }
         final separator = _headerSeparator(received);
@@ -214,18 +214,20 @@ class RtspConnectionProbe {
         final lines = header.split(RegExp(r'\r?\n'));
         final status = RegExp(r'^RTSP/\d+\.\d+\s+(\d{3})').firstMatch(lines.first);
         if (status == null) {
-          if (!result.isCompleted) result.complete(null);
+          if (!result.isCompleted) { result.complete(null); }
           return;
         }
         final headers = <String, String>{};
         for (final line in lines.skip(1)) {
           final colon = line.indexOf(':');
-          if (colon > 0) headers[line.substring(0, colon).trim().toLowerCase()] =
-              line.substring(colon + 1).trim();
+          if (colon > 0) {
+            headers[line.substring(0, colon).trim().toLowerCase()] =
+                line.substring(colon + 1).trim();
+          }
         }
         final length = int.tryParse(headers['content-length'] ?? '0') ?? 0;
         if (length < 0 || length > 96 * 1024) {
-          if (!result.isCompleted) result.complete(null);
+          if (!result.isCompleted) { result.complete(null); }
           return;
         }
         final bodyStart = separator + (received[separator] == 13 ? 4 : 2);
@@ -235,9 +237,9 @@ class RtspConnectionProbe {
           result.complete(_RtspReply(int.parse(status.group(1)!), headers, body));
         }
       }, onError: (Object _) {
-        if (!result.isCompleted) result.complete(null);
+        if (!result.isCompleted) { result.complete(null); }
       }, onDone: () {
-        if (!result.isCompleted) result.complete(null);
+        if (!result.isCompleted) { result.complete(null); }
       });
       final payload = StringBuffer()
         ..write('DESCRIBE $uri RTSP/1.0\r\n')
@@ -258,10 +260,10 @@ class RtspConnectionProbe {
   static int _headerSeparator(List<int> bytes) {
     for (var i = 0; i + 3 < bytes.length; i++) {
       if (bytes[i] == 13 && bytes[i + 1] == 10 &&
-          bytes[i + 2] == 13 && bytes[i + 3] == 10) return i;
+          bytes[i + 2] == 13 && bytes[i + 3] == 10) { return i; }
     }
     for (var i = 0; i + 1 < bytes.length; i++) {
-      if (bytes[i] == 10 && bytes[i + 1] == 10) return i;
+      if (bytes[i] == 10 && bytes[i + 1] == 10) { return i; }
     }
     return -1;
   }
@@ -281,7 +283,9 @@ class RtspConnectionProbe {
     final algorithm = (params['algorithm'] ?? 'MD5').toUpperCase();
     final qopList = (params['qop'] ?? '').split(',').map((e) => e.trim().toLowerCase()).toList();
     if (realm == null || nonce == null || algorithm != 'MD5' ||
-        params.containsKey('qop') && !qopList.contains('auth')) return null;
+        (params.containsKey('qop') && !qopList.contains('auth'))) {
+      return null;
+    }
     String md5Text(String input) => md5.convert(utf8.encode(input)).toString();
     final ha1 = md5Text('$user:$realm:$pass');
     final ha2 = md5Text('DESCRIBE:$uri');

@@ -17,7 +17,7 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.301+301\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.302+302\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
             source = source.replace('Melhoradas as verificações de atualização',
                                     'Corrigido erro nas verificações de atualização')
@@ -28,13 +28,13 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.301+301\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.302+302\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 301', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 302', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
-            path.write_text(source.replace('Melhoradas as verificações de atualização para evitar bloqueios incorretos na geração do aplicativo.',
+            path.write_text(source.replace('Corrigidos problemas de análise estática no assistente de câmeras RTSP.',
                                            'TODO'), 'utf8')
             with self.assertRaisesRegex(ValueError, 'mensagens'):
                 policy.validate(root)
