@@ -1,3 +1,10 @@
+## 1.0.304+304: regressão do modal Zoom no build 255 (2026-10-19)
+
+- Corrigida a falha única do Flutter Test após 570 aprovados: seletor global encontrava o botão `Zoom` e o título do modal ao mesmo tempo.
+- Modal de zoom marcado com `Key('mcrp_zoom_dialog')`; teste usa `find.descendant` para validar exclusivamente o conteúdo do modal e confirma o encerramento.
+- Testes Python atualizados para barrar seletores ambíguos e preservar comandos `zoom/50`, `zoom/0`, `record/start`, `quality/480`, `fps/10`, `torch/30`.
+- Nenhuma alteração na lógica de streaming, câmera, rede ou gravação; build APK ainda não confirmado.
+
 ## 1.0.303+303: Flutter Test build 254 e zoom compacto (2026-10-19)
 
 - Corrigida expectativa antiga em `mcrp_remote_controls_test.dart`: o painel exibe `Zoom`, X no topo e restauro via ícone com tooltip, não os textos do pop-up anterior.

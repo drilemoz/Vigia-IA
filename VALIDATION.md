@@ -1,4 +1,12 @@
-# Validação Vigia IA 1.0.303+303
+# Validação Vigia IA 1.0.304+304
+
+## Build Android-APK-255 (2026-10-19)
+
+- Versão 1.0.303 passou por verificação preventiva, Flutter Analyze e 570 testes Flutter, mas 1 teste falhou em `test/mcrp_remote_controls_test.dart`, linha 27, ao encontrar dois textos `Zoom`: o botão do painel ao fundo e o título do modal.
+- Na versão 1.0.304, o modal recebe chave estável `mcrp_zoom_dialog`; o teste verifica o título apenas entre seus descendentes e preserva os controles/asseverações de comandos.
+- Criado `tool/test_build255_zoom_scope_304.py` e fortalecido `tool/test_build254_zoom_widget_303.py`; não altera protocolo nem captura.
+- Testes locais: 272 testes Python aprovados; versionamento, consistência de release, contratos CI e imports aprovados. `tool/verify_project.sh` ultrapassou o limite de tempo, sem falhas nos blocos concluídos. Flutter Analyze, Flutter Test e APK da 1.0.304 permanecem pendentes no GitHub Actions.
+
 
 ## Build Android-APK-254 (2026-10-19)
 

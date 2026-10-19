@@ -24,7 +24,10 @@ void main() {
     await tester.pumpAndSettle();
     // Desde 1.0.297 o zoom e um modal compacto ancorado na parte inferior.
     // O titulo e 'Zoom'; restaurar e fechar usam botoes com tooltip.
-    expect(find.text('Zoom'), findsOneWidget);
+    final zoomDialog = find.byKey(const Key('mcrp_zoom_dialog'));
+    expect(zoomDialog, findsOneWidget);
+    // A acao 'Zoom' permanece no painel ao fundo; escopo do modal elimina duplicidade.
+    expect(find.descendant(of: zoomDialog, matching: find.text('Zoom')), findsOneWidget);
     expect(find.text('Zoom da câmera'), findsNothing);
     expect(find.byTooltip('Fechar'), findsOneWidget);
     expect(find.byTooltip('Zoom original (1×)'), findsOneWidget);
@@ -37,6 +40,7 @@ void main() {
     expect(find.text('0%'), findsOneWidget);
     await tester.tap(find.byTooltip('Fechar'));
     await tester.pumpAndSettle();
+    expect(zoomDialog, findsNothing);
     // Na 1.0.297, o card Vídeo agrupa resolução e FPS.
     await tester.tap(find.text('Vídeo'));
     await tester.pumpAndSettle();

@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.303', build: 303);
+      AppBuildVersion(version: '1.0.304', build: 304);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.303', build: 303),
+      version: AppBuildVersion(version: '1.0.304', build: 304),
       changes: <String>[
-        'Corrigida a verificação do painel de zoom remoto após sua atualização visual.',
-        'Mantidos os controles compactos de zoom e o botão de restaurar o tamanho original.',
-        'Preservadas as opções de câmeras RTSP e o monitoramento ao vivo.',
+        'Melhorada a validação do painel de zoom remoto sem confundir botão e janela aberta.',
+        'Mantidos o zoom compacto e os comandos de vídeo, gravação e lanterna.',
+        'Preservadas as câmeras RTSP e a transmissão ao vivo.',
       ],
     ),
   ]);

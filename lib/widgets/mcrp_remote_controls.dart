@@ -173,6 +173,7 @@ class McrpControlPanel extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
               child: Material(
+                key: const Key('mcrp_zoom_dialog'),
                 color: Theme.of(dialogContext).colorScheme.surface,
                 borderRadius: BorderRadius.circular(22),
                 child: Padding(

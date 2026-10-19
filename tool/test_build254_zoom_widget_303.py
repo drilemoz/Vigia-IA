@@ -16,7 +16,10 @@ class Build254ZoomWidget303(unittest.TestCase):
         self.assertIn("const Expanded(child: Text('Zoom',", widget)
         for tooltip in ('Fechar', 'Aumentar zoom', 'Diminuir zoom', 'Zoom original (1×)'):
             self.assertIn("tooltip: '" + tooltip + "'", widget)
-        self.assertIn("expect(find.text('Zoom'), findsOneWidget)", test)
+        self.assertIn("key: const Key('mcrp_zoom_dialog')", widget)
+        self.assertIn("find.byKey(const Key('mcrp_zoom_dialog'))", test)
+        self.assertIn("find.descendant(of: zoomDialog, matching: find.text('Zoom'))", test)
+        self.assertNotIn("expect(find.text('Zoom'), findsOneWidget)", test)
         self.assertIn("tester.tap(find.byTooltip('Zoom original (1×)'))", test)
         self.assertIn("tester.tap(find.byTooltip('Fechar'))", test)
         self.assertNotIn("find.text('Tamanho original (1×)')", test)

@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.303+303
+# Arquitetura — Vigia IA 1.0.304+304
 
 ## Correção da suíte de controles MCRP (build 254)
 

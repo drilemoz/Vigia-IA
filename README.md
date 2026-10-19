@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.303+303`
+**Versão atual:** `1.0.304+304`
+
+## Atualização 1.0.304+304 · APK 255
+
+- Eliminada ambiguidade do teste Flutter de zoom: título do modal agora é localizado dentro de uma superfície identificada, sem confundir com o botão Zoom atrás do painel.
+- Preservados comandos MCRP de gravação, zoom, vídeo e lanterna.
+- Adicionada regressão específica para evitar a falha recorrente de seleção global de texto. Flutter e APK ainda precisam ser confirmados pelo CI.
 
 ## Atualização 1.0.303+303 · APK 254
 
