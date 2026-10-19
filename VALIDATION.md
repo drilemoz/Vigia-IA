@@ -1,3 +1,12 @@
+# Validação Vigia IA 1.0.300+300
+
+- APK 251 (1.0.299+299): falhou na verificação preventiva por duas asserções antigas em `tool/test_build230_native_status_lint_277.py`. Não chegou ao analisador Flutter nem ao Gradle.
+- Reparos: versão dinâmica e estado `ready` do transmissor capturado antes de promoção de nulidade.
+- `python3 -m unittest discover -s tool -p "test_*.py" -q`: **260 testes aprovados**.
+- `tool/check_version_sync.py`, `tool/check_release_consistency.py`, `tool/check_import_targets.py`, `tool/check_ci_contract.py`, `bash -n tool/verify_project.sh`: aprovados.
+- `tool/verify_project.sh`: executado parcialmente; sem falhas nos blocos concluídos, mas excedeu o tempo limite do ambiente e **não foi integralmente aprovado**.
+- `flutter analyze`, `flutter test` e build Android: não executados, SDK Flutter/Android indisponível nesta sessão. Repetir no próximo GitHub Actions.
+
 # Validação Vigia IA 1.0.299+299
 
 - **1.0.299:** novo formulário RTSP, probes e transporte. Validações Python/ZIP locais; Flutter/Android SDK indisponível. Testar login Digest, variantes de firmware e reprodução real em aparelho.

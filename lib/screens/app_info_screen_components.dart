@@ -77,7 +77,7 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.299',
+          version: '1.0.300',
           current: true,
           changes: [
             'Cadastro RTSP com IP, porta, lista de caminhos e URL automática.',

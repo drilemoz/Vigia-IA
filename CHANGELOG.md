@@ -1,3 +1,10 @@
+## 1.0.300+300: correção da verificação preventiva do APK 251 (2026-10-19)
+
+- O teste herdado do APK 230 verificava `1.0.296+296` e bloqueava a versão 1.0.299; atualizado para conferir dinamicamente versão e catálogo de Novidades.
+- A tela Transmissão calcula `ready` antes de promover o estado nativo e passa `!ready` aos controles, evitando `s?.ready` redundante.
+- Preservados RTSP assistido, vídeo, transmissão e gravação da 1.0.299.
+- Flutter analyze, flutter test e APK continuam pendentes do próximo workflow.
+
 ## 1.0.299+299: conexão RTSP assistida (2026-10-19)
 
 - Fluxo de cadastro inspirado no Minha Câmera 1.4.76, com lista de caminhos, colar URL, IP/porta separados e escolha de câmera LAN.

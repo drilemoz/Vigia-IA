@@ -447,6 +447,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
   Widget build(BuildContext context) {
     final s = _status;
     final running = s?.running == true;
+    final ready = s?.ready == true;
     final busy = _busy || (s?.busy == true);
     final url = s?.releasing == true ? null : s?.url;
     final recording = _details['x-recording'] == '1' || s?.recording == true;
@@ -562,7 +563,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
           ],
           if (url != null) ...[
             const SizedBox(height: 9),
-            _controls(recording: recording, disabled: busy || s?.ready != true),
+            _controls(recording: recording, disabled: busy || !ready),
           ],
           const SizedBox(height: 12),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Text(

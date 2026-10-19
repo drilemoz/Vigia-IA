@@ -1,4 +1,10 @@
-# Arquitetura — Vigia IA 1.0.299+299
+# Arquitetura — Vigia IA 1.0.300+300
+
+## 1.0.300: verificação preventiva e nulidade do status nativo
+
+- `tool/test_build230_native_status_lint_277.py` consulta `pubspec.yaml` para versionamento sequencial e confirma catálogo de Novidades, sem expectativa histórica fixa.
+- `NativeTransmitterScreen` computa `ready` uma vez antes de promover `NativeTransmitterStatus?`; controles locais usam o booleano `ready` sem acesso nulo redundante.
+- Sem alterações no protocolo, captura, rede ou gravação.
 
 ## 1.0.299: RTSP LAN assistido
 

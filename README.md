@@ -1,3 +1,11 @@
+## 1.0.300+300: build 251 corrigido (2026-10-19)
+
+- Reparo dos 2 testes preventivos que encerraram o workflow APK 251 antes da análise Flutter.
+- Validação da versão atual por `pubspec.yaml`, sem número de build antigo fixado em regressão histórica.
+- Estado `ready` do transmissor promovido com segurança e reutilizado nos botões locais.
+- Funções RTSP/ONVIF, vídeo, IA e MCRP preservadas.
+- Build Android e testes reais continuam pendentes de CI/aparelho.
+
 ## 1.0.299+299: assistente de conexão RTSP (2026-10-19)
 
 - Editor RTSP simplificado, IP e porta independentes, presets de caminhos conhecidos e opção personalizada.
@@ -351,7 +359,7 @@
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.299+299`
+**Versão atual:** `1.0.300+300`
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 
