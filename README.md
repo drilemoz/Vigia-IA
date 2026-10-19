@@ -1,3 +1,11 @@
+**Versão atual:** `1.0.301+301`
+
+## Atualização 1.0.301+301 · APK 252
+
+- Gate de Novidades corrigido: aceita notas de manutenção, verifica versão e rejeita catálogos inconsistentes.
+- Corrigido somente o processo de verificação e metadados; nenhum fluxo de câmera, RTSP ou transmissão foi alterado.
+- Build Flutter/Android ainda pendente do próximo GitHub Actions.
+
 ## 1.0.300+300: build 251 corrigido (2026-10-19)
 
 - Reparo dos 2 testes preventivos que encerraram o workflow APK 251 antes da análise Flutter.

@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.301+301
+
+## Política de release no CI
+
+- `check_release_consistency.py`: versão/build declarados no aplicativo, nos metadados, tela Sobre e catálogo.
+- `check_news_catalog_policy.py`: entrada única para a versão atual e mensagens válidas, permitindo texto sobre reparos.
+- `test_news_catalog_policy_301.py`: evita reintroduzir a rejeição indiscriminada de palavras como 'corrigido' e verifica que releases desatualizados ou textos provisórios falhem.
+- Pipeline e módulos funcionais de câmera permanecem inalterados.
+
 # Arquitetura — Vigia IA 1.0.300+300
 
 ## 1.0.300: verificação preventiva e nulidade do status nativo

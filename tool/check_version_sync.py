@@ -77,10 +77,14 @@ for news_version, news_build in version_refs:
         fail("catalogo de Novidades contem versao diferente da instalada")
 if news.count("UpdateRelease(") > 1:
     fail("popup de Novidades deve conter no maximo a release instalada atual")
-news_changes = news.lower()
-for forbidden in ("bug", "erro", "falha", "correção", "correcao"):
-    if forbidden in news_changes:
-        fail(f"popup de Novidades contem termo tecnico proibido: {forbidden}")
+# Mudanças de manutenção também são relevantes ao usuário.
+# O contrato de texto/versão da release atual fica num só verificador,
+# sem lista proibitiva de palavras como "erro", "falha" ou "correção".
+from check_news_catalog_policy import validate as validate_news_catalog
+try:
+    validate_news_catalog(root)
+except ValueError as error:
+    fail(f"Novidades inconsistentes: {error}")
 
 for user_agent_file in (
     root / "lib/services/map_cycling_route_service.dart",

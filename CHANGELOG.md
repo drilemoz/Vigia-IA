@@ -1,3 +1,10 @@
+## 1.0.301+301: falso positivo do APK 252 em Novidades (2026-10-19)
+
+- Substituída a checagem antiga que proibia palavras de correção no catálogo de Novidades atual.
+- Implementado `tool/check_news_catalog_policy.py` para garantir versão atual, entrada única e textos descritivos, sem rejeitar correções legítimas.
+- Criados testes de regressão da política de Novidades 301. Fluxos RTSP, vídeo e transmissão preservados.
+- Flutter analyze, flutter test e APK pendentes da CI.
+
 ## 1.0.300+300: correção da verificação preventiva do APK 251 (2026-10-19)
 
 - O teste herdado do APK 230 verificava `1.0.296+296` e bloqueava a versão 1.0.299; atualizado para conferir dinamicamente versão e catálogo de Novidades.

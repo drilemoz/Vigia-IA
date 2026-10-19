@@ -77,13 +77,11 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.300',
+          version: '1.0.301',
           current: true,
           changes: [
-            'Cadastro RTSP com IP, porta, lista de caminhos e URL automática.',
-            'Busca no Wi-Fi e diagnóstico DESCRIBE/SDP por perfil.',
-            'Compatibilidade de transporte por câmera e opção de decodificação por software.',
-            'Ao vivo mantém os estados e cronômetros do transmissor.',
+            'Verificação das atualizações mais confiável, sem bloqueios por termos de correção.',
+            'Mantidos o cadastro RTSP assistido, o vídeo Ao vivo e os estados de transmissão.',
           ],
         ),
         SizedBox(height: 10),

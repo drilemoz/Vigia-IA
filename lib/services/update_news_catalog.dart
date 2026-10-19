@@ -8,16 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.300', build: 300);
+      AppBuildVersion(version: '1.0.301', build: 301);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.300', build: 300),
+      version: AppBuildVersion(version: '1.0.301', build: 301),
       changes: <String>[
-        'Corrigida a verificação preventiva que bloqueava o APK 251.',
-        'Teste de versão acompanha o build atual, sem valores antigos fixos.',
-        'Controles do transmissor verificam prontidão sem acesso nulo redundante.',
-        'Mantidas busca RTSP, reprodução e opções de transporte da versão anterior.',
+        'Melhoradas as verificações de atualização para evitar bloqueios incorretos na geração do aplicativo.',
+        'O catálogo de Novidades agora aceita informações sobre correções e melhorias de estabilidade.',
+        'Preservados o cadastro RTSP assistido, a transmissão e os cronômetros do Ao vivo.',
       ],
     ),
   ]);

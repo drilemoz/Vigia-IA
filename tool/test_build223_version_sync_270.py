@@ -21,7 +21,7 @@ VALIDATOR_FILES = (
     'lib/services/map_destination_search_service.dart',
     'lib/screens/app_info_screen.dart',
     'lib/screens/app_info_screen_components.dart',
-    'tool/check_version_sync.py',
+    'tool/check_version_sync.py', 'tool/check_news_catalog_policy.py',
 )
 
 
