@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.303+303
+
+## Correção da suíte de controles MCRP (build 254)
+
+- Painel remoto mantém o zoom compacto em `lib/widgets/mcrp_remote_controls.dart`.
+- Teste Flutter acompanha rótulos/acessibilidade realmente publicados: `Zoom`, `Fechar` (X) e `Zoom original (1×)` (ícone).
+- A lógica da captura, a conexão RTSP e o protocolo de comandos remotos **não foram modificados**.
+- Regression gate verifica os identificadores usados por `test/mcrp_remote_controls_test.dart`.
+
 # Arquitetura — Vigia IA 1.0.302+302
 
 ## Política de release no CI

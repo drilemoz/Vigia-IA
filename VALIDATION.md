@@ -1,3 +1,12 @@
+# Validação Vigia IA 1.0.303+303
+
+## Build Android-APK-254 (2026-10-19)
+
+- Gate preventivo e `flutter analyze --fatal-infos --fatal-warnings` **passaram** na versão 1.0.302.
+- `flutter test`: 569 aprovados, 1 teste falhou (texto antigo do modal Zoom na linha 25 de `test/mcrp_remote_controls_test.dart`); APK não iniciado.
+- V1.0.303 troca as expectativas obsoletas por título/tooltip do painel atual e mantém todas as asserções dos comandos.
+- Testes Python de regressão do widget incluídos no gate. Flutter/Android SDK local indisponível; `flutter test` e APK continuam pendentes no CI.
+
 # Validação Vigia IA 1.0.302+302 · APK 253
 
 - APK 253 (1.0.301+301): a verificação preventiva passou, incluindo 263 testes Python, mas `flutter analyze --fatal-infos --fatal-warnings` encontrou 36 apontamentos. Nenhum APK foi compilado.

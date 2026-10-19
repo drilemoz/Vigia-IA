@@ -77,7 +77,7 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.302',
+          version: '1.0.303',
           current: true,
           changes: [
             'Verificação das atualizações mais confiável, sem bloqueios por termos de correção.',

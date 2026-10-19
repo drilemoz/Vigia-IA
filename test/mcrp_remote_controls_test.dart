@@ -22,15 +22,20 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Zoom'));
     await tester.pumpAndSettle();
-    expect(find.text('Zoom da câmera'), findsOneWidget);
+    // Desde 1.0.297 o zoom e um modal compacto ancorado na parte inferior.
+    // O titulo e 'Zoom'; restaurar e fechar usam botoes com tooltip.
+    expect(find.text('Zoom'), findsOneWidget);
+    expect(find.text('Zoom da câmera'), findsNothing);
+    expect(find.byTooltip('Fechar'), findsOneWidget);
+    expect(find.byTooltip('Zoom original (1×)'), findsOneWidget);
     expect(find.text('40%'), findsOneWidget);
     await tester.tap(find.byTooltip('Aumentar zoom'));
     await tester.pumpAndSettle();
     expect(find.text('50%'), findsOneWidget);
-    await tester.tap(find.text('Tamanho original (1×)'));
+    await tester.tap(find.byTooltip('Zoom original (1×)'));
     await tester.pumpAndSettle();
     expect(find.text('0%'), findsOneWidget);
-    await tester.tap(find.text('Fechar'));
+    await tester.tap(find.byTooltip('Fechar'));
     await tester.pumpAndSettle();
     // Na 1.0.297, o card Vídeo agrupa resolução e FPS.
     await tester.tap(find.text('Vídeo'));

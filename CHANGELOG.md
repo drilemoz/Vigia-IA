@@ -1,3 +1,10 @@
+## 1.0.303+303: Flutter Test build 254 e zoom compacto (2026-10-19)
+
+- Corrigida expectativa antiga em `mcrp_remote_controls_test.dart`: o painel exibe `Zoom`, X no topo e restauro via ícone com tooltip, não os textos do pop-up anterior.
+- Preservados os comandos enviados ao transmissor e acrescentada checagem de regressão do teste Flutter para alterações futuras na UI.
+- Novidades, Sobre, User-Agents e metadados Android sincronizados; sem mudança em transmissão/REC/RTSP.
+- Build 254 passou em Flutter Analyze, mas parou em 1 teste Flutter; APK ainda não compilado.
+
 ## 1.0.302+302: falso positivo do APK 252 em Novidades (2026-10-19)
 
 - Substituída a checagem antiga que proibia palavras de correção no catálogo de Novidades atual.

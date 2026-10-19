@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.302+302`
+**Versão atual:** `1.0.303+303`
+
+## Atualização 1.0.303+303 · APK 254
+
+- Corrigido teste Flutter do controle remoto para a interface de zoom compacta (X, zoom original por ícone, título reduzido).
+- Preservados comandos de zoom, vídeo, lanterna e gravação do transmissor, sem mudanças funcionais.
+- Flutter Analyze passou no build 254; o APK depende de teste Flutter e compilação no novo workflow.
 
 ## Atualização 1.0.302+302 · APK 253
 
