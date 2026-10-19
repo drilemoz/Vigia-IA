@@ -77,8 +77,28 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.306',
+          version: '1.0.308',
           current: true,
+          changes: [
+            'Corrigidos os 8 avisos fatais do Flutter Analyze no workflow APK 258.',
+            'Histórico: atualização da placa segura, sem acesso protegido incorreto ao State.',
+            'Galeria Remota e captura preservadas; nenhum ajuste no gravador nesta versão.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.307',
+          current: false,
+          changes: [
+            'Gravação do A3 com quadros encaminhados ao MP4 antes da compressão da rede.',
+            'Fotos por mudança de cena opcionais, salvas no A3 mesmo sem receptor aberto.',
+            'Histórico acessível pela Galeria Remota, com limites de fotos e proteção térmica.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.306',
+          current: false,
           changes: [
             'Galeria remota no menu inferior, para recuperar imagens e vídeos do A3.',
             'Seleção múltipla, filtros, prévias e downloads com progresso.',

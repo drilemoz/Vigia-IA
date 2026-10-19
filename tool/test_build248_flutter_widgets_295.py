@@ -34,8 +34,8 @@ class Build248WidgetContracts(unittest.TestCase):
         self.assertNotIn("tester.tap(find.text('Resolução'))", test)
 
     def test_version(self):
-        self.assertIn('version: 1.0.306+306', read('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.306.md').is_file())
+        self.assertIn('version: 1.0.308+308', read('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.308.md').is_file())
 
 
 if __name__ == '__main__':

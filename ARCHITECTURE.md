@@ -1,4 +1,18 @@
-# Arquitetura — Vigia IA 1.0.306+306
+# Arquitetura — Vigia IA 1.0.308+308
+
+## Manutenção de compilação 1.0.308
+
+- Histórico: o callback de OCR chama `_refreshAfterPlateChange()` declarado na classe `State`, sem usar diretamente `setState` em extensão não autorizada.
+- O tratamento de falha de preferência do Histórico usa `context.mounted` para o `BuildContext` do construtor da UI após uma operação assíncrona.
+- Galeria Remota e guarda de veículos: blocos completos nos comandos de fluxo; import supérfluo de OCR removido. Nenhuma alteração de rede nem de persistência nesta release.
+
+## Transmissor de câmera em segundo plano 1.0.307
+
+- `PhoneCameraBackgroundService` continua como serviço nativo explícito e preserva o MCRP/PhotoRemoteLibrary; não cria câmera adicional.
+- `PhoneMp4Recorder` recebe NV21 na fila do gravador ANTES do encoder de rede, com timestamp produzido no callback da câmera. Não ocupa a fila com cópias adicionais dos quadros nem reinicia o fluxo ao iniciar REC.
+- `PhoneScenePhotoGate` avalia 192 amostras de luminância Y, sem modelo de IA nem consulta remota. Capta alteração visual, não a categoria veículo; desabilitado por padrão e com limite 30s/60h.
+- A escrita de JPG no `PhoneRemotePhoto` roda fora do worker do stream, com no máximo uma operação pendente; galeria MCRP reaproveitada. Desativa-se durante gravação, parada do transmissor e calor alto.
+- `MainActivity` disponibiliza preferência opcional via MethodChannel; a tela do transmissor exibe Switch e número de fotos.
 
 ## Galeria remota 1.0.306
 

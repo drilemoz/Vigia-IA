@@ -67,6 +67,11 @@ class MainActivity : FlutterActivity() {
             "starting" to service.starting,
             "releasing" to service.releasing,
             "recording" to service.recording,
+            "scenePhotosEnabled" to getSharedPreferences("phone_video", MODE_PRIVATE)
+                .getBoolean(service.SCENE_PHOTOS_PREF, false),
+            "scenePhotosSaved" to service.scenePhotosSaved,
+            "recorderAccepted" to service.recorderAccepted,
+            "recorderBusyDropped" to service.recorderBusyDropped,
             "ready" to (service.running && service.firstFramePublished),
             "url" to service.streamUrl,
             "phase" to service.startupPhase,
@@ -286,6 +291,18 @@ class MainActivity : FlutterActivity() {
                             result.success(true)
                         } catch (error: Exception) {
                             result.error("native_transmitter_stop", error.message, null)
+                        }
+                    }
+                    "scenePhotos" -> {
+                        val enabled = call.argument<Boolean>("enabled")
+                        if (enabled == null) result.error("invalid_setting", "Estado obrigatório", null)
+                        else {
+                            val transmitter = com.minhacamera.PhoneCameraBackgroundService
+                            // A Activity visível salva a preferência mesmo sem transmissão.
+                            getSharedPreferences("phone_video", MODE_PRIVATE).edit()
+                                .putBoolean(transmitter.SCENE_PHOTOS_PREF, enabled).apply()
+                            if (transmitter.running) transmitter.commandScenePhotos(this, enabled)
+                            result.success(true)
                         }
                     }
                     "record" -> {

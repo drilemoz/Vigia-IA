@@ -86,23 +86,27 @@ internal class PhoneMp4Recorder(private val context: Context, val width: Int, va
         }
     }
 
-    fun append(nv21: ByteArray, timestampNs: Long) {
-        if (stopped) return
-        val encoder = codec ?: return
+    /** Timestamp capturado no callback da câmera; retorno indica quadro aceito pelo codec. */
+    fun append(nv21: ByteArray, timestampNs: Long): Boolean {
+        if (stopped) return false
+        val encoder = codec ?: return false
+        // Liberar buffers prontos ANTES de solicitar novo input reduz descartes
+        // em MediaCodec de baixo desempenho, sem bloquear o worker de transmissão.
+        drain(false)
+        val index = encoder.dequeueInputBuffer(5_000)
+        if (index < 0) return false
+        val buffer = encoder.getInputBuffer(index) ?: throw IllegalStateException("Encoder sem buffer")
+        val converted = PhoneYuv420.convert(nv21, width, height, planar)
+        if (buffer.capacity() < converted.size) throw IllegalStateException("Buffer H.264 insuficiente")
         if (firstTimestampNs < 0L) firstTimestampNs = timestampNs
         val presentationUs = maxOf(lastTimestampUs + 1, (timestampNs - firstTimestampNs) / 1000)
-        val index = encoder.dequeueInputBuffer(2_000)
-        if (index >= 0) {
-            val buffer = encoder.getInputBuffer(index) ?: throw IllegalStateException("Encoder sem buffer")
-            val converted = PhoneYuv420.convert(nv21, width, height, planar)
-            if (buffer.capacity() < converted.size) throw IllegalStateException("Buffer H.264 insuficiente")
-            buffer.clear()
-            buffer.put(converted)
-            encoder.queueInputBuffer(index, 0, converted.size, presentationUs, 0)
-            lastTimestampUs = presentationUs
-            frames++
-        }
+        buffer.clear()
+        buffer.put(converted)
+        encoder.queueInputBuffer(index, 0, converted.size, presentationUs, 0)
+        lastTimestampUs = presentationUs
+        frames++
         drain(false)
+        return true
     }
 
     /** Retorna URI de Downloads, ou null se não houve quadros válidos. */

@@ -1,3 +1,16 @@
+## Correção APK 258 / 1.0.308+308
+
+- O workflow APK 258 usou fonte 1.0.306, passou nos testes preventivos e falhou na etapa `flutter analyze --fatal-infos --fatal-warnings` com 8 problemas: Histórico (`BuildContext` e `setState` de extension), Galeria (3 `if` sem chaves), guard de captura (2 `if` sem chaves) e OCR (1 import redundante).
+- A correção foi aplicada sobre 1.0.307 para preservar REC do A3 e fotos locais. `tool/test_build258_flutter_analyze_308.py` identifica os 8 casos e verifica a correção textual.
+- Executar no GitHub Actions: `flutter analyze`, `flutter test`, APK. Flutter SDK não instalado no ambiente local; testes estruturais não provam aprovação do analisador.
+
+## Verificações da versão 1.0.307+307
+
+- `tool/test_transmitter_rec_scene_307.py` valida a ordem dos encoders, PTS, preferências e limites de fotos do A3.
+- Validar com aparelhos físicos: A3 em 480p, REC por 60 s sem e com espectador, 10 FPS, reprodução local, aquecimento e FPS de fato. Depois, modo Fotos por movimento com receptor fechado e confirmação na Galeria Remota do Note 11.
+- O gatilho de fotos detecta diferenças visuais, NÃO garante foto de todo veículo, nem classifica marca/modelo ou placa.
+- Resultados da suíte e checks atualizados após execução; Flutter Analyze/Test/APK exigem GitHub Actions.
+
 ## Validação da Galeria remota 1.0.306+306
 
 - Cliente MCRP mantém token apenas no armazenamento privado e restringe as URLs a IPv4 local, porta 8765 e caminho com token de 32 caracteres.
@@ -5,7 +18,7 @@
 - `test/remote_gallery_storage_test.dart` e `tool/test_remote_gallery_306.py` adicionados. Testes Flutter, lint e APK permanecem pendentes até CI (SDK Flutter não disponível neste ambiente).
 - Testar em aparelhos físicos: Wi-Fi local, 1+ fotos, 1+ vídeos, arquivos grandes, cancelamento, reabertura offline, escolha do aparelho e reprodução remota H.264/MP4.
 
-# Validação Vigia IA 1.0.306+306
+# Validação Vigia IA 1.0.308+308
 
 ## Versão 1.0.305+305 · histórico de veículos e OCR
 

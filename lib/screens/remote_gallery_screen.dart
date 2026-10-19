@@ -243,7 +243,9 @@ class _RemoteGalleryScreenState extends State<RemoteGalleryScreen> {
             }
           }
         } catch (_) {
-          if (_cancelTransfer) break;
+          if (_cancelTransfer) {
+            break;
+          }
           failures++;
         }
         if (mounted) setState(() {
@@ -455,12 +457,16 @@ class _RemoteGalleryScreenState extends State<RemoteGalleryScreen> {
             itemCount: _remoteTab ? items.isEmpty ? 1 : items.length : files.isEmpty ? 1 : files.length,
             itemBuilder: (context, index) {
               if (_remoteTab) {
-                if (items.isEmpty) return const Padding(padding: EdgeInsets.all(24),
-                    child: Text('Nenhum arquivo remoto. Conecte o A3 e toque em Atualizar.'));
+                if (items.isEmpty) {
+                  return const Padding(padding: EdgeInsets.all(24),
+                      child: Text('Nenhum arquivo remoto. Conecte o A3 e toque em Atualizar.'));
+                }
                 return _remoteRow(items[index]);
               }
-              if (files.isEmpty) return const Padding(padding: EdgeInsets.all(24),
-                  child: Text('Nenhum arquivo recebido. Baixe fotos ou vídeos do A3.'));
+              if (files.isEmpty) {
+                return const Padding(padding: EdgeInsets.all(24),
+                    child: Text('Nenhum arquivo recebido. Baixe fotos ou vídeos do A3.'));
+              }
               return _localRow(files[index]);
             },
           )),

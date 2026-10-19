@@ -1,4 +1,18 @@
-**Versão atual:** `1.0.306+306`
+**Versão atual:** `1.0.308+308`
+
+## Atualização 1.0.308+308 · Correção Flutter Analyze APK 258
+
+- Eliminados 8 apontamentos do analisador Flutter registrados no workflow APK 258, que analisou a versão 1.0.306 e não chegou à compilação do APK.
+- No Histórico, a mensagem de falha ao salvar a preferência usa a guarda do `BuildContext` correto. A atualização visual da placa é delegada a um método de `State`, eliminando acesso protegido via `extension`.
+- Na Galeria Remota, os `if` exigidos recebem chaves; o guarda de capturas de veículos também segue a recomendação do Dart. Importação redundante de `dart:typed_data` removida no OCR.
+- Não altera as funções de REC, fotos do A3, Galeria MCRP ou OCR. Verificação real do Flutter Analyze e APK pendente no próximo workflow.
+
+## Atualização 1.0.307+307 · REC otimizado e fotos no A3
+
+- O gravador MP4 recebe o frame rotacionado antes da compressão JPEG/H.264 usada na transmissão e preserva o horário original do quadro, com contadores de quadros ocupados no transmissor.
+- O transmissor pode guardar fotos JPEG por mudança de cena, habilitadas manualmente, com cadência máxima de uma a cada 30s e até 60/h; não é detector de carros.
+- Com o serviço de câmera ativo, funciona mesmo com a interface do Note 11 fechada. Foto automática é suspensa durante REC e em calor alto para poupar bateria.
+- Fotos salvas são visíveis na Galeria Remota pelo Wi-Fi local. Não se promete captura de todos os veículos ou trabalho depois de encerrar o serviço no A3.
 
 ## Atualização 1.0.306+306 · Galeria remota A3 ⇄ Note 11
 

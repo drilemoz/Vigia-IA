@@ -16,6 +16,8 @@ class NativeCameraTransmitterService {
   static Future<void> start() async => _channel.invokeMethod<void>('start');
   static Future<void> stop() async => _channel.invokeMethod<void>('stop');
   static Future<void> toggleRecording() async => _channel.invokeMethod<void>('record');
+  static Future<void> setScenePhotosEnabled(bool enabled) async =>
+      _channel.invokeMethod<void>('scenePhotos', {'enabled': enabled});
 }
 
 class NativeTransmitterStatus {
@@ -23,11 +25,15 @@ class NativeTransmitterStatus {
     required this.running, required this.starting, required this.releasing,
     required this.recording, required this.ready, required this.url,
     required this.phase, required this.error, required this.seconds,
+    required this.scenePhotosEnabled, required this.scenePhotosSaved,
+    required this.recorderAccepted, required this.recorderBusyDropped,
   });
   final bool running, starting, releasing, recording, ready;
   final String? url, error;
   final String phase;
   final int seconds;
+  final bool scenePhotosEnabled;
+  final int scenePhotosSaved, recorderAccepted, recorderBusyDropped;
 
   bool get busy => starting || releasing;
 
@@ -41,5 +47,9 @@ class NativeTransmitterStatus {
     phase: json['phase'] is String ? json['phase'] as String : 'parado',
     error: json['error'] is String ? json['error'] as String : null,
     seconds: (json['seconds'] as num?)?.toInt() ?? 0,
+    scenePhotosEnabled: json['scenePhotosEnabled'] == true,
+    scenePhotosSaved: (json['scenePhotosSaved'] as num?)?.toInt() ?? 0,
+    recorderAccepted: (json['recorderAccepted'] as num?)?.toInt() ?? 0,
+    recorderBusyDropped: (json['recorderBusyDropped'] as num?)?.toInt() ?? 0,
   );
 }

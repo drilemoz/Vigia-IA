@@ -65,6 +65,11 @@ class _EventsScreenState extends State<EventsScreen> {
     }
   }
 
+  // Deve permanecer no State: extensões não podem chamar setState diretamente.
+  void _refreshAfterPlateChange() {
+    if (mounted) setState(() {});
+  }
+
   bool _isRelevant(MonitorEvent event) {
     if (event.type == MonitorEventType.cameraObstructed ||
         event.type == MonitorEventType.cameraMoved) {
@@ -223,7 +228,7 @@ class _EventsScreenState extends State<EventsScreen> {
                     setState(() => _automaticVehicleCapture = enabled);
                   }
                 } catch (_) {
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text(
                         'Não foi possível salvar a opção de fotos automáticas.',

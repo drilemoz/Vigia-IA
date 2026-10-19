@@ -1,3 +1,18 @@
+## 1.0.308+308 (2026-10-19)
+
+- Correção de todos os oito diagnósticos de `flutter analyze --fatal-infos --fatal-warnings` do GitHub Actions APK 258 (que compilava fonte 1.0.306): `use_build_context_synchronously`, `invalid_use_of_protected_member`, cinco `curly_braces_in_flow_control_structures` e `unnecessary_import`.
+- `EventsScreen`: `context.mounted` no contexto correto após `await` e atualização de `State` por método membro, sem `setState` dentro de extension.
+- `RemoteGalleryScreen` e `VehicleCaptureGuard`: blocos completos nos `if`; OCR: import redundant removido.
+- Galeria Remota, fotos por cena e gravação MP4 do A3 intactos. Teste estrutural de regressão adicionado. Próximo GitHub Actions confirma Flutter Analyze, Flutter Test e compilação.
+
+## 1.0.307+307 (2026-10-19)
+
+- MP4 nativo: encaminha quadros para a fila do gravador antes da codificação MJPEG/H.264 da transmissão, com PTS baseado no momento da captura e métricas de quadros descartados por ocupação.
+- Modo Eco não reduz artificialmente a cadência de captura durante REC, preservando a proteção térmica; taxa padrão do gravador ajustada a 10 FPS para o perfil leve.
+- Serviço do A3: fotos JPEG por mudança de cena opt-in, sem nuvem nem receptor aberto, com 30 segundos de cooldown, teto 60/h, escrita em worker independente e acesso pela Galeria Remota existente.
+- Mudança de cena NÃO confirma um veículo: por enquanto não há detector de veículos autônomo no A3. Fotos suspensas durante gravação e calor alto.
+- Testes de regressão e metadados sincronizados. Flutter Analyze, testes Flutter e build APK pendentes de GitHub Actions.
+
 ## 1.0.306+306 (2026-10-19)
 
 - Galeria remota na barra inferior: busca mídias do transmissor autenticado pela rede Wi-Fi e oferece seleção de aparelho, QR, filtros, prévias e downloads individuais/múltiplos.

@@ -146,7 +146,7 @@ extension _EventsActions on _EventsScreenState {
                     event: event,
                     history: _history,
                     onChanged: () {
-                      if (mounted) setState(() {});
+                      _refreshAfterPlateChange();
                     },
                   ),
                 Padding(

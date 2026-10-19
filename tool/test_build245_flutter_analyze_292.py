@@ -24,6 +24,6 @@ class Build245FlutterAnalyzeTests(unittest.TestCase):
         self.assertNotIn('.transform(latin1.decoder)', scanner)
 
     def test_version_and_news_current(self):
-        self.assertIn('version: 1.0.306+306', source('pubspec.yaml'))
-        self.assertIn("AppBuildVersion(version: '1.0.306', build: 306)", source('lib/services/update_news_catalog.dart'))
-        self.assertTrue((ROOT/'RELEASE-1.0.306.md').exists())
+        self.assertIn('version: 1.0.308+308', source('pubspec.yaml'))
+        self.assertIn("AppBuildVersion(version: '1.0.308', build: 308)", source('lib/services/update_news_catalog.dart'))
+        self.assertTrue((ROOT/'RELEASE-1.0.308.md').exists())

@@ -33,6 +33,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Captura MJPEG independente da Activity. O usuário ativa este serviço com a tela visível,
@@ -49,6 +50,9 @@ class PhoneCameraBackgroundService : Service() {
         const val ACTION_START = "com.vigiaia.app.TRANSMITTER_START"
         const val ACTION_STOP = "com.vigiaia.app.TRANSMITTER_STOP"
         const val ACTION_RECORD = "com.vigiaia.app.TRANSMITTER_RECORD"
+        const val ACTION_SCENE_PHOTOS = "com.vigiaia.app.TRANSMITTER_SCENE_PHOTOS"
+        const val EXTRA_ENABLED = "enabled"
+        const val SCENE_PHOTOS_PREF = "scene_photos_enabled"
         const val ACTION_CODEC = "com.vigiaia.app.TRANSMITTER_CODEC"
         const val ACTION_QUALITY = "com.vigiaia.app.TRANSMITTER_QUALITY"
         const val ACTION_FPS = "com.vigiaia.app.TRANSMITTER_FPS"
@@ -67,6 +71,12 @@ class PhoneCameraBackgroundService : Service() {
                 putExtra("value", value)
             })
         }
+        fun commandScenePhotos(context: Context, enabled: Boolean) {
+            context.startService(Intent(context, PhoneCameraBackgroundService::class.java).apply {
+                action = ACTION_SCENE_PHOTOS
+                putExtra(EXTRA_ENABLED, enabled)
+            })
+        }
         fun changeCodecLocal(context: Context, desired: String) {
             context.startService(Intent(context, PhoneCameraBackgroundService::class.java).apply {
                 action = ACTION_CODEC
@@ -78,6 +88,12 @@ class PhoneCameraBackgroundService : Service() {
         @Volatile var running = false
             private set
         @Volatile var recording = false
+            private set
+        @Volatile var scenePhotosSaved = 0
+            private set
+        @Volatile var recorderAccepted = 0
+            private set
+        @Volatile var recorderBusyDropped = 0
             private set
         @Volatile var streamUrl: String? = null
             private set
@@ -112,6 +128,10 @@ class PhoneCameraBackgroundService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val encodeWorker = Executors.newSingleThreadExecutor { r -> Thread(r, "phone-background-mjpeg") }
     private val recordWorker = Executors.newSingleThreadExecutor { r -> Thread(r, "phone-background-mp4") }
+    private val photoWorker = Executors.newSingleThreadExecutor { r -> Thread(r, "phone-background-scene-photo") }
+    private val sceneGate = PhoneScenePhotoGate()
+    private val sceneSaveBusy = AtomicBoolean(false)
+    @Volatile private var scenePhotosEnabled = false
     private val encoding = AtomicBoolean(false)
     private val recordingBusy = AtomicBoolean(false)
     private val torch by lazy { PhoneTorchController(mainHandler, { recording }, { heatState }) }
@@ -302,6 +322,15 @@ class PhoneCameraBackgroundService : Service() {
                 refreshFrameRotation()
             }
             ACTION_RECORD -> if (running && !closing) toggleRecording()
+            ACTION_SCENE_PHOTOS -> {
+                val enabled = intent.getBooleanExtra(EXTRA_ENABLED, false)
+                getSharedPreferences("phone_video", MODE_PRIVATE).edit()
+                    .putBoolean(SCENE_PHOTOS_PREF, enabled).apply()
+                scenePhotosEnabled = enabled
+                sceneGate.reset()
+                PhoneStreamDiagnostics.add("Fotos por movimento: ${if (enabled) "ligadas" else "desligadas"}")
+                if (running) updateNotification()
+            }
             ACTION_QUALITY -> if (running && !closing && !recording && !switching && !takingPhoto) {
                 val profile = intent.getIntExtra("value", -1)
                 if (profile in listOf(360, 480, 720, 768, 1080)) {
@@ -348,6 +377,12 @@ class PhoneCameraBackgroundService : Service() {
                     startupPhase = "preparando superfície EGL"
                     PhoneStreamDiagnostics.add("Tela apagada: foreground iniciado; preparando EGL")
                     ecoEnabled = getSharedPreferences("phone_video", MODE_PRIVATE).getBoolean("eco_enabled", true)
+                    scenePhotosEnabled = getSharedPreferences("phone_video", MODE_PRIVATE)
+                        .getBoolean(SCENE_PHOTOS_PREF, false)
+                    sceneGate.reset()
+                    scenePhotosSaved = 0
+                    recorderAccepted = 0
+                    recorderBusyDropped = 0
                     requestedQuality = getSharedPreferences("phone_video", MODE_PRIVATE).getInt("remote_quality", 480)
                     fpsLimit = getSharedPreferences("phone_video", MODE_PRIVATE).getInt("remote_fps", 10)
                     liveCodec = getSharedPreferences("phone_video", MODE_PRIVATE).getString("stream_codec", "mjpeg")
@@ -759,6 +794,7 @@ class PhoneCameraBackgroundService : Service() {
         opened.setPreviewTexture(preview.surfaceTexture)
         val byteCount = size.width * size.height * 3 / 2
         lastCapture = 0L
+        sceneGate.reset()
         lastPublishedAtMs = SystemClock.elapsedRealtime()
         opened.setPreviewCallbackWithBuffer { bytes, source ->
             if (bytes != null) {
@@ -771,7 +807,8 @@ class PhoneCameraBackgroundService : Service() {
             // REC local nao fica limitado por essa politica de ociosidade.
             val idle = session.activeVideoViewers() == 0 && !recording
             val interval = if (idle) 2_500L else
-                PhoneEcoPolicy.streamIntervalMs(fpsLimit, ecoEnabled, heatState)
+                PhoneEcoPolicy.streamIntervalMs(
+                    fpsLimit, ecoEnabled && !recording, heatState)
             if (bytes != null && server === session && !closing && !switching &&
                 bytes.size >= byteCount &&
                 SystemClock.elapsedRealtime() - lastCapture >= interval &&
@@ -780,6 +817,7 @@ class PhoneCameraBackgroundService : Service() {
                 pipelineProbe.accepted(lastCapture)
                 val snapshot = bytes.copyOf(byteCount)
                 val rotationForFrame = frameRotationDegrees
+                val capturedNs = System.nanoTime()
                 try {
                     encodeWorker.execute {
                         try {
@@ -788,6 +826,8 @@ class PhoneCameraBackgroundService : Service() {
                                 val rotated = Nv21Frames.rotated(snapshot, size.width, size.height, rotationForFrame)
                                 val width = if (rotationForFrame % 180 == 0) size.width else size.height
                                 val height = if (rotationForFrame % 180 == 0) size.height else size.width
+                                // MP4 recebe o quadro antes do JPEG/H.264 de rede; PTS de captura real.
+                                appendRecording(rotated, width, height, capturedNs)
                                 publish(session, rotated, width, height)
                             }
                         } catch (e: Exception) {
@@ -907,7 +947,11 @@ class PhoneCameraBackgroundService : Service() {
                     lastJpegPreviewAt = now
                     val preview = ByteArrayOutputStream()
                     if (YuvImage(frame, ImageFormat.NV21, width, height, null)
-                            .compressToJpeg(Rect(0, 0, width, height), 42, preview)) latestJpeg = preview.toByteArray()
+                            .compressToJpeg(Rect(0, 0, width, height), 60, preview)) {
+                        val encoded = preview.toByteArray()
+                        latestJpeg = encoded
+                        maybeSaveScenePhoto(frame, width, height, encoded)
+                    }
                 }
             } catch (e: Exception) {
                 h264FailedThisSession = true
@@ -921,7 +965,7 @@ class PhoneCameraBackgroundService : Service() {
                 session.clearAvc()
             }
         }
-        if (liveCodec != "mjpeg") { appendRecording(frame, width, height); return }
+        if (liveCodec != "mjpeg") { return }
         val jpeg = ByteArrayOutputStream()
         if (!YuvImage(frame, ImageFormat.NV21, width, height, null)
                 .compressToJpeg(Rect(0, 0, width, height), PhoneEcoPolicy.jpegQuality(ecoEnabled, heatState), jpeg)) return
@@ -934,7 +978,7 @@ class PhoneCameraBackgroundService : Service() {
         publishedFps.mark(SystemClock.elapsedRealtime())
         markFirstPublishedFrame()
         watchdogRestarts = 0 // Dados da bateria nos headers, nunca gravados nos pixels.
-        appendRecording(frame, width, height)
+        maybeSaveScenePhoto(frame, width, height, encoded)
     }
 
     private fun markFirstPublishedFrame() {
@@ -945,38 +989,72 @@ class PhoneCameraBackgroundService : Service() {
         }
     }
 
-    private fun appendRecording(frame: ByteArray, width: Int, height: Int) {
-        if (recording && recordingBusy.compareAndSet(false, true)) {
-            val snapshot = frame.copyOf()
-            try {
-                recordWorker.execute {
-                    try {
-                        if (recording) {
-                            if (recorder == null) {
-                                val prefs = getSharedPreferences("phone_video", MODE_PRIVATE)
-                                recorder = PhoneMp4Recorder(applicationContext, width, height,
-                                    prefs.getInt("record_fps", 15).coerceIn(5, 30),
-                                    prefs.getInt("record_bitrate", 2_000_000).coerceIn(500_000, 8_000_000))
-                            }
-                            recorder?.append(snapshot, System.nanoTime())
-                        }
-                    } catch (_: Exception) {
-                        recording = false
-                        torch.onStateChanged()
-                        try { recorder?.cancel() } catch (_: Exception) { }
-                        recorder = null
-                        lastError = "Não foi possível gravar"
-                        mainHandler.post { updateNotification() }
-                    } finally { recordingBusy.set(false) }
-                }
-            } catch (_: Exception) { recordingBusy.set(false) }
+    /** Somente mudança de cena, sem afirmar que houve detecção de veículo.
+     *  Reusa JPEG já produzido para o MCRP, sem outra câmera/codificador.
+     *  O quota/cooldown também valem sem visualizador no Note 11.
+     */
+    private fun maybeSaveScenePhoto(frame: ByteArray, width: Int, height: Int, jpeg: ByteArray) {
+        if (!scenePhotosEnabled || recording || closing || !running || jpeg.isEmpty()) return
+        if (heatState == PhoneHeatState.HOT || sceneSaveBusy.get()) return
+        if (!sceneGate.observe(frame, width, height, SystemClock.elapsedRealtime())) return
+        if (!sceneSaveBusy.compareAndSet(false, true)) return
+        try {
+            photoWorker.execute {
+                try {
+                    if (!scenePhotosEnabled || !running || closing) return@execute
+                    if (PhoneRemotePhoto.save(applicationContext, jpeg)) {
+                        scenePhotosSaved++
+                        PhoneStreamDiagnostics.add("Foto por movimento salva no A3")
+                    } else {
+                        lastError = "Falha ao salvar foto por movimento"
+                    }
+                } catch (e: Exception) {
+                    lastError = "Foto automática: ${e.javaClass.simpleName}"
+                } finally { sceneSaveBusy.set(false) }
+            }
+        } catch (_: Exception) { sceneSaveBusy.set(false) }
+    }
+
+    /** Envio limitado a um quadro por vez para não acumular atraso no MediaCodec.
+     *  Os dados rotacionados são imutáveis até finalizar o worker da gravação. */
+    private fun appendRecording(frame: ByteArray, width: Int, height: Int, capturedNs: Long) {
+        if (!recording) return
+        if (!recordingBusy.compareAndSet(false, true)) {
+            recorderBusyDropped++
+            return
         }
+        try {
+            recordWorker.execute {
+                try {
+                    if (recording) {
+                        if (recorder == null) {
+                            val prefs = getSharedPreferences("phone_video", MODE_PRIVATE)
+                            recorder = PhoneMp4Recorder(applicationContext, width, height,
+                                prefs.getInt("record_fps", 10).coerceIn(5, 30),
+                                prefs.getInt("record_bitrate", 1_500_000).coerceIn(500_000, 8_000_000))
+                        }
+                        if (recorder?.append(frame, capturedNs) == true) recorderAccepted++
+                        else recorderBusyDropped++
+                    }
+                } catch (e: Exception) {
+                    recording = false
+                    torch.onStateChanged()
+                    try { recorder?.cancel() } catch (_: Exception) { }
+                    recorder = null
+                    lastError = "Não foi possível gravar: ${e.javaClass.simpleName}"
+                    mainHandler.post { updateNotification() }
+                } finally { recordingBusy.set(false) }
+            }
+        } catch (_: Exception) { recordingBusy.set(false) }
     }
 
     private fun toggleRecording() {
         PhoneStreamDiagnostics.add(if (recording) "Gravação encerrada" else "Gravação solicitada")
         recording = !recording
+        if (recording) { recorderAccepted = 0; recorderBusyDropped = 0 }
         torch.onStateChanged()
+        // Em REC, não limitar a 5 FPS somente por modo Eco; manter proteção térmica.
+        mainHandler.post { applyCameraFpsRange() }
         recordingStartMs = if (recording) SystemClock.elapsedRealtime() else 0L
         if (!recording) {
             recordWorker.execute { finishRecording() }
@@ -1021,6 +1099,7 @@ class PhoneCameraBackgroundService : Service() {
         oldServer?.stop()
         releasePreview()
         encodeWorker.shutdown()
+        photoWorker.shutdown()
         // Enquanto a finalização do MP4 estiver pendente, conservar as proteções de suspensão.
         recordWorker.execute {
             try { finishRecording() } finally {
@@ -1070,7 +1149,8 @@ class PhoneCameraBackgroundService : Service() {
 
     private fun diagnosis(): String = PhoneStreamDiagnostics.report(
         "modo=${if (running) "ativo" else "parado"}, codec=$liveCodec, gravando=$recording, " +
-            "eco=$ecoEnabled, lanterna=${torch.mode}/${torch.enabled}, capturados=$frameCount, ultimoCallbackMs=${SystemClock.elapsedRealtime()-lastCaptureAtMs}, " +
+            "eco=$ecoEnabled, fotosMovimento=$scenePhotosEnabled, fotosSalvas=$scenePhotosSaved, " +
+            "quadrosREC=$recorderAccepted, descartadosREC=$recorderBusyDropped, lanterna=${torch.mode}/${torch.enabled}, capturados=$frameCount, ultimoCallbackMs=${SystemClock.elapsedRealtime()-lastCaptureAtMs}, " +
             "ultimoCodificadoMs=${SystemClock.elapsedRealtime()-lastPublishedAtMs}, tentativas=$watchdogRestarts, " +
             "fase=$startupPhase, termicaAndroid=$thermalStatus, estadoTermico=$heatState, " +
             "visualizadores=${server?.activeVideoViewers() ?: 0}, " +

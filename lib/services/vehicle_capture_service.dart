@@ -77,9 +77,13 @@ class VehicleCaptureGuard {
       match.lastSeen = now;
       match.centerX = centerX;
       match.centerY = centerY;
-      if (match.hits < 2 || chosen != null) continue;
+      if (match.hits < 2 || chosen != null) {
+        continue;
+      }
       if (match.lastSaved != null &&
-          now.difference(match.lastSaved!) < repeatSameRegion) continue;
+          now.difference(match.lastSaved!) < repeatSameRegion) {
+        continue;
+      }
       final lastCameraPhoto = _lastPhotoByCamera[cameraId];
       if (lastCameraPhoto != null &&
           now.difference(lastCameraPhoto) < minimumBetweenPhotos) continue;

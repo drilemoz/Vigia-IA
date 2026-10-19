@@ -130,6 +130,19 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     }
   }
 
+  Future<void> _toggleScenePhotos(bool enabled) async {
+    if (_localCommandBusy || _busy) return;
+    setState(() { _localCommandBusy = true; _error = null; });
+    try {
+      await NativeCameraTransmitterService.setScenePhotosEnabled(enabled);
+      await _refresh();
+    } catch (error) {
+      if (mounted) setState(() => _error = 'Fotos por movimento: $error');
+    } finally {
+      if (mounted) setState(() => _localCommandBusy = false);
+    }
+  }
+
   Future<void> _command(String action) async {
     final url = _status?.url;
     if (url == null || _localCommandBusy || _busy) return;
@@ -556,6 +569,34 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
               ],
             ]),
           )),
+          Card(child: Column(children: [
+            SwitchListTile.adaptive(
+              secondary: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Fotos por movimento no transmissor'),
+              subtitle: const Text(
+                'O A3 fotografa mudanças na cena mesmo sem o Note 11 aberto. '
+                'Não identifica veículos: imagens aproximadas, limite de frequência, '
+                'pausado durante REC e calor alto.'),
+              value: s?.scenePhotosEnabled ?? false,
+              onChanged: _localCommandBusy || busy ? null : _toggleScenePhotos,
+            ),
+            if (running && s != null && s.scenePhotosEnabled)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  'Fotos nesta transmissão: ${s.scenePhotosSaved} · '
+                  'Veja-as em Galeria no Note 11.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+          ])),
+          if (recording && s != null && s.recorderAccepted > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Text('Quadros REC: ${s.recorderAccepted} · '
+                  'descartados por ocupação: ${s.recorderBusyDropped}',
+                  style: Theme.of(context).textTheme.bodySmall),
+            ),
           if (_error != null || s?.error != null) ...[
             const SizedBox(height: 8),
             Card(child: Padding(padding: const EdgeInsets.all(12), child: Text(
