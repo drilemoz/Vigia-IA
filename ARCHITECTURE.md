@@ -1,4 +1,10 @@
-# Arquitetura — Vigia IA 1.0.295+295
+# Arquitetura — Vigia IA 1.0.296+296
+
+## 1.0.296: alinhamento automático de versão e build (build 249)
+
+- Validação preventiva compara versão e build de pubspec, AppMetadata, Novidades, Sobre, Android/GitHub Manager e notas de release, em vez de `grep` com número desatualizado.
+- Teste regressivo simula catálogo com build errado e exige falha precoce.
+- Sem mudança no pipeline de vídeo, rede, armazenamento, IA, mapas ou controle remoto.
 
 ## 1.0.295: recuperação do fluxo de testes do build 248
 

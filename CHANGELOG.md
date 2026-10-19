@@ -1,3 +1,10 @@
+## 1.0.296+296: correção da verificação preventiva do build 249 (2026-10-18)
+
+- Build 249 (versão 1.0.295) interrompido antes do Flutter Analyze por um `grep` histórico que exigia build 294 no catálogo de Novidades 1.0.295.
+- Substituído o teste frágil por verificação dinâmica entre `pubspec.yaml`, AppMetadata, Novidades, Sobre, metadados JSON e versão Android.
+- Inserida verificação imediata no início do script integral e testes de regressão para o erro original.
+- Aplicativo preserva interfaces e funcionalidades da 1.0.295; alteração restrita a validação e metadados.
+
 ## 1.0.295+295: testes Flutter alinhados ao painel e navegação (2026-10-18)
 
 - Corrigidos os dois testes Flutter que interromperam o build 248, mantendo a navegação de 5 abas e Configurações no topo direito.

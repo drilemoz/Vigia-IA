@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.295',
+          version: '1.0.296',
           current: true,
+          changes: [
+            'Corrigida a validação de versão e build que interrompia o build 249.',
+            'Catálogo de Novidades, metadados e verificações passam a conferir o mesmo release.',
+            'Preservadas a interface de cinco abas, câmeras, IA e transmissão.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.295',
           changes: [
             'Interface e testes alinhados à navegação principal com cinco destinos.',
             'Painel Vídeo e Lanterna verificados com as opções de resolução e FPS.',

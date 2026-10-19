@@ -32,7 +32,7 @@ void main() {
     expect(find.text('0%'), findsOneWidget);
     await tester.tap(find.text('Fechar'));
     await tester.pumpAndSettle();
-    // Na 1.0.295, o card Vídeo agrupa resolução e FPS.
+    // Na 1.0.296, o card Vídeo agrupa resolução e FPS.
     await tester.tap(find.text('Vídeo'));
     await tester.pumpAndSettle();
     expect(find.text('Resolução e FPS'), findsOneWidget);

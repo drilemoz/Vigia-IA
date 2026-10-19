@@ -8,11 +8,11 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.295', build: 295);
+      AppBuildVersion(version: '1.0.296', build: 296);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.295', build: 295),
+      version: AppBuildVersion(version: '1.0.296', build: 296),
       changes: <String>[
         'Navegação com cinco destinos e Configurações no cabeçalho superior direito.',
         'Controle remoto compacto com Zoom, Vídeo e Lanterna em janelas dedicadas.',

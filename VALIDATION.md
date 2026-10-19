@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.296+296
+
+- **Build 249, versão 1.0.295:** a verificação preventiva falhou em `tool/verify_project.sh`, que exigia incorretamente `AppBuildVersion(version: '1.0.295', build: 294)` enquanto o catálogo estava corretamente em build 295. `flutter analyze` e compilação de APK não foram alcançados.
+- **Correção 1.0.296:** verificação coerente com versão obtida do `pubspec.yaml`, validação do par versão/build em metadados e no catálogo, e regressão de mismatch.
+- Flutter/Android SDK indisponíveis localmente; confirmar `flutter analyze`, `flutter test` e APK no próximo GitHub Actions.
+
 # Validação Vigia IA 1.0.295+295
 
 - **Build 248 (código 1.0.294):** `flutter analyze --fatal-infos --fatal-warnings` passou sem problemas; `flutter test` falhou em `main_navigation_bar_test.dart` (esperava 6 abas, foram renderizadas 5) e `mcrp_remote_controls_test.dart` (procurava o texto `Resolução` no card, agora `Vídeo`).
