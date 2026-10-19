@@ -69,7 +69,12 @@ class _HistoryCard extends StatelessWidget {
                           icon: Icons.schedule_rounded,
                           text: _formatDateTime(event.createdAt),
                         ),
-                        if (event.type != MonitorEventType.alert)
+                        if (event.plateText != null && event.plateText!.isNotEmpty)
+                          _HistoryMeta(
+                            icon: Icons.confirmation_number_outlined,
+                            text: 'Placa: ${event.plateText}',
+                          ),
+                        if (event.type == MonitorEventType.entered || event.type == MonitorEventType.exited)
                           _HistoryMeta(
                             icon: event.type == MonitorEventType.entered
                                 ? Icons.login_rounded

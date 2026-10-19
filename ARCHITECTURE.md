@@ -1,4 +1,12 @@
-# Arquitetura — Vigia IA 1.0.304+304
+# Arquitetura — Vigia IA 1.0.305+305
+
+## Fluxo de veículos 1.0.305
+
+- `VehicleCaptureService` persiste opção local na pasta privada do app (off por padrão), recebe detecções do detector já carregado e usa `VehicleCaptureGuard` para exigir duas confirmações por região e impor janelas de cooldown. A captura usa o `EventHistoryService.addEvent` e o tipo `vehicleSnapshot`; o JPEG é salvo no armazenamento privado do app.
+- O histórico tem limite compartilhado de 200 eventos e limpeza por política existente; a opção automática registra apenas com IA ligada e câmera sendo analisada, não com o app parado.
+- `VehiclePlateOcrService` só é invocado pela `VehiclePlateSection` no detalhe do evento. Usa ML Kit Latin embutido, recorte contextual e fallback para foto completa, sem rede. O texto é hipóteses revisável e salvo como `plateText` no JSON do evento.
+- Sem reconhecimento automático de marca/modelo, sem identificação cadastral e sem acesso a dados de proprietário.
+
 
 ## Correção da suíte de controles MCRP (build 254)
 

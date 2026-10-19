@@ -95,9 +95,10 @@ class EventHistoryService {
     String? zoneId,
     String? zoneName,
     String? cameraId,
+    bool requireSnapshot = false,
   }) async {
     try {
-      return await _enqueue<MonitorEvent>(() async {
+      return await _enqueue<MonitorEvent?>(() async {
         await initialize();
         final createdAt = DateTime.now();
         final id = '${createdAt.microsecondsSinceEpoch}_${detection.label}_${type.name}';
@@ -114,6 +115,7 @@ class EventHistoryService {
           );
         }
 
+        if (requireSnapshot && snapshotPath == null) return null;
         final event = MonitorEvent(
           id: id,
           createdAt: createdAt,
@@ -178,6 +180,19 @@ class EventHistoryService {
         changed = true;
       }
       if (changed) await _persist();
+    });
+  }
+
+  Future<void> updatePlate(String id, String? plateText) async {
+    await _enqueue<void>(() async {
+      await initialize();
+      final index = _events.indexWhere((event) => event.id == id);
+      if (index < 0) return;
+      _events[index] = _events[index].copyWith(
+        plateText: plateText,
+        clearPlateText: plateText == null,
+      );
+      await _persist();
     });
   }
 

@@ -77,11 +77,20 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.304',
+          version: '1.0.305',
           current: true,
           changes: [
-            'Verificação das atualizações mais confiável, sem bloqueios por termos de correção.',
-            'Mantidos o cadastro RTSP assistido, o vídeo Ao vivo e os estados de transmissão.',
+            'Fotos de veículos com confirmação e limite de repetições no Histórico.',
+            'Escanear placas brasileiras offline sob demanda no registro, com correção e cópia.',
+            'Registro automático opcional, sem envio de imagens à nuvem.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.304',
+          changes: [
+            'Zoom MCRP identificado com chave estável para testes da interface.',
+            'Preservado o cadastro RTSP e a transmissão ao vivo.',
           ],
         ),
         SizedBox(height: 10),

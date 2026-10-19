@@ -1,3 +1,9 @@
+## 1.0.305+305 (2026-10-19)
+
+- Registro automático opcional de veículos detectados com imagem no histórico existente, confirmação por dois quadros e controle de duplicação espacial/temporal.
+- OCR de placas brasileiras offline sob demanda com ML Kit, recorte do veículo, fallback de quadro e correção manual, salvo junto ao evento.
+- Foto e OCR locais, sem API e sem token; mantida gravação, RTSP, mapas e IA existentes.
+
 ## 1.0.304+304: regressão do modal Zoom no build 255 (2026-10-19)
 
 - Corrigida a falha única do Flutter Test após 570 aprovados: seletor global encontrava o botão `Zoom` e o título do modal ao mesmo tempo.

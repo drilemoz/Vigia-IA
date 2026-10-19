@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.304+304`
+**Versão atual:** `1.0.305+305`
+
+## Atualização 1.0.305+305 · veículos e OCR offline
+
+- Histórico > **Fotografar veículos automaticamente**: opção persistente, desativada até o usuário ligar; a detecção de carro/moto/ônibus/caminhão usa a IA já ativa e dois quadros consecutivos, não OCR permanente.
+- Suprime repetições por região por 60 segundos e por câmera por 8 segundos; resultados dependem de visibilidade/estabilidade da câmera. Não garante fotografar todos os veículos.
+- Histórico > registro do veículo > **Escanear placa**: OCR ML Kit local no recorte do veículo, com segunda tentativa no quadro completo; reconhece padrões brasileiros antigo e Mercosul, com edição, cópia e persistência local.
+- Não consulta marca/modelo/propietário por placa e não usa Plate Recognizer nem transmite imagens pela internet. O histórico mantém limite de 200 registros e as rotinas de limpeza existentes.
 
 ## Atualização 1.0.304+304 · APK 255
 

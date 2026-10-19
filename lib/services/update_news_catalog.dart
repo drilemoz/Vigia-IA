@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.304', build: 304);
+      AppBuildVersion(version: '1.0.305', build: 305);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.304', build: 304),
+      version: AppBuildVersion(version: '1.0.305', build: 305),
       changes: <String>[
-        'Melhorada a validação do painel de zoom remoto sem confundir botão e janela aberta.',
-        'Mantidos o zoom compacto e os comandos de vídeo, gravação e lanterna.',
-        'Preservadas as câmeras RTSP e a transmissão ao vivo.',
+        'Fotos de veículos com confirmação e limite de repetições no Histórico.',
+        'Escanear placas brasileiras offline no registro, com correção manual.',
+        'Captura automática opcional e dados guardados no próprio celular.',
       ],
     ),
   ]);

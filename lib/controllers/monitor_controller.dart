@@ -46,6 +46,7 @@ import '../services/object_detection_service.dart';
 import '../services/object_filter_policy.dart';
 import '../services/object_tracker.dart';
 import '../services/vehicle_passage_counter.dart';
+import '../services/vehicle_capture_service.dart';
 import '../services/partial_person_detection_service.dart';
 import '../services/performance_telemetry_service.dart';
 import '../services/smart_alert_rule_engine.dart';
@@ -106,6 +107,7 @@ class MonitorController extends ChangeNotifier {
   final RuntimeHealthService _health = RuntimeHealthService.instance;
   final ErrorLogService _logs = ErrorLogService.instance;
   final EventHistoryService _eventHistory = EventHistoryService.instance;
+  final VehicleCaptureService _vehicleCapture = VehicleCaptureService.instance;
   final AppSettingsService _appSettings = AppSettingsService.instance;
   final BikeModeService _bikeMode = BikeModeService.instance;
   final BikeApproachEstimator _bikeApproachEstimator = BikeApproachEstimator();
@@ -412,6 +414,7 @@ class MonitorController extends ChangeNotifier {
         _detector.initialize(),
         _speech.initialize(),
         _clipRecorder.initialize(),
+        _vehicleCapture.initialize(),
       ]);
       _speech..configure(_settings.voiceAlertPreferences)
         ..setEnabled(_settings.alertOutputs.voice);
@@ -541,7 +544,6 @@ class MonitorController extends ChangeNotifier {
       (_) => unawaited(_applyScheduleState()),
     );
   }
-
   Future<void> _applyScheduleState() async {
     if (_disposed || !_baseReady) return;
     final shouldBeActive = _schedule.isActiveAt(DateTime.now());
@@ -584,13 +586,11 @@ class MonitorController extends ChangeNotifier {
     }
     _notify();
   }
-
   Future<void> _startSourceUnlocked(VideoSourceConfig config) async {
     if (_disposed || (_suspended && !_backgroundMonitoringEnabled) || !_baseReady) {
       return;
     }
     if (!_scheduleActive) return;
-
     _resetSessionMetrics();
     final analysisInterval = _effectiveMonitorAnalysisInterval(this, config);
     final source = switch (config.type) {
@@ -648,7 +648,6 @@ class MonitorController extends ChangeNotifier {
       _notify();
     });
     _notify();
-
     try {
       if (_backgroundMonitoringEnabled) {
         final started = await _ensureBackgroundService(
@@ -699,7 +698,6 @@ class MonitorController extends ChangeNotifier {
     }
     _notify();
   }
-
   Future<void> switchSource(VideoSourceConfig config) async {
     _error = null;
     _resetEventState();
@@ -882,10 +880,10 @@ class MonitorController extends ChangeNotifier {
       detectorRuns = 1;
       final bikeApproachDetectionActive =
           _bikeConfig.enabled && _bikeConfig.approachAlertsEnabled;
-      final primaryAllowedLabels = bikeApproachDetectionActive
+      final primaryAllowedLabels = bikeApproachDetectionActive || _vehicleCapture.enabled
           ? <String>{..._alertLabels, ...ObjectFilterCatalog.vehicles}
           : _alertLabels;
-      final primaryMaxResults = bikeApproachDetectionActive
+      final primaryMaxResults = bikeApproachDetectionActive || _vehicleCapture.enabled
           ? math.max(_settings.maxResults, 8).toInt()
           : _settings.maxResults;
       final primaryRun = await _detector.detectMeasured(
@@ -1133,6 +1131,7 @@ class MonitorController extends ChangeNotifier {
               transitions: <ZoneTransition>[],
             );
       _trackedDetections = tracking.active;
+      _captureVehicleObservations(frame, primaryGlobalForBike, motionResult.cameraMotion, session);
       _observeVehiclePassages(tracking.active, now,
           motionResult.cameraMotion);
       if (_announceEntryExit && tracking.transitions.isNotEmpty) {

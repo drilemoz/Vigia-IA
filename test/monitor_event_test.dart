@@ -18,6 +18,7 @@ void main() {
       zoneId: 'portao',
       zoneName: 'Portão',
       cameraId: 'cam-portao',
+      plateText: 'ABC1D23',
       box: const NormalizedBox(
         yMin: 0.1,
         xMin: 0.2,
@@ -41,6 +42,7 @@ void main() {
     expect(restored.zoneId, 'portao');
     expect(restored.zoneName, 'Portão');
     expect(restored.cameraId, 'cam-portao');
+    expect(restored.plateText, 'ABC1D23');
     expect(restored.box.yMin, closeTo(0.1, 0.0001));
     expect(restored.box.xMin, closeTo(0.2, 0.0001));
     expect(restored.box.yMax, closeTo(0.8, 0.0001));

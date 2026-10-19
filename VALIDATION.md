@@ -1,4 +1,13 @@
-# Validação Vigia IA 1.0.304+304
+# Validação Vigia IA 1.0.305+305
+
+## Versão 1.0.305+305 · histórico de veículos e OCR
+
+- Fonte baseada na 1.0.304+304. Adicionado registro automático opt-in no Histórico, usando detecções locais, duas observações e limites de repetição (8 s/câmera, 60 s/região).
+- OCR ML Kit (`google_mlkit_text_recognition ^0.17.1`) somente ao tocar em Escanear placa, com filtro de formato brasileiro e edição manual. Resultados são estimativas visuais, não cadastro oficial.
+- Testes Flutter novos: `test/vehicle_capture_guard_test.dart`, `test/vehicle_plate_ocr_test.dart`; contrato Python `tool/test_vehicle_history_305.py`.
+- Pendente no CI: `flutter pub get`, `flutter analyze`, `flutter test` e APK. Testes físicos com câmera e placas reais não executados neste ambiente.
+
+
 
 ## Build Android-APK-255 (2026-10-19)
 

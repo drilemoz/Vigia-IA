@@ -179,6 +179,12 @@ extension _MonitorControllerEventSupport on MonitorController {
           ),
         );
       }
+      if (_vehicleCapture.enabled &&
+          ObjectFilterCatalog.automobiles.contains(detection.label) &&
+          _vehicleCapture.hasRecentPhoto(
+              sourceConfig.cameraId ?? _sourceDisplayName, detection.label)) {
+        continue; // Evita duplicar o mesmo evento quando a foto já existe.
+      }
       final event = await _eventHistory.addEvent(
         detection: detection,
         frame: frame,

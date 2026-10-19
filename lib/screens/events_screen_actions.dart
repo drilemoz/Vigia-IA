@@ -141,6 +141,14 @@ extension _EventsActions on _EventsScreenState {
                     ],
                   ),
                 ),
+                if (ObjectFilterCatalog.automobiles.contains(event.label))
+                  VehiclePlateSection(
+                    event: event,
+                    history: _history,
+                    onChanged: () {
+                      if (mounted) setState(() {});
+                    },
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -157,7 +165,7 @@ extension _EventsActions on _EventsScreenState {
                       Text('Confiança: ${(event.confidence * 100).round()}%'),
                       if (event.zoneName != null)
                         Text('Área: ${event.zoneName}'),
-                      if (event.type != MonitorEventType.alert)
+                      if (event.type == MonitorEventType.entered || event.type == MonitorEventType.exited)
                         Text(
                           event.type == MonitorEventType.entered
                               ? 'Registro: entrada na área (não é contador)'

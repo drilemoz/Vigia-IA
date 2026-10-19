@@ -413,6 +413,7 @@ String _eventKind(MonitorEventType type) => switch (type) {
       MonitorEventType.exited => 'saída',
       MonitorEventType.cameraObstructed => 'câmera obstruída',
       MonitorEventType.cameraMoved => 'câmera deslocada',
+      MonitorEventType.vehicleSnapshot => 'veículo fotografado',
     };
 
 String _formatTime(DateTime value) =>

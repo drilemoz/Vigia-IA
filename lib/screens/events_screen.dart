@@ -7,6 +7,8 @@ import 'package:vlc_player/vlc_player.dart';
 import '../models/monitor_event.dart';
 import '../models/object_filter_catalog.dart';
 import '../services/event_history_service.dart';
+import '../services/vehicle_capture_service.dart';
+import '../widgets/vehicle_plate_section.dart';
 import '../services/native_platform_service.dart';
 import '../widgets/main_navigation_bar.dart';
 import '../widgets/main_navigation_routes.dart';
@@ -28,6 +30,8 @@ class EventsScreen extends StatefulWidget {
 class _EventsScreenState extends State<EventsScreen> {
   final EventHistoryService _history = EventHistoryService.instance;
   final NativePlatformService _native = NativePlatformService.instance;
+  final VehicleCaptureService _vehicleCapture = VehicleCaptureService.instance;
+  bool _automaticVehicleCapture = false;
   bool _loading = true;
   String? _loadError;
   _HistoryGroupFilter _groupFilter = _HistoryGroupFilter.all;
@@ -42,11 +46,15 @@ class _EventsScreenState extends State<EventsScreen> {
 
   Future<void> _load() async {
     try {
-      await _history.initialize();
+      await Future.wait(<Future<void>>[
+        _history.initialize(),
+        _vehicleCapture.initialize(),
+      ]);
       if (!mounted) return;
       setState(() {
         _loading = false;
         _loadError = null;
+        _automaticVehicleCapture = _vehicleCapture.enabled;
       });
     } catch (_) {
       if (!mounted) return;
@@ -197,6 +205,32 @@ class _EventsScreenState extends State<EventsScreen> {
               ],
               onChanged: (value) {
                 if (value != null) setState(() => _cameraFilter = value);
+              },
+            ),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Fotografar veículos automaticamente'),
+              subtitle: const Text(
+                'Com IA ativa, salva carros, motos, ônibus e caminhões. '
+                'Requer duas detecções e limita fotos repetidas. '
+                'O OCR de placa só roda ao tocar no registro.',
+              ),
+              value: _automaticVehicleCapture,
+              onChanged: (enabled) async {
+                try {
+                  await _vehicleCapture.setEnabled(enabled);
+                  if (mounted) {
+                    setState(() => _automaticVehicleCapture = enabled);
+                  }
+                } catch (_) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text(
+                        'Não foi possível salvar a opção de fotos automáticas.',
+                      )),
+                    );
+                  }
+                }
               },
             ),
             const SizedBox(height: 10),

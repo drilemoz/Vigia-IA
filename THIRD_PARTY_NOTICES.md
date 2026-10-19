@@ -1,5 +1,10 @@
 # Dependencias principais
 
+## Reconhecimento local de texto (1.0.305)
+
+O botão **Escanear placa** no Histórico usa `google_mlkit_text_recognition` 0.17.1 e o modelo de reconhecimento latino **ML Kit** integrado ao app Android. Consulte as licenças da biblioteca Flutter, das dependências Google ML Kit resolvidas no Gradle e os termos aplicáveis antes de distribuir o APK. Não há API Token e as imagens de placas não são enviadas à nuvem por este módulo.
+
+
 Este projeto usa pacotes Flutter e bibliotecas nativas de terceiros. Antes de distribuir publicamente o APK, revise e cumpra as licencas de todas as dependencias resolvidas pelo `pub` e, em especial, os requisitos de redistribuicao do VLC/libVLC usados por `vlc_player`.
 
 A partir da 1.0.257, o detector prefere o **YOLO26s** quando o arquivo foi exportado e validado no GitHub Actions. Modelos EfficientDet-Lite2/Lite0 e SSD MobileNet V1 continuam como alternativas compatíveis, baixadas de fontes Google AI Edge via `tool/fetch_model.sh`.

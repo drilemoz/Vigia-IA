@@ -17,9 +17,9 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.304+304\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.305+305\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            source = source.replace('Melhorada a validação do painel de zoom remoto sem confundir botão e janela aberta.',
+            source = source.replace('Fotos de veículos com confirmação e limite de repetições no Histórico.',
                                     'Corrigido erro nas verificações de atualização')
             (root / 'lib/services/update_news_catalog.dart').write_text(source, 'utf8')
             policy.validate(root)
@@ -28,13 +28,13 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.304+304\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.305+305\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 304', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 305', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
-            path.write_text(source.replace('Melhorada a validação do painel de zoom remoto sem confundir botão e janela aberta.',
+            path.write_text(source.replace('Fotos de veículos com confirmação e limite de repetições no Histórico.',
                                            'TODO'), 'utf8')
             with self.assertRaisesRegex(ValueError, 'mensagens'):
                 policy.validate(root)

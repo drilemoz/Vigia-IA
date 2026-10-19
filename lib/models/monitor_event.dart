@@ -1,6 +1,6 @@
 import 'detection.dart';
 
-enum MonitorEventType { alert, entered, exited, cameraObstructed, cameraMoved }
+enum MonitorEventType { alert, entered, exited, cameraObstructed, cameraMoved, vehicleSnapshot }
 
 class MonitorEvent {
   const MonitorEvent({
@@ -18,6 +18,7 @@ class MonitorEvent {
     this.zoneId,
     this.zoneName,
     this.cameraId,
+    this.plateText,
   });
 
   final String id;
@@ -34,10 +35,14 @@ class MonitorEvent {
   final String? zoneId;
   final String? zoneName;
   final String? cameraId;
+  /// Hipótese de OCR revisável pelo usuário; não é consulta cadastral.
+  final String? plateText;
 
   MonitorEvent copyWith({
     String? snapshotPath,
     String? clipPath,
+    String? plateText,
+    bool clearPlateText = false,
   }) =>
       MonitorEvent(
         id: id,
@@ -54,6 +59,7 @@ class MonitorEvent {
         zoneId: zoneId,
         zoneName: zoneName,
         cameraId: cameraId,
+        plateText: clearPlateText ? null : (plateText ?? this.plateText),
       );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -70,6 +76,7 @@ class MonitorEvent {
         'zoneId': zoneId,
         'zoneName': zoneName,
         'cameraId': cameraId,
+        'plateText': plateText,
         'box': <String, Object?>{
           'yMin': box.yMin,
           'xMin': box.xMin,
@@ -101,6 +108,7 @@ class MonitorEvent {
       zoneId: json['zoneId'] as String?,
       zoneName: json['zoneName'] as String?,
       cameraId: json['cameraId'] as String?,
+      plateText: json['plateText'] as String?,
       box: NormalizedBox(
         yMin: (boxJson['yMin'] as num?)?.toDouble() ?? 0,
         xMin: (boxJson['xMin'] as num?)?.toDouble() ?? 0,
