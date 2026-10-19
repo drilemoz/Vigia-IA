@@ -21,15 +21,15 @@ class ReleaseConsistency296Tests(unittest.TestCase):
                      'lib/services/update_news_catalog.dart',
                      'lib/screens/app_info_screen_components.dart',
                      'app_identity.json', 'github-manager.json',
-                     'tool/verify_project.sh', 'RELEASE-1.0.305.md')
+                     'tool/verify_project.sh', 'RELEASE-1.0.306.md')
             for name in paths:
                 target = dest / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(real_root / name, target)
             catalog = dest / 'lib/services/update_news_catalog.dart'
             current = catalog.read_text('utf-8')
-            self.assertEqual(current.count("AppBuildVersion(version: '1.0.305', build: 305)"), 2)
-            catalog.write_text(current.replace('build: 305', 'build: 297', 1), 'utf-8')
+            self.assertEqual(current.count("AppBuildVersion(version: '1.0.306', build: 306)"), 2)
+            catalog.write_text(current.replace('build: 306', 'build: 297', 1), 'utf-8')
             with patch.object(checks, 'ROOT', dest), self.assertRaisesRegex(ValueError, 'Catalogo de Novidades'):
                 checks.validate()
 
@@ -37,5 +37,5 @@ class ReleaseConsistency296Tests(unittest.TestCase):
         # Validate that version mismatch in standalone metadata is detectable.
         source = Path(__file__).resolve().parents[1] / 'github-manager.json'
         data = __import__('json').loads(source.read_text('utf-8'))
-        self.assertEqual(data['version'], '1.0.305')
-        self.assertEqual(data['android']['versionCode'], 305)
+        self.assertEqual(data['version'], '1.0.306')
+        self.assertEqual(data['android']['versionCode'], 306)

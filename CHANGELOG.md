@@ -1,3 +1,10 @@
+## 1.0.306+306 (2026-10-19)
+
+- Galeria remota na barra inferior: busca mídias do transmissor autenticado pela rede Wi-Fi e oferece seleção de aparelho, QR, filtros, prévias e downloads individuais/múltiplos.
+- Downloads atômicos com barra de progresso, cancelamento, recuperação de copias privadas e publicação opcional na galeria Android; preserva originais no A3.
+- Novo contrato de navegação com seis destinos e testes de segurança de nomes, duplicatas e integridade; demais módulos mantidos.
+- Otimização de gravação e fotografia autônoma no transmissor continuam como próximas etapas.
+
 ## 1.0.305+305 (2026-10-19)
 
 - Registro automático opcional de veículos detectados com imagem no histórico existente, confirmação por dois quadros e controle de duplicação espacial/temporal.

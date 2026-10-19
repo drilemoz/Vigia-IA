@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.305', build: 305);
+      AppBuildVersion(version: '1.0.306', build: 306);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.305', build: 305),
+      version: AppBuildVersion(version: '1.0.306', build: 306),
       changes: <String>[
-        'Fotos de veículos com confirmação e limite de repetições no Histórico.',
-        'Escanear placas brasileiras offline no registro, com correção manual.',
-        'Captura automática opcional e dados guardados no próprio celular.',
+        'Galeria remota na barra inferior com acesso às mídias do A3 por Wi-Fi.',
+        'Baixe fotos e vídeos individualmente ou em seleção múltipla.',
+        'Arquivos recebidos consultáveis offline, sem excluir os originais do A3.',
       ],
     ),
   ]);

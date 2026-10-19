@@ -4,8 +4,9 @@ import '../screens/events_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/map_workspace_shell.dart';
 import '../screens/multi_camera_screen.dart';
+import '../screens/remote_gallery_screen.dart';
 
-/// Destinos principais: Início, Histórico, Ao vivo, Câmeras, Mapas.
+/// Destinos principais: Início, Histórico, Ao vivo, Câmeras, Galeria, Mapas.
 /// A navegação principal substitui a pilha para impedir abas duplicadas.
 /// Ao vivo inicia a câmera local pelo fluxo de permissões já existente na Home.
 void navigateToMainDestination(
@@ -19,7 +20,8 @@ void navigateToMainDestination(
     1 => const EventsScreen(),
     2 => const HomeScreen(startMonitorOnLoad: true),
     3 => const MultiCameraScreen(),
-    4 => const MapWorkspaceShell(),
+    4 => const RemoteGalleryScreen(),
+    5 => const MapWorkspaceShell(),
     _ => const HomeScreen(),
   };
   Navigator.of(context).pushAndRemoveUntil<void>(

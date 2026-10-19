@@ -1,4 +1,13 @@
-# Arquitetura — Vigia IA 1.0.305+305
+# Arquitetura — Vigia IA 1.0.306+306
+
+## Galeria remota 1.0.306
+
+- Sexto destino do `AdaptiveMainScaffold` (`RemoteGalleryScreen`): Inicio(0), Historico(1), Ao vivo(2), Cameras(3), Galeria(4), Mapas(5); o fluxo de mapas mantém a tela, só muda o índice.
+- Fonte remota MCRP já implementada no transmissor Kotlin `PhoneRemoteLibrary`/`PhoneCameraServer` em `/control/<token>/mcrp/media`. Navega somente mídias geradas pelo app, protegidas pelo token de pareamento e transporte privado Wi-Fi.
+- `McrpClient` lê lista e baixa binários em streaming para `.part`, valida tamanho declarado e cancela/desfaz parciais. `RemoteGalleryStorage` usa SHA-256 de identificação de mídia e endereço sem expor token no nome, evita downloads redundantes e guarda cópias na pasta privada GaleriaRemota.
+- O receptor pode publicar JPEG/PNG/WebP/MP4/WebM/3GPP via `publishCameraMedia` do Android MediaStore e consultar cópias privadas offline em Recebidos. Nunca deleta mídia do transmissor.
+- Não muda o gravador do A3, não executa IA autônoma no transmissor; ambos ficam para próximas versões.
+
 
 ## Fluxo de veículos 1.0.305
 

@@ -159,28 +159,52 @@ class McrpClient {
     return utf8.decode(data, allowMalformed: true);
   }
 
-  Future<File> download(McrpMediaItem item, Directory directory) async {
+  Future<File> download(
+    McrpMediaItem item,
+    Directory directory, {
+    String? targetName,
+    void Function(int received, int total)? onProgress,
+    bool Function()? isCancelled,
+  }) async {
+    if (item.size <= 0 || item.size > 2 * 1024 * 1024 * 1024) {
+      throw const FormatException('Tamanho de mídia fora do limite.');
+    }
     await directory.create(recursive: true);
-    final name = item.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
-    final path = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}_${name.isEmpty ? 'media.bin' : name}';
-    final file = File(path);
+    final safeName = (targetName ??
+        '${DateTime.now().millisecondsSinceEpoch}_${item.name}')
+        .replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    if (safeName.isEmpty || safeName == '.' || safeName == '..') {
+      throw const FormatException('Nome de download inválido.');
+    }
+    final file = File('${directory.path}/$safeName');
+    final partial = File('${file.path}.part');
     try {
+      if (isCancelled?.call() == true) throw const FileSystemException('Download cancelado.');
+      if (await partial.exists()) await partial.delete();
       final response = await _get(address.mediaFile(item.id));
-      final sink = file.openWrite();
+      final sink = partial.openWrite();
       var received = 0;
       try {
         await for (final chunk in response.timeout(const Duration(seconds: 40))) {
+          if (isCancelled?.call() == true) {
+            throw const FileSystemException('Download cancelado.');
+          }
           received += chunk.length;
-          if (received > item.size + 4096 || received > 2 * 1024 * 1024 * 1024) {
+          if (received > item.size || received > 2 * 1024 * 1024 * 1024) {
             throw const FormatException('Arquivo excedeu o tamanho declarado.');
           }
           sink.add(chunk);
+          onProgress?.call(received, item.size);
         }
-      } finally { await sink.close(); }
+      } finally {
+        await sink.close();
+      }
       if (received != item.size) throw const FormatException('Download incompleto.');
-      return file;
-    } catch (_) {
+      if (isCancelled?.call() == true) throw const FileSystemException('Download cancelado.');
       if (await file.exists()) await file.delete();
+      return await partial.rename(file.path);
+    } catch (_) {
+      if (await partial.exists()) await partial.delete();
       rethrow;
     }
   }

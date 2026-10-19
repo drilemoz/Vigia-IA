@@ -115,9 +115,9 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
 
   @override
   Widget build(BuildContext context) => AdaptiveMainScaffold(
-    currentIndex: 4,
+    currentIndex: 5,
     onDestinationSelected: (index) =>
-        navigateToMainDestination(context, index, currentIndex: 4),
+        navigateToMainDestination(context, index, currentIndex: 5),
     appBar: AppBar(
       title: const Text('Mapas'),
       actions: [

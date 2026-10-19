@@ -1,4 +1,11 @@
-# Validação Vigia IA 1.0.305+305
+## Validação da Galeria remota 1.0.306+306
+
+- Cliente MCRP mantém token apenas no armazenamento privado e restringe as URLs a IPv4 local, porta 8765 e caminho com token de 32 caracteres.
+- Nova Galeria: seleção de A3 salvo ou QR, GET `/mcrp/info` e `/mcrp/media`, prévias, download de mídia, seleção múltipla, aba offline de recebidos, armazenamento sem traversal e arquivos `.part` até concluir.
+- `test/remote_gallery_storage_test.dart` e `tool/test_remote_gallery_306.py` adicionados. Testes Flutter, lint e APK permanecem pendentes até CI (SDK Flutter não disponível neste ambiente).
+- Testar em aparelhos físicos: Wi-Fi local, 1+ fotos, 1+ vídeos, arquivos grandes, cancelamento, reabertura offline, escolha do aparelho e reprodução remota H.264/MP4.
+
+# Validação Vigia IA 1.0.306+306
 
 ## Versão 1.0.305+305 · histórico de veículos e OCR
 

@@ -7,7 +7,7 @@ class Redesign294(unittest.TestCase):
   def test_navigation_five_settings_top_right(self):
     nav=src('lib/widgets/main_navigation_bar.dart')
     self.assertNotIn("label: 'Ajustes'",nav)
-    self.assertEqual(nav.count("label: '"),5)
+    self.assertEqual(nav.count("label: '"),6)
     self.assertIn("tooltip: 'Configurações gerais'",src('lib/screens/monitor_screen.dart'))
     self.assertIn('appBar: AppBar(',src('lib/screens/map_workspace_shell.dart'))
     self.assertIn('return Scaffold(',src('lib/screens/settings_screen.dart'))
@@ -45,6 +45,6 @@ class Redesign294(unittest.TestCase):
     self.assertIn('exportToDownloads()',src('lib/screens/monitor_screen_ai_tools.dart'))
     self.assertIn('Downloads/Vigia IA',src('android/app/src/main/kotlin/com/vigiaia/app/MainActivity.kt'))
   def test_version(self):
-    self.assertIn('version: 1.0.305+305',src('pubspec.yaml'))
-    self.assertTrue((ROOT/'RELEASE-1.0.305.md').exists())
+    self.assertIn('version: 1.0.306+306',src('pubspec.yaml'))
+    self.assertTrue((ROOT/'RELEASE-1.0.306.md').exists())
 if __name__=='__main__': unittest.main()

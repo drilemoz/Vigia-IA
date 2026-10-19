@@ -77,12 +77,19 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.305',
+          version: '1.0.306',
           current: true,
           changes: [
-            'Fotos de veículos com confirmação e limite de repetições no Histórico.',
-            'Escanear placas brasileiras offline sob demanda no registro, com correção e cópia.',
-            'Registro automático opcional, sem envio de imagens à nuvem.',
+            'Galeria remota no menu inferior, para recuperar imagens e vídeos do A3.',
+            'Seleção múltipla, filtros, prévias e downloads com progresso.',
+            'Aba Recebidos com cópias locais; arquivos originais preservados no transmissor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.305',
+          changes: [
+            'Fotos automáticas de veículos no Histórico e OCR local manual de placas.',
           ],
         ),
         SizedBox(height: 10),

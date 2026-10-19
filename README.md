@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.305+305`
+**Versão atual:** `1.0.306+306`
+
+## Atualização 1.0.306+306 · Galeria remota A3 ⇄ Note 11
+
+- **Galeria** agora integra a navegação inferior com seis destinos, mantendo mapas, monitor e Histórico. Reutiliza o protocolo MCRP autenticado do transmissor Vigia IA / Minha Câmera, sem novos serviços de nuvem.
+- Escolha aparelhos salvos, cadastre a URL privada ou leia QR do A3; consulte fotos e vídeos, filtre, visualize e baixe individualmente ou em seleção múltipla. Transferência com progresso e cancelamento seguro, sem apagar originais.
+- Aba **Recebidos** mostra cópias locais offline; fotos MP4/JPEG e outros formatos suportados podem também ser publicados na galeria Android. Cópias privadas não contêm token no nome; downloads incompletos são removidos.
+- Transmissor A3 deve estar ligado, com serviço MCRP ativo e os dois aparelhos na mesma rede Wi-Fi; o envio de vídeo ao vivo e a gravação são independentes da Galeria. Esta versão não altera gravação nem habilita IA autônoma no A3.
 
 ## Atualização 1.0.305+305 · veículos e OCR offline
 

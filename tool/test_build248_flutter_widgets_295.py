@@ -14,13 +14,12 @@ class Build248WidgetContracts(unittest.TestCase):
         source = read('lib/widgets/main_navigation_bar.dart')
         test = read('test/main_navigation_bar_test.dart')
         self.assertEqual(source.count('label: \'Início\''), 1)
-        for name in ('Início', 'Histórico', 'Ao vivo', 'Câmeras', 'Mapas'):
+        for name in ('Início', 'Histórico', 'Ao vivo', 'Câmeras', 'Galeria', 'Mapas'):
             self.assertIn(f"label: '{name}'", source)
             self.assertIn(f"find.text('{name}')", test)
         self.assertNotIn("label: 'Ajustes'", source)
-        self.assertIn('findsNWidgets(5)', test)
+        self.assertIn('findsNWidgets(6)', test)
         self.assertIn("expect(find.text('Ajustes'), findsNothing)", test)
-        self.assertNotIn('findsNWidgets(6)', test)
 
     def test_mcrp_modal_commands_checked_not_merely_renamed(self):
         source = read('lib/widgets/mcrp_remote_controls.dart')
@@ -35,8 +34,8 @@ class Build248WidgetContracts(unittest.TestCase):
         self.assertNotIn("tester.tap(find.text('Resolução'))", test)
 
     def test_version(self):
-        self.assertIn('version: 1.0.305+305', read('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.305.md').is_file())
+        self.assertIn('version: 1.0.306+306', read('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.306.md').is_file())
 
 
 if __name__ == '__main__':
