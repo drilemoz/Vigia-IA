@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.314+314`
+**Versão atual:** `1.0.315+315`
+
+## Atualização 1.0.315+315 · Correção do APK 263
+
+Corrigidos três diagnósticos de `flutter analyze --fatal-infos --fatal-warnings` no build 263: import redundante do serviço de diagnóstico, import relativo em teste Dart e chamada de `print` no script. Nenhuma lógica de captura, transmissão, exportação ou recuperação foi modificada. A compilação do APK ainda deve ser confirmada no GitHub Actions. Detalhes: `RELEASE-1.0.315.md`.
 
 ## Atualização 1.0.314+314 · Diagnóstico automático
 

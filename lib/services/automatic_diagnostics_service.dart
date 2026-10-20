@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' show FrameTiming;
 
 import 'package:flutter/material.dart';

@@ -1,3 +1,11 @@
+## 1.0.315+315 (2026-10-20)
+
+- Corrigida a etapa `flutter analyze --fatal-infos --fatal-warnings` do workflow Android APK 263 (fonte 1.0.314).
+- Removido import redundante de `dart:typed_data` no coletor de diagnósticos Flutter.
+- O teste Dart do sanitizador passa a usar import `package:vigiaia/...` e `stdout.writeln` em vez de `print`, sem alterar asserções.
+- Incluída regressão para os três avisos; metadados, catálogo de Novidades e telas Sobre/Mudanças sincronizados.
+- APK Release, Flutter Test e avaliação do Analyzer após a correção dependem de novo workflow.
+
 ## 1.0.314+314 (2026-10-20)
 
 - Captura contínua local de telemetria e erros Flutter/Dart, isolate de IA e Java/Kotlin.

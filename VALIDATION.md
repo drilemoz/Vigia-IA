@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.315+315
+
+- Evidências e limites da correção do APK 263: `VALIDATION-1.0.315.md`.
+- Os logs originais mostram três lints de nível `info`, tratados como falha por `--fatal-infos`.
+- Corrigidos os três pontos no fonte e incorporado um teste preventivo. `flutter analyze`, `flutter test` e compilação APK devem ser confirmados no CI.
+
 # Validação Vigia IA 1.0.314+314
 
 - Evidências e limites desta entrega: `VALIDATION-1.0.314.md`.

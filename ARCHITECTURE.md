@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.314+314
+# Arquitetura — Vigia IA 1.0.315+315
+
+## 1.0.315+315 · Correção de lint no CI
+
+Sem alteração arquitetural. O `AutomaticDiagnosticsService` continua com coleta local; removido apenas um import redundante. O verificador Dart segue com as mesmas asserções, mas agora importa pelo pacote e escreve no stdout sem `print`.
 
 ## 1.0.314+314 · Coleta automática e recuperação
 

@@ -1,4 +1,6 @@
-import '../../lib/utils/diagnostic_redactor.dart';
+import 'dart:io';
+
+import 'package:vigiaia/utils/diagnostic_redactor.dart';
 
 void check(bool value, String label) {
   if (!value) throw StateError(label);
@@ -32,7 +34,7 @@ void main() {
       'credential leaked',
     );
   }
-  print(
+  stdout.writeln(
     'PASS: Dart redaction, legacy source scrub, preserved metrics and stack',
   );
 }
