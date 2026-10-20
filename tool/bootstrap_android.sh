@@ -30,6 +30,9 @@ rm -rf android/app/src/main/kotlin/*
 KOTLIN_DIR="android/app/src/main/kotlin/com/vigiaia/app"
 mkdir -p "$KOTLIN_DIR"
 cp "$ROOT/tool/android/MainActivity.kt" "$KOTLIN_DIR/MainActivity.kt"
+for helper in VigiaApplication AppDiagnostics DiagnosticPolicy; do
+  cp "$ROOT/tool/android/$helper.kt" "$KOTLIN_DIR/$helper.kt"
+done
 cp "$ROOT/tool/android/LanScanSupport.kt" "$KOTLIN_DIR/LanScanSupport.kt"
 cp "$ROOT/tool/android/CompassStreamHandler.kt" "$KOTLIN_DIR/CompassStreamHandler.kt"
 cp "$ROOT/tool/android/AlertAudioPlayer.kt" "$KOTLIN_DIR/AlertAudioPlayer.kt"

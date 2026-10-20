@@ -7,14 +7,12 @@ import 'app/app.dart';
 import 'services/app_orientation_service.dart';
 import 'services/appearance_settings_service.dart';
 import 'services/error_log_service.dart';
+import 'services/automatic_diagnostics_service.dart';
 import 'services/system_ui_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemUiService.edgeToEdge();
-  await AppOrientationService.lockPortrait();
-  await ErrorLogService.instance.initialize();
-  await AppearanceSettingsService.instance.initialize();
+  AutomaticDiagnosticsService.instance.start();
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -25,6 +23,7 @@ Future<void> main() async {
         stackTrace: details.stack,
         message: 'Erro não tratado pela interface.',
         context: <String, Object?>{
+          'nãoTratado': true,
           if (details.context != null)
             'contexto': details.context!.toDescription(),
           'biblioteca': details.library,
@@ -40,10 +39,20 @@ Future<void> main() async {
         error: error,
         stackTrace: stackTrace,
         message: 'Erro não tratado da plataforma.',
+        context: const {'nãoTratado': true},
       ),
     );
     return true;
   };
 
+  await ErrorLogService.instance.initialize();
+  try {
+    await SystemUiService.edgeToEdge();
+    await AppOrientationService.lockPortrait();
+    await AppearanceSettingsService.instance.initialize();
+  } catch (error, stackTrace) {
+    await ErrorLogService.instance.recordException(source: 'Inicialização',
+        error: error, stackTrace: stackTrace, context: const {'nãoTratado': true});
+  }
   runApp(const VigiaIaApp());
 }

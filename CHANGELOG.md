@@ -1,3 +1,12 @@
+## 1.0.314+314 (2026-10-20)
+
+- Captura contínua local de telemetria e erros Flutter/Dart, isolate de IA e Java/Kotlin.
+- Motivo de saída Android consultado para todo o app, independente de RTSP.
+- Sessão anterior preservada e aviso com exportação ao reabrir; até três incidentes pendentes.
+- Redação de credenciais também nos registros antigos e em FormatException.
+- Histórico limitado, escrita em worker e amostragem de 10 segundos.
+- Mantidas as correções de transmissão/gravação de 1.0.313.
+
 ## 1.0.313+313 (2026-10-20)
 
 - REC desacoplado da compressão de rede e rotação MP4 por metadado.

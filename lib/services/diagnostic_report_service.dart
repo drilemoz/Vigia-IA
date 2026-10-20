@@ -13,6 +13,8 @@ import 'global_audio_service.dart';
 import 'system_health_service.dart';
 import 'rtsp_diagnostics_service.dart';
 import 'map_diagnostics_service.dart';
+import 'automatic_diagnostics_service.dart';
+import '../utils/diagnostic_redactor.dart';
 
 class DiagnosticReport {
   DiagnosticReport({
@@ -21,6 +23,7 @@ class DiagnosticReport {
     this.audioDiagnostics = const {},
     this.rtspDiagnostics = const {},
     this.mapDiagnostics = const {},
+    this.automaticDiagnostics = const {},
     this.alertEvents = const [],
     this.esp32Modules = const [],
     required List<ErrorLogEntry> entries,
@@ -31,6 +34,7 @@ class DiagnosticReport {
   final Map<String, Object?> audioDiagnostics;
   final Map<String, Object?> rtspDiagnostics;
   final Map<String, Object?> mapDiagnostics;
+  final Map<String, Object?> automaticDiagnostics;
   final List<Map<String, Object?>> alertEvents;
   final List<Map<String, Object?>> esp32Modules;
   final List<ErrorLogEntry> entries;
@@ -198,7 +202,9 @@ class DiagnosticReport {
       ..writeln('Volume: ${audioDiagnostics['mediaVolume'] ?? '?'} / ${audioDiagnostics['mediaMaxVolume'] ?? '?'}')
       ..writeln('Dados técnicos: ${jsonEncode(audioDiagnostics)}');
     for (final event in alertEvents) { buffer.writeln(jsonEncode(event)); }
-    return buffer.toString();
+    buffer..writeln('\n=== DIAGNÓSTICO AUTOMÁTICO / SESSÕES ===')
+      ..writeln(const JsonEncoder.withIndent('  ').convert(automaticDiagnostics));
+    return DiagnosticRedactor.text(buffer.toString());
   }
 
   static String _yesNo(bool value) => value ? 'sim' : 'não';
@@ -240,6 +246,7 @@ class DiagnosticReportService {
       },
       rtspDiagnostics: rtspDiagnostics,
       mapDiagnostics: mapDiagnostics,
+      automaticDiagnostics: await AutomaticDiagnosticsService.instance.capture(),
       alertEvents: PerformanceTelemetryService.instance.createReport().alertEvents,
       esp32Modules: Esp32TelemetryService.instance.diagnostics,
       entries: List<ErrorLogEntry>.of(_logs.entries),

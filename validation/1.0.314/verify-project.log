@@ -1,0 +1,617 @@
+Ao vivo 266: contratos de vídeo, diagnóstico e telemetria aprovados.
+PASS: Dart redaction, legacy source scrub, preserved metrics and stack
+PASS: exit classification, no false crash for normal/user stop, redaction and size bounds
+----------------------------------------------------------------------
+Ran 4 tests in 14.107s
+
+OK
+----------------------------------------------------------------------
+Ran 2 tests in 11.934s
+
+OK
+PASS: conversão YUV, cadência, saídas independentes, proteção térmica e recuperação AVC
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+Versao e build sincronizados: 1.0.314+314
+APK 221: quatro atualizações IA usam helper no State e lint rigoroso permanece ativo.
+----------------------------------------------------------------------
+Ran 5 tests in 0.004s
+
+OK
+Build 219: padrão EfficientDet-Lite0 e modo Automático preservados (Flutter test).
+----------------------------------------------------------------------
+Ran 3 tests in 0.105s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 6 tests in 0.004s
+
+OK
+Ao vivo 1.0.262: layout, sensores reais e rótulos aprovados.
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK
+APK 215: if do seletor frontal com chaves e analyzer rigoroso preservado.
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+APK 213: getters do controlador de IA sem duplicidade
+----------------------------------------------------------------------
+Ran 3 tests in 0.004s
+
+OK
+MCRP Vigia IA: 14 contratos preventivos aprovados (nao substitui Flutter).
+MCRP 272: 14 contratos aprovados.
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s
+
+OK
+----------------------------------------------------------------------
+Ran 2 tests in 8.619s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+Build 209: 35 apontamentos do analyzer tratados estruturalmente (Flutter ainda necessário).
+----------------------------------------------------------------------
+Ran 5 tests in 0.003s
+
+OK
+Build 207: guard fullscreen com chaves e analyzer rigoroso preservados.
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+Contratos preventivos de eventos/áreas 256: OK
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+IA 258: controles, automação, relatório, fallback, transmissor OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 8 tests in 0.005s
+
+OK
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+----------------------------------------------------------------------
+Ran 10 tests in 0.004s
+
+OK
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+Versionamento sincronizado: 1.0.314+314
+----------------------------------------------------------------------
+Ran 2 tests in 0.184s
+
+OK
+Home 252: quatro modos, MCRP e câmeras cadastradas preservadas.
+----------------------------------------------------------------------
+Ran 4 tests in 0.045s
+
+OK
+OK: Ao vivo local direto; GPS/MBTiles/Explorer somente sob demanda; retomada preservada.
+----------------------------------------------------------------------
+Ran 4 tests in 0.004s
+
+OK
+Versao e build sincronizados: 1.0.314+314
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+----------------------------------------------------------------------
+Ran 3 tests in 0.006s
+
+OK
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+Versionamento sincronizado: 1.0.314+314
+Modelo em modo fonte: assets/models/efficientdet_lite0.tflite sera baixado por tool/fetch_model.sh antes do build.
+Modelo em modo fonte: assets/models/ssd_mobilenet_v1.tflite sera baixado por tool/fetch_model.sh antes do build.
+Contratos de IA, áudio, câmera e tela inteira 1.0.67 verificados.
+Catálogo de áudio Android validado: 78 slots com referências R.raw explícitas.
+Buildfixes do mapa #179 e #182 validados.
+Catálogo de áudio Android validado: 78 slots com referências R.raw explícitas.
+Contratos da interface 1.0.220: OK
+Buildfix #185: conflitos de Path, filtro rádio e avisos locais verificados.
+Regressões do analyzer Android APK #187: 3/3 guardas com chaves.
+Build Android APK #191: guarda offline com chaves aprovada.
+Regressao de overflow da ficha POI Android APK #188: OK
+HUD 1.0.228: 14 contratos estruturais aprovados
+Rotas 1.0.229: 11 contratos estruturais aprovados
+OK: 16 contratos Bike/ESP32/radio 1.0.230
+11 contratos offline e autonomia 1.0.231 aprovados
+Refatoracao 1.0.233: 18 contratos OK
+Refatoracao 1.0.234: 16 contratos OK
+Extracao de pre-visualizacao 235: 14 contratos OK
+Regressões locais de mapa/rádio 1.0.219: OK
+Alternativas de navegacao 236: 17 contratos OK
+Navegação modular 237: 15 contratos OK
+Gravacao modular 238: 20 contratos OK
+Buildfix 239: 10 construtores publicos com super.key; gate Flutter preservado.
+Buildfix 240: 3 expectativas textuais alinhadas aos widgets originais.
+Buildfix 241: altitude, precisão GPS e unidades validadas em layout normal/compacto.
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+Imports/exports/parts locais: destinos encontrados (checagem parcial).
+Contrato CI: gates, assinatura e ferramentas na ordem exigida.
+test_build212_regression (test_ai_controls_258.AiControls258Tests.test_build212_regression) ... ok
+test_contract (test_ai_controls_258.AiControls258Tests.test_contract) ... ok
+test_default_auto_and_choices (test_ai_controls_258.AiControls258Tests.test_default_auto_and_choices) ... ok
+test_manual_fallback_does_not_promote_heavier_model (test_ai_controls_258.AiControls258Tests.test_manual_fallback_does_not_promote_heavier_model) ... ok
+test_nonmodal_diagnostic_preserves_controls (test_ai_controls_258.AiControls258Tests.test_nonmodal_diagnostic_preserves_controls) ... ok
+test_actual_file (test_analyzer_213_259.Analyzer213259Test.test_actual_file) ... ok
+test_fails_for_duplicate_model_getter (test_analyzer_213_259.Analyzer213259Test.test_fails_for_duplicate_model_getter) ... ok
+test_unrelated_getter_not_flagged (test_analyzer_213_259.Analyzer213259Test.test_unrelated_getter_not_flagged) ... ok
+test_dart_redaction (test_automatic_diagnostics_314.Diagnostics314Tests.test_dart_redaction) ... PASS: Dart redaction, legacy source scrub, preserved metrics and stack
+ok
+test_hooks_and_recovery_order (test_automatic_diagnostics_314.Diagnostics314Tests.test_hooks_and_recovery_order) ... ok
+test_native_survives_bootstrap (test_automatic_diagnostics_314.Diagnostics314Tests.test_native_survives_bootstrap) ... ok
+test_production_rules (test_automatic_diagnostics_314.Diagnostics314Tests.test_production_rules) ... PASS: exit classification, no false crash for normal/user stop, redaction and size bounds
+ok
+test_each_return_without_braces_is_rejected (test_build187_lints.Build187LintsTest.test_each_return_without_braces_is_rejected) ... ok
+test_missing_guard_is_rejected (test_build187_lints.Build187LintsTest.test_missing_guard_is_rejected) ... ok
+test_original_code_corrected (test_build187_lints.Build187LintsTest.test_original_code_corrected) ... ok
+test_baseline (test_build188_poi_layout.PoiLayout188Test.test_baseline) ... ok
+test_missing_responsive_buttons_rejected (test_build188_poi_layout.PoiLayout188Test.test_missing_responsive_buttons_rejected) ... ok
+test_missing_small_screen_regression_rejected (test_build188_poi_layout.PoiLayout188Test.test_missing_small_screen_regression_rejected) ... ok
+test_unbounded_text_rejected (test_build188_poi_layout.PoiLayout188Test.test_unbounded_text_rejected) ... ok
+test_corrected_guard_has_block (test_build191_lints.Build191LintsTest.test_corrected_guard_has_block) ... ok
+test_missing_guard_is_rejected (test_build191_lints.Build191LintsTest.test_missing_guard_is_rejected) ... ok
+test_original_unbraced_return_is_rejected (test_build191_lints.Build191LintsTest.test_original_unbraced_return_is_rejected) ... ok
+test_corrected_expectations (test_build195_widget_text_240.Build195WidgetTextRegression.test_corrected_expectations) ... ok
+test_rejects_loss_of_rich_text_unit (test_build195_widget_text_240.Build195WidgetTextRegression.test_rejects_loss_of_rich_text_unit) ... ok
+test_rejects_old_separate_number_expectation (test_build195_widget_text_240.Build195WidgetTextRegression.test_rejects_old_separate_number_expectation) ... ok
+test_rejects_old_unrendered_heading_word (test_build195_widget_text_240.Build195WidgetTextRegression.test_rejects_old_unrendered_heading_word) ... ok
+test_baseline (test_build196_telemetry_units_241.TelemetryUnitContracts.test_baseline) ... ok
+test_detects_isolated_accuracy (test_build196_telemetry_units_241.TelemetryUnitContracts.test_detects_isolated_accuracy) ... ok
+test_detects_isolated_altitude (test_build196_telemetry_units_241.TelemetryUnitContracts.test_detects_isolated_altitude) ... ok
+test_detects_lost_compact_case (test_build196_telemetry_units_241.TelemetryUnitContracts.test_detects_lost_compact_case) ... ok
+test_detects_lost_units_in_widget (test_build196_telemetry_units_241.TelemetryUnitContracts.test_detects_lost_units_in_widget) ... ok
+test_clean_sources (test_build198_lints_243.Build198LintTests.test_clean_sources) ... ok
+test_rejects_concatenation (test_build198_lints_243.Build198LintTests.test_rejects_concatenation) ... ok
+test_rejects_healthcheck_path_regression (test_build198_lints_243.Build198LintTests.test_rejects_healthcheck_path_regression) ... ok
+test_rejects_missing_braces (test_build198_lints_243.Build198LintTests.test_rejects_missing_braces) ... ok
+test_rejects_unneeded_import (test_build198_lints_243.Build198LintTests.test_rejects_unneeded_import) ... ok
+test_inline_return_detected (test_build201_lint_246.Build201LintRegression.test_inline_return_detected) ... ok
+test_lint_suppression_detected (test_build201_lint_246.Build201LintRegression.test_lint_suppression_detected) ... ok
+test_lost_generation_guard_detected (test_build201_lint_246.Build201LintRegression.test_lost_generation_guard_detected) ... ok
+test_real_project (test_build201_lint_246.Build201LintRegression.test_real_project) ... ok
+test_removed_braces_detected (test_build201_lint_246.Build201LintRegression.test_removed_braces_detected) ... ok
+test_contract_passes (test_build204_test_timeout_249.Build204RegressionTests.test_contract_passes) ... ok
+test_rejects_fake_async_directory_create (test_build204_test_timeout_249.Build204RegressionTests.test_rejects_fake_async_directory_create) ... ok
+test_rejects_file_io_in_widget (test_build204_test_timeout_249.Build204RegressionTests.test_rejects_file_io_in_widget) ... ok
+test_rejects_lost_persistence_coverage (test_build204_test_timeout_249.Build204RegressionTests.test_rejects_lost_persistence_coverage) ... ok
+test_rejects_missing_test_timeout (test_build204_test_timeout_249.Build204RegressionTests.test_rejects_missing_test_timeout) ... ok
+test_rejects_missing_workflow_guard (test_build204_test_timeout_249.Build204RegressionTests.test_rejects_missing_workflow_guard) ... ok
+test_missing_braces_fails (test_build207_fullscreen_lint_253.Build207FullscreenLint253.test_missing_braces_fails) ... ok
+test_real_project (test_build207_fullscreen_lint_253.Build207FullscreenLint253.test_real_project) ... ok
+test_relaxed_analyzer_fails (test_build207_fullscreen_lint_253.Build207FullscreenLint253.test_relaxed_analyzer_fails) ... ok
+test_suppression_fails (test_build207_fullscreen_lint_253.Build207FullscreenLint253.test_suppression_fails) ... ok
+test_accidental_divider_variable_detected (test_build209_analyzer_255.Build209AnalyzerRegression.test_accidental_divider_variable_detected) ... ok
+test_analyzer_policy_preserved (test_build209_analyzer_255.Build209AnalyzerRegression.test_analyzer_policy_preserved) ... ok
+test_current_contract (test_build209_analyzer_255.Build209AnalyzerRegression.test_current_contract) ... ok
+test_interpolation_lint_detected (test_build209_analyzer_255.Build209AnalyzerRegression.test_interpolation_lint_detected) ... ok
+test_missing_ai_getter_detected (test_build209_analyzer_255.Build209AnalyzerRegression.test_missing_ai_getter_detected) ... ok
+test_analyzer_must_stay_strict (test_build215_camera_lint_261.Build215CameraLint261.test_analyzer_must_stay_strict) ... ok
+test_lint_suppression_is_rejected (test_build215_camera_lint_261.Build215CameraLint261.test_lint_suppression_is_rejected) ... ok
+test_missing_braces_is_rejected (test_build215_camera_lint_261.Build215CameraLint261.test_missing_braces_is_rejected) ... ok
+test_real_project (test_build215_camera_lint_261.Build215CameraLint261.test_real_project) ... ok
+test_automatic_option_remains_available (test_build219_yolo_default_test_265.YoloDefaultFlutterRegressionTest.test_automatic_option_remains_available) ... ok
+test_check_runs (test_build219_yolo_default_test_265.YoloDefaultFlutterRegressionTest.test_check_runs) ... ok
+test_flutter_default_is_yolo26s (test_build219_yolo_default_test_265.YoloDefaultFlutterRegressionTest.test_flutter_default_is_yolo26s) ... ok
+test_analyzer_must_stay_strict (test_build221_ai_lint_267.Build221AiLint267Test.test_analyzer_must_stay_strict) ... ok
+test_current_contract (test_build221_ai_lint_267.Build221AiLint267Test.test_current_contract) ... ok
+test_direct_protected_state_call_rejected (test_build221_ai_lint_267.Build221AiLint267Test.test_direct_protected_state_call_rejected) ... ok
+test_lint_suppression_rejected (test_build221_ai_lint_267.Build221AiLint267Test.test_lint_suppression_rejected) ... ok
+test_missing_state_helper_rejected (test_build221_ai_lint_267.Build221AiLint267Test.test_missing_state_helper_rejected) ... ok
+test_ci_delegates_version_code_to_dynamic_validator (test_build223_version_sync_270.Build223VersionSyncTests.test_ci_delegates_version_code_to_dynamic_validator) ... ok
+test_validator_rejects_mismatched_android_version_code_and_name (test_build223_version_sync_270.Build223VersionSyncTests.test_validator_rejects_mismatched_android_version_code_and_name) ... ok
+test_current_version_is_updated (test_build227_lints_274.Build227LintContract.test_current_version_is_updated) ... ok
+test_mounted_snackbar_condition_is_braced (test_build227_lints_274.Build227LintContract.test_mounted_snackbar_condition_is_braced) ... ok
+test_recording_uses_null_safe_access_in_native_ui (test_build227_lints_274.Build227LintContract.test_recording_uses_null_safe_access_in_native_ui) ... ok
+test_class_copied_and_visible_to_compiler (test_build228_nv21_275.Nv21Build228Tests.test_class_copied_and_visible_to_compiler) ... ok
+test_rotation_y_and_interleaved_vu_kotlin (test_build228_nv21_275.Nv21Build228Tests.test_rotation_y_and_interleaved_vu_kotlin) ... ok
+test_current_version_matches_news_without_stale_build (test_build230_native_status_lint_277.Build230NativeStatusLint.test_current_version_matches_news_without_stale_build) ... ok
+test_native_status_has_nonnull_promotion_before_ready (test_build230_native_status_lint_277.Build230NativeStatusLint.test_native_status_has_nonnull_promotion_before_ready) ... ok
+test_delete_update_is_braced (test_build239_trip_lint_286.Build239TripLint286.test_delete_update_is_braced) ... ok
+test_gps_error_conditional_is_braced (test_build239_trip_lint_286.Build239TripLint286.test_gps_error_conditional_is_braced) ... ok
+test_preferences_update_is_braced (test_build239_trip_lint_286.Build239TripLint286.test_preferences_update_is_braced) ... ok
+test_app_startup_mount_guard_has_braces (test_build244_flutter_analyze_291.Build244FlutterAnalyzeTests.test_app_startup_mount_guard_has_braces) ... ok
+test_data_usage_pending_write_has_braces (test_build244_flutter_analyze_291.Build244FlutterAnalyzeTests.test_data_usage_pending_write_has_braces) ... ok
+test_tcp_decoder_matches_uint8list_stream (test_build244_flutter_analyze_291.Build244FlutterAnalyzeTests.test_tcp_decoder_matches_uint8list_stream) ... ok
+test_version_and_release_synced (test_build244_flutter_analyze_291.Build244FlutterAnalyzeTests.test_version_and_release_synced) ... ok
+test_data_usage_resumption_guard_with_multiline_condition_is_block (test_build245_flutter_analyze_292.Build245FlutterAnalyzeTests.test_data_usage_resumption_guard_with_multiline_condition_is_block) ... ok
+test_rtsp_byte_type_fix_is_preserved (test_build245_flutter_analyze_292.Build245FlutterAnalyzeTests.test_rtsp_byte_type_fix_is_preserved) ... ok
+test_transmitter_guard_with_multiline_condition_is_block (test_build245_flutter_analyze_292.Build245FlutterAnalyzeTests.test_transmitter_guard_with_multiline_condition_is_block) ... ok
+test_version_and_news_current (test_build245_flutter_analyze_292.Build245FlutterAnalyzeTests.test_version_and_news_current) ... ok
+test_main_navigation_and_widget_assertions_match (test_build248_flutter_widgets_295.Build248WidgetContracts.test_main_navigation_and_widget_assertions_match) ... ok
+test_mcrp_modal_commands_checked_not_merely_renamed (test_build248_flutter_widgets_295.Build248WidgetContracts.test_mcrp_modal_commands_checked_not_merely_renamed) ... ok
+test_version (test_build248_flutter_widgets_295.Build248WidgetContracts.test_version) ... ok
+test_changed_if_branches_are_braced (test_build253_analyzer_302.Build253Analyzer302.test_changed_if_branches_are_braced) ... ok
+test_rtsp_editor_user_field_has_no_extra_parenthesis (test_build253_analyzer_302.Build253Analyzer302.test_rtsp_editor_user_field_has_no_extra_parenthesis) ... ok
+test_sdp_regex_uses_supported_multiline_parameter (test_build253_analyzer_302.Build253Analyzer302.test_sdp_regex_uses_supported_multiline_parameter) ... ok
+test_socket_utf8_decoder_receives_list_int_stream (test_build253_analyzer_302.Build253Analyzer302.test_socket_utf8_decoder_receives_list_int_stream) ... ok
+test_transmitter_checks_nullable_status_before_ready (test_build253_analyzer_302.Build253Analyzer302.test_transmitter_checks_nullable_status_before_ready) ... ok
+test_commands_are_still_asserted (test_build254_zoom_widget_303.Build254ZoomWidget303.test_commands_are_still_asserted) ... ok
+test_compact_zoom_dialog_contract (test_build254_zoom_widget_303.Build254ZoomWidget303.test_compact_zoom_dialog_contract) ... ok
+test_remote_commands_not_removed (test_build255_zoom_scope_304.Build255ZoomScope304.test_remote_commands_not_removed) ... ok
+test_zoom_dialog_has_stable_scope (test_build255_zoom_scope_304.Build255ZoomScope304.test_zoom_dialog_has_stable_scope) ... ok
+test_async_context_mounted (test_build258_flutter_analyze_308.Build258AnalyzerFix.test_async_context_mounted) ... ok
+test_gallery_all_three_ifs_use_braces (test_build258_flutter_analyze_308.Build258AnalyzerFix.test_gallery_all_three_ifs_use_braces) ... ok
+test_no_protected_set_state_extension (test_build258_flutter_analyze_308.Build258AnalyzerFix.test_no_protected_set_state_extension) ... ok
+test_ocr_redundant_import_removed (test_build258_flutter_analyze_308.Build258AnalyzerFix.test_ocr_redundant_import_removed) ... ok
+test_release_and_previous_features_preserved (test_build258_flutter_analyze_308.Build258AnalyzerFix.test_release_and_previous_features_preserved) ... ok
+test_vehicle_guard_both_ifs_use_braces (test_build258_flutter_analyze_308.Build258AnalyzerFix.test_vehicle_guard_both_ifs_use_braces) ... ok
+test_gallery_download_progress_mounted_if_has_explicit_braces (test_build259_flutter_analyze_309.Build259AnalyzerRegression.test_gallery_download_progress_mounted_if_has_explicit_braces) ... ok
+test_new_version_preserves_previous_features (test_build259_flutter_analyze_309.Build259AnalyzerRegression.test_new_version_preserves_previous_features) ... ok
+test_vehicle_photo_camera_cooldown_if_has_explicit_braces (test_build259_flutter_analyze_309.Build259AnalyzerRegression.test_vehicle_photo_camera_cooldown_if_has_explicit_braces) ... ok
+test_eight_optional_missing_types_are_the_only_suppressed_types (test_build260_r8_mlkit_310.Build260R8Regression.test_eight_optional_missing_types_are_the_only_suppressed_types) ... ok
+test_original_ocr_and_local_gallery_remain_available (test_build260_r8_mlkit_310.Build260R8Regression.test_original_ocr_and_local_gallery_remain_available) ... ok
+test_release_uses_same_rules_and_bootstrap_restores_them (test_build260_r8_mlkit_310.Build260R8Regression.test_release_uses_same_rules_and_bootstrap_restores_them) ... ok
+test_four_add_source_actions_in_one_row_without_changing_callbacks (test_camera_compact_280.CameraCompact280.test_four_add_source_actions_in_one_row_without_changing_callbacks) ... ok
+test_info_is_an_action_next_to_metrics_not_full_banner (test_camera_compact_280.CameraCompact280.test_info_is_an_action_next_to_metrics_not_full_banner) ... ok
+test_local_camera_shows_event_without_redundant_device_detail (test_camera_compact_280.CameraCompact280.test_local_camera_shows_event_without_redundant_device_detail) ... ok
+test_mobile_cards_are_content_sized_other_widths_preserve_grid (test_camera_compact_280.CameraCompact280.test_mobile_cards_are_content_sized_other_widths_preserve_grid) ... ok
+test_contract (test_camera_hub_248.CameraHub248Tests.test_contract) ... ok
+test_deletion_does_not_reimport_legacy (test_camera_hub_248.CameraHub248Tests.test_deletion_does_not_reimport_legacy) ... ok
+test_migration_not_losing_source_before_save (test_camera_hub_248.CameraHub248Tests.test_migration_not_losing_source_before_save) ... ok
+test_mjpeg_source_not_rtsp (test_camera_hub_248.CameraHub248Tests.test_mjpeg_source_not_rtsp) ... ok
+test_monitor_entry (test_camera_hub_248.CameraHub248Tests.test_monitor_entry) ... ok
+test_no_duplicate_home_card_but_controls_remain (test_camera_hub_248.CameraHub248Tests.test_no_duplicate_home_card_but_controls_remain) ... ok
+test_no_secret_in_camera_card (test_camera_hub_248.CameraHub248Tests.test_no_secret_in_camera_card) ... ok
+test_front_is_primary_from_both_selectors (test_camera_primary_perf_260.FrontPrimaryAndPerformance260.test_front_is_primary_from_both_selectors) ... ok
+test_ignore_legacy_secondary_front_after_resume (test_camera_primary_perf_260.FrontPrimaryAndPerformance260.test_ignore_legacy_secondary_front_after_resume) ... ok
+test_local_frame_source_tracks_front_lens (test_camera_primary_perf_260.FrontPrimaryAndPerformance260.test_local_frame_source_tracks_front_lens) ... ok
+test_single_physical_camera_released_before_switch (test_camera_primary_perf_260.FrontPrimaryAndPerformance260.test_single_physical_camera_released_before_switch) ... ok
+test_throttle_does_not_limit_native_preview (test_camera_primary_perf_260.FrontPrimaryAndPerformance260.test_throttle_does_not_limit_native_preview) ... ok
+test_distance_and_sources_are_not_equated_to_driving_route (test_destination_search_contracts.DestinationSearchContracts.test_distance_and_sources_are_not_equated_to_driving_route) ... ok
+test_incremental_search_does_not_call_nominatim (test_destination_search_contracts.DestinationSearchContracts.test_incremental_search_does_not_call_nominatim) ... ok
+test_local_results_use_same_ranking_and_no_stale_query_overwrite (test_destination_search_contracts.DestinationSearchContracts.test_local_results_use_same_ranking_and_no_stale_query_overwrite) ... ok
+test_nominatim_is_submitted_with_nonrestrictive_regional_preference (test_destination_search_contracts.DestinationSearchContracts.test_nominatim_is_submitted_with_nonrestrictive_regional_preference) ... ok
+test_pure_dart_regressions_exist (test_destination_search_contracts.DestinationSearchContracts.test_pure_dart_regressions_exist) ... ok
+test_editor_dialog_keeps_all_existing_settings (test_home_dashboard_281.HomeDashboard281.test_editor_dialog_keeps_all_existing_settings) ... ok
+test_public_version (test_home_dashboard_281.HomeDashboard281.test_public_version) ... ok
+test_telemetry_is_reachable_without_duplicate_shortcuts (test_home_dashboard_281.HomeDashboard281.test_telemetry_is_reachable_without_duplicate_shortcuts) ... ok
+test_three_independent_compact_cards (test_home_dashboard_281.HomeDashboard281.test_three_independent_compact_cards) ... ok
+test_contract (test_home_modes_252.HomeModes252Tests.test_contract) ... ok
+test_home_has_only_four_main_cards (test_home_modes_252.HomeModes252Tests.test_home_has_only_four_main_cards) ... ok
+test_mcrp_remains_visible_in_camera_hub (test_home_modes_252.HomeModes252Tests.test_mcrp_remains_visible_in_camera_hub) ... ok
+test_saved_camera_records_not_changed (test_home_modes_252.HomeModes252Tests.test_saved_camera_records_not_changed) ... ok
+test_dashboard_has_no_repeated_navigation (test_home_organization_282.HomeOrganization282.test_dashboard_has_no_repeated_navigation) ... ok
+test_data_and_adjustment_actions_preserved (test_home_organization_282.HomeOrganization282.test_data_and_adjustment_actions_preserved) ... ok
+test_modes_are_actions_and_existing_services_are_reused (test_home_organization_282.HomeOrganization282.test_modes_are_actions_and_existing_services_are_reused) ... ok
+test_status_is_configuration_not_invented_live_metrics (test_home_organization_282.HomeOrganization282.test_status_is_configuration_not_invented_live_metrics) ... ok
+test_version (test_home_organization_282.HomeOrganization282.test_version) ... ok
+test_android_wifi_subnet_and_no_cellular (test_lan_scan_289.LanDiscovery289.test_android_wifi_subnet_and_no_cellular) ... ok
+test_ci_installs_helper_even_when_android_recreated (test_lan_scan_289.LanDiscovery289.test_ci_installs_helper_even_when_android_recreated) ... ok
+test_multicast_lock_scoped_with_android_manifest (test_lan_scan_289.LanDiscovery289.test_multicast_lock_scoped_with_android_manifest) ... ok
+test_no_auto_pair_token_or_password_in_discovery (test_lan_scan_289.LanDiscovery289.test_no_auto_pair_token_or_password_in_discovery) ... ok
+test_onvif_udp_parallel_tcp (test_lan_scan_289.LanDiscovery289.test_onvif_udp_parallel_tcp) ... ok
+test_probe_never_authenticates_and_confirms_protocol (test_lan_scan_289.LanDiscovery289.test_probe_never_authenticates_and_confirms_protocol) ... ok
+test_tcp_well_known_ports_and_bounded_concurrency (test_lan_scan_289.LanDiscovery289.test_tcp_well_known_ports_and_bounded_concurrency) ... ok
+test_ui_permission_progress_cancel_and_not_fake_rtsp (test_lan_scan_289.LanDiscovery289.test_ui_permission_progress_cancel_and_not_fake_rtsp) ... ok
+test_current_contract (test_live_lazy_map_251.LiveLazyMap251.test_current_contract) ... ok
+test_detects_live_picker_regression (test_live_lazy_map_251.LiveLazyMap251.test_detects_live_picker_regression) ... ok
+test_detects_location_guard_regression (test_live_lazy_map_251.LiveLazyMap251.test_detects_location_guard_regression) ... ok
+test_detects_map_auto_start_regression (test_live_lazy_map_251.LiveLazyMap251.test_detects_map_auto_start_regression) ... ok
+test_900ms_cap_removed_and_250ms_safety_kept (test_local_camera_fps_268.LocalCameraFps268.test_900ms_cap_removed_and_250ms_safety_kept) ... ok
+test_backpressure_protects_cpu_and_preview (test_local_camera_fps_268.LocalCameraFps268.test_backpressure_protects_cpu_and_preview) ... ok
+test_configured_target_and_bike_policy (test_local_camera_fps_268.LocalCameraFps268.test_configured_target_and_bike_policy) ... ok
+test_slider_allows_250ms_and_diagnostic_shows_effective_interval (test_local_camera_fps_268.LocalCameraFps268.test_slider_allows_250ms_and_diagnostic_shows_effective_interval) ... ok
+test_unrelated_remote_video_keeps_its_own_cadence (test_local_camera_fps_268.LocalCameraFps268.test_unrelated_remote_video_keeps_its_own_cadence) ... ok
+test_all_primary_surfaces (test_main_navigation_six_279.MainNavigationFive294.test_all_primary_surfaces) ... ok
+test_five_destinations (test_main_navigation_six_279.MainNavigationFive294.test_five_destinations) ... ok
+test_single_routing_contract (test_main_navigation_six_279.MainNavigationFive294.test_single_routing_contract) ... ok
+test_all_ten_public_widget_constructors_accept_super_key (test_map_widget_keys_239.ExtractedMapKeys239Tests.test_all_ten_public_widget_constructors_accept_super_key) ... ok
+test_missing_key_is_detected (test_map_widget_keys_239.ExtractedMapKeys239Tests.test_missing_key_is_detected) ... ok
+test_missing_widget_class_is_detected (test_map_widget_keys_239.ExtractedMapKeys239Tests.test_missing_widget_class_is_detected) ... ok
+test_one_line_widget_constructor_without_key_is_detected (test_map_widget_keys_239.ExtractedMapKeys239Tests.test_one_line_widget_constructor_without_key_is_detected) ... ok
+test_compatibility_error_only_404 (test_mcrp_245.TestMcrp245.test_compatibility_error_only_404) ... ok
+test_low_cost_stream (test_mcrp_245.TestMcrp245.test_low_cost_stream) ... ok
+test_no_legacy_by_default (test_mcrp_245.TestMcrp245.test_no_legacy_by_default) ... ok
+test_no_model_transmission (test_mcrp_245.TestMcrp245.test_no_model_transmission) ... ok
+test_public_media_store (test_mcrp_245.TestMcrp245.test_public_media_store) ... ok
+test_structural_contracts (test_mcrp_245.TestMcrp245.test_structural_contracts) ... ok
+test_help_status_and_camera_name_cleanup (test_mcrp_lite0_293.CompactRemote293.test_help_status_and_camera_name_cleanup) ... ok
+test_lite0_default_and_auto_order (test_mcrp_lite0_293.CompactRemote293.test_lite0_default_and_auto_order) ... ok
+test_metadata (test_mcrp_lite0_293.CompactRemote293.test_metadata) ... ok
+test_zoom_and_resolution_keep_authenticated_commands (test_mcrp_lite0_293.CompactRemote293.test_zoom_and_resolution_keep_authenticated_commands) ... ok
+test_no_stale_frame_or_false_live_state (test_mcrp_live_ui_298.McrpLiveUi298.test_no_stale_frame_or_false_live_state) ... ok
+test_server_is_authority_of_state_and_elapsed (test_mcrp_live_ui_298.McrpLiveUi298.test_server_is_authority_of_state_and_elapsed) ... ok
+test_status_below_video_and_independent_rec (test_mcrp_live_ui_298.McrpLiveUi298.test_status_below_video_and_independent_rec) ... ok
+test_confidence_regression (test_monitor_layout_262.MonitorLayout262Test.test_confidence_regression) ... ok
+test_contract (test_monitor_layout_262.MonitorLayout262Test.test_contract) ... ok
+test_floating_regression (test_monitor_layout_262.MonitorLayout262Test.test_floating_regression) ... ok
+test_missing_data_regression (test_monitor_layout_262.MonitorLayout262Test.test_missing_data_regression) ... ok
+test_all_entrypoints_use_native_transmitter (test_native_default_transmitter_278.NativeTransmitterDefault278.test_all_entrypoints_use_native_transmitter) ... ok
+test_keeps_private_qr_remote_rec_and_emergency_controls (test_native_default_transmitter_278.NativeTransmitterDefault278.test_keeps_private_qr_remote_rec_and_emergency_controls) ... ok
+test_registration_names_are_consistent (test_native_default_transmitter_278.NativeTransmitterDefault278.test_registration_names_are_consistent) ... ok
+test_bootstrap_restores_all_sources (test_native_transmitter_273.NativeTransmitterContracts.test_bootstrap_restores_all_sources) ... ok
+test_core_camera_service_and_mcrp_protocol (test_native_transmitter_273.NativeTransmitterContracts.test_core_camera_service_and_mcrp_protocol) ... ok
+test_native_is_exposed_by_default_and_legacy_is_unrouted (test_native_transmitter_273.NativeTransmitterContracts.test_native_is_exposed_by_default_and_legacy_is_unrouted) ... ok
+test_permissions_foreground_and_local_channel (test_native_transmitter_273.NativeTransmitterContracts.test_permissions_foreground_and_local_channel) ... ok
+test_fullscreen_rotation_and_controls (test_network_cameras_287.NetworkAndMonitor287.test_fullscreen_rotation_and_controls) ... ok
+test_heuristic_opt_in_and_model_visible (test_network_cameras_287.NetworkAndMonitor287.test_heuristic_opt_in_and_model_visible) ... ok
+test_lan_discovery_scoped_and_no_token (test_network_cameras_287.NetworkAndMonitor287.test_lan_discovery_scoped_and_no_token) ... ok
+test_pairing_still_requires_qr (test_network_cameras_287.NetworkAndMonitor287.test_pairing_still_requires_qr) ... ok
+test_rtsp_credentials_protected (test_network_cameras_287.NetworkAndMonitor287.test_rtsp_credentials_protected) ... ok
+test_current_news_accepts_descriptions_of_fixes (test_news_catalog_policy_301.NewsCatalogPolicy301Tests.test_current_news_accepts_descriptions_of_fixes) ... ok
+test_reject_old_release_or_empty_news (test_news_catalog_policy_301.NewsCatalogPolicy301Tests.test_reject_old_release_or_empty_news) ... ok
+test_word_correction_is_not_a_rejection_reason (test_news_catalog_policy_301.NewsCatalogPolicy301Tests.test_word_correction_is_not_a_rejection_reason) ... ok
+test_baseline (test_offline_autonomy_231.OfflineAutonomy231Test.test_baseline) ... ok
+test_lost_offline_polling_rejected (test_offline_autonomy_231.OfflineAutonomy231Test.test_lost_offline_polling_rejected) ... ok
+test_missing_corridor_guard_rejected (test_offline_autonomy_231.OfflineAutonomy231Test.test_missing_corridor_guard_rejected) ... ok
+test_reintroduced_duplicate_dns_rejected (test_offline_autonomy_231.OfflineAutonomy231Test.test_reintroduced_duplicate_dns_rejected) ... ok
+test_online_fetch_has_http_backoff (test_poi_contracts_225.PoiContracts225.test_online_fetch_has_http_backoff) ... ok
+test_poi_detail_source_distance_and_caveat (test_poi_contracts_225.PoiContracts225.test_poi_detail_source_distance_and_caveat) ... ok
+test_restore_marks_old_online_results_cache (test_poi_contracts_225.PoiContracts225.test_restore_marks_old_online_results_cache) ... ok
+test_result_provenance_is_persisted (test_poi_contracts_225.PoiContracts225.test_result_provenance_is_persisted) ... ok
+test_navigation_five_settings_top_right (test_redesign_294.Redesign294.test_navigation_five_settings_top_right) ... ok
+test_rtsp_prefill_and_diagnostic (test_redesign_294.Redesign294.test_rtsp_prefill_and_diagnostic) ... ok
+test_tcp_8765_does_not_bypass_qr (test_redesign_294.Redesign294.test_tcp_8765_does_not_bypass_qr) ... ok
+test_version (test_redesign_294.Redesign294.test_version) ... ok
+test_video_control_combines_fps_quality_and_torch (test_redesign_294.Redesign294.test_video_control_combines_fps_quality_and_torch) ... ok
+test_video_paused_and_times_from_real_transmitter (test_redesign_294.Redesign294.test_video_paused_and_times_from_real_transmitter) ... ok
+test_current_metadata_and_catalog_match_pubspec (test_release_consistency_296.ReleaseConsistency296Tests.test_current_metadata_and_catalog_match_pubspec) ... ok
+test_reject_android_metadata_mismatch (test_release_consistency_296.ReleaseConsistency296Tests.test_reject_android_metadata_mismatch) ... ok
+test_reject_stale_catalog_build (test_release_consistency_296.ReleaseConsistency296Tests.test_reject_stale_catalog_build) ... ok
+test_gallery_ui_mimics_existing_remote_multimedia (test_remote_gallery_306.RemoteGallery306.test_gallery_ui_mimics_existing_remote_multimedia) ... ok
+test_media_stream_security_and_atomic_copy (test_remote_gallery_306.RemoteGallery306.test_media_stream_security_and_atomic_copy) ... ok
+test_six_destinations_with_explicit_gallery (test_remote_gallery_306.RemoteGallery306.test_six_destinations_with_explicit_gallery) ... ok
+test_version (test_remote_gallery_306.RemoteGallery306.test_version) ... ok
+test_home_remembers_id_without_secret_and_fallback_does_not_forget (test_remote_transmission_288.RemoteTransmission288.test_home_remembers_id_without_secret_and_fallback_does_not_forget) ... ok
+test_pause_releases_expensive_capture_not_authentication (test_remote_transmission_288.RemoteTransmission288.test_pause_releases_expensive_capture_not_authentication) ... ok
+test_protocol_is_authenticated_and_backward_compatible (test_remote_transmission_288.RemoteTransmission288.test_protocol_is_authenticated_and_backward_compatible) ... ok
+test_receiver_controls_use_actual_status_and_legacy_fallback (test_remote_transmission_288.RemoteTransmission288.test_receiver_controls_use_actual_status_and_legacy_fallback) ... ok
+test_resume_does_not_rebind_port_or_change_token (test_remote_transmission_288.RemoteTransmission288.test_resume_does_not_rebind_port_or_change_token) ... ok
+test_thermal_limits_preexisting_and_no_invented_savings (test_remote_transmission_288.RemoteTransmission288.test_thermal_limits_preexisting_and_no_invented_savings) ... ok
+test_analyzer_removed (test_stabilization_contracts.CiContractTests.test_analyzer_removed) ... ok
+test_apk_metadata_verification_removed (test_stabilization_contracts.CiContractTests.test_apk_metadata_verification_removed) ... ok
+test_baseline (test_stabilization_contracts.CiContractTests.test_baseline) ... ok
+test_gradle_wrapper_mismatch (test_stabilization_contracts.CiContractTests.test_gradle_wrapper_mismatch) ... ok
+test_missing_signature_verification (test_stabilization_contracts.CiContractTests.test_missing_signature_verification) ... ok
+test_signing_before_tests (test_stabilization_contracts.CiContractTests.test_signing_before_tests) ... ok
+test_tests_removed (test_stabilization_contracts.CiContractTests.test_tests_removed) ... ok
+test_local_import_missing (test_stabilization_contracts.ImportTargetTests.test_local_import_missing) ... ok
+test_package_import_and_external_package (test_stabilization_contracts.ImportTargetTests.test_package_import_and_external_package) ... ok
+test_real_project (test_stabilization_contracts.ImportTargetTests.test_real_project) ... ok
+test_closed_panel_updates_freshness_via_shared_tick (test_stabilization_contracts.TelemetryHudContracts.test_closed_panel_updates_freshness_via_shared_tick) ... ok
+test_compass_gps_heading_requires_live_fix (test_stabilization_contracts.TelemetryHudContracts.test_compass_gps_heading_requires_live_fix) ... ok
+test_hud_uses_only_fresh_gps_for_accuracy_and_altitude (test_stabilization_contracts.TelemetryHudContracts.test_hud_uses_only_fresh_gps_for_accuracy_and_altitude) ... ok
+test_confirmation (test_transition_evidence_256.VerifiedZoneContracts.test_confirmation) ... ok
+test_controller_uses_safe_mode (test_transition_evidence_256.VerifiedZoneContracts.test_controller_uses_safe_mode) ... ok
+test_cooldown (test_transition_evidence_256.VerifiedZoneContracts.test_cooldown) ... ok
+test_current (test_transition_evidence_256.VerifiedZoneContracts.test_current) ... ok
+test_missing_exit_guard (test_transition_evidence_256.VerifiedZoneContracts.test_missing_exit_guard) ... ok
+test_motion_evidence (test_transition_evidence_256.VerifiedZoneContracts.test_motion_evidence) ... ok
+test_relogio_monotonico_e_desenho_a_um_hz (test_transmitter_elapsed_311.NativeElapsed311Contracts.test_relogio_monotonico_e_desenho_a_um_hz) ... ok
+test_sem_aumento_de_consultas_a_camera (test_transmitter_elapsed_311.NativeElapsed311Contracts.test_sem_aumento_de_consultas_a_camera) ... ok
+test_versao_publica_e_testes_de_clock (test_transmitter_elapsed_311.NativeElapsed311Contracts.test_versao_publica_e_testes_de_clock) ... ok
+test_bootstrap_is_authoritative (test_transmitter_exclusive_290.TransmitterExclusive290.test_bootstrap_is_authoritative) ... ok
+test_guard_native_monitor_and_radio (test_transmitter_exclusive_290.TransmitterExclusive290.test_guard_native_monitor_and_radio) ... ok
+test_idle_limit_excludes_recording (test_transmitter_exclusive_290.TransmitterExclusive290.test_idle_limit_excludes_recording) ... ok
+test_no_cross_module_navigation (test_transmitter_exclusive_290.TransmitterExclusive290.test_no_cross_module_navigation) ... ok
+test_no_global_services_on_transmitter_startup (test_transmitter_exclusive_290.TransmitterExclusive290.test_no_global_services_on_transmitter_startup) ... ok
+test_recovery_and_audio_cannot_restart (test_transmitter_exclusive_290.TransmitterExclusive290.test_recovery_and_audio_cannot_restart) ... ok
+test_saved_mode_restores_android_guard (test_transmitter_exclusive_290.TransmitterExclusive290.test_saved_mode_restores_android_guard) ... ok
+test_stop_exits_when_remote_capture_paused (test_transmitter_exclusive_290.TransmitterExclusive290.test_stop_exits_when_remote_capture_paused) ... ok
+test_thermal_status_exposed_without_exposing_keys (test_transmitter_exclusive_290.TransmitterExclusive290.test_thermal_status_exposed_without_exposing_keys) ... ok
+test_video_viewers_not_http_peers (test_transmitter_exclusive_290.TransmitterExclusive290.test_video_viewers_not_http_peers) ... ok
+test_card_uses_existing_android_telemetry (test_transmitter_performance_312.TransmitterPerformance312Tests.test_card_uses_existing_android_telemetry) ... ok
+test_recording_priority_and_thermal_guard (test_transmitter_performance_312.TransmitterPerformance312Tests.test_recording_priority_and_thermal_guard) ... ok
+test_version (test_transmitter_performance_312.TransmitterPerformance312Tests.test_version) ... ok
+test_kotlin_behavior (test_transmitter_pipeline_313.Transmitter313Tests.test_kotlin_behavior) ... ok
+test_recording_is_scheduled_outside_network_worker (test_transmitter_pipeline_313.Transmitter313Tests.test_recording_is_scheduled_outside_network_worker) ... ok
+test_mp4_frame_before_network_encoding_and_uses_capture_clock (test_transmitter_rec_scene_307.TransmitterRecorder307.test_mp4_frame_before_network_encoding_and_uses_capture_clock) ... ok
+test_opt_in_scene_only_while_native_service_running (test_transmitter_rec_scene_307.TransmitterRecorder307.test_opt_in_scene_only_while_native_service_running) ... ok
+test_version (test_transmitter_rec_scene_307.TransmitterRecorder307.test_version) ... ok
+test_actions_preserve_native_service_and_recording_status (test_transmitter_redesign_283.TransmitterRedesign283.test_actions_preserve_native_service_and_recording_status) ... ok
+test_first_install_follows_android_saved_choice_preserved (test_transmitter_redesign_283.TransmitterRedesign283.test_first_install_follows_android_saved_choice_preserved) ... ok
+test_qr_modal_and_private_protocol_preserved (test_transmitter_redesign_283.TransmitterRedesign283.test_qr_modal_and_private_protocol_preserved) ... ok
+test_display_identity_does_not_break_old_mcrp_url_protocol (test_transmitter_remote_rec_276.TransmitterRemoteRec276.test_display_identity_does_not_break_old_mcrp_url_protocol) ... ok
+test_native_screen_removes_preview_and_folds_sensitive_pairing (test_transmitter_remote_rec_276.TransmitterRemoteRec276.test_native_screen_removes_preview_and_folds_sensitive_pairing) ... ok
+test_remote_rec_has_explicit_start_stop_and_rechecks_actual_status (test_transmitter_remote_rec_276.TransmitterRemoteRec276.test_remote_rec_has_explicit_start_stop_and_rechecks_actual_status) ... ok
+test_city_search_is_explicit_online_and_does_not_force_gps (test_trip_planning_284.TripPlanning284.test_city_search_is_explicit_online_and_does_not_force_gps) ... ok
+test_home_card_is_lazy_and_no_replacement_for_modes (test_trip_planning_284.TripPlanning284.test_home_card_is_lazy_and_no_replacement_for_modes) ... ok
+test_library_keeps_multiple_routes_offline (test_trip_planning_284.TripPlanning284.test_library_keeps_multiple_routes_offline) ... ok
+test_routes_and_days_reuse_existing_math_and_schedule (test_trip_planning_284.TripPlanning284.test_routes_and_days_reuse_existing_math_and_schedule) ... ok
+test_theme_verifier_follows_system_and_fixes_build_237 (test_trip_planning_284.TripPlanning284.test_theme_verifier_follows_system_and_fixes_build_237) ... ok
+test_action_bar_map_and_confirmation (test_trip_planning_wizard_285.Wizard285.test_action_bar_map_and_confirmation) ... ok
+test_existing_storage_not_migrated (test_trip_planning_wizard_285.Wizard285.test_existing_storage_not_migrated) ... ok
+test_export_uses_existing_picker_and_escapes_gpx (test_trip_planning_wizard_285.Wizard285.test_export_uses_existing_picker_and_escapes_gpx) ... ok
+test_gps_is_only_optional (test_trip_planning_wizard_285.Wizard285.test_gps_is_only_optional) ... ok
+test_initial_screen_has_only_cta_and_library (test_trip_planning_wizard_285.Wizard285.test_initial_screen_has_only_cta_and_library) ... ok
+test_metadata (test_trip_planning_wizard_285.Wizard285.test_metadata) ... ok
+test_wizard_has_two_steps (test_trip_planning_wizard_285.Wizard285.test_wizard_has_two_steps) ... ok
+test_history_includes_photo_and_plate (test_vehicle_history_305.VehicleHistory305Test.test_history_includes_photo_and_plate) ... ok
+test_ocr_is_offline_manual_only (test_vehicle_history_305.VehicleHistory305Test.test_ocr_is_offline_manual_only) ... ok
+test_opt_in_and_guard (test_vehicle_history_305.VehicleHistory305Test.test_opt_in_and_guard) ... ok
+test_vehicle_detection_has_no_continuous_ocr (test_vehicle_history_305.VehicleHistory305Test.test_vehicle_detection_has_no_continuous_ocr) ... ok
+test_version_and_ui_switch (test_vehicle_history_305.VehicleHistory305Test.test_version_and_ui_switch) ... ok
+test_export_verifies_io_before_using_model (test_yolo_257.YoloReceiverContracts.test_export_verifies_io_before_using_model) ... ok
+test_order_and_distinct_labelmaps (test_yolo_257.YoloReceiverContracts.test_order_and_distinct_labelmaps) ... ok
+test_tensor_formats_and_preprocess (test_yolo_257.YoloReceiverContracts.test_tensor_formats_and_preprocess) ... ok
+test_transmitter_has_no_detector (test_yolo_257.YoloReceiverContracts.test_transmitter_has_no_detector) ... ok
+test_version_and_license (test_yolo_257.YoloReceiverContracts.test_version_and_license) ... ok
+test_auto_starts_with_lite0 (test_yolo_default_263.YoloDefault263.test_auto_starts_with_lite0) ... ok
+test_build_requires_real_yolo (test_yolo_default_263.YoloDefault263.test_build_requires_real_yolo) ... ok
+test_default_model_is_lite0 (test_yolo_default_263.YoloDefault263.test_default_model_is_lite0) ... ok
+test_modern_official_export_and_validation (test_yolo_default_263.YoloDefault263.test_modern_official_export_and_validation) ... ok
+test_only_receiver_performs_ai (test_yolo_default_263.YoloDefault263.test_only_receiver_performs_ai) ... ok
+test_ui_explains_actual_preference (test_yolo_default_263.YoloDefault263.test_ui_explains_actual_preference) ... ok
+test_cholesky_legacy_alias_only_when_missing (test_yolo_export_264.ExportYolo264Test.test_cholesky_legacy_alias_only_when_missing) ... ok
+test_efficientdet_lite2_official_mediapipe_url (test_yolo_export_264.ExportYolo264Test.test_efficientdet_lite2_official_mediapipe_url) ... ok
+test_interpreter_and_fail_closed_release (test_yolo_export_264.ExportYolo264Test.test_interpreter_and_fail_closed_release) ... ok
+test_missing_modern_op_fails_explicitly (test_yolo_export_264.ExportYolo264Test.test_missing_modern_op_fails_explicitly) ... ok
+test_torch_torchvision_pinned_as_official_pair (test_yolo_export_264.ExportYolo264Test.test_torch_torchvision_pinned_as_official_pair) ... ok
+
+----------------------------------------------------------------------
+Ran 308 tests in 26.555s
+
+OK
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+Novidades: uma entrada válida para 1.0.314+314, 3 mensagens.
+Versao e build sincronizados: 1.0.314+314
+PASS: conversão YUV, cadência, saídas independentes, proteção térmica e recuperação AVC
+Verificacao preventiva concluida com sucesso.
+Integração 242: QR 1.4.35, streaming MJPEG, IA local e modo sem IA validados estruturalmente.
+Buildfix 243: 3 avisos fatais de flutter analyze #198 eliminados estruturalmente.
+MCRP 245: 22 contratos aprovados; flutter analyze/test pendentes.
+Buildfix 246: guarda de IA com bloco obrigatório preservado.
+PASS: arquivo local privado
+PASS: dados persistidos em JSON
+PASS: validacao de URL segura
+PASS: cadastro somente sob comando explicito
+PASS: limite de memoria e cadastros
+PASS: nao mostra token na lista
+PASS: reconexao por toque
+PASS: exclusao com confirmacao
+PASS: armazenamento injetavel para testes
+PASS: testes de persistencia
+PASS: testes de segurança
+PASS: testes de widget
+PASS: MCRP consolidado em Câmeras sem card na Home
+PASS: home preserva modos sem atalhos duplicados
+PASS: ao vivo local com seletor legado disponível
+PASS: não obriga URL RTSP antiga
+PASS: fonte remota não é RTSP
+PASS: ao vivo salva fonte selecionada
+PASS: monitor usa ajuste superior, com Início na navegação principal
+PASS: câmeras admite QR e URL MJPEG
+PASS: Câmeras recebe cadastros da 247
+PASS: migracao protege duplicatas
+PASS: limpeza de registro legado ao remover
+PASS: QR rotativo atualiza cadastro existente
+PASS: esconder token no diálogo QR
+PASS: câmeras editam e apagam
+PASS: MCRP continua via Câmeras
+PASS: seleção Câmeras persiste último Ao vivo
+PASS: QR vigente ainda validado local
+PASS: fonte MJPEG continua habilitada
+Cameras / Ao vivo: 18 contratos aprovados.
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.045s
+
+OK
+Build 204: testWidgets sem I/O real; testes de disco isolados; timeouts de CI verificados.
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+OK: Home 282, modos e navegação principal, Bike e retomada.

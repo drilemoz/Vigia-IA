@@ -1,4 +1,10 @@
-# Arquitetura — Vigia IA 1.0.313+313
+# Arquitetura — Vigia IA 1.0.314+314
+
+## 1.0.314+314 · Coleta automática e recuperação
+
+`VigiaApplication` instala o capturador nativo antes da Activity/Flutter. `AppDiagnostics` usa um worker único: 30 amostras a cada 10 s enquanto a Activity, transmissão ou monitoramento está ativo; 40 eventos, até três incidentes pendentes. Prefs dos incidentes são separadas da sessão corrente. O handler fatal salva o último snapshot em cache sem esperar pelo worker e delega ao handler Android. Na próxima inicialização, o histórico do Android 11+ é consultado para o processo principal, sem depender de RTSP. Não se deduz crash pela ausência de encerramento limpo.
+
+`AutomaticDiagnosticsService` acompanha lifecycle, tempos de renderização e métricas já disponíveis, sem ativar sensores. Logs existentes alimentam a coleta nativa. `DiagnosticRecoveryHost` antecede o gate inicial para evitar sobreposição com novidades/permissões. A exportação de incidente não depende da inicialização da câmera/GPS/saúde. O diagnóstico manual inclui a nova seção automática. `DiagnosticRedactor` remove URIs e credenciais; exceções de formato não retêm a entrada original.
 
 ## 1.0.313+313 · Saídas independentes do transmissor
 

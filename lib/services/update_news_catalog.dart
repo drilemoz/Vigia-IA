@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.313', build: 313);
+      AppBuildVersion(version: '1.0.314', build: 314);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.313', build: 313),
+      version: AppBuildVersion(version: '1.0.314', build: 314),
       changes: <String>[
-        'Gravação independente da compressão de rede, com menos cópias de imagem no A3.',
-        'Transmissão durante REC respeita o FPS escolhido, mantendo a proteção térmica.',
-        'H.264 recupera a sequência após atrasos; disponíveis opções de 15, 24 e 30 FPS.',
+        'Diagnóstico automático em todos os modos, sem precisar iniciar a coleta.',
+        'Ao reabrir após uma falha detectada, o app oferece exportar o relatório salvo.',
+        'Histórico de desempenho, erros gerais e transmissão, com proteção de credenciais.',
       ],
     ),
   ]);

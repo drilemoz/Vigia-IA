@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.313',
+          version: '1.0.314',
           current: true,
+          changes: [
+            'Diagnóstico automático em todos os modos, sem precisar iniciar a coleta.',
+            'Ao reabrir após uma falha detectada, o app oferece exportar o relatório salvo.',
+            'Histórico de desempenho, erros gerais e transmissão, com proteção de credenciais.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.313',
+          current: false,
           changes: [
             'Gravação independente da compressão de rede, com menos cópias de imagem no A3.',
             'Transmissão durante REC respeita o FPS escolhido, mantendo a proteção térmica.',
@@ -2656,8 +2666,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.313',
+          version: '1.0.314',
           current: true,
+          changes: [
+            'Diagnóstico automático em todos os modos, sem precisar iniciar a coleta.',
+            'Ao reabrir após uma falha detectada, o app oferece exportar o relatório salvo.',
+            'Histórico de desempenho, erros gerais e transmissão, com proteção de credenciais.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.313',
+          current: false,
           changes: [
             'Gravação independente da compressão de rede, com menos cópias de imagem no A3.',
             'Transmissão durante REC respeita o FPS escolhido, mantendo a proteção térmica.',

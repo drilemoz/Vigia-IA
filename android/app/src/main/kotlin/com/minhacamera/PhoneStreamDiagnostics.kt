@@ -13,6 +13,7 @@ internal object PhoneStreamDiagnostics {
     private const val MAX_EVENTS = 120
     @Volatile private var app: Context? = null
     @Synchronized fun initialize(context: Context) {
+        if (app != null) return
         app = context.applicationContext
         val previous = context.getSharedPreferences("private_stream_diagnostics", Context.MODE_PRIVATE)
             .getString("events", "").orEmpty()
@@ -66,7 +67,7 @@ internal object PhoneStreamDiagnostics {
     @Synchronized fun report(context: String = ""): String = buildString {
         append("Vigia IA • Diagnóstico local\n")
         append("Tempo monotônico: ${SystemClock.elapsedRealtime()} ms\n")
-        if (context.isNotBlank()) append(context.take(300)).append('\n')
+        if (context.isNotBlank()) append(context.take(2000)).append('\n')
         events.forEach { append(it).append('\n') }
         val stored = app?.getSharedPreferences("private_stream_diagnostics", Context.MODE_PRIVATE)
             ?.getString("freeze_snapshot", null)

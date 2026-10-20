@@ -45,6 +45,19 @@ import java.util.concurrent.atomic.AtomicInteger
 @Suppress("DEPRECATION")
 class PhoneCameraBackgroundService : Service() {
     companion object {
+        @Volatile private var diagnosticInstance: PhoneCameraBackgroundService? = null
+        internal fun automaticReport(): String = diagnosticInstance?.diagnosis() ?: PhoneStreamDiagnostics.report()
+        internal fun automaticMetrics(): org.json.JSONObject {
+            val service = diagnosticInstance
+            return org.json.JSONObject().put("running", running).put("recording", recording)
+                .put("phase", startupPhase).put("recAccepted", recorderAccepted).put("recBusyDropped", recorderBusyDropped)
+                .put("captured", service?.frameCount ?: 0).put("targetFps", service?.fpsLimit ?: 0)
+                .put("recordingTargetFps", service?.recordingFps ?: 0).put("codec", service?.liveCodec ?: "none")
+                .put("captureAgeMs", service?.let { (SystemClock.elapsedRealtime() - it.lastCaptureAtMs).coerceAtLeast(0) } ?: -1)
+                .put("publishedAgeMs", service?.let { (SystemClock.elapsedRealtime() - it.lastPublishedAtMs).coerceAtLeast(0) } ?: -1)
+                .put("heatState", service?.heatState?.toString() ?: "none")
+                .put("viewers", service?.server?.activeVideoViewers() ?: 0)
+        }
         private const val CHANNEL = "phone-camera-background-v1"
         private const val NOTIFICATION_ID = 1047
         const val ACTION_START = "com.vigiaia.app.TRANSMITTER_START"
@@ -306,6 +319,7 @@ class PhoneCameraBackgroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        diagnosticInstance = this
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
                 NotificationChannel(CHANNEL, "Vigia IA · Transmissão nativa", NotificationManager.IMPORTANCE_LOW)
@@ -1183,6 +1197,7 @@ class PhoneCameraBackgroundService : Service() {
     )
 
     override fun onDestroy() {
+        diagnosticInstance = null
         if (!closing) stopCaptureAndFinish()
         starting = false
         super.onDestroy()

@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.314+314
+
+- Evidências e limites desta entrega: `VALIDATION-1.0.314.md`.
+- Coleta nativa compilada isoladamente e regras de classificação/redação executadas em JVM; sanitizador executado em Dart.
+- Flutter Analyze/Test, APK e validação física continuam pendentes; não foram substituídos por checagens estáticas.
+
 # Validação Vigia IA 1.0.313+313
 
 ## Evidências desta entrega

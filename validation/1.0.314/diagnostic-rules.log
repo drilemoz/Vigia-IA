@@ -1,0 +1,5 @@
+PASS: exit classification, no false crash for normal/user stop, redaction and size bounds
+----------------------------------------------------------------------
+Ran 3 tests in 12.606s
+
+OK

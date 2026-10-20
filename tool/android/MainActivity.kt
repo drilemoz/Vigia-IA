@@ -397,6 +397,17 @@ class MainActivity : FlutterActivity() {
 
     private fun handleNativeCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
+            "automaticDiagnostics" -> AppDiagnostics.report { result.success(it) }
+            "diagnosticHeartbeat" -> {
+                AppDiagnostics.heartbeat(call.argument<String>("value").orEmpty())
+                result.success(null)
+            }
+            "diagnosticEvent" -> {
+                AppDiagnostics.event(call.argument<String>("source").orEmpty(),
+                    call.argument<String>("detail").orEmpty(), call.argument<Boolean>("unhandled") == true)
+                result.success(null)
+            }
+            "acknowledgeDiagnostic" -> AppDiagnostics.acknowledge(call.argument<String>("id").orEmpty()) { result.success(it) }
             "lanScanRange" -> {
                 try { result.success(lanScanSupport.range()) }
                 catch (error: Exception) { result.error("lan_range", error.message, null) }

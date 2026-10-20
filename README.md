@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.313+313`
+**Versão atual:** `1.0.314+314`
+
+## Atualização 1.0.314+314 · Diagnóstico automático
+
+Coleta automática em todos os modos, com histórico limitado de desempenho e falhas. Ao reabrir após erro não tratado ou encerramento anormal informado pelo Android, oferece exportar o relatório anterior para Downloads. Nada é enviado automaticamente. Detalhes e limites: `RELEASE-1.0.314.md`.
 
 ## Atualização 1.0.313+313 · Fluidez da transmissão e gravação
 

@@ -1,0 +1,25 @@
+warning: argument -classpath is passed multiple times. Only the last value will be used: /workspace/scratch/783e9b997042/kotlin-tools/android-api34.jar:/workspace/scratch/783e9b997042/kotlin-tools/androidx-core.jar:/workspace/scratch/783e9b997042/kotlin-tools/kotlin-stdlib-2.1.20.jar:/workspace/scratch/783e9b997042/kotlin-tools/annotations-13.0.jar
+android/app/src/main/kotlin/com/minhacamera/NetUtil.kt:15:19: warning: 'val allNetworks: Array<(out) Network!>!' is deprecated. Deprecated in Java.
+        return cm.allNetworks.firstOrNull {
+                  ^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneCameraBackgroundService.kt:18:8: warning: 'class Camera : Any' is deprecated. Deprecated in Java.
+import android.hardware.Camera
+       ^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneH264LiveEncoder.kt:43:81: warning: 'static field COLOR_FormatYUV420Planar: Int' is deprecated. Deprecated in Java.
+                    caps.colorFormats.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) ->
+                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneH264LiveEncoder.kt:44:58: warning: 'static field COLOR_FormatYUV420Planar: Int' is deprecated. Deprecated in Java.
+                        MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneH264LiveEncoder.kt:45:81: warning: 'static field COLOR_FormatYUV420SemiPlanar: Int' is deprecated. Deprecated in Java.
+                    caps.colorFormats.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) ->
+                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneH264LiveEncoder.kt:46:58: warning: 'static field COLOR_FormatYUV420SemiPlanar: Int' is deprecated. Deprecated in Java.
+                        MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneH264LiveEncoder.kt:91:63: warning: 'static field COLOR_FormatYUV420Planar: Int' is deprecated. Deprecated in Java.
+        planar = selected == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^
+android/app/src/main/kotlin/com/minhacamera/PhoneTorchController.kt:3:8: warning: 'class Camera : Any' is deprecated. Deprecated in Java.
+import android.hardware.Camera
+       ^^^^^^^^^^^^^^^^^^^^^^^

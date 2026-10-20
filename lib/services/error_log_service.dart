@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../utils/diagnostic_redactor.dart';
+
 enum ErrorLogLevel { info, warning, error }
 
 class ErrorLogEntry {
@@ -46,12 +48,12 @@ class ErrorLogEntry {
         (item) => item.name == json['level'],
         orElse: () => ErrorLogLevel.error,
       ),
-      source: json['source'] as String? ?? 'Aplicativo',
-      message: json['message'] as String? ?? 'Erro sem descrição',
-      details: json['details'] as String?,
+      source: DiagnosticRedactor.text(json['source'] as String? ?? 'Aplicativo'),
+      message: DiagnosticRedactor.text(json['message'] as String? ?? 'Erro sem descrição'),
+      details: json['details'] == null ? null : DiagnosticRedactor.text(json['details'].toString()),
       context: rawContext is Map
           ? rawContext.map(
-              (key, value) => MapEntry(key.toString(), value.toString()),
+              (key, value) => MapEntry(DiagnosticRedactor.text(key.toString()), DiagnosticRedactor.field(key.toString(), value)),
             )
           : const <String, String>{},
     );
@@ -68,7 +70,8 @@ class ErrorLogService extends ChangeNotifier {
   File? _file;
   Future<void> _writeTail = Future<void>.value();
   final Map<String, DateTime> _lastRecorded = <String, DateTime>{};
-  bool _initialized = false;
+  Future<void>? _initialization;
+  void Function(ErrorLogEntry entry)? onRecorded;
 
   List<ErrorLogEntry> get entries =>
       List<ErrorLogEntry>.unmodifiable(_entries.reversed);
@@ -77,9 +80,9 @@ class ErrorLogService extends ChangeNotifier {
       .where((entry) => entry.level != ErrorLogLevel.info)
       .length;
 
-  Future<void> initialize() async {
-    if (_initialized) return;
-    _initialized = true;
+  Future<void> initialize() => _initialization ??= _initialize();
+
+  Future<void> _initialize() async {
     try {
       final directory = await getApplicationSupportDirectory();
       final logsDirectory = Directory('${directory.path}/diagnostics');
@@ -104,8 +107,8 @@ class ErrorLogService extends ChangeNotifier {
         }
         if (_entries.length > _maxEntries) {
           _entries.removeRange(0, _entries.length - _maxEntries);
-          await _rewriteFile();
         }
+        await _rewriteFile(); // Remove leaked credentials from older stored entries too.
       }
     } catch (_) {
       // A central continua funcionando em memória se o armazenamento falhar.
@@ -120,6 +123,7 @@ class ErrorLogService extends ChangeNotifier {
     String? details,
     Map<String, Object?> context = const <String, Object?>{},
   }) async {
+    await initialize();
     final now = DateTime.now();
     final compactMessage = _compact(message);
     final dedupKey = '${level.name}|$source|$compactMessage';
@@ -134,18 +138,23 @@ class ErrorLogService extends ChangeNotifier {
         (_, value) => now.difference(value) > const Duration(minutes: 10),
       );
     }
+    while (_lastRecorded.length > 300) {
+      _lastRecorded.remove(_lastRecorded.keys.first);
+    }
     final entry = ErrorLogEntry(
       id: '${now.microsecondsSinceEpoch}-${_entries.length}',
       timestamp: now,
       level: level,
-      source: source,
+      source: _compact(source, maxLength: 100),
       message: compactMessage,
       details: details == null ? null : _compact(details, maxLength: 12000),
       context: context.map(
-        (key, value) => MapEntry(key, value?.toString() ?? 'null'),
+        (key, value) => MapEntry(_compact(key, maxLength: 100),
+            _compact(DiagnosticRedactor.field(key, value), maxLength: 1000)),
       ),
     );
     _entries.add(entry);
+    try { onRecorded?.call(entry); } catch (_) { /* logging must not recurse */ }
     if (_entries.length > _maxEntries) {
       _entries.removeAt(0);
     }
@@ -161,13 +170,16 @@ class ErrorLogService extends ChangeNotifier {
     Map<String, Object?> context = const <String, Object?>{},
     ErrorLogLevel level = ErrorLogLevel.error,
   }) {
+    final description = error is FormatException
+        ? 'FormatException: ${error.message} (posição ${error.offset ?? "desconhecida"}; entrada omitida)'
+        : error.toString();
     return record(
       level: level,
       source: source,
-      message: message ?? error.toString(),
+      message: message ?? description,
       details: stackTrace == null
-          ? error.toString()
-          : '${error.toString()}\n\n$stackTrace',
+          ? description
+          : '$description\n\n$stackTrace',
       context: context,
     );
   }
@@ -247,17 +259,7 @@ class ErrorLogService extends ChangeNotifier {
   }
 
   static String _compact(String value, {int maxLength = 2000}) {
-    var normalized = value.trim();
-    // Enderecos de cameras podem levar senhas no userinfo, path ou query.
-    // Exportacoes tecnicas nunca devem incluir a URI completa.
-    normalized = normalized.replaceAll(
-      RegExp(r'rtsp://[^\s\x00-\x1F]+', caseSensitive: false),
-      'rtsp://[endereço omitido]',
-    );
-    normalized = normalized.replaceAllMapped(
-      RegExp(r'(password|senha|token)=([^&\s]+)', caseSensitive: false),
-      (match) => '${match.group(1)}=***',
-    );
+    final normalized = DiagnosticRedactor.text(value.trim());
     if (normalized.length <= maxLength) return normalized;
     return '${normalized.substring(0, maxLength)}…';
   }

@@ -20,6 +20,8 @@ import '../services/native_platform_service.dart';
 import '../services/startup_guard.dart';
 import '../services/transmitter_exclusive_policy.dart';
 import '../widgets/update_news_host.dart';
+import '../widgets/diagnostic_recovery_host.dart';
+import '../services/error_log_service.dart';
 
 class VigiaIaApp extends StatelessWidget {
   const VigiaIaApp({super.key});
@@ -38,7 +40,7 @@ class VigiaIaApp extends StatelessWidget {
         themeMode: appearance.themeMode,
         theme: _theme(brightness: Brightness.light, seed: appearance.seedColor),
         darkTheme: _theme(brightness: Brightness.dark, seed: appearance.seedColor),
-        home: const _StartupGate(),
+        home: const DiagnosticRecoveryHost(child: _StartupGate()),
       ),
     );
   }
@@ -165,6 +167,8 @@ class _StartupGateState extends State<_StartupGate> {
     Object error,
     StackTrace stackTrace,
   ) {
+    unawaited(ErrorLogService.instance.recordException(source: 'Inicialização',
+        error: error, stackTrace: stackTrace, message: 'Falha na etapa $stage'));
     debugPrint('Vigia IA startup [$stage]: $error');
     debugPrintStack(stackTrace: stackTrace);
   }
