@@ -1,3 +1,11 @@
+# Validação Vigia IA 1.0.317+317
+
+- Piloto RTSP Media3: `tool/test_media3_rtsp_317.py` cobre bootstrap, dependências, registro de PlatformView, callback de primeiro frame, release e privacidade.
+- Parser PSI Kotlin executado nos arquivos `MainActivity.kt` e `Media3RtspPlatformView.kt`, sem erros sintáticos; **não prova compilação nem execução com Media3**.
+- `tool/check_release_consistency.py` e validadores de Novidades/versões devem conferir 1.0.317+317.
+- `tool/verify_project.sh`: concluído sem erros; suíte geral `unittest discover`: 323 testes, 322 aprovados e 1 ignorado. Detalhes em `VALIDATION-1.0.317.md`.
+- Flutter SDK e Android SDK completos não estão disponíveis neste ambiente; `flutter analyze`, `flutter test`, build APK e reprodução RTSP H.264 real dependem do workflow e de aparelho físico.
+
 # Validação Vigia IA 1.0.316+316
 
 - Evidências dos três erros do `flutter test` no workflow 264: `Vigia-IA-Android-APK-264-logs.zip`.

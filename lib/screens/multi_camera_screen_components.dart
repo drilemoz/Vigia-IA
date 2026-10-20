@@ -199,6 +199,7 @@ class _CameraCard extends StatelessWidget {
     required this.status,
     required this.lastEvent,
     required this.onOpen,
+    required this.onMedia3Test,
     required this.onOpenWithSecond,
     required this.onMcrpControls,
     required this.onEdit,
@@ -211,6 +212,7 @@ class _CameraCard extends StatelessWidget {
   final CameraProbeResult? status;
   final MonitorEvent? lastEvent;
   final VoidCallback onOpen;
+  final VoidCallback? onMedia3Test;
   final VoidCallback? onOpenWithSecond;
   final VoidCallback? onMcrpControls;
   final VoidCallback? onEdit;
@@ -315,7 +317,8 @@ class _CameraCard extends StatelessWidget {
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
                   ),
                 ),
-                if (onMcrpControls != null ||
+                if (onMedia3Test != null ||
+                    onMcrpControls != null ||
                     onOpenWithSecond != null ||
                     onEdit != null ||
                     onToggle != null ||
@@ -323,6 +326,7 @@ class _CameraCard extends StatelessWidget {
                   PopupMenuButton<String>(
                     tooltip: 'Opções da câmera',
                     onSelected: (value) {
+                      if (value == 'media3') onMedia3Test?.call();
                       if (value == 'controls') onMcrpControls?.call();
                       if (value == 'second') onOpenWithSecond?.call();
                       if (value == 'edit') onEdit?.call();
@@ -330,6 +334,11 @@ class _CameraCard extends StatelessWidget {
                       if (value == 'delete') onDelete?.call();
                     },
                     itemBuilder: (_) => [
+                      if (onMedia3Test != null)
+                        const PopupMenuItem(
+                          value: 'media3',
+                          child: Text('Testar H.264 com Media3'),
+                        ),
                       if (onMcrpControls != null)
                         const PopupMenuItem(
                           value: 'controls',

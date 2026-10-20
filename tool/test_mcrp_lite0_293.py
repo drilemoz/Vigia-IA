@@ -41,8 +41,8 @@ class CompactRemote293(unittest.TestCase):
         self.assertIn('DetectorModelPreference.yolo26s => 0',assets)
         self.assertIn('modelIndex++ < firstIndex',assets)
     def test_metadata(self):
-        self.assertIn('version: 1.0.316+316',read('pubspec.yaml'))
-        self.assertIn("AppBuildVersion(version: '1.0.316', build: 316)",read('lib/services/update_news_catalog.dart'))
-        self.assertTrue((ROOT/'RELEASE-1.0.316.md').exists())
+        self.assertIn('version: 1.0.317+317',read('pubspec.yaml'))
+        self.assertIn("AppBuildVersion(version: '1.0.317', build: 317)",read('lib/services/update_news_catalog.dart'))
+        self.assertTrue((ROOT/'RELEASE-1.0.317.md').exists())
 
 if __name__ == '__main__': unittest.main()

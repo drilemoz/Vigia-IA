@@ -30,6 +30,7 @@ rm -rf android/app/src/main/kotlin/*
 KOTLIN_DIR="android/app/src/main/kotlin/com/vigiaia/app"
 mkdir -p "$KOTLIN_DIR"
 cp "$ROOT/tool/android/MainActivity.kt" "$KOTLIN_DIR/MainActivity.kt"
+cp "$ROOT/tool/android/Media3RtspPlatformView.kt" "$KOTLIN_DIR/Media3RtspPlatformView.kt"
 for helper in VigiaApplication AppDiagnostics DiagnosticPolicy; do
   cp "$ROOT/tool/android/$helper.kt" "$KOTLIN_DIR/$helper.kt"
 done
@@ -153,6 +154,8 @@ media_deps = '''dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     // Rádio online: ExoPlayer (MP3/AAC/Ogg/HLS com metadados ICY) e MediaSession.
     implementation("androidx.media3:media3-exoplayer:1.8.0")
+    implementation("androidx.media3:media3-exoplayer-rtsp:1.8.0")
+    implementation("androidx.media3:media3-ui:1.8.0")
     implementation("androidx.media3:media3-exoplayer-hls:1.8.0")
     implementation("androidx.media3:media3-session:1.8.0")
 }

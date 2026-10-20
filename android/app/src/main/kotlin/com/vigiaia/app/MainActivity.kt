@@ -84,6 +84,7 @@ class MainActivity : FlutterActivity() {
     private val backgroundChannelName = "vigiaia/background"
     private val nativeChannelName = "vigiaia/native"
     private val lanScanSupport by lazy { LanScanSupport(this) }
+    private var media3RtspViews: Media3RtspPlatformViewFactory? = null
     private val compassChannelName = "vigiaia/compass"
     private var pendingNotificationPermission: MethodChannel.Result? = null
     private var pendingCameraPermission: MethodChannel.Result? = null
@@ -132,11 +133,19 @@ class MainActivity : FlutterActivity() {
 
     override fun onPostResume() {
         super.onPostResume()
+        media3RtspViews?.resumeAll()
         volumeControlStream = AudioManager.STREAM_MUSIC
         window.decorView.post { MonitorSystemUi.apply(window, monitorFullscreen) }
     }
 
+    override fun onPause() {
+        media3RtspViews?.pauseAll()
+        super.onPause()
+    }
+
     override fun onDestroy() {
+        media3RtspViews?.disposeAll()
+        media3RtspViews = null
         lanScanSupport.multicast(false)
         compassStreamHandler?.dispose()
         compassStreamHandler = null
@@ -158,6 +167,10 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        media3RtspViews = Media3RtspPlatformViewFactory(flutterEngine.dartExecutor.binaryMessenger)
+        flutterEngine.platformViewsController.registry.registerViewFactory(
+            "vigiaia/media3_rtsp", media3RtspViews!!
+        )
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "vigiaia/transmitter_exclusive")
             .setMethodCallHandler { call, result ->
                 when (call.method) {

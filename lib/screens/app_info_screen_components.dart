@@ -77,7 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.316',
+          version: '1.0.317',
+          current: true,
+          changes: [
+            'Nova prévia RTSP H.264 com Media3, sem IA, nas opções das câmeras.',
+            'Registro do primeiro frame renderizado e falhas sem expor credenciais.',
+            'Player isolado e liberado ao fechar; modo Monitorar/VLC preservado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.317',
           current: true,
           changes: [
             'Corrigidos três testes Flutter de recuperação de diagnósticos.',
@@ -2686,7 +2696,7 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.316',
+          version: '1.0.317',
           current: true,
           changes: [
             'Corrigidos três testes Flutter de recuperação de diagnósticos.',

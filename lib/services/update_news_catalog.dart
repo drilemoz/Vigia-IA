@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.316', build: 316);
+      AppBuildVersion(version: '1.0.317', build: 317);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.316', build: 316),
+      version: AppBuildVersion(version: '1.0.317', build: 317),
       changes: <String>[
-        'Corrigida a espera dos testes Flutter do aviso de recuperação.',
-        'Exportação e manutenção de incidentes verificadas sem espera infinita.',
-        'Nenhuma alteração no comportamento do diagnóstico no aplicativo.',
+        'Adicionado teste independente de vídeo RTSP H.264 com Media3.',
+        'O primeiro frame e os códigos de falha podem ser conferidos na prévia.',
+        'Monitoramento com IA, MCRP e VLC continuam preservados.',
       ],
     ),
   ]);

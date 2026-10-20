@@ -7,6 +7,7 @@ import '../models/camera_source_selector.dart';
 import '../services/minha_camera_live_url.dart';
 import '../services/minha_camera_registry_migration.dart';
 import 'mcrp_camera_screen.dart';
+import 'media3_rtsp_test_screen.dart';
 import 'rtsp_camera_editor_dialog.dart';
 import '../models/monitor_event.dart';
 import '../models/object_filter_catalog.dart';
@@ -420,6 +421,17 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                     status: _status[camera.id],
                     lastEvent: _lastEvent(camera),
                     onOpen: () => _open(camera),
+                    onMedia3Test: camera.type == CameraEndpointType.rtsp
+                        ? () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => Media3RtspTestScreen(
+                                  cameraName: camera.name,
+                                  url: camera.address,
+                                  forceTcp: camera.rtspForceTcp,
+                                ),
+                              ),
+                            )
+                        : null,
                     onMcrpControls: MinhaCameraLiveUrl.isValid(camera.address)
                         ? () => Navigator.of(context).push(
                               MaterialPageRoute<void>(

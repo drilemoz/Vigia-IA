@@ -1,3 +1,11 @@
+## 1.0.317+317 (2026-10-20)
+
+- Novo player RTSP H.264 nativo Android via Media3 1.8.0 (`media3-exoplayer-rtsp` e `media3-ui`), isolado de VLC/IA.
+- Nova opção **Câmeras > RTSP > opções > Testar H.264 com Media3**, exibindo primeiro frame efetivo, dimensões, transporte TCP/UDP e erros sanitizados.
+- Pausa quando a Activity vai para segundo plano, retoma ao voltar e libera recursos quando a prévia é descartada; botão de nova tentativa.
+- Registro de etapas de RTSP sem credenciais. Não modifica fluxo de monitoramento/VLC, MCRP, IA ou gravação; teste antes de salvar é etapa futura.
+- `tool/verify_project.sh` aprovado (323 testes Python na suíte geral, 1 ignorado, além de checagens adicionais). Build real Android/Flutter e teste em aparelhos ainda pendentes.
+
 ## 1.0.316+316 (2026-10-20)
 
 - Corrigidos os três testes `diagnostic_recovery_host_test.dart` que falharam no Android APK 264 por `pumpAndSettle timed out` com carregamento animado sob o diálogo.

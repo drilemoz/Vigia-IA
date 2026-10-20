@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.316+316`
+**Versão atual:** `1.0.317+317`
+
+## Atualização 1.0.317+317 · RTSP Media3 H.264 (teste isolado)
+
+No menu de uma câmera RTSP cadastrada, selecione **Testar H.264 com Media3** para abrir um player nativo Android independente, sem IA e sem gravação. O player usa Media3 ExoPlayer/RTSP/UI 1.8.0 (mesma versão do rádio), solicita TCP conforme preferência, reporta o primeiro frame realmente renderizado e mostra código de falha sem expor credenciais; pausa em segundo plano e libera recursos ao fechar. O botão **Monitorar** segue no LibVLC até que IA e MCRP sejam migrados/testados. Esta etapa NÃO valida automaticamente câmeras ao salvar, tema da próxima versão. Não presume suporte a H.265. Diagnóstico real em aparelho e CI ainda necessários. Detalhes: `RELEASE-1.0.317.md`.
 
 ## Atualização 1.0.316+316 · Testes de recuperação (APK 264)
 

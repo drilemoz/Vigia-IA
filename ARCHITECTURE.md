@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.316+316
+# Arquitetura — Vigia IA 1.0.317+317
+
+## 1.0.317+317 · Experimento RTSP Media3
+
+`Media3RtspPlatformViewFactory` implementa uma Android PlatformView por câmera, com ExoPlayer/`RtspMediaSource` e `PlayerView` em Kotlin. Mensagens de estado via MethodChannel indexado pelo id nativo (estado, primeiro frame, resolução e código de erro), sem URI, usuário, senha ou stacktrace. O factory é registrado em `MainActivity`; `onPause`/`onPostResume` controlam reprodução, e cada PlatformView libera seu player em `dispose`. A tela Dart `Media3RtspTestScreen` é acessível pelo menu RTSP da Central Câmeras; não ativa IA, não extrai RGB nem grava. `RtspCameraSource` e monitoramento normal permanecem no LibVLC. Migração completa e teste de vídeo no cadastro são etapas posteriores; H.265 não faz parte deste piloto.
 
 ## 1.0.316+316 · Recuperação de diagnóstico, testes Flutter
 
