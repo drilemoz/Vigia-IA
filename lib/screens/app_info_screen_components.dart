@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.315',
+          version: '1.0.316',
           current: true,
+          changes: [
+            'Corrigidos três testes Flutter de recuperação de diagnósticos.',
+            'Espera limitada enquanto o diálogo aparece sobre o carregamento.',
+            'Exportação e histórico local de incidentes preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.315',
+          current: false,
           changes: [
             'Corrigida a análise estática que impedia a geração do APK 263.',
             'Corrigidos imports e saída do teste de redação de diagnósticos.',
@@ -2676,8 +2686,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.315',
+          version: '1.0.316',
           current: true,
+          changes: [
+            'Corrigidos três testes Flutter de recuperação de diagnósticos.',
+            'Espera limitada enquanto o diálogo aparece sobre o carregamento.',
+            'Exportação e histórico local de incidentes preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.315',
+          current: false,
           changes: [
             'Corrigida a análise estática que impedia a geração do APK 263.',
             'Corrigidos imports e saída do teste de redação de diagnósticos.',

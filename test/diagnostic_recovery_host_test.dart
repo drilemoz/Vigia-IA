@@ -3,6 +3,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vigiaia/widgets/diagnostic_recovery_host.dart';
 
 void main() {
+  // O indicador de carregamento fica animando sob o diálogo. Não aguardar
+  // pumpAndSettle() enquanto o aviso estiver aberto: ele nunca ficará ocioso.
+  Future<void> waitForRecoveryDialog(WidgetTester tester) async {
+    for (var frame = 0; frame < 20; frame++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (find.text('Erro detectado no último uso').evaluate().isNotEmpty) {
+        // Finaliza a transição do diálogo antes de tocar nos seus botões.
+        await tester.pump(const Duration(milliseconds: 350));
+        return;
+      }
+    }
+    fail('O aviso de recuperação não apareceu após 20 quadros.');
+  }
+
   Widget host({
     required List<Map<String, Object?>> pending,
     Future<String?> Function(Map<String, Object?>)? save,
@@ -41,7 +55,7 @@ void main() {
         },
       ),
     );
-    await tester.pumpAndSettle();
+    await waitForRecoveryDialog(tester);
     expect(find.text('Erro detectado no último uso'), findsOneWidget);
     expect(find.text('Aplicativo pronto'), findsNothing);
     await tester.tap(find.text('Agora não'));
@@ -64,9 +78,11 @@ void main() {
         },
       ),
     );
-    await tester.pumpAndSettle();
+    await waitForRecoveryDialog(tester);
     await tester.tap(find.text('Exportar'));
-    await tester.pumpAndSettle();
+    // A falha preserva o diálogo e, portanto, a animação do carregamento.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(acknowledgements, 0);
     expect(find.textContaining('Não foi possível exportar'), findsOneWidget);
     expect(find.text('Exportar'), findsOneWidget);
@@ -91,7 +107,7 @@ void main() {
         },
       ),
     );
-    await tester.pumpAndSettle();
+    await waitForRecoveryDialog(tester);
     await tester.tap(find.text('Exportar'));
     await tester.pumpAndSettle();
     expect(operations, ['saved', 'acknowledged']);

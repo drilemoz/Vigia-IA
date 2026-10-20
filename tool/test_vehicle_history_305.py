@@ -47,7 +47,7 @@ class VehicleHistory305Test(unittest.TestCase):
         self.assertNotIn('VehiclePlateOcrService', source('lib/services/vehicle_capture_service.dart'))
 
     def test_version_and_ui_switch(self):
-        self.assertIn('version: 1.0.315+315', source('pubspec.yaml'))
+        self.assertIn('version: 1.0.316+316', source('pubspec.yaml'))
         self.assertIn('google_mlkit_text_recognition: ^0.17.1', source('pubspec.yaml'))
         self.assertIn('SwitchListTile.adaptive', source('lib/screens/events_screen.dart'))
         self.assertIn('Fotografar veículos automaticamente', source('lib/screens/events_screen.dart'))

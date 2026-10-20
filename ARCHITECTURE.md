@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.315+315
+# Arquitetura — Vigia IA 1.0.316+316
+
+## 1.0.316+316 · Recuperação de diagnóstico, testes Flutter
+
+Sem mudança de arquitetura ou código de produção. O indicador indeterminado de carregamento permanece sob o diálogo de recuperação enquanto um incidente estiver pendente; testes aguardam o modal por número limitado de quadros em vez de esperar todas as animações cessarem.
 
 ## 1.0.315+315 · Correção de lint no CI
 

@@ -46,7 +46,7 @@ class TransmitterRemoteRec276(unittest.TestCase):
         self.assertIn("'Controle remoto · ${_status", read('lib/widgets/mcrp_remote_controls.dart'))
         self.assertIn('MinhaCameraLiveUrl.isValid(url)', read('lib/screens/monitor_screen_mcrp_support.dart'))
         self.assertIn("^/live/[0-9a-f]{32}$", read('lib/services/mcrp_client.dart'))
-        self.assertIn("'1.0.315'", read('lib/core/app_metadata.dart'))
+        self.assertIn("'1.0.316'", read('lib/core/app_metadata.dart'))
 
 if __name__ == '__main__':
     unittest.main()

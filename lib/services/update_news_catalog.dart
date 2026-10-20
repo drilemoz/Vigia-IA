@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.315', build: 315);
+      AppBuildVersion(version: '1.0.316', build: 316);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.315', build: 315),
+      version: AppBuildVersion(version: '1.0.316', build: 316),
       changes: <String>[
-        'Corrigida a análise estática que impedia a geração do APK 263.',
-        'Imports e teste Dart de redação dos diagnósticos ajustados.',
-        'Coleta automática de diagnósticos e funções anteriores preservadas.',
+        'Corrigida a espera dos testes Flutter do aviso de recuperação.',
+        'Exportação e manutenção de incidentes verificadas sem espera infinita.',
+        'Nenhuma alteração no comportamento do diagnóstico no aplicativo.',
       ],
     ),
   ]);

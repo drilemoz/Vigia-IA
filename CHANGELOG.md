@@ -1,3 +1,11 @@
+## 1.0.316+316 (2026-10-20)
+
+- Corrigidos os três testes `diagnostic_recovery_host_test.dart` que falharam no Android APK 264 por `pumpAndSettle timed out` com carregamento animado sob o diálogo.
+- Inclusa espera limitada e explícita para o diálogo de recuperação; verificação da falha de exportação usa `pump` com prazo definido, mantendo a caixa aberta.
+- `flutter analyze` do build 264: nenhum apontamento; 585 testes Flutter aprovados e 3 falharam antes da correção.
+- Nenhuma alteração em código Flutter de produção ou captura/retensão de diagnósticos. Tela Mudanças, Novidades, documentação e metadados sincronizados.
+- Flutter/Android SDK e compilação APK não disponíveis localmente; novo workflow deve confirmar resultado.
+
 ## 1.0.315+315 (2026-10-20)
 
 - Corrigida a etapa `flutter analyze --fatal-infos --fatal-warnings` do workflow Android APK 263 (fonte 1.0.314).

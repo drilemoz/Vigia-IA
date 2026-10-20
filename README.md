@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.315+315`
+**Versão atual:** `1.0.316+316`
+
+## Atualização 1.0.316+316 · Testes de recuperação (APK 264)
+
+O workflow 264 passou em `flutter analyze` sem apontamentos, mas teve 3 falhas de `pumpAndSettle timed out` nos testes da abertura com incidente pendente. O carregamento animado permanece visível atrás do diálogo, impedindo que `pumpAndSettle` encontre repouso. Os três testes agora aguardam o diálogo por quadros limitados e verificam as ações sem desativar a animação do app. O teste de ausência de incidente continua com `pumpAndSettle`; exportação e reconhecimento de incidente permanecem validados. Código de produção sem alterações comportamentais. Detalhes: `RELEASE-1.0.316.md`. APK Release e testes Flutter corrigidos precisam de confirmação no próximo GitHub Actions.
 
 ## Atualização 1.0.315+315 · Correção do APK 263
 

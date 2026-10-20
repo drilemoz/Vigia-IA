@@ -1,3 +1,11 @@
+# Validação Vigia IA 1.0.316+316
+
+- Evidências dos três erros do `flutter test` no workflow 264: `Vigia-IA-Android-APK-264-logs.zip`.
+- Diagnóstico: `pumpAndSettle` em diálogos com indicador `CircularProgressIndicator` animado na árvore abaixo.
+- Correção: `test/diagnostic_recovery_host_test.dart`; regressão estrutural: `tool/test_build264_recovery_316.py`.
+- Resultado completo de verificações locais: `VALIDATION-1.0.316.md`.
+- SDK Flutter e Dart indisponíveis localmente; análise/testes/compilação reais dependem do novo workflow.
+
 # Validação Vigia IA 1.0.315+315
 
 - Evidências e limites da correção do APK 263: `VALIDATION-1.0.315.md`.
