@@ -70,8 +70,7 @@ class PhoneCameraServer(
     private val frameLock = java.lang.Object()
     private var sequence = 0L
     private var latest: ByteArray? = null
-    private var latestAvc: ByteArray? = null
-    private var avcSequence = 0L
+    private val avcQueue = PhoneAvcQueue()
     private val codecLock = java.lang.Object()
     private var latestAtMs = 0L
     private var latestBattery: PhoneBatteryReading? = null
@@ -143,17 +142,16 @@ class PhoneCameraServer(
         synchronized(frameLock) { latestBattery = reading }
     }
 
-    internal fun publishAvc(accessUnit: ByteArray) {
-        if (!running || accessUnit.isEmpty() || accessUnit.size > 2_097_152) return
+    internal fun publishAvc(accessUnit: ByteArray, keyframe: Boolean) {
+        if (!running || accessUnit.isEmpty()) return
         synchronized(codecLock) {
-            latestAvc = accessUnit
-            avcSequence++
+            avcQueue.add(accessUnit, keyframe, SystemClock.elapsedRealtime())
             codecLock.notifyAll()
         }
     }
 
     fun clearAvc() {
-        synchronized(codecLock) { latestAvc = null; avcSequence++; codecLock.notifyAll() }
+        synchronized(codecLock) { avcQueue.clear(); codecLock.notifyAll() }
     }
 
     /** Invalida o último quadro quando a câmera muda de lente ou resolução. */
@@ -487,18 +485,26 @@ class PhoneCameraServer(
             "Cache-Control: no-store\r\nConnection: close\r\n\r\n").toByteArray(Charsets.US_ASCII))
         videoViewers.incrementAndGet()
         try {
-        requestKeyframe?.invoke()
-        var last = 0L
+        val cursor = synchronized(codecLock) { avcQueue.cursor() }
+        var lastSyncRequestAt = -1_000L
         val out = peer.getOutputStream()
         while (running && transmissionActive?.invoke() != false && !peer.isClosed && codecStatus?.invoke() == "h264") {
             val packet = synchronized(codecLock) {
-                if (running && last == avcSequence) codecLock.wait(1200)
-                if (last == avcSequence) null else {
-                    last = avcSequence
-                    latestAvc
+                avcQueue.read(cursor, SystemClock.elapsedRealtime())
+            }
+            if (packet == null) {
+                val now = SystemClock.elapsedRealtime()
+                if (cursor.waitingForKeyframe && now - lastSyncRequestAt >= 1_000L) {
+                    lastSyncRequestAt = now
+                    runCatching { requestKeyframe?.invoke() }
                 }
-            } ?: continue
-            out.write(packet)
+                synchronized(codecLock) {
+                    // Espera limitada inclusive se a notificação chegou antes do wait.
+                    if (running) codecLock.wait(50)
+                }
+                continue
+            }
+            out.write(packet.bytes)
             out.flush()
         }
         } finally { videoViewers.decrementAndGet() }
@@ -521,7 +527,7 @@ class PhoneCameraServer(
         try { discoverySocket?.close() } catch (_: Exception) { }
         try { server.close() } catch (_: Exception) { }
         synchronized(frameLock) { latest = null; latestBattery = null; frameLock.notifyAll() }
-        synchronized(codecLock) { latestAvc = null; codecLock.notifyAll() }
+        synchronized(codecLock) { avcQueue.clear(); codecLock.notifyAll() }
         peers.forEach { try { it.close() } catch (_: Exception) { } }
         peers.clear()
     }

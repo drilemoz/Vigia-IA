@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.310', build: 310);
+      AppBuildVersion(version: '1.0.313', build: 313);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.310', build: 310),
+      version: AppBuildVersion(version: '1.0.313', build: 313),
       changes: <String>[
-        'Corrigida falha R8 no APK 260 causada por idiomas opcionais do ML Kit.',
-        'OCR de placas brasileiras permanece local, sem módulos extras.',
-        'Galeria Remota, fotos e gravação do Redmi A3 preservadas.',
+        'Gravação independente da compressão de rede, com menos cópias de imagem no A3.',
+        'Transmissão durante REC respeita o FPS escolhido, mantendo a proteção térmica.',
+        'H.264 recupera a sequência após atrasos; disponíveis opções de 15, 24 e 30 FPS.',
       ],
     ),
   ]);

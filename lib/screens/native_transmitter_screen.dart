@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../services/mcrp_client.dart';
+import '../services/native_elapsed_counter.dart';
 import '../services/native_camera_transmitter_service.dart';
 import '../services/native_platform_service.dart';
+import '../models/device_telemetry.dart';
 import '../services/app_launch_mode_service.dart';
 import 'launch_mode_screen.dart';
 
@@ -32,6 +34,13 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
   NativeTransmitterStatus? _status;
   Map<String, String> _details = const {};
   Timer? _timer;
+  Timer? _displayTimer;
+  Timer? _telemetryTimer;
+  DeviceTelemetrySnapshot? _telemetry;
+  bool _telemetryRefreshing = false;
+  final Stopwatch _elapsedClock = Stopwatch()..start();
+  final NativeElapsedCounter _transmitElapsed = NativeElapsedCounter();
+  final NativeElapsedCounter _recordElapsed = NativeElapsedCounter();
   bool _busy = false;
   bool _refreshing = false;
   bool _localCommandBusy = false;
@@ -43,22 +52,41 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     unawaited(_refresh());
-    // O status na UI e consultado a cada 3 s, sem capturar video no Flutter.
+    unawaited(_refreshTelemetry());
+    _telemetryTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (_foreground) unawaited(_refreshTelemetry());
+    });
+    // Dados da camera/rede a cada 3 s; cronometros desenhados localmente a 1 Hz.
     _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (_foreground) unawaited(_refresh());
+      if (_foreground) {
+        unawaited(_refresh());
+      }
+    });
+    _displayTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_foreground && mounted &&
+          (_status?.running == true || _status?.recording == true ||
+              _details['x-recording'] == '1')) {
+        setState(() {});
+      }
     });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _foreground = state == AppLifecycleState.resumed;
-    if (_foreground) unawaited(_refresh());
+    if (_foreground) {
+      unawaited(_refresh());
+      unawaited(_refreshTelemetry());
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    _displayTimer?.cancel();
+    _telemetryTimer?.cancel();
+    _elapsedClock.stop();
     super.dispose();
   }
 
@@ -67,24 +95,95 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     _refreshing = true;
     try {
       final status = await NativeCameraTransmitterService.status();
+      final statusSampledAt = _elapsedClock.elapsed;
       Map<String, String> details = const {};
+      Duration? recordingSampledAt;
       if (status.url != null && !status.releasing) {
         McrpClient? client;
         try {
           client = McrpClient(McrpAddress.parse(status.url!));
           details = await client.status();
+          recordingSampledAt = _elapsedClock.elapsed;
         } catch (_) {
           // O servico pode estar abrindo a camera ou trocando de rede.
         } finally {
           client?.close();
         }
       }
-      if (mounted) setState(() { _status = status; _details = details; });
+      if (mounted) {
+        _transmitElapsed.synchronize(
+          active: status.running,
+          seconds: status.seconds,
+          sampledAt: statusSampledAt,
+        );
+        final recording = status.recording || details['x-recording'] == '1';
+        _recordElapsed.synchronize(
+          active: recording,
+          seconds: int.tryParse(details['x-recording-seconds'] ?? ''),
+          sampledAt: recordingSampledAt ?? statusSampledAt,
+        );
+        setState(() {
+          _status = status;
+          _details = details;
+        });
+      }
     } catch (error) {
       if (mounted) setState(() => _error = 'Estado nativo indisponível: $error');
     } finally {
       _refreshing = false;
     }
+  }
+
+  /// Amostra apenas enquanto a tela esta visivel; sem polling da câmera ou Wi-Fi.
+  Future<void> _refreshTelemetry() async {
+    if (_telemetryRefreshing || !_foreground) return;
+    _telemetryRefreshing = true;
+    try {
+      final sample = await _permissions.readDeviceTelemetry();
+      if (mounted && _foreground) setState(() => _telemetry = sample);
+    } catch (_) {
+      // Leitura de telemetria nao pode interromper a transmissao.
+    } finally {
+      _telemetryRefreshing = false;
+    }
+  }
+
+  static String _mib(int? bytes) {
+    if (bytes == null || bytes < 0) return 'Indisponível';
+    return '${(bytes / 1048576).toStringAsFixed(0)} MB';
+  }
+
+  Widget _resourceCard() {
+    final telemetry = _telemetry;
+    final scheme = Theme.of(context).colorScheme;
+    final cpu = telemetry?.appCpuPercent;
+    final total = telemetry?.memoryTotalBytes;
+    final available = telemetry?.memoryAvailableBytes;
+    return Card(child: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.memory_rounded, color: scheme.primary),
+          const SizedBox(width: 10),
+          Expanded(child: Text('Desempenho do A3',
+              style: Theme.of(context).textTheme.titleMedium)),
+        ]),
+        const SizedBox(height: 10),
+        Wrap(spacing: 7, runSpacing: 7, children: [
+          _metric(Icons.speed_rounded,
+              'CPU app: ${cpu == null ? 'Calculando…' : '${cpu.toStringAsFixed(1)}%'}'),
+          _metric(Icons.apps_rounded,
+              'Memória app: ${_mib(telemetry?.appMemoryUsedBytes)}'),
+          _metric(Icons.storage_rounded,
+              'RAM livre: ${_mib(available)}'),
+        ]),
+        const SizedBox(height: 9),
+        Text('RAM total: ${_mib(total)} · CPU = uso do Vigia IA, proporcional aos núcleos. '
+             'Memória app = PSS estimado pelo Android. Atualiza a cada 6 segundos, '
+             'somente com esta tela aberta.',
+            style: Theme.of(context).textTheme.bodySmall),
+      ]),
+    ));
   }
 
   Future<void> _start() async {
@@ -431,6 +530,9 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
                 onPressed: canUse ? () => _showOptions('Quadros por segundo', Icons.speed_rounded, const [
                   _TransmitterOption('5 FPS', 'fps/5', Icons.slow_motion_video_rounded),
                   _TransmitterOption('10 FPS', 'fps/10', Icons.videocam_outlined),
+                  _TransmitterOption('15 FPS', 'fps/15', Icons.videocam_outlined),
+                  _TransmitterOption('24 FPS', 'fps/24', Icons.videocam_outlined),
+                  _TransmitterOption('30 FPS', 'fps/30', Icons.videocam_outlined),
                 ], 'fps/$fps') : null)),
               SizedBox(width: itemWidth, height: 73, child: _controlTile(
                 label: quality == 'Resolução' ? quality : '${quality}p',
@@ -471,7 +573,9 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
     const thermalLabels = <String>['Normal', 'Leve', 'Moderado',
       'Alto', 'Crítico', 'Emergência', 'Desligamento'];
     final camera = _details['x-camera-facing'] == '1' ? 'Frontal' : 'Traseira';
-    final recordSeconds = int.tryParse(_details['x-recording-seconds'] ?? '');
+    final now = _elapsedClock.elapsed;
+    final transmitSeconds = _transmitElapsed.secondsAt(now);
+    final recordSeconds = _recordElapsed.secondsAt(now);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -522,7 +626,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
                 const SizedBox(height: 15),
                 Row(children: [
                   Expanded(child: _durationPanel(running ? 'TRANSMITINDO' : 'PAUSADO',
-                      running ? _elapsed(s!.seconds) : 'Transmissão parada',
+                      running ? _elapsed(transmitSeconds ?? s!.seconds) : 'Transmissão parada',
                       running ? Icons.wifi_tethering_rounded : Icons.pause_circle_outline,
                       scheme.primary)),
                   const SizedBox(width: 9),
@@ -569,6 +673,7 @@ class _NativeTransmitterScreenState extends State<NativeTransmitterScreen>
               ],
             ]),
           )),
+          _resourceCard(),
           Card(child: Column(children: [
             SwitchListTile.adaptive(
               secondary: const Icon(Icons.photo_camera_outlined),

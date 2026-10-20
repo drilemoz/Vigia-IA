@@ -57,8 +57,11 @@ class TransmitterExclusive290(unittest.TestCase):
 
     def test_idle_limit_excludes_recording(self):
         s=src('android/app/src/main/kotlin/com/minhacamera/PhoneCameraBackgroundService.kt')
-        self.assertIn('session.activeVideoViewers() == 0 && !recording',s)
-        self.assertIn('val interval = if (idle) 2_500L',s)
+        self.assertIn('val idle = session.activeVideoViewers() == 0',s)
+        self.assertIn('val streamInterval = if (idle) 2_500L',s)
+        # REC agora possui seu próprio pacer, antes da política de ociosidade da rede.
+        self.assertIn('val recordDue = recording && recordPacer.accept(capturedNs,',s)
+        self.assertLess(s.index('val recordDue ='), s.index('val idle = session.activeVideoViewers()'))
         self.assertIn('PowerManager.THERMAL_STATUS_EMERGENCY',s)
         self.assertIn('heatState == PhoneHeatState.WARM',s)
         self.assertIn('getBoolean("eco_enabled", true)',s)

@@ -66,6 +66,7 @@ internal class PhoneH264LiveEncoder(
                         setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
                         setInteger(MediaFormat.KEY_FRAME_RATE, fps)
                         setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
+                        setInteger(MediaFormat.KEY_MAX_B_FRAMES, 0)
                         // Bitrate padrão para preservar compatibilidade com encoders AVC dos fabricantes.
                     }
                     candidate.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
@@ -94,14 +95,12 @@ internal class PhoneH264LiveEncoder(
         if (closed) return
         if (firstNs < 0) firstNs = timestampNs
         val pts = maxOf(lastUs + 1, (timestampNs - firstNs) / 1000)
+        drain() // Devolver output antes de pedir input evita descartes desnecessários.
         val index = codec.dequeueInputBuffer(0)
         if (index >= 0) {
             val buffer = codec.getInputBuffer(index) ?: return
-            val converted = PhoneYuv420.convert(nv21, width, height, planar)
-            if (buffer.capacity() < converted.size) throw IllegalStateException("AVC input insuficiente")
-            buffer.clear()
-            buffer.put(converted)
-            codec.queueInputBuffer(index, 0, converted.size, pts, 0)
+            val count = PhoneYuv420.write(nv21, width, height, planar, buffer)
+            codec.queueInputBuffer(index, 0, count, pts, 0)
             lastUs = pts
         }
         drain()

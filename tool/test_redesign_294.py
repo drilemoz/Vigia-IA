@@ -45,6 +45,6 @@ class Redesign294(unittest.TestCase):
     self.assertIn('exportToDownloads()',src('lib/screens/monitor_screen_ai_tools.dart'))
     self.assertIn('Downloads/Vigia IA',src('android/app/src/main/kotlin/com/vigiaia/app/MainActivity.kt'))
   def test_version(self):
-    self.assertIn('version: 1.0.310+310',src('pubspec.yaml'))
-    self.assertTrue((ROOT/'RELEASE-1.0.310.md').exists())
+    self.assertIn('version: 1.0.313+313',src('pubspec.yaml'))
+    self.assertTrue((ROOT/'RELEASE-1.0.313.md').exists())
 if __name__=='__main__': unittest.main()

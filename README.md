@@ -1,4 +1,24 @@
-**Versão atual:** `1.0.310+310`
+**Versão atual:** `1.0.313+313`
+
+## Atualização 1.0.313+313 · Fluidez da transmissão e gravação
+
+REC recebe quadros independentemente da compressão de rede; orientação MP4 por metadado e conversão direta no encoder reduzem o trabalho por quadro. H.264 passa a preservar a sequência com recuperação por quadro-chave. Removido teto adicional de 5 FPS da rede durante REC, com proteções térmicas mantidas. Opções de 15/24/30 FPS disponíveis; começar em 480p/10 FPS e medir no A3.
+
+Detalhes e roteiro: `RELEASE-1.0.313.md`. APK/Flutter e testes físicos ainda precisam de confirmação.
+
+## Atualização 1.0.312+312 · CPU e memória no A3
+
+- Novo card mostra CPU do processo, memória do Vigia IA (PSS) e RAM livre/total durante Transmissão.
+- Gravação MP4 recebe prioridade sobre compressão de vídeo para a rede. O visualizador continua funcionando com taxa de quadros reduzida durante REC; sem visualizador, publica quadros periódicos.
+- Eco não limita artificialmente a FPS da câmera durante gravação, mas proteção térmica permanece. A fluidez real precisa ser testada no Redmi A3.
+- Movimento global da bicicleta não é gatilho adequado para iniciar/parar REC; manter manual por ora e planejar dashcam circular.
+
+## Atualização 1.0.311+311 · Cronômetros contínuos no A3
+
+- Na tela de transmissão, os dois cronômetros agora avançam visualmente a cada segundo, com `Stopwatch` monotônico.
+- O status nativo/MCRP continua atualizado a cada 3 segundos; não há aumento de consultas à câmera ou à rede.
+- A contagem local se sincroniza com o tempo nativo, inclusive após o aplicativo voltar para primeiro plano ou a gravação ser reiniciada.
+- A mudança é apenas na apresentação dos tempos: não altera os FPS, a gravação MP4 ou o fluxo MJPEG.
 
 ## Atualização 1.0.310+310 · Correção de minificação R8 do APK 260
 

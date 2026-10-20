@@ -1,3 +1,27 @@
+# Validação Vigia IA 1.0.313+313
+
+## Evidências desta entrega
+
+- `tool/verify_project.sh`: concluído com código 0; 517 testes Python reportados, além dos verificadores de contratos. Inclui execução real dos testes Kotlin JVM de cadência/YUV/fila AVC e rotação NV21. Não confundir estes testes com `flutter test`.
+- Compilação Kotlin isolada do módulo com.minhacamera com Kotlin 2.1.20, Java 17, APIs Android 34 e AndroidX Core 1.13.1: sem erros. MainActivity e o identificador R.mipmap.ic_launcher foram substituídos por adaptadores mínimos apenas nessa compilação. Isso não é build do aplicativo/Gradle/R8.
+- Testes de comportamento Kotlin: conversão NV21/I420/NV12 em buffers heap/diretos; cadência com jitter; cadência REC independente da rede; limites térmicos; ordem H.264 com múltiplos leitores; recuperação após perda, troca de encoder, limite de memória e atraso.
+- Flutter SDK e Android SDK de build completos indisponíveis neste ambiente: flutter analyze, flutter test e APK Release ainda dependem do workflow.
+- Sem acesso à câmera RTSP ou ao Redmi A3 físico: fluidez, orientação do MP4, codecs reais e encerramento sob carga devem seguir o roteiro RELEASE-1.0.313.md.
+
+# Validação Vigia IA 1.0.312+312
+
+## Validação 1.0.312+312
+
+- Contratos em `tool/test_transmitter_performance_312.py` para painel, telemetria, priorização e sincronismo Kotlin.
+- Teste puro Kotlin de `PhoneRecNetworkPolicy` para cadência e comportamento com/sem REC.
+- Flutter Analyze/Test/APK e vídeo real do A3 ainda necessitam verificação; não inferir eliminação de travamentos sem gravação física.
+
+
+- **Causa da falha visual:** o estado completo da tela era consultado apenas a cada 3 segundos, fazendo o contador saltar de `00:10` para `00:13` mesmo quando o serviço nativo contava normalmente.
+- **Correção:** fonte nativa de duração preservada, `Stopwatch` monotônico para apresentar cada segundo e timer local a 1 Hz desacoplado das consultas MCRP.
+- **Testes novos:** `tool/test_transmitter_elapsed_311.py` e `test/native_elapsed_counter_test.dart` cobrem transição de segundos, sincronização, pausa e reinício.
+- **Pendente:** Flutter Analyze, Flutter Test, APK e teste de fluidez no A3 físico.
+
 # Validação Vigia IA 1.0.310+310
 
 - **Origem:** workflow Android APK 260, fonte 1.0.309. Resultado factual: `flutter analyze --fatal-infos --fatal-warnings` sem problemas, 579 testes Flutter aprovados, falha em `:app:minifyReleaseWithR8` por oito classes opcionais de ML Kit OCR ausentes.

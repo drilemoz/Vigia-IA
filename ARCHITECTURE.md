@@ -1,3 +1,30 @@
+# Arquitetura — Vigia IA 1.0.313+313
+
+## 1.0.313+313 · Saídas independentes do transmissor
+
+O callback da câmera mantém dois PhoneFramePacer independentes e dois sinalizadores atômicos de ocupação. Quando alguma saída aceita o quadro, uma única cópia NV21 imutável é compartilhada. recordWorker recebe essa cópia diretamente; encodeWorker faz a rotação e compressão da rede. Não há espera de rede no gravador. A geração da sessão REC invalida trabalhos de sessões anteriores, e a finalização permanece serial no recordWorker.
+
+PhoneMp4Recorder codifica largura/altura originais e usa orientação no contêiner. PhoneYuv420 escreve diretamente no ByteBuffer de hardware. O quadro mantém o timestamp de captura. Há um limite de um quadro em voo por saída; a sobrecarga descarta quadros, sem acumular latência. Proteção térmica e cadência nominal continuam reduzindo taxas quando necessário.
+
+PhoneAvcQueue é protegido pelo codecLock, guarda até 24 pacotes/4 MiB e serve cada cliente por cursor. Após overrun, troca de geração ou pacote atrasado mais de 1 s, só um quadro-chave retoma o envio. A solicitação de chave ocorre fora do lock e é limitada a uma por segundo por cliente. MJPEG mantém seu comportamento de último quadro, apropriado a imagens independentes.
+
+A interface oferece as taxas já aceitas pelo protocolo. Não muda o transporte RTSP nem acrescenta IA ao transmissor.
+
+## 1.0.312+312 · Telemetria do transmissor e prioridade de gravação
+
+- `NativeTransmitterScreen` consulta `NativePlatformService.readDeviceTelemetry()` a cada 6s quando visível, sem consultar servidor MCRP. Exibe CPU normalizada por núcleos, PSS do app, RAM livre/total.
+- `PhoneRecNetworkPolicy` aplica cadência reduzida à saída de rede em REC, deixando `appendRecording` inalterado; copia idêntica em `tool/android/native_transmitter` para bootstrap.
+- `effectiveCameraFps()` só considera Eco fora de REC; políticas WARM/HOT permanecem.
+- Não há detector próprio de veículos no A3 nem gravação por movimento autônoma nesta entrega.
+
+
+## Cronômetros do transmissor A3
+
+- `NativeTransmitterScreen` recebe duração real do `NativeCameraTransmitterService.status()` e do cabeçalho `X-Recording-Seconds` via MCRP, ambos consultados no máximo a cada três segundos.
+- `NativeElapsedCounter` extrapola a partir das amostras usando `Stopwatch.elapsed` monotônico, com redesenho separado a 1 Hz.
+- Divergência maior que um segundo é corrigida pela medição nativa. Gravação reiniciada retorna a zero; parada limpa a referência.
+- O timer visual não envia comandos nem solicita quadros, minimizando impacto no A3.
+
 # Arquitetura — Vigia IA 1.0.310+310
 
 ## R8 Release e OCR Latin (build 260)

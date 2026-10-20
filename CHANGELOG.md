@@ -1,3 +1,27 @@
+## 1.0.313+313 (2026-10-20)
+
+- REC desacoplado da compressão de rede e rotação MP4 por metadado.
+- Conversão YUV diretamente no buffer do codec e seleção de encoder de hardware.
+- Cadência independente e tolerante ao jitter; eliminada restrição adicional de 5 FPS durante REC com receptor.
+- Histórico H.264 limitado, cursor por cliente e recuperação por quadro-chave após perda/atraso.
+- Interface com 15/24/30 FPS, preservando padrão 10 FPS e proteção térmica.
+- Testes Kotlin de comportamento e fontes do bootstrap sincronizadas. RTSP preservado.
+
+## 1.0.312+312 (2026-10-19)
+
+- Adicionado card de CPU, memória PSS do aplicativo e RAM livre/total na tela Transmissão, com leitura Android a cada 6 segundos enquanto visível.
+- Reduzida a compressão concorrente de rede durante REC; prioritário MP4: até 5 FPS para receptor e ~0,4 FPS sem espectadores.
+- Modo Eco não restringe a câmera a 5 FPS durante gravação, preservando proteção térmica.
+- Gravação por mudança de cena durante ciclismo não habilitada: a cena em movimento causaria acionamento contínuo.
+- Continuidade de MCRP, Galeria, fotos e OCR preservada. Testes físicos pendentes.
+
+## 1.0.311+311 (2026-10-19)
+
+- Corrigido salto visual nos cronômetros TRANSMITINDO e GRAVANDO do Redmi A3, antes atualizados somente de 3 em 3 segundos.
+- Adicionada interpolação monotônica leve na tela, com timer local de 1 segundo e sincronização periódica com a contagem nativa.
+- Consultas Android/MCRP, gravação MP4, FPS, capturas de fotos e Galeria Remota não alterados.
+- Testes Dart e contratos Python adicionados; APK e teste no aparelho pendentes.
+
 ## 1.0.310+310 (2026-10-19)
 
 - APK 260: `flutter analyze` limpo e 579 testes Flutter aprovados; `:app:minifyReleaseWithR8` falhou com oito classes de OCR ML Kit opcionais ausentes.

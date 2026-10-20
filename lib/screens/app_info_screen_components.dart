@@ -77,12 +77,22 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.310',
+          version: '1.0.313',
           current: true,
           changes: [
-            'APK 260: configurado R8 para OCR Latin com scripts ML Kit opcionais ausentes.',
-            'Minificação Release e assinatura preservadas, sem baixar modelos de outros idiomas.',
-            'Galeria Remota, fotos do A3, OCR e gravação preservados.',
+            'Gravação independente da compressão de rede, com menos cópias de imagem no A3.',
+            'Transmissão durante REC respeita o FPS escolhido, mantendo a proteção térmica.',
+            'H.264 recupera a sequência após atrasos; disponíveis opções de 15, 24 e 30 FPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.312',
+          current: false,
+          changes: [
+            'Card de CPU do Vigia IA, memória do app e RAM livre na tela de Transmissão.',
+            'REC priorizado no A3: menos codificação de rede enquanto grava e FPS Eco corrigido.',
+            'Fotos por movimento mantidas separadas de gravação automática na bicicleta.',
           ],
         ),
         SizedBox(height: 10),
@@ -2646,8 +2656,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.281',
+          version: '1.0.313',
           current: true,
+          changes: [
+            'Gravação independente da compressão de rede, com menos cópias de imagem no A3.',
+            'Transmissão durante REC respeita o FPS escolhido, mantendo a proteção térmica.',
+            'H.264 recupera a sequência após atrasos; disponíveis opções de 15, 24 e 30 FPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.281',
+          current: false,
           changes: [
             'Atalhos QR, Celular, RTSP e ESP32 lado a lado em Câmeras.',
             'Informações sobre contagem disponíveis no ícone de ajuda.',

@@ -3,6 +3,7 @@ package com.minhacamera
 import android.content.ContentValues
 import android.content.Context
 import android.media.MediaCodec
+import android.media.MediaCodecList
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
@@ -17,35 +18,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Conversão de NV21 para entrada YUV420 de encoders Android. Sem suposições sobre o codec. */
-internal object PhoneYuv420 {
-    fun convert(nv21: ByteArray, width: Int, height: Int, planar: Boolean): ByteArray {
-        require(width > 0 && height > 0 && width % 2 == 0 && height % 2 == 0)
-        val size = width * height
-        require(nv21.size >= size * 3 / 2)
-        val out = ByteArray(size * 3 / 2)
-        System.arraycopy(nv21, 0, out, 0, size)
-        if (planar) {
-            var u = size
-            var v = size + size / 4
-            for (i in size until size * 3 / 2 step 2) {
-                out[u++] = nv21[i + 1]
-                out[v++] = nv21[i]
-            }
-        } else {
-            for (i in size until size * 3 / 2 step 2) {
-                out[i] = nv21[i + 1]
-                out[i + 1] = nv21[i]
-            }
-        }
-        return out
-    }
-}
-
 /** Grava MP4/H.264 sem áudio. Todos os métodos são invocados sequencialmente no worker de quadros. */
 @Suppress("DEPRECATION")
 internal class PhoneMp4Recorder(private val context: Context, val width: Int, val height: Int,
-    private val fps: Int = 12, private val bitrate: Int = 1_500_000) {
+    private val fps: Int = 12, private val bitrate: Int = 1_500_000,
+    private val orientationDegrees: Int = 0) {
     private val temp = File.createTempFile("phone-camera-", ".mp4", context.cacheDir)
     private var codec: MediaCodec? = null
     private var muxer: MediaMuxer? = null
@@ -60,26 +37,47 @@ internal class PhoneMp4Recorder(private val context: Context, val width: Int, va
     init {
         require(width > 0 && height > 0 && width % 2 == 0 && height % 2 == 0)
         try {
-            val encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-            codec = encoder
-            val formats = encoder.codecInfo.getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC).colorFormats
-            val color = when {
-                formats.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) ->
-                    MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar
-                formats.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) ->
-                    MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
-                else -> throw IllegalStateException("Codificador H.264 não aceita entrada YUV420 em ByteBuffer")
+            require(orientationDegrees in listOf(0, 90, 180, 270))
+            var failure: Exception? = null
+            // Não cair silenciosamente num encoder de CPU em aparelhos modestos.
+            for (candidate in MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos) {
+                if (!candidate.isEncoder || !candidate.isHardwareAccelerated ||
+                    !candidate.supportedTypes.any { it.equals(MediaFormat.MIMETYPE_VIDEO_AVC, true) }) continue
+                var encoder: MediaCodec? = null
+                try {
+                    val caps = candidate.getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC)
+                    if (!caps.videoCapabilities.areSizeAndRateSupported(width, height, fps.toDouble())) continue
+                    val color = when {
+                        caps.colorFormats.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) ->
+                            MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
+                        caps.colorFormats.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) ->
+                            MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar
+                        else -> continue
+                    }
+                    encoder = MediaCodec.createByCodecName(candidate.name)
+                    val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height).apply {
+                        setInteger(MediaFormat.KEY_COLOR_FORMAT, color)
+                        setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
+                        setInteger(MediaFormat.KEY_FRAME_RATE, fps)
+                        setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
+                        setInteger(MediaFormat.KEY_MAX_B_FRAMES, 0)
+                    }
+                    encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+                    encoder.start()
+                    codec = encoder
+                    planar = color == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
+                    PhoneStreamDiagnostics.add("MP4 hardware: ${candidate.name}, ${width}x$height@$fps, rotação=$orientationDegrees")
+                    break
+                } catch (e: Exception) {
+                    failure = e
+                    runCatching { encoder?.release() }
+                }
             }
-            planar = color == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
-            val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height).apply {
-                setInteger(MediaFormat.KEY_COLOR_FORMAT, color)
-                setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
-                setInteger(MediaFormat.KEY_FRAME_RATE, fps)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
+            if (codec == null) throw IllegalStateException("Sem encoder H.264 de hardware para ${width}x$height@$fps; tente 480p/10 FPS", failure)
+            muxer = MediaMuxer(temp.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4).apply {
+                // Orientação no contêiner evita girar todos os pixels para gravar.
+                setOrientationHint(orientationDegrees)
             }
-            encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-            muxer = MediaMuxer(temp.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-            encoder.start()
         } catch (e: Exception) {
             release(deleteTemp = true)
             throw e
@@ -96,13 +94,10 @@ internal class PhoneMp4Recorder(private val context: Context, val width: Int, va
         val index = encoder.dequeueInputBuffer(5_000)
         if (index < 0) return false
         val buffer = encoder.getInputBuffer(index) ?: throw IllegalStateException("Encoder sem buffer")
-        val converted = PhoneYuv420.convert(nv21, width, height, planar)
-        if (buffer.capacity() < converted.size) throw IllegalStateException("Buffer H.264 insuficiente")
+        val count = PhoneYuv420.write(nv21, width, height, planar, buffer)
         if (firstTimestampNs < 0L) firstTimestampNs = timestampNs
         val presentationUs = maxOf(lastTimestampUs + 1, (timestampNs - firstTimestampNs) / 1000)
-        buffer.clear()
-        buffer.put(converted)
-        encoder.queueInputBuffer(index, 0, converted.size, presentationUs, 0)
+        encoder.queueInputBuffer(index, 0, count, presentationUs, 0)
         lastTimestampUs = presentationUs
         frames++
         drain(false)

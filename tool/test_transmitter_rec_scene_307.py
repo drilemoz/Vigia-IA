@@ -8,8 +8,8 @@ class TransmitterRecorder307(unittest.TestCase):
     def test_mp4_frame_before_network_encoding_and_uses_capture_clock(self):
         service = src('android/app/src/main/kotlin/com/minhacamera/PhoneCameraBackgroundService.kt')
         self.assertIn('val capturedNs = System.nanoTime()', service)
-        self.assertLess(service.index('appendRecording(rotated, width, height, capturedNs)'),
-                        service.index('publish(session, rotated, width, height)'))
+        self.assertLess(service.index('appendRecording(snapshot, size.width, size.height, capturedNs,'),
+                        service.index('publish(session, rotated, width, height, capturedNs)'))
         self.assertIn('recorder?.append(frame, capturedNs)', service)
         self.assertNotIn('recorder?.append(snapshot, System.nanoTime())', service)
         self.assertIn('recorderBusyDropped++', service)
@@ -36,7 +36,7 @@ class TransmitterRecorder307(unittest.TestCase):
         self.assertIn('Pictures/VigiaIA/', library)
 
     def test_version(self):
-        self.assertIn('version: 1.0.310+310', src('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.310.md').exists())
+        self.assertIn('version: 1.0.313+313', src('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.313.md').exists())
 
 if __name__ == '__main__': unittest.main()
