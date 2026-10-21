@@ -202,6 +202,44 @@ class DiagnosticReport {
       ..writeln('Volume: ${audioDiagnostics['mediaVolume'] ?? '?'} / ${audioDiagnostics['mediaMaxVolume'] ?? '?'}')
       ..writeln('Dados técnicos: ${jsonEncode(audioDiagnostics)}');
     for (final event in alertEvents) { buffer.writeln(jsonEncode(event)); }
+    // Timeline read from the native recorder, including the last saved session.
+    // Labels are fixed app actions and coarse touch regions, never typed data.
+    buffer.writeln('\n=== INTERAÇÕES DE INTERFACE (ANTES DO ENCERRAMENTO) ===');
+    var recordedUi = 0;
+    for (final key in <String>['previousSession', 'currentSession']) {
+      final session = automaticDiagnostics[key];
+      if (session is! Map) continue;
+      final events = session['events'];
+      if (events is! List) continue;
+      for (final event in events) {
+        if (event is! Map || event['source'] != 'UI') continue;
+        final at = event['at'];
+        final when = at is int
+            ? DateTime.fromMillisecondsSinceEpoch(at).toIso8601String()
+            : 'horário indisponível';
+        buffer.writeln('$when | $key | ${DiagnosticRedactor.text(event['detail']?.toString() ?? '')}');
+        recordedUi++;
+      }
+    }
+    final prior = automaticDiagnostics['previousSession'];
+    if (prior is Map && prior['lastUiActionBeforeExit'] is Map) {
+      final saved = prior['lastUiActionBeforeExit'] as Map;
+      final at = saved['at'];
+      final when = at is int
+          ? DateTime.fromMillisecondsSinceEpoch(at).toIso8601String()
+          : 'horário indisponível';
+      buffer.writeln('ÚLTIMA AÇÃO ANTES DA SAÍDA: $when | '
+          '${DiagnosticRedactor.text(saved['detail']?.toString() ?? '')}');
+    }
+    final lastUi = automaticDiagnostics['lastUiAction'];
+    if (lastUi is Map && lastUi['at'] is int) {
+      final time = DateTime.fromMillisecondsSinceEpoch(lastUi['at'] as int);
+      buffer.writeln('Último toque salvo imediatamente: ${time.toIso8601String()} | '
+          '${DiagnosticRedactor.text(lastUi['detail']?.toString() ?? '')}');
+    }
+    if (recordedUi == 0) buffer.writeln('Nenhuma interação de interface persistida.');
+    buffer.writeln('Regiões de toque são aproximadas. Entradas de texto e teclado não são gravados.');
+
     buffer..writeln('\n=== DIAGNÓSTICO AUTOMÁTICO / SESSÕES ===')
       ..writeln(const JsonEncoder.withIndent('  ').convert(automaticDiagnostics));
     return DiagnosticRedactor.text(buffer.toString());

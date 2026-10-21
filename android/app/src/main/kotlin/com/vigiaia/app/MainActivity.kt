@@ -416,8 +416,13 @@ class MainActivity : FlutterActivity() {
                 result.success(null)
             }
             "diagnosticEvent" -> {
+                if (call.argument<String>("source") == "UI" &&
+                    call.argument<Boolean>("urgent") == true) {
+                    AppDiagnostics.checkpointUiAction(call.argument<String>("detail").orEmpty())
+                }
                 AppDiagnostics.event(call.argument<String>("source").orEmpty(),
-                    call.argument<String>("detail").orEmpty(), call.argument<Boolean>("unhandled") == true)
+                    call.argument<String>("detail").orEmpty(), call.argument<Boolean>("unhandled") == true,
+                    call.argument<Boolean>("urgent") == true)
                 result.success(null)
             }
             "acknowledgeDiagnostic" -> AppDiagnostics.acknowledge(call.argument<String>("id").orEmpty()) { result.success(it) }

@@ -20,6 +20,7 @@ import '../services/event_history_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/remote_camera_pairing_service.dart';
 import '../services/error_log_service.dart';
+import '../services/automatic_diagnostics_service.dart';
 import '../services/rtsp_diagnostics_service.dart';
 import '../services/lan_camera_discovery_service.dart';
 import '../services/lan_camera_subnet_scanner.dart';
@@ -121,6 +122,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
   }
 
   Future<void> _addCamera(CameraEndpointType type) async {
+    AutomaticDiagnosticsService.instance.recordUiAction('cameras', 'adicionar_${type.name}');
     final endpoint = await _showCameraEditor(type: type);
     if (endpoint == null) return;
     await _registry.save(endpoint);
@@ -129,6 +131,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
   }
 
   Future<void> _scanPhoneQr() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('cameras', 'parear_qr');
     final raw = await Navigator.push<String>(
       context,
       MaterialPageRoute<String>(
@@ -349,6 +352,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
       navigateToMainDestination(context, index, currentIndex: 3);
 
   void _openSettings() {
+    AutomaticDiagnosticsService.instance.recordUiAction('cameras', 'abrir_configuracoes');
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
     );

@@ -46,7 +46,7 @@ class RemoteGallery306(unittest.TestCase):
         self.assertTrue((ROOT/'test/remote_gallery_storage_test.dart').exists())
 
     def test_version(self):
-        self.assertIn('version: 1.0.318+318', source('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.318.md').is_file())
+        self.assertIn('version: 1.0.319+319', source('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.319.md').is_file())
 
 if __name__ == '__main__': unittest.main()

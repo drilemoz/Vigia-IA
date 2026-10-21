@@ -1,6 +1,10 @@
-**Versão atual:** `1.0.318+318`
+**Versão atual:** `1.0.319+319`
 
-## Atualização 1.0.318+318 · Correção Flutter Analyze APK 266
+## Atualização 1.0.319+319 · Trilha de diagnóstico das interações
+
+Agora o diagnóstico automático persiste cada toque reconhecido (região 3×3, sem coordenadas exatas), transições de tela, abas e ações nomeadas da Central de Câmeras/Media3, mesmo quando não há IA ou captura ativa. Interações são persistidas com prioridade e o Android guarda um checkpoint síncrono do último toque recebido. A exportação manual apresenta a trilha anterior e a atual em uma seção específica; o relatório automático preserva eventos na sessão congelada. Até 120 eventos recentes, sem teclas, campos editáveis, senhas, parâmetros da câmera ou upload. A coleta não garante reter ações que nunca chegaram ao Android antes da queda. Detalhes: `RELEASE-1.0.319.md`.
+
+## Atualização 1.0.319+319 · Correção Flutter Analyze APK 266
 
 O build 266 parou na análise estática por enviar `CameraEndpoint.address` (`String?`) ao `Media3RtspTestScreen.url` (`String`). O menu de teste Media3 agora só oferece a prévia quando a câmera é RTSP e tem endereço não vazio, com promoção de tipo segura. Mantém a rota Media3 H.264 experimental sem IA, enquanto Monitorar permanece no VLC. Não implementa ainda o cadastro com prévia obrigatória, previsto para uma próxima versão. Ver `RELEASE-1.0.318.md`.
 

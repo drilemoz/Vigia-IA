@@ -51,6 +51,19 @@ internal object AppDiagnostics {
     private val prefs get() = app.getSharedPreferences("automatic_diagnostics_v314", Context.MODE_PRIVATE)
     private val incidentPrefs get() = app.getSharedPreferences("automatic_incidents_v314", Context.MODE_PRIVATE)
     private val crashPrefs get() = app.getSharedPreferences("automatic_crash_v314", Context.MODE_PRIVATE)
+    private val uiPrefs get() = app.getSharedPreferences("ui_diagnostic_breadcrumb_v319", Context.MODE_PRIVATE)
+
+    /** Small synchronous checkpoint: survives a death before the event worker runs. */
+    fun checkpointUiAction(detail: String) {
+        if (!::app.isInitialized) return
+        runCatching {
+            uiPrefs.edit().putString("last", JSONObject()
+                .put("at", System.currentTimeMillis())
+                .put("session", session)
+                .put("detail", DiagnosticPolicy.safe(detail, 256)).toString()).commit()
+        }
+    }
+
 
     fun initialize(application: Application) {
         app = application
@@ -94,6 +107,13 @@ internal object AppDiagnostics {
         val fatal = json(crashPrefs.getString("fatal", null))
         val fatalSession = json(fatal.optString("session"))
         if (fatalSession.has("session")) previous = fatalSession
+        // Congela o último clique da sessão encerrada antes do próximo
+        // MaterialApp emitir eventos de navegação na sessão recém-aberta.
+        val lastUi = json(uiPrefs.getString("last", null))
+        if (previous.optString("session").isNotEmpty() &&
+            lastUi.optString("session") == previous.optString("session")) {
+            previous.put("lastUiActionBeforeExit", lastUi)
+        }
         val oldStart = previous.optLong("startedAt")
         if (Build.VERSION.SDK_INT >= 30) runCatching {
             val manager = app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -145,14 +165,14 @@ internal object AppDiagnostics {
         sample()
     }
 
-    fun event(source: String, detail: String, isUnhandled: Boolean = false) {
+    fun event(source: String, detail: String, isUnhandled: Boolean = false, urgent: Boolean = false) {
         if (queuedEvents.incrementAndGet() > 64) { queuedEvents.decrementAndGet(); return }
         worker.execute { try { runCatching {
             if (isUnhandled) unhandled = true
             events.addLast(JSONObject().put("at", System.currentTimeMillis())
                 .put("source", DiagnosticPolicy.safe(source, 100)).put("detail", DiagnosticPolicy.safe(detail, 2400)))
-            while (events.size > 40) events.removeFirst()
-            if (isUnhandled || SystemClock.uptimeMillis() - lastPersistAt >= 2000) persist()
+            while (events.size > 120) events.removeFirst()
+            if (isUnhandled || urgent || SystemClock.uptimeMillis() - lastPersistAt >= 2000) persist()
         } } finally { queuedEvents.decrementAndGet() } }
     }
 
@@ -163,9 +183,10 @@ internal object AppDiagnostics {
     fun report(callback: (String) -> Unit) {
         worker.execute {
             val result = runCatching { JSONObject().put("automatic", true).put("sampleIntervalSeconds", 10)
-                .put("retainedSamples", 30).put("persistenceOk", persistenceOk)
+                .put("retainedSamples", 30).put("retainedEvents", 120).put("uiActionsImmediate", true).put("persistenceOk", persistenceOk)
                 .put("pendingIncidents", incidents)
-                .put("lastExit", lastExit).put("previousSession", previous)
+                .put("lastExit", lastExit).put("lastUiAction", json(uiPrefs.getString("last", null)))
+                .put("previousSession", previous)
                 .put("currentSession", json(cachedSession)).toString() }.getOrDefault("{}")
             main.post { callback(result) }
         }
@@ -243,6 +264,6 @@ internal object AppDiagnostics {
             .put("transmission", DiagnosticPolicy.safe(PhoneCameraBackgroundService.automaticReport(), 24000))
             .put("rtspStage", app.getSharedPreferences("rtsp_diagnostics", Context.MODE_PRIVATE).getString("stage", "none"))
             .toString()
-        persistenceOk = prefs.edit().putString("current", cachedSession).commit() // worker only, bounded to 30 samples/40 events
+        persistenceOk = prefs.edit().putString("current", cachedSession).commit() // worker only, bounded to 30 samples/120 events
     }
 }

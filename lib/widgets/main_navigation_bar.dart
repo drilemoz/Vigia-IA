@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/adaptive_layout.dart';
+import '../services/automatic_diagnostics_service.dart';
 
 const _mainDestinations = <({IconData icon, IconData selectedIcon, String label})>[
   (icon: Icons.home_outlined, selectedIcon: Icons.home_rounded, label: 'Início'),
@@ -34,7 +35,13 @@ class MainNavigationBar extends StatelessWidget {
       ),
       child: NavigationBar(
       selectedIndex: currentIndex,
-      onDestinationSelected: onDestinationSelected,
+      onDestinationSelected: (index) {
+        if (index >= 0 && index < _mainDestinations.length) {
+          AutomaticDiagnosticsService.instance
+              .setUiSection(_mainDestinations[index].label);
+        }
+        onDestinationSelected(index);
+      },
       height: 68,
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       destinations: [
@@ -64,7 +71,13 @@ class MainNavigationRail extends StatelessWidget {
   Widget build(BuildContext context) {
     return NavigationRail(
       selectedIndex: currentIndex,
-      onDestinationSelected: onDestinationSelected,
+      onDestinationSelected: (index) {
+        if (index >= 0 && index < _mainDestinations.length) {
+          AutomaticDiagnosticsService.instance
+              .setUiSection(_mainDestinations[index].label);
+        }
+        onDestinationSelected(index);
+      },
       labelType: NavigationRailLabelType.selected,
       minWidth: 70,
       scrollable: true,

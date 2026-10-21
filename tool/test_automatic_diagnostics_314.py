@@ -39,6 +39,6 @@ class Diagnostics314Tests(unittest.TestCase):
         self.assertIn('finally {', native)
         self.assertIn('delegate.uncaughtException(thread, error)', native)
         self.assertIn('while (samples.size > 30)', native)
-        self.assertIn('while (events.size > 40)', native)
+        self.assertIn('while (events.size > 120)', native)
 
 if __name__ == '__main__': unittest.main()

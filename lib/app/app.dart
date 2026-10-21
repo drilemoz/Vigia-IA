@@ -22,6 +22,9 @@ import '../services/transmitter_exclusive_policy.dart';
 import '../widgets/update_news_host.dart';
 import '../widgets/diagnostic_recovery_host.dart';
 import '../services/error_log_service.dart';
+import '../services/automatic_diagnostics_service.dart';
+import '../services/diagnostic_route_observer.dart';
+import '../widgets/diagnostic_ui_interaction_capture.dart';
 
 class VigiaIaApp extends StatelessWidget {
   const VigiaIaApp({super.key});
@@ -37,6 +40,10 @@ class VigiaIaApp extends StatelessWidget {
       builder: (context, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Vigia IA',
+        navigatorObservers: [DiagnosticRouteObserver.instance],
+        builder: (context, child) => DiagnosticUiInteractionCapture(
+          child: child ?? const SizedBox.shrink(),
+        ),
         themeMode: appearance.themeMode,
         theme: _theme(brightness: Brightness.light, seed: appearance.seedColor),
         darkTheme: _theme(brightness: Brightness.dark, seed: appearance.seedColor),
@@ -108,6 +115,15 @@ class _StartupGateState extends State<_StartupGate> {
       _launchMode = launchMode;
       _launchModeLoaded = true;
     });
+
+    final initialSection = switch (launchMode) {
+      AppLaunchMode.normal => 'Início',
+      AppLaunchMode.monitor => 'Ao vivo',
+      AppLaunchMode.bike => 'Mapas',
+      AppLaunchMode.transmission => 'Transmissão',
+      null => 'Escolha de modo',
+    };
+    AutomaticDiagnosticsService.instance.setUiSection(initialSection);
 
     if (completed && launchMode != AppLaunchMode.transmission) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

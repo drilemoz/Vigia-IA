@@ -305,7 +305,13 @@ class _CameraCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 FilledButton.icon(
-                  onPressed: camera.enabled && cameraAvailable ? onOpen : null,
+                  onPressed: camera.enabled && cameraAvailable
+                      ? () {
+                          AutomaticDiagnosticsService.instance
+                              .recordUiAction('cameras', 'monitorar_${camera.type.name}');
+                          onOpen();
+                        }
+                      : null,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 38),
                     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -326,6 +332,8 @@ class _CameraCard extends StatelessWidget {
                   PopupMenuButton<String>(
                     tooltip: 'Opções da câmera',
                     onSelected: (value) {
+                      AutomaticDiagnosticsService.instance
+                          .recordUiAction('opcoes_camera', value);
                       if (value == 'media3') onMedia3Test?.call();
                       if (value == 'controls') onMcrpControls?.call();
                       if (value == 'second') onOpenWithSecond?.call();

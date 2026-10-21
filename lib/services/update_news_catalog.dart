@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.318', build: 318);
+      AppBuildVersion(version: '1.0.319', build: 319);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.318', build: 318),
+      version: AppBuildVersion(version: '1.0.319', build: 319),
       changes: <String>[
-        'Corrigido erro de tipo que impedia o build APK 266.',
-        'Teste H.264 com Media3 exige endereço RTSP preenchido.',
-        'Monitoramento com IA, VLC e MCRP permanecem preservados.',
+        'Trilha automática de toques, abas e ações das câmeras.',
+        'Última interação persistida para investigar fechamentos.',
+        'Sem guardar senhas, texto digitado ou URLs.',
       ],
     ),
   ]);

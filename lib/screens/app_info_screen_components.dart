@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.318',
+          version: '1.0.319',
           current: true,
+          changes: [
+            'Trilha de toques por região, navegação e ações de câmera no diagnóstico.',
+            'Último toque gravado imediatamente antes de possíveis encerramentos.',
+            'Senhas, textos digitados e URLs não são registrados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.318',
+          current: false,
           changes: [
             'Corrigida a falha do Flutter Analyze no build 266.',
             'Teste Media3 só fica disponível quando há URL RTSP cadastrada.',
@@ -2706,8 +2716,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.318',
+          version: '1.0.319',
           current: true,
+          changes: [
+            'Trilha de toques por região, navegação e ações de câmera no diagnóstico.',
+            'Último toque gravado imediatamente antes de possíveis encerramentos.',
+            'Senhas, textos digitados e URLs não são registrados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.318',
+          current: false,
           changes: [
             'Corrigida a falha do Flutter Analyze no build 266.',
             'Teste Media3 só fica disponível quando há URL RTSP cadastrada.',

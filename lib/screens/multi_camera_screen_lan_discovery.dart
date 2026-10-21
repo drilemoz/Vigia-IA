@@ -2,6 +2,7 @@ part of 'multi_camera_screen.dart';
 
 extension _LanCameraDiscoveryActions on _MultiCameraScreenState {
   Future<void> _scanLocalNetwork() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('cameras', 'escanear_rede');
     final discovered = <LanCameraCandidate>[];
     final cancel = LanScanCancelToken();
     bool scanning = true;

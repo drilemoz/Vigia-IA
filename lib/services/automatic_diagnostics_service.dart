@@ -24,6 +24,47 @@ class AutomaticDiagnosticsService with WidgetsBindingObserver {
   int _frames = 0;
   int _slowFrames = 0;
   int _maxFrameMs = 0;
+  String _uiSection = 'Inicialização';
+  int _uiRouteDepth = 0;
+  DateTime? _lastUiTap;
+
+  /// Somente rótulos fixos do aplicativo. Nunca enviar valores de campos.
+  void recordUiAction(String area, String action) {
+    final safeArea = DiagnosticRedactor.text(area);
+    final safeAction = DiagnosticRedactor.text(action);
+    unawaited(_send('diagnosticEvent', <String, Object?>{
+      'source': 'UI',
+      'detail': 'acao=$safeAction | area=$safeArea | aba=$_uiSection | nivel=$_uiRouteDepth',
+      'urgent': true,
+    }));
+  }
+
+  void setUiSection(String section) {
+    _uiSection = section;
+    recordUiAction('navegacao', 'aba_$section');
+  }
+
+  void setUiRouteDepth(int depth, String transition) {
+    _uiRouteDepth = depth < 0 ? 0 : depth;
+    recordUiAction('rota', transition);
+  }
+
+  /// Toques genéricos são identificados apenas por uma região 3x3, sem pixels.
+  /// Não registra teclado, edição de campos, texto, QR, senhas nem URLs.
+  void recordUiTap(int row, int column) {
+    final now = DateTime.now();
+    if (_lastUiTap != null && now.difference(_lastUiTap!) <
+        const Duration(milliseconds: 180)) {
+      return;
+    }
+    _lastUiTap = now;
+    final rows = <String>['topo', 'meio', 'base'];
+    final columns = <String>['esquerda', 'centro', 'direita'];
+    if (row < 0 || row >= rows.length ||
+        column < 0 || column >= columns.length) return;
+    recordUiAction('toque', '${rows[row]}_${columns[column]}');
+  }
+
 
   void start() {
     if (_started) return;
@@ -38,6 +79,7 @@ class AutomaticDiagnosticsService with WidgetsBindingObserver {
             '${entry.level.name}: ${entry.message}\n${entry.details ?? ''}\n${entry.context}',
           ),
           'unhandled': entry.context['nãoTratado'] == 'true',
+          'urgent': entry.context['nãoTratado'] == 'true',
         }),
       );
     };
@@ -145,11 +187,18 @@ class AutomaticDiagnosticsService with WidgetsBindingObserver {
   /// Exports frozen evidence even if the camera/GPS/health subsystem cannot start.
   Future<String?> exportIncident(Map<String, Object?> incident) async {
     await ErrorLogService.instance.initialize();
+    final session = incident['session'];
+    final lastUi = session is Map ? session['lastUiActionBeforeExit'] : null;
+    final checkpoint = lastUi is Map
+        ? 'Último clique anterior à saída: '
+            '${DiagnosticRedactor.text(lastUi['detail']?.toString() ?? '')}\n'
+        : 'Último clique anterior à saída: não disponível\n';
     final text = DiagnosticRedactor.text(
       'Vigia IA - Diagnóstico automático\n'
       'Exportador: ${AppMetadata.version}+${AppMetadata.build}\n'
       'Gerado em: ${DateTime.now().toIso8601String()}\n'
       'Sessão anterior preservada; a versão da falha consta no registro abaixo.\n'
+      '$checkpoint'
       '=== INCIDENTE E HISTÓRICO ANTERIOR ===\n'
       '${const JsonEncoder.withIndent('  ').convert(incident)}\n'
       '=== ERROS GERAIS PERSISTIDOS (podem incluir outras sessões) ===\n'

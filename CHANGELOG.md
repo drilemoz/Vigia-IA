@@ -1,4 +1,12 @@
-## 1.0.318+318 (2026-10-20)
+## 1.0.319+319 (2026-10-20)
+
+- Diagnóstico automático passa a registrar toques por região aproximada, navegação de abas, push/pop e ações identificadas da Central Câmeras e Media3.
+- Eventos de UI são persistidos sem o atraso normal de 2 s; o Android grava também o último toque em registro síncrono separado para recuperação após término abrupto.
+- Trilha cronológica anterior/atual e último toque aparecem explicitamente nos diagnósticos manuais; incidentes automáticos já incluem os eventos nativos.
+- Histórico local limitado a 120 eventos; teclado, entradas de texto, senhas, URLs e coordenadas exatas são excluídos. Não há envio pela rede.
+- Mantidos player Media3 experimental, VLC/Monitorar, IA, mapas, GPS e transmissor; testes físicos e build Android pendentes.
+
+## 1.0.319+319 (2026-10-20)
 
 - Corrigido `flutter analyze` do build 266: `CameraEndpoint.address` é anulável, mas `Media3RtspTestScreen.url` exige `String`.
 - Prévia de teste Media3 disponível somente para cadastro RTSP com URL não vazia; sem conversão forçada ou valor artificial.

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/error_log_service.dart';
+import '../services/automatic_diagnostics_service.dart';
 import '../services/rtsp_diagnostics_service.dart';
 
 /// Primeira etapa da migração RTSP: reproduz vídeo nativo via Media3, SEM IA.
@@ -43,6 +44,7 @@ class _Media3RtspTestScreenState extends State<Media3RtspTestScreen> {
   @override
   void initState() {
     super.initState();
+    AutomaticDiagnosticsService.instance.recordUiAction('media3', 'abrir_previa');
     unawaited(_diagnostics.mark('open_requested', address: widget.url));
     _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted || _firstFrame) return;
@@ -57,6 +59,8 @@ class _Media3RtspTestScreenState extends State<Media3RtspTestScreen> {
   Future<void> _onPlatformViewCreated(int id) async {
     final channel = MethodChannel('vigiaia/media3_rtsp/$id');
     _channel = channel;
+    AutomaticDiagnosticsService.instance.recordUiAction('media3', 'view_criada');
+    unawaited(_diagnostics.mark('controller_created', address: widget.url));
     channel.setMethodCallHandler((call) async {
       if (call.method == 'state' && call.arguments is Map) {
         _receiveStatus(call.arguments as Map<Object?, Object?>);
@@ -75,6 +79,14 @@ class _Media3RtspTestScreenState extends State<Media3RtspTestScreen> {
   void _receiveStatus(Map<Object?, Object?> value) {
     if (!mounted) return;
     final phase = value['state'];
+    if (phase is String && phase != _phase) {
+      const permitted = {'connecting', 'buffering', 'ready', 'ended', 'error', 'paused'};
+      AutomaticDiagnosticsService.instance.recordUiAction(
+        'media3_estado', permitted.contains(phase) ? phase : 'desconhecido');
+      if (phase == 'buffering') {
+        unawaited(_diagnostics.mark('buffering', address: widget.url));
+      }
+    }
     final code = value['errorCode'];
     final firstFrame = value['firstFrame'] == true;
     setState(() {
@@ -119,6 +131,7 @@ class _Media3RtspTestScreenState extends State<Media3RtspTestScreen> {
   Future<void> _retry() async {
     final channel = _channel;
     if (channel == null) return;
+    AutomaticDiagnosticsService.instance.recordUiAction('media3', 'tentar_novamente');
     _startedAt = DateTime.now();
     setState(() {
       _phase = 'connecting';
