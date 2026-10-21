@@ -1,3 +1,10 @@
+## 1.0.321+321 (2026-10-20)
+
+- Corrigida a falha do build 269 em `flutter test --coverage`: timers fake de 3 segundos pendentes no teste `main_navigation_bar_test.dart` após o registro de mudanças de aba pelo `AutomaticDiagnosticsService`.
+- O teste agora usa `setMockMethodCallHandler` no canal `vigiaia/native`, limpa o mock no teardown e confirma os eventos Câmeras, Galeria e Mapas, preservando o fluxo de diagnóstico de produção.
+- Adicionada regressão preventiva `tool/test_build269_navigation_timers_321.py` e versionamento sequencial sincronizado.
+- Media3 experimental, VLC, registro de interações, câmera, IA, mapas e transmissão preservados. Flutter Test e APK da 1.0.321 requerem novo workflow.
+
 ## 1.0.320+320 (2026-10-20)
 
 - Corrigido o bloqueio do APK 268 em `flutter analyze --fatal-infos --fatal-warnings`: `if` sem bloco no coletor automático de diagnóstico e import desnecessário `dart:ui` na captura de toques.

@@ -1,4 +1,9 @@
-**Versão atual:** `1.0.320+320`
+**Versão atual:** `1.0.321+321`
+
+## Atualização 1.0.321+321 · Correção do Flutter Test no build 269
+
+O build 269 aprovou o `flutter analyze` e avançou até os testes Flutter, mas um teste do menu principal terminou com timers de 3 segundos pendentes do novo registro nativo de interações. O teste agora instala e remove um gravador Android simulado, verifica as três ações das abas e aguarda o processamento assíncrono, sem desabilitar o diagnóstico real. O novo pacote contém `RELEASE-1.0.321.md` e `VALIDATION-1.0.321.md`. A compilação APK ainda depende do GitHub Actions.
+
 
 ## Atualização 1.0.320+320 · Correção do Flutter Analyze no build 268
 

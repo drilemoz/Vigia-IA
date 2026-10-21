@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.320+320
+# Arquitetura — Vigia IA 1.0.321+321
+
+## 1.0.321+321 · Teste isolado da comunicação diagnóstica com Android
+
+A arquitetura de produção permanece inalterada. `MainNavigationBar` envia a escolha de aba ao `AutomaticDiagnosticsService`, que usa `MethodChannel('vigiaia/native')` com timeout de 3 segundos. Em testes de widget sem uma resposta nativa controlada, a Future cria timers na zona FakeAsync que ficam pendentes no fim do teste. O teste `main_navigation_bar_test.dart` instala um handler nativo de teste e restaura o messenger no teardown, garantindo resposta assíncrona curta e validando as ações gravadas. Assim, não se elimina a persistência urgente de diagnóstico dos aparelhos reais.
 
 ## 1.0.320+320 · Correção de análise estática do diagnóstico
 

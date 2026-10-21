@@ -26,7 +26,7 @@ class Build268Analyzer320(unittest.TestCase):
         self.assertNotIn("import 'dart:ui'", dart)
 
     def test_version_and_release(self):
-        self.assertIn('version: 1.0.320+320', source('pubspec.yaml'))
+        self.assertIn('version: 1.0.321+321', source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.320.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.320.md').is_file())
 

@@ -14,8 +14,8 @@ def source(path):
 
 class Media3Rtsp317Tests(unittest.TestCase):
     def test_version(self):
-        self.assertIn('version: 1.0.320+320', source('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.320.md').is_file())
+        self.assertIn('version: 1.0.321+321', source('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.321.md').is_file())
 
     def test_dependencies_consistent_with_radio(self):
         gradle = source('android/app/build.gradle.kts')

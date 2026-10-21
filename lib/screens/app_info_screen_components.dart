@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.320',
+          version: '1.0.321',
           current: true,
+          changes: [
+            'Corrigido o teste de navegação que bloqueava o APK 269.',
+            'Trilha de interações agora validada com gravador Android simulado.',
+            'Media3, VLC, IA, câmeras e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.320',
+          current: false,
           changes: [
             'Corrigidos dois avisos fatais do Flutter Analyze no build 268.',
             'Registro de toques e menus permanece ativo e privado.',
@@ -2726,8 +2736,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.320',
+          version: '1.0.321',
           current: true,
+          changes: [
+            'Corrigido o teste de navegação que bloqueava o APK 269.',
+            'Trilha de interações agora validada com gravador Android simulado.',
+            'Media3, VLC, IA, câmeras e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.320',
+          current: false,
           changes: [
             'Corrigidos dois avisos fatais do Flutter Analyze no build 268.',
             'Registro de toques e menus permanece ativo e privado.',

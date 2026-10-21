@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.320', build: 320);
+      AppBuildVersion(version: '1.0.321', build: 321);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.320', build: 320),
+      version: AppBuildVersion(version: '1.0.321', build: 321),
       changes: <String>[
-        'Corrigida a análise estática que impedia o APK 268.',
-        'Diagnóstico de toques e menus permanece preservado.',
-        'Media3 RTSP experimental e monitoramento mantidos.',
+        'Corrigido o teste de navegação que bloqueava a compilação do APK 269.',
+        'Menu principal continua registrando as ações no diagnóstico.',
+        'Media3 RTSP experimental, câmeras, IA e mapas preservados.',
       ],
     ),
   ]);

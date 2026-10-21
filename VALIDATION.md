@@ -1,4 +1,9 @@
-# Validação Vigia IA 1.0.320+320
+# Validação Vigia IA 1.0.321+321
+
+- Build 269: `flutter analyze --fatal-infos --fatal-warnings` passou sem issues, e `flutter test --coverage` reportou 588 sucessos e 1 falha: `main_navigation_bar_test.dart` com 3 timers pendentes criados por `_send().timeout(3s)`.
+- Correção: mock de `vigiaia/native` no teste de widget e asserções para três eventos de navegação; regressão no verificador preventivo. Detalhes: `RELEASE-1.0.321.md`, `VALIDATION-1.0.321.md`.
+- Flutter SDK/Android SDK indisponíveis localmente. Novo workflow precisa confirmar testes Flutter e compilação APK.
+- Resultado local da 1.0.321: 340 testes Python (339 aprovados, 1 ignorado), checagens de versão e de release aprovadas; `tool/verify_project.sh` executou parcialmente e não concluiu pelo limite de tempo do ambiente.
 
 - Build 268: testes Python passaram (333); Flutter Analyze falhou por duas infos fatais (`automatic_diagnostics_service.dart:64:49` e `diagnostic_ui_interaction_capture.dart:1:8`).
 - Correções e teste preventivo: `RELEASE-1.0.320.md`, `VALIDATION-1.0.320.md` e `tool/test_build268_flutter_analyze_320.py`.
