@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.317+317
+# Arquitetura — Vigia IA 1.0.318+318
+
+## 1.0.318+318 · Guarda de URL na prévia Media3
+
+A central de Câmeras só oferece `onMedia3Test` quando o endpoint é RTSP e o `address` opcional está presente e não vazio. O `String` local promovido é passado ao `Media3RtspTestScreen`. Não altera o player nativo nem a interface `VideoSource`: o monitoramento segue pelo VLC. Corrige o build 266 em `flutter analyze`; testes reais continuam dependentes do CI.
 
 ## 1.0.317+317 · Experimento RTSP Media3
 

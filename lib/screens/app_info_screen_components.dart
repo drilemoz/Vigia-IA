@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.317',
+          version: '1.0.318',
           current: true,
+          changes: [
+            'Corrigida a falha do Flutter Analyze no build 266.',
+            'Teste Media3 só fica disponível quando há URL RTSP cadastrada.',
+            'Prévia experimental e monitoramento anterior preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.317',
+          current: false,
           changes: [
             'Nova prévia RTSP H.264 com Media3, sem IA, nas opções das câmeras.',
             'Registro do primeiro frame renderizado e falhas sem expor credenciais.',
@@ -87,8 +97,8 @@ class AllChangesPanel extends StatelessWidget {
         ),
         SizedBox(height: 10),
         _ReleaseCard(
-          version: '1.0.317',
-          current: true,
+          version: '1.0.316',
+          current: false,
           changes: [
             'Corrigidos três testes Flutter de recuperação de diagnósticos.',
             'Espera limitada enquanto o diálogo aparece sobre o carregamento.',
@@ -2696,8 +2706,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.317',
+          version: '1.0.318',
           current: true,
+          changes: [
+            'Corrigida a falha do Flutter Analyze no build 266.',
+            'Teste Media3 só fica disponível quando há URL RTSP cadastrada.',
+            'Prévia experimental e monitoramento anterior preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.316',
+          current: false,
           changes: [
             'Corrigidos três testes Flutter de recuperação de diagnósticos.',
             'Espera limitada enquanto o diálogo aparece sobre o carregamento.',

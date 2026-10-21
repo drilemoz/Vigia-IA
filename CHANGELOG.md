@@ -1,3 +1,10 @@
+## 1.0.318+318 (2026-10-20)
+
+- Corrigido `flutter analyze` do build 266: `CameraEndpoint.address` é anulável, mas `Media3RtspTestScreen.url` exige `String`.
+- Prévia de teste Media3 disponível somente para cadastro RTSP com URL não vazia; sem conversão forçada ou valor artificial.
+- Media3 H.264 experimental, Monitorar/LibVLC, MCRP, IA e mapas preservados; teste no aparelho e build Android pendentes.
+- Adicionado teste direcionado de regressão contra parâmetros anuláveis em `tool/test_build266_media3_nullable_318.py`.
+
 ## 1.0.317+317 (2026-10-20)
 
 - Novo player RTSP H.264 nativo Android via Media3 1.8.0 (`media3-exoplayer-rtsp` e `media3-ui`), isolado de VLC/IA.

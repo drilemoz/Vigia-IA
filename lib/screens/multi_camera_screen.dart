@@ -413,6 +413,9 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                 final disabled = cameras.where((camera) => !camera.enabled).length;
                 Widget cameraCardAt(BuildContext context, int index) {
                   final camera = cameras[index];
+                  // O endpoint RTSP pode ser importado sem endereço. A prévia
+                  // Media3 exige String, então não ofereça o teste sem URL.
+                  final rtspTestUrl = camera.address;
                   return _CameraCard(
                     camera: camera,
                     cameraAvailable:
@@ -421,12 +424,14 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                     status: _status[camera.id],
                     lastEvent: _lastEvent(camera),
                     onOpen: () => _open(camera),
-                    onMedia3Test: camera.type == CameraEndpointType.rtsp
+                    onMedia3Test: camera.type == CameraEndpointType.rtsp &&
+                            rtspTestUrl != null &&
+                            rtspTestUrl.trim().isNotEmpty
                         ? () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => Media3RtspTestScreen(
                                   cameraName: camera.name,
-                                  url: camera.address,
+                                  url: rtspTestUrl,
                                   forceTcp: camera.rtspForceTcp,
                                 ),
                               ),

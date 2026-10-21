@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.317', build: 317);
+      AppBuildVersion(version: '1.0.318', build: 318);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.317', build: 317),
+      version: AppBuildVersion(version: '1.0.318', build: 318),
       changes: <String>[
-        'Adicionado teste independente de vídeo RTSP H.264 com Media3.',
-        'O primeiro frame e os códigos de falha podem ser conferidos na prévia.',
-        'Monitoramento com IA, MCRP e VLC continuam preservados.',
+        'Corrigido erro de tipo que impedia o build APK 266.',
+        'Teste H.264 com Media3 exige endereço RTSP preenchido.',
+        'Monitoramento com IA, VLC e MCRP permanecem preservados.',
       ],
     ),
   ]);

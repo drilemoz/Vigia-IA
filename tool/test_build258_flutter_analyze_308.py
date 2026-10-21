@@ -45,8 +45,8 @@ class Build258AnalyzerFix(unittest.TestCase):
         self.assertIn("import 'package:flutter/foundation.dart';", dart)
 
     def test_release_and_previous_features_preserved(self):
-        self.assertIn('version: 1.0.317+317', source('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.317.md').is_file())
+        self.assertIn('version: 1.0.318+318', source('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.318.md').is_file())
         self.assertIn('PhoneScenePhotoGate', source('android/app/src/main/kotlin/com/minhacamera/PhoneCameraBackgroundService.kt'))
         self.assertIn('class RemoteGalleryScreen', source('lib/screens/remote_gallery_screen.dart'))
         self.assertIn('class VehiclePlateOcrService', source('lib/services/vehicle_plate_ocr_service.dart'))

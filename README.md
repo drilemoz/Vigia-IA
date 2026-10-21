@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.317+317`
+**Versão atual:** `1.0.318+318`
+
+## Atualização 1.0.318+318 · Correção Flutter Analyze APK 266
+
+O build 266 parou na análise estática por enviar `CameraEndpoint.address` (`String?`) ao `Media3RtspTestScreen.url` (`String`). O menu de teste Media3 agora só oferece a prévia quando a câmera é RTSP e tem endereço não vazio, com promoção de tipo segura. Mantém a rota Media3 H.264 experimental sem IA, enquanto Monitorar permanece no VLC. Não implementa ainda o cadastro com prévia obrigatória, previsto para uma próxima versão. Ver `RELEASE-1.0.318.md`.
 
 ## Atualização 1.0.317+317 · RTSP Media3 H.264 (teste isolado)
 

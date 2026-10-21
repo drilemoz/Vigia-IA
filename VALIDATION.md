@@ -1,3 +1,10 @@
+# Validação Vigia IA 1.0.318+318
+
+- Build 266: 323 testes preventivos Python aprovados; `flutter analyze` apresentou 1 erro `String?` em `multi_camera_screen.dart:429` antes da correção.
+- Correção: só abrir prévia Media3 se RTSP com endereço não nulo e não vazio; teste de regressão `tool/test_build266_media3_nullable_318.py`.
+- `tool/verify_project.sh` aprovado com Kotlin fora do PATH: 327 testes Python (323 aprovados, 4 ignorados); ver `VALIDATION-1.0.318.md`.
+- Flutter SDK e Android SDK indisponíveis no ambiente local; o CI deverá confirmar `flutter analyze`, `flutter test` e `assembleRelease`.
+
 # Validação Vigia IA 1.0.317+317
 
 - Piloto RTSP Media3: `tool/test_media3_rtsp_317.py` cobre bootstrap, dependências, registro de PlatformView, callback de primeiro frame, release e privacidade.
