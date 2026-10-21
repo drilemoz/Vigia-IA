@@ -1,3 +1,10 @@
+## 1.0.320+320 (2026-10-20)
+
+- Corrigido o bloqueio do APK 268 em `flutter analyze --fatal-infos --fatal-warnings`: `if` sem bloco no coletor automático de diagnóstico e import desnecessário `dart:ui` na captura de toques.
+- Adicionada regressão `tool/test_build268_flutter_analyze_320.py` e chamada preventiva no `tool/verify_project.sh`.
+- Trilha persistente de menus/cliques da 1.0.319, proteção de credenciais, Media3 RTSP isolado, VLC/monitoramento, MCRP, IA, mapas e outros módulos sem mudança de comportamento.
+- A compilação Android e os testes Flutter requerem confirmação por novo workflow GitHub Actions.
+
 ## 1.0.319+319 (2026-10-20)
 
 - Diagnóstico automático passa a registrar toques por região aproximada, navegação de abas, push/pop e ações identificadas da Central Câmeras e Media3.
@@ -6,7 +13,7 @@
 - Histórico local limitado a 120 eventos; teclado, entradas de texto, senhas, URLs e coordenadas exatas são excluídos. Não há envio pela rede.
 - Mantidos player Media3 experimental, VLC/Monitorar, IA, mapas, GPS e transmissor; testes físicos e build Android pendentes.
 
-## 1.0.319+319 (2026-10-20)
+## 1.0.318+318 (2026-10-20)
 
 - Corrigido `flutter analyze` do build 266: `CameraEndpoint.address` é anulável, mas `Media3RtspTestScreen.url` exige `String`.
 - Prévia de teste Media3 disponível somente para cadastro RTSP com URL não vazia; sem conversão forçada ou valor artificial.

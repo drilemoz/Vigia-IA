@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.319',
+          version: '1.0.320',
           current: true,
+          changes: [
+            'Corrigidos dois avisos fatais do Flutter Analyze no build 268.',
+            'Registro de toques e menus permanece ativo e privado.',
+            'Reprodutor RTSP Media3 e monitoramento existente preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.319',
+          current: false,
           changes: [
             'Trilha de toques por região, navegação e ações de câmera no diagnóstico.',
             'Último toque gravado imediatamente antes de possíveis encerramentos.',
@@ -2716,8 +2726,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.319',
+          version: '1.0.320',
           current: true,
+          changes: [
+            'Corrigidos dois avisos fatais do Flutter Analyze no build 268.',
+            'Registro de toques e menus permanece ativo e privado.',
+            'Reprodutor RTSP Media3 e monitoramento existente preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.319',
+          current: false,
           changes: [
             'Trilha de toques por região, navegação e ações de câmera no diagnóstico.',
             'Último toque gravado imediatamente antes de possíveis encerramentos.',

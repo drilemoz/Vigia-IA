@@ -33,7 +33,7 @@ class Build260R8Regression(unittest.TestCase):
         self.assertIn('google_mlkit_text_recognition', (ROOT/'pubspec.yaml').read_text())
         self.assertIn('TextRecognitionScript.latin',(ROOT/'lib/services/vehicle_plate_ocr_service.dart').read_text())
         self.assertIn('class RemoteGalleryScreen', (ROOT/'lib/screens/remote_gallery_screen.dart').read_text())
-        self.assertIn('version: 1.0.319+319',(ROOT/'pubspec.yaml').read_text())
-        self.assertTrue((ROOT/'RELEASE-1.0.319.md').is_file())
+        self.assertIn('version: 1.0.320+320',(ROOT/'pubspec.yaml').read_text())
+        self.assertTrue((ROOT/'RELEASE-1.0.320.md').is_file())
 
 if __name__=='__main__':unittest.main()

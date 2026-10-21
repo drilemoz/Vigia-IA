@@ -29,8 +29,8 @@ class Build266Media3NullSafety318(unittest.TestCase):
         self.assertIn("viewType: 'vigiaia/media3_rtsp'", source)
 
     def test_version_increment(self):
-        self.assertIn('version: 1.0.319+319', (ROOT / 'pubspec.yaml').read_text('utf8'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.319.md').is_file())
+        self.assertIn('version: 1.0.320+320', (ROOT / 'pubspec.yaml').read_text('utf8'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.320.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

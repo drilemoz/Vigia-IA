@@ -1,10 +1,14 @@
-# Arquitetura — Vigia IA 1.0.319+319
+# Arquitetura — Vigia IA 1.0.320+320
+
+## 1.0.320+320 · Correção de análise estática do diagnóstico
+
+Sem alteração de arquitetura. O teste de coordenadas de toque mantém as mesmas guardas e executa `return` dentro de bloco explícito no `AutomaticDiagnosticsService`, e `DiagnosticUiInteractionCapture` continua a usar `PointerDeviceKind` via `flutter/gestures.dart`, removendo o import redundante de `dart:ui`. A coleta, proteção de campos editáveis, checkpoint nativo urgente e relatórios permanecem idênticos. Regressão no script preventivo para ambos os avisos registrados no build 268.
 
 ## 1.0.319+319 · Trilha de UI resistente a encerramentos
 
 `DiagnosticUiInteractionCapture` envolve o Navigator via `MaterialApp.builder` e observa somente toques curtos, fora do teclado e de editores; quantiza localização à grade 3×3, sem conteúdo, senha, URL ou pixels reais. `DiagnosticRouteObserver` marca entradas/saídas da pilha, e `MainNavigationBar`/`MainNavigationRail` e ações de Câmeras/Media3 emitem rótulos estáticos. `AutomaticDiagnosticsService.recordUiAction` publica `diagnosticEvent` urgente no canal Android; o `AppDiagnostics` persiste urgentemente até 120 eventos e faz `checkpointUiAction` síncrono mínimo do último toque recebido, antes de delegar ao worker. A gravação normal de amostras a cada 10 s continua sem alterações. `DiagnosticReportService` apresenta a trilha legível de sessões anterior/atual, além do evento síncrono. Não coleta digitação, conteúdo multimídia ou dados de localização, e não transmite relatórios automaticamente. O custo de escrita por toque precisa de medição em aparelho real.
 
-## 1.0.319+319 · Guarda de URL na prévia Media3
+## 1.0.318+318 · Guarda de URL na prévia Media3
 
 A central de Câmeras só oferece `onMedia3Test` quando o endpoint é RTSP e o `address` opcional está presente e não vazio. O `String` local promovido é passado ao `Media3RtspTestScreen`. Não altera o player nativo nem a interface `VideoSource`: o monitoramento segue pelo VLC. Corrige o build 266 em `flutter analyze`; testes reais continuam dependentes do CI.
 

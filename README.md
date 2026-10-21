@@ -1,10 +1,14 @@
-**Versão atual:** `1.0.319+319`
+**Versão atual:** `1.0.320+320`
+
+## Atualização 1.0.320+320 · Correção do Flutter Analyze no build 268
+
+O workflow APK 268 executou com sucesso 333 testes Python da 1.0.319, porém `flutter analyze --fatal-infos --fatal-warnings` bloqueou o build com dois lints em código do diagnóstico de toques: `curly_braces_in_flow_control_structures` e `unnecessary_import`. Ambos foram eliminados sem alterar os eventos capturados ou a retenção dos dados. `tool/test_build268_flutter_analyze_320.py` previne seu retorno. Registro de menus, Media3 experimental, VLC, IA e mapas preservados. O novo workflow deve confirmar Flutter analyze/test e APK. Mais detalhes em `RELEASE-1.0.320.md`.
 
 ## Atualização 1.0.319+319 · Trilha de diagnóstico das interações
 
 Agora o diagnóstico automático persiste cada toque reconhecido (região 3×3, sem coordenadas exatas), transições de tela, abas e ações nomeadas da Central de Câmeras/Media3, mesmo quando não há IA ou captura ativa. Interações são persistidas com prioridade e o Android guarda um checkpoint síncrono do último toque recebido. A exportação manual apresenta a trilha anterior e a atual em uma seção específica; o relatório automático preserva eventos na sessão congelada. Até 120 eventos recentes, sem teclas, campos editáveis, senhas, parâmetros da câmera ou upload. A coleta não garante reter ações que nunca chegaram ao Android antes da queda. Detalhes: `RELEASE-1.0.319.md`.
 
-## Atualização 1.0.319+319 · Correção Flutter Analyze APK 266
+## Atualização 1.0.318+318 · Correção Flutter Analyze APK 266
 
 O build 266 parou na análise estática por enviar `CameraEndpoint.address` (`String?`) ao `Media3RtspTestScreen.url` (`String`). O menu de teste Media3 agora só oferece a prévia quando a câmera é RTSP e tem endereço não vazio, com promoção de tipo segura. Mantém a rota Media3 H.264 experimental sem IA, enquanto Monitorar permanece no VLC. Não implementa ainda o cadastro com prévia obrigatória, previsto para uma próxima versão. Ver `RELEASE-1.0.318.md`.
 

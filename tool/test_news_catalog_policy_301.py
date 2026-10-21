@@ -17,9 +17,9 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.319+319\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.320+320\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            source = source.replace('Trilha automática de toques, abas e ações das câmeras.',
+            source = source.replace('Corrigida a análise estática que impedia o APK 268.',
                                     'Corrigido erro nas verificações de atualização')
             (root / 'lib/services/update_news_catalog.dart').write_text(source, 'utf8')
             policy.validate(root)
@@ -28,13 +28,13 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.319+319\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.320+320\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 319', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 320', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
-            path.write_text(source.replace('Trilha automática de toques, abas e ações das câmeras.',
+            path.write_text(source.replace('Corrigida a análise estática que impedia o APK 268.',
                                            'TODO'), 'utf8')
             with self.assertRaisesRegex(ValueError, 'mensagens'):
                 policy.validate(root)

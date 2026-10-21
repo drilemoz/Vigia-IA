@@ -33,8 +33,8 @@ class Build259AnalyzerRegression(unittest.TestCase):
         self.assertIn('now.difference(match.lastSaved!) < repeatSameRegion', code)
 
     def test_new_version_preserves_previous_features(self):
-        self.assertIn('version: 1.0.319+319', source('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.319.md').is_file())
+        self.assertIn('version: 1.0.320+320', source('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.320.md').is_file())
         self.assertIn('class RemoteGalleryScreen', source('lib/screens/remote_gallery_screen.dart'))
         self.assertIn('class VehiclePlateOcrService', source('lib/services/vehicle_plate_ocr_service.dart'))
         self.assertIn('PhoneScenePhotoGate', source('android/app/src/main/kotlin/com/minhacamera/PhoneCameraBackgroundService.kt'))

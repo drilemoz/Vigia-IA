@@ -61,7 +61,9 @@ class AutomaticDiagnosticsService with WidgetsBindingObserver {
     final rows = <String>['topo', 'meio', 'base'];
     final columns = <String>['esquerda', 'centro', 'direita'];
     if (row < 0 || row >= rows.length ||
-        column < 0 || column >= columns.length) return;
+        column < 0 || column >= columns.length) {
+      return;
+    }
     recordUiAction('toque', '${rows[row]}_${columns[column]}');
   }
 

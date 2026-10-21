@@ -1,4 +1,8 @@
-# Validação Vigia IA 1.0.319+319
+# Validação Vigia IA 1.0.320+320
+
+- Build 268: testes Python passaram (333); Flutter Analyze falhou por duas infos fatais (`automatic_diagnostics_service.dart:64:49` e `diagnostic_ui_interaction_capture.dart:1:8`).
+- Correções e teste preventivo: `RELEASE-1.0.320.md`, `VALIDATION-1.0.320.md` e `tool/test_build268_flutter_analyze_320.py`.
+- Suíte Python 1.0.320: 336 testes, 335 aprovados e 1 ignorado; regressão dos dois lints aprovada. A execução local integral de `tool/verify_project.sh` foi interrompida por limite de execução; Flutter Analyzer/Test e compilação APK ainda precisam ser confirmados no GitHub Actions.
 
 - Versionamento, coleta de cliques e persistência nativa em `RELEASE-1.0.319.md` e `VALIDATION-1.0.319.md`.
 - Suíte direcionada `tool/test_ui_diagnostics_319.py` verifica fluxo de eventos, espelhos Kotlin/bootstrap, ausência de dados de digitação, histórico limitado e exportação.
