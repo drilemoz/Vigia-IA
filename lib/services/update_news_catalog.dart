@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.321', build: 321);
+      AppBuildVersion(version: '1.0.323', build: 323);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.321', build: 321),
+      version: AppBuildVersion(version: '1.0.323', build: 323),
       changes: <String>[
-        'Corrigido o teste de navegação que bloqueava a compilação do APK 269.',
-        'Menu principal continua registrando as ações no diagnóstico.',
-        'Media3 RTSP experimental, câmeras, IA e mapas preservados.',
+        'Ajuste de velocidade e horas pedaladas por dia disponível durante a navegação de bicicleta.',
+        'ETA e planejamento por dias são recalculados sem parar a rota em andamento.',
+        'Registro diagnóstico das ações de edição e aplicação do ritmo durante a navegação.',
       ],
     ),
   ]);

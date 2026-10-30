@@ -1,4 +1,13 @@
-**Versão atual:** `1.0.321+321`
+**Versão atual:** `1.0.323+323`
+
+## Atualização 1.0.323+323 · Alterar ritmo durante a navegação
+
+O painel detalhado da navegação de bicicleta agora contém **Ajustar ritmo**: altere velocidade média, horas por dia, equilíbrio e uso do histórico sem encerrar a rota. O tempo restante e o planejamento por dias são recalculados; a navegação mantém o painel aberto. As ações são identificadas no diagnóstico sem registrar coordenadas ou valores de campos. Ver `RELEASE-1.0.323.md` e `VALIDATION-1.0.323.md`.
+
+## Atualização 1.0.322+322 · Retorno da navegação detalhada e diagnóstico em segundo plano
+
+A configuração manual de velocidade e horas por dia da bicicleta volta a ser solicitada ao calcular prévia de rota, e a navegação passa a exibir o painel detalhado desde o início. A nova trilha de menus de Mapas é nomeada; o gravador tenta persistir amostras de recursos a cada 30 segundos em segundo plano, enquanto o Android mantiver o processo executando. Os limites e testes estão em `RELEASE-1.0.322.md` e `VALIDATION-1.0.322.md`.
+
 
 ## Atualização 1.0.321+321 · Correção do Flutter Test no build 269
 

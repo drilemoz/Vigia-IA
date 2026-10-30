@@ -20,6 +20,29 @@ void main() {
     expect(estimate.dayCount, 3);
   });
 
+  test('alterar ritmo durante a rota recalcula ETA e dias sem refazer o percurso', () {
+    const distance = 180000.0;
+    final original = planner.estimate(
+      distanceMeters: distance,
+      preferences: const BikeTravelPreferences(
+        averageSpeedKmh: 15,
+        ridingHoursPerDay: 5,
+      ),
+    );
+    final adjusted = planner.estimate(
+      distanceMeters: distance,
+      preferences: const BikeTravelPreferences(
+        averageSpeedKmh: 20,
+        ridingHoursPerDay: 6,
+      ),
+    );
+    expect(original.ridingDuration, const Duration(hours: 12));
+    expect(original.dayCount, 3);
+    expect(adjusted.ridingDuration, const Duration(hours: 9));
+    expect(adjusted.dayCount, 2);
+    expect(adjusted.distanceMeters, distance);
+  });
+
   test('plano prefere local real e não inventa serviço quando não há candidato', () {
     final plan = planner.buildPlan(
       routePoints: const <LatLng>[

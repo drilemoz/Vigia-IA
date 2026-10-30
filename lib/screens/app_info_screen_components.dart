@@ -77,12 +77,32 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.321',
+          version: '1.0.323',
           current: true,
           changes: [
+            'Ajuste de velocidade e horas por dia disponível durante a navegação Bike.',
+            'ETA e plano por dias recalculados sem encerrar o trajeto.',
+            'Diagnóstico identifica abertura e aplicação do ritmo em navegação.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.322',
+          current: false,
+          changes: [
+            'Ritmo, horas por dia e planejamento Bike voltaram à prévia.',
+            'Navegação mostra orientações e detalhes desde o início.',
+            'Diagnóstico amplia menus e amostras em segundo plano.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.321',
+          current: false,
+          changes: [
             'Corrigido o teste de navegação que bloqueava o APK 269.',
-            'Trilha de interações agora validada com gravador Android simulado.',
-            'Media3, VLC, IA, câmeras e mapas preservados.',
+            'Trilha de interações validada com o gravador Android simulado.',
+            'Media3, VLC, IA e câmeras mantidos.',
           ],
         ),
         SizedBox(height: 10),
@@ -2736,12 +2756,32 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.321',
+          version: '1.0.323',
           current: true,
           changes: [
+            'Ajuste de velocidade e horas por dia disponível durante a navegação Bike.',
+            'ETA e plano por dias recalculados sem encerrar o trajeto.',
+            'Diagnóstico identifica abertura e aplicação do ritmo em navegação.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.322',
+          current: false,
+          changes: [
+            'Ritmo, horas por dia e planejamento Bike voltaram à prévia.',
+            'Navegação mostra orientações e detalhes desde o início.',
+            'Diagnóstico amplia menus e amostras em segundo plano.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.321',
+          current: false,
+          changes: [
             'Corrigido o teste de navegação que bloqueava o APK 269.',
-            'Trilha de interações agora validada com gravador Android simulado.',
-            'Media3, VLC, IA, câmeras e mapas preservados.',
+            'Trilha de interações validada com o gravador Android simulado.',
+            'Media3, VLC, IA e câmeras mantidos.',
           ],
         ),
         SizedBox(height: 10),

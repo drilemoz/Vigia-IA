@@ -11,7 +11,7 @@ class VigiaApplication : Application() {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        AppDiagnostics.event("Android", "onTrimMemory=$level")
+        AppDiagnostics.trimMemory(level)
     }
 
     @Suppress("DEPRECATION")

@@ -6,6 +6,7 @@ import '../models/map_workspace_mode.dart';
 import '../widgets/main_navigation_bar.dart';
 import '../widgets/main_navigation_routes.dart';
 import '../services/map_route_service.dart';
+import '../services/automatic_diagnostics_service.dart';
 import '../widgets/map_workspace_mode_picker.dart';
 import 'bike_mode_screen.dart';
 import 'events_screen.dart';
@@ -31,8 +32,10 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
   bool _toolVisible = false;
 
   Future<void> _chooseMode() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'escolher_modo_mapa');
     final selected = await showMapWorkspaceModePicker(context, selected: _mode);
     if (!mounted || selected == null) return;
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'modo_${selected.name}');
     setState(() => _mode = selected);
     if (selected == MapWorkspaceMode.navigate && !_route.navigating) {
       _destinationSearchRequests.value++;
@@ -58,6 +61,7 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
   }
 
   Future<void> _showTools() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'abrir_ferramentas');
     await showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
@@ -108,6 +112,7 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
         title: Text(label),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () {
+          AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'ferramenta_${destination.runtimeType}');
           Navigator.of(sheetContext).pop();
           unawaited(_openTool(destination));
         },

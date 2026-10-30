@@ -30,6 +30,7 @@ import '../models/offline_poi_package.dart';
 import '../models/route_explorer_models.dart';
 import '../models/video_source_config.dart';
 import '../services/app_settings_service.dart';
+import '../services/automatic_diagnostics_service.dart';
 import '../services/background_monitor_service.dart';
 import '../services/bike_mode_service.dart';
 import '../services/bike_pressure_safety_service.dart';
@@ -289,7 +290,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   bool _camerasVisible = false;
   bool _stopMapOwnedSourcesWhenHidden = true;
   bool? _fullscreenCameraSecondary;
-  bool _navigationPanelMinimized = true;
+  bool _navigationPanelMinimized = false;
   // null = HUD automático por contexto; tocar no indicador alterna a exibição.
   bool? _hudExpandedOverride;
 
@@ -1772,6 +1773,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       };
 
   Future<MapTravelMode?> _chooseTravelMode() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'selecionar_modalidade_rota');
     final scheme = Theme.of(context).colorScheme;
     return showMapCenteredDialog<MapTravelMode>(
       context: context,
@@ -1824,6 +1826,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<_BikeTravelSelection?> _chooseBikeTravelPreferences() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'planejar_velocidade_bike');
     var speed = _mapViewSettings.bikeTravelPreferences.averageSpeedKmh;
     var hours = _mapViewSettings.bikeTravelPreferences.ridingHoursPerDay;
     var balance = _mapViewSettings.bikeTravelPreferences.balanceDays;
@@ -2069,6 +2072,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _previewRouteToSearchResult(MapDestinationSearchResult item) async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'destino_calcular_rota');
     // Durante uma navegação existente, mantém o fluxo de navegação anterior.
     if (_routeState.navigationTarget != null) {
       await _navigateToSearchResult(item);
@@ -2083,9 +2087,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     }
     final mode = await _chooseTravelMode();
     if (!mounted || mode == null) return;
-    // Para a prévia, reutiliza o ritmo persistido. Editar é uma ação
-    // voluntária dentro do cartão e não força o diálogo em cada destino.
+    // O usuario escolhe o ritmo antes de calcular uma rota Bike;
+    // o ajuste na previa continua disponivel para edicoes posteriores.
+    if (!await _prepareTravelPreferences(mode)) return;
     if (!mounted) return;
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'calcular_previa_rota');
     if (_connectivity.isOffline || _offlineMaps.mode == OfflineMapMode.offline) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
         'Novos cálculos de rota precisam de internet. Mapas offline não incluem roteamento offline.',
@@ -2203,6 +2209,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _editPreviewBikePace() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'editar_velocidade_previa');
     final target = _previewTarget;
     if (target == null || target.travelMode != MapTravelMode.bicycle) return;
     final selection = await _chooseBikeTravelPreferences();
@@ -2217,6 +2224,47 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     }
   }
 
+  /// Permite ajustar o ritmo da bicicleta sem encerrar a navegação ativa.
+  /// O ETA é recalculado localmente; o novo plano diário só é aplicado se
+  /// o mesmo destino/traçado continuar ativo após as buscas assíncronas.
+  Future<void> _editActiveBikePace() async {
+    final target = _routeState.navigationTarget;
+    if (target == null || target.travelMode != MapTravelMode.bicycle) return;
+    AutomaticDiagnosticsService.instance.recordUiAction(
+      'mapas', 'editar_ritmo_navegacao_ativa',
+    );
+    final selection = await _chooseBikeTravelPreferences();
+    if (!mounted || selection == null ||
+        !_sameNavigationTarget(_routeState.navigationTarget, target)) {
+      return;
+    }
+    await _mapViewSettings.setBikeTravelPreferences(selection.preferences);
+    await _mapViewSettings.setBikeUseHistoricalSpeed(
+      selection.useHistoricalSpeed,
+    );
+    if (!mounted ||
+        !_sameNavigationTarget(_routeState.navigationTarget, target)) {
+      return;
+    }
+    final route = _cyclingRoute;
+    setState(() {
+      _navigationPanelMinimized = false;
+      _bikeTripPlan = null;
+      _bikeTripEstimate = route == null ? null : _bikeTripPlanner.estimate(
+        distanceMeters: route.distanceMeters,
+        preferences: _effectiveBikeTravelPreferences,
+      );
+      _bikeTripPlanLoading = route != null &&
+          (_bikeTripEstimate?.dayCount ?? 0) > 1;
+    });
+    if (route != null) {
+      unawaited(_refreshBikeTripPlan(route: route, target: target));
+    }
+    AutomaticDiagnosticsService.instance.recordUiAction(
+      'mapas', 'ritmo_navegacao_recalculado',
+    );
+  }
+
   void _dismissRoutePreview() {
     ++_previewSerial;
     setState(() {
@@ -2229,6 +2277,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _startPreviewNavigation() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'iniciar_navegacao_previa');
     final target = _previewTarget;
     if (target == null || _previewRoutes.isEmpty || _previewLoading) return;
     final routes = List<MapCyclingRoute>.of(_previewRoutes);
@@ -2262,7 +2311,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _navigation3dRendererFailed = false;
       _navigation3dFollowing = true;
       _followPosition = true;
-      _navigationPanelMinimized = true;
+      _navigationPanelMinimized = false;
     });
     await _routeState.navigateTo(target);
     unawaited(_mapViewSettings.setLastTravelMode(target.travelMode));
@@ -2275,6 +2324,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _navigateToSearchResult(MapDestinationSearchResult item) async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'navegar_destino_durante_rota');
     final travelMode = await _chooseTravelMode();
     if (!mounted || travelMode == null) return;
     if (!await _prepareTravelPreferences(travelMode)) return;
@@ -2315,7 +2365,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _offRouteSamples = 0;
       _lastRouteRecalculatedAt = null;
       _lastNavigationProgressPointAt = null;
-      _navigationPanelMinimized = true;
+      _navigationPanelMinimized = false;
     });
     unawaited(_mapViewSettings.setLastTravelMode(travelMode));
     await _routeState.navigateTo(target);
@@ -2683,9 +2733,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     if (!mounted) return;
     final activeTarget = _routeState.navigationTarget;
     final activeRoute = _cyclingRoute;
+    final currentPreferences = _effectiveBikeTravelPreferences;
     if (!_sameNavigationTarget(activeTarget, target) ||
         activeRoute == null ||
-        activeRoute.points != route.points) {
+        activeRoute.points != route.points ||
+        currentPreferences.averageSpeedKmh != preferences.averageSpeedKmh ||
+        currentPreferences.ridingHoursPerDay != preferences.ridingHoursPerDay ||
+        currentPreferences.balanceDays != preferences.balanceDays) {
       return;
     }
     final plan = _bikeTripPlanner.buildPlan(
@@ -2723,6 +2777,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _selectFreeMapPoint(LatLng point) async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'selecionar_ponto_no_mapa');
     final current = _routeState.current;
     final serial = ++_mapTapLookupSerial;
     setState(() {
@@ -2758,6 +2813,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _showMapLocationDetails(MapDestinationSearchResult item) async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'detalhes_local');
     await showMapCenteredDialog<void>(
       context: context,
       maxWidth: 520,
@@ -4754,6 +4810,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _showMapOptions() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'abrir_opcoes_mapa');
     await showMapCenteredDialog<void>(
       context: context,
       maxWidth: 520,
@@ -4792,6 +4849,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   subtitle: Text(widget.workspaceModeLabel ?? 'Explorar'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'modo_do_mapa');
                     Navigator.of(sheetContext).pop();
                     widget.onChooseWorkspaceMode?.call();
                   },
@@ -4803,6 +4861,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   subtitle: const Text('Câmeras, IA, Bike, histórico e ajustes'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'ferramentas_do_vigia_ia');
                     Navigator.of(sheetContext).pop();
                     widget.onOpenWorkspaceTools?.call();
                   },
@@ -4815,6 +4874,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Abrir rota salva'),
                 subtitle: const Text('Reabrir o último trajeto sem internet'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'abrir_rota_salva');
                   Navigator.of(sheetContext).pop();
                   unawaited(_openSavedRoute());
                 },
@@ -4824,6 +4884,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Tela inteira no mapa'),
                 subtitle: Text(_rideSettings.immersive ? 'Ativada · relógio e bateria no mapa' : 'Barras do Android visíveis'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'tela_inteira_no_mapa');
                   Navigator.of(sheetContext).pop();
                   final enabled = !_rideSettings.immersive;
                   unawaited(_rideSettings.update(fullscreen: enabled));
@@ -4837,6 +4898,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     ? 'Ligado · dados OSM marcados, requer internet'
                     : 'Desligado · sem inferir vias sem dados'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'destacar_terra_asfalto_rodovias_e_rios');
                   Navigator.of(sheetContext).pop();
                   final enabled = !_rideSettings.roadOverlayEnabled;
                   unawaited(_rideSettings.update(roads: enabled));
@@ -4860,6 +4922,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     ? 'Google Maps · ${_mapViewSettings.stylePreset.label}'
                     : 'Mapa atual · ${_mapViewSettings.stylePreset.label}'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'provedor_do_mapa');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showLayerPicker());
                 },
@@ -4869,6 +4932,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Vista de relevo'),
                 subtitle: const Text('Mapa topográfico 2D; relevo sombreado quando a chave Stadia estiver configurada.'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'vista_de_relevo');
                   Navigator.of(sheetContext).pop();
                   unawaited(_selectMapStyle(_offlineMaps.hasStadiaApiKey
                       ? MapStylePreset.terrain : MapStylePreset.topographic));
@@ -4881,6 +4945,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     ? 'Limites: ${_rideSettings.speedLimitsKmh.join(' / ')} km/h'
                     : 'Desligados'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'alertas_de_velocidade');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showSpeedAlertSettings());
                 },
@@ -4890,6 +4955,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Bike e sensores'),
                 subtitle: const Text('Abrir telemetria da bicicleta'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'bike_e_sensores');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showBikePanel());
                 },
@@ -4899,6 +4965,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Áudio do mapa'),
                 subtitle: const Text('Voz da navegação e demais avisos'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'audio_do_mapa');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showAudioQuickControls());
                 },
@@ -4908,6 +4975,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Rádio online'),
                 subtitle: const Text('Streams salvos e reprodução'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'radio_online');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showRadioPanel());
                 },
@@ -4926,6 +4994,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   'Modo ${_mapViewSettings.orientationMode.label}',
                 ),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'orientacao');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showCompassDetails());
                 },
@@ -4943,6 +5012,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       : 'Adicionar câmera ao mapa',
                 ),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'cameras_sobre_o_mapa');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showCameraManager());
                 },
@@ -4957,6 +5027,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       : '${_routeExplorer.offlinePackages.length} região(ões) salva(s).',
                 ),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'pacotes_pontos_offline');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showOfflinePoiPackages());
                 },
@@ -4966,6 +5037,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Mapas offline'),
                 subtitle: const Text('Gerenciar MBTiles e downloads de mapa.'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'mapas_offline');
                   Navigator.of(sheetContext).pop();
                   unawaited(_openOfflineMaps());
                 },
@@ -4975,6 +5047,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 title: const Text('Configurações'),
                 subtitle: const Text('Busca, categorias e alertas.'),
                 onTap: () {
+                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'configuracoes');
                   Navigator.of(sheetContext).pop();
                   unawaited(_showMapSettings());
                 },
@@ -6638,7 +6711,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 bikeHealth == BikeSensorHealth.warning,
             manuallyExpanded: _hudExpandedOverride,
           );
-          final showDockedNavigationBanner = focusLevel == 0 && compactHud &&
+          final showDockedNavigationBanner = compactHud &&
               navigationTarget != null &&
               _navigationPanelMinimized;
           final floatingCardBottomInset = !compactHud
@@ -7535,7 +7608,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     onNavigate: () => _navigateToPoi(selectedPoi),
                   ),
                 ),
-              if (focusLevel == 0 && _previewTarget != null && navigationTarget == null)
+              if (_previewTarget != null && navigationTarget == null)
                 Positioned(
                   left: 8, right: 8,
                   bottom: bottomInset + 38,
@@ -7559,7 +7632,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     onSave: _savePreviewRoute,
                   ),
                 ),
-              if (focusLevel == 0 && navigationTarget != null &&
+              if (navigationTarget != null &&
                   (compactHud || (!showSelectedPoiCard && !showSelectedMapLocationCard)) &&
                   !showDockedNavigationBanner)
                 Positioned(
@@ -7597,9 +7670,10 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     following: navigation3dActive ? _navigation3dFollowing : _followPosition,
                     nearbyPoints: _routeExplorer.activeResults,
                     onRouteSelected: _selectCyclingRoute,
-                    onToggleMinimized: () => setState(
-                      () => _navigationPanelMinimized = !_navigationPanelMinimized,
-                    ),
+                    onToggleMinimized: () {
+                      AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'alternar_painel_navegacao');
+                      setState(() => _navigationPanelMinimized = !_navigationPanelMinimized);
+                    },
                     onFollowRequested: current == null
                         ? null
                         : () {
@@ -7612,7 +7686,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     onTripPlan: _bikeTripPlan == null
                         ? null
                         : () => unawaited(_showBikeTripPlan()),
-                    onStop: _stopNavigation,
+                    onEditBikePace: navigationTarget.travelMode == MapTravelMode.bicycle
+                        ? () => unawaited(_editActiveBikePace())
+                        : null,
+                    onStop: () {
+                      AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'encerrar_navegacao');
+                      _stopNavigation();
+                    },
                   ),
                 ),
               if (showDockedNavigationBanner)
@@ -7652,9 +7732,10 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         ? _navigation3dFollowing : _followPosition,
                     nearbyPoints: _routeExplorer.activeResults,
                     onRouteSelected: _selectCyclingRoute,
-                    onToggleMinimized: () => setState(
-                      () => _navigationPanelMinimized = false,
-                    ),
+                    onToggleMinimized: () {
+                      AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'expandir_painel_navegacao');
+                      setState(() => _navigationPanelMinimized = false);
+                    },
                     onFollowRequested: current == null ? null : () {
                       if (navigation3dActive) {
                         _recenterNavigation3d();
@@ -7664,7 +7745,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     },
                     onTripPlan: _bikeTripPlan == null
                         ? null : () => unawaited(_showBikeTripPlan()),
-                    onStop: _stopNavigation,
+                    onEditBikePace: navigationTarget.travelMode == MapTravelMode.bicycle
+                        ? () => unawaited(_editActiveBikePace())
+                        : null,
+                    onStop: () {
+                      AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'encerrar_navegacao');
+                      _stopNavigation();
+                    },
                   ),
                 ),
               // Se o painel foi ocultado por um POI ou pelo modo foco,
@@ -10193,6 +10280,7 @@ class _NavigationBanner extends StatelessWidget {
     required this.onToggleMinimized,
     required this.onFollowRequested,
     required this.onTripPlan,
+    required this.onEditBikePace,
     required this.onStop,
   });
 
@@ -10219,6 +10307,7 @@ class _NavigationBanner extends StatelessWidget {
   final VoidCallback onToggleMinimized;
   final VoidCallback? onFollowRequested;
   final VoidCallback? onTripPlan;
+  final VoidCallback? onEditBikePace;
   final VoidCallback onStop;
 
   String _distance(double? meters) {
@@ -10391,6 +10480,10 @@ class _NavigationBanner extends StatelessWidget {
     final speedValue = bikeEstimate == null
         ? target.travelMode.routeLabel
         : '${bikeEstimate!.preferences.averageSpeedKmh.toStringAsFixed(0)} km/h';
+    final bikePaceSummary = bikeEstimate == null
+        ? 'Definir velocidade e horas por dia'
+        : 'Planejamento: ${bikeEstimate!.preferences.ridingHoursPerDay.toStringAsFixed(1)} h/dia · '
+            '${bikeEstimate!.dayCount} dia(s) previstos';
 
     final water = _nearest(const <RouteExplorerCategory>{RouteExplorerCategory.water});
     final food = _nearest(const <RouteExplorerCategory>{
@@ -10621,6 +10714,21 @@ class _NavigationBanner extends StatelessWidget {
                 onSelected: onRouteSelected,
               )),
           ]),
+          if (target.travelMode == MapTravelMode.bicycle &&
+              onEditBikePace != null)
+            Row(children: [
+              Expanded(child: Text(
+                bikePaceSummary,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: foreground.withValues(alpha: 0.8)),
+              )),
+              TextButton.icon(
+                onPressed: onEditBikePace,
+                icon: const Icon(Icons.tune_rounded, size: 17),
+                label: const Text('Ajustar ritmo'),
+              ),
+            ]),
           const SizedBox(height: 6),
           ClipRRect(borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(value: progressFraction, minHeight: 4,

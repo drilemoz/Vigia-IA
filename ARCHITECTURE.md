@@ -1,4 +1,14 @@
-# Arquitetura — Vigia IA 1.0.321+321
+# Arquitetura — Vigia IA 1.0.323+323
+
+## Vigia IA 1.0.323+323 · Edição do ritmo em rota ativa
+
+`MapMonitoringScreen._editActiveBikePace` reutiliza o seletor existente de preferências Bike durante uma navegação ativa, persistindo em `MapViewSettingsService`. Após confirmar, a estimativa é recalculada imediatamente com `BikeTripPlanner` e o plano de dias é refeito por `_refreshBikeTripPlan`, que valida se destino/rota ainda correspondem à navegação atual. O painel `_NavigationBanner` recebe `onEditBikePace` apenas para Bike e oferece botão **Ajustar ritmo** com o plano atual. O registro semântico no diagnóstico não guarda entrada de usuário, destino nem coordenadas. Não implementa roteamento offline adicional e não altera o motor RTSP.
+
+# Arquitetura — Vigia IA 1.0.322+322
+
+## 1.0.322+322 · Prévia, orientação visível e diagnósticos
+
+O `MapMonitoringScreen` volta a chamar `_prepareTravelPreferences` para trajetos Bike antes da prévia, reaproveitando `MapViewSettingsService` para dados persistidos. A navegação exibe `_NavigationBanner` expandido no primeiro frame, sem esconder instruções sob o modo Foco, com recolhimento manual. `AutomaticDiagnosticsService` fornece rótulos fixos de ações, e `AppDiagnostics` armazena amostras reduzidas também em cache, sem serviço adicional. `DiagnosticReportService` assinala a idade da tentativa RTSP para não atribuir saídas posteriores ao VLC.
 
 ## 1.0.321+321 · Teste isolado da comunicação diagnóstica com Android
 

@@ -1,3 +1,19 @@
+## 1.0.323+323 (2026-10-30)
+
+- Adicionado botão **Ajustar ritmo** ao painel detalhado da navegação Bike já iniciada, com edição de velocidade manual, horas de pedal por dia, equilíbrio e média aprendida opcional.
+- Alterações recalculam ETA e plano diário sem interromper a navegação, com verificação de destino ativo para evitar aplicar resultados obsoletos.
+- Ações `editar_ritmo_navegacao_ativa` e `ritmo_navegacao_recalculado` identificadas no diagnóstico, sem registrar valores sensíveis ou localização.
+- Preservadas a prévia e navegação expandida da 1.0.322, os módulos de câmera, IA, rádio, ESP32, MCRP e o diagnóstico nativo.
+- Compilação Flutter/Android e teste físico permanecem pendentes no CI/aparelho.
+
+## 1.0.322+322 (2026-10-30)
+
+- Restaurada a configuração explícita da velocidade, horas/dia e equilíbrio da bicicleta antes de mostrar a prévia de rota.
+- Navegação inicia com painel de instruções expandido e visível mesmo no modo Foco; opção de recolher preservada.
+- Amostras leves de segundo plano, PSS, descrição de saída do Android, contextualização RTSP e menus de mapa nomeados nos diagnósticos.
+- Adicionadas regressões `tool/test_map_diagnostics_navigation_322.py` e preservados VLC/Media3, câmeras, IA, GPS, MCRP e ESP32.
+- Build Flutter/Android e testes no aparelho pendentes.
+
 ## 1.0.321+321 (2026-10-20)
 
 - Corrigida a falha do build 269 em `flutter test --coverage`: timers fake de 3 segundos pendentes no teste `main_navigation_bar_test.dart` após o registro de mudanças de aba pelo `AutomaticDiagnosticsService`.

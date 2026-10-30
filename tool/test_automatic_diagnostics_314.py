@@ -38,7 +38,7 @@ class Diagnostics314Tests(unittest.TestCase):
         self.assertLess(native.index('putString("incidents", incidents.toString())'), native.index('startedAt = System.currentTimeMillis()'))
         self.assertIn('finally {', native)
         self.assertIn('delegate.uncaughtException(thread, error)', native)
-        self.assertIn('while (samples.size > 30)', native)
+        self.assertIn('while (samples.size > 60)', native)
         self.assertIn('while (events.size > 120)', native)
 
 if __name__ == '__main__': unittest.main()

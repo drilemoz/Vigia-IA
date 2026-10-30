@@ -177,6 +177,20 @@ class DiagnosticReport {
         buffer.writeln('---');
       }
     }
+    final attemptAt = rtspDiagnostics['attemptAtMs'];
+    final exitAt = rtspDiagnostics['lastExitAtMs'];
+    final isRtspExitClose = attemptAt is num && exitAt is num &&
+        exitAt >= attemptAt && exitAt - attemptAt <= 120000;
+    final priorSession = automaticDiagnostics['previousSession'];
+    final priorSamples = priorSession is Map ? priorSession['samples'] : null;
+    final countBackground = priorSamples is List ? priorSamples.where(
+        (sample) => sample is Map && sample['foreground'] == false).length : 0;
+    buffer
+      ..writeln('\n=== RECURSOS EM SEGUNDO PLANO ===')
+      ..writeln('Amostras recuperadas em segundo plano: $countBackground')
+      ..writeln('Amostragem reduzida prevista: 30 s, sem garantia após suspensão pelo Android.')
+      ..writeln('Exit reason 9 identifica uso excessivo de recursos, não a classe do recurso.')
+      ..writeln('As amostras completas estão no JSON de sessões ao fim deste relatório.');
     buffer
       ..writeln('\n=== RTSP / ENCERRAMENTO ANDROID ===')
       ..writeln('Etapa persistida: ${rtspDiagnostics['stage'] ?? 'não disponível'}')
@@ -187,6 +201,7 @@ class DiagnosticReport {
       ..writeln('Última saída Android após a tentativa: ${rtspDiagnostics['lastExitReason'] ?? 'sem registro'}')
       ..writeln('Saída Android (ms Unix): ${rtspDiagnostics['lastExitAtMs'] ?? 'sem registro'}')
       ..writeln('Status/sinal Android: ${rtspDiagnostics['lastExitStatus'] ?? 'não disponível'}')
+      ..writeln('Encerramento próximo à tentativa RTSP: ${isRtspExitClose ? 'sim, até 2 minutos' : 'não confirmado; pode ser registro anterior'}')
       ..writeln('Observação: a etapa anterior não prova a causa. Crash nativo pode exigir logcat/tombstone.')
       ..writeln()
       ..writeln('=== ÁUDIO ===')

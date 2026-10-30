@@ -1,4 +1,14 @@
-# Validação Vigia IA 1.0.321+321
+# Validação Vigia IA 1.0.323+323
+
+- Ajuste de ritmo durante navegação Bike, teste preventivo e documentação: `RELEASE-1.0.323.md`, `VALIDATION-1.0.323.md`.
+- Flutter Analyzer, testes Flutter e compilação APK requerem workflow; não foram executados localmente.
+
+# Validação Vigia IA 1.0.322+322
+
+- Regressões e mudanças: `RELEASE-1.0.322.md`, `tool/test_map_diagnostics_navigation_322.py`.
+- A coleta em segundo plano pode ser suspensa pelo Android; campos nativos não provam a causa específica de excesso de recursos.
+- Suíte Python 1.0.322: 346 testes, 345 aprovados e 1 ignorado; verificador integral passou; modificações finais de diagnóstico validadas pelos testes direcionados e sintaxe Kotlin.
+- Flutter Analyze, testes Flutter, Gradle APK e testes no dispositivo ainda exigem execução efetiva.
 
 - Build 269: `flutter analyze --fatal-infos --fatal-warnings` passou sem issues, e `flutter test --coverage` reportou 588 sucessos e 1 falha: `main_navigation_bar_test.dart` com 3 timers pendentes criados por `_send().timeout(3s)`.
 - Correção: mock de `vigiaia/native` no teste de widget e asserções para três eventos de navegação; regressão no verificador preventivo. Detalhes: `RELEASE-1.0.321.md`, `VALIDATION-1.0.321.md`.

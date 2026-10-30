@@ -43,6 +43,7 @@ internal object AppDiagnostics {
     private val queuedEvents = AtomicInteger(0)
     private var lastCpu = 0L
     private var lastCpuAt = 0L
+    private var lastBackgroundSampleAt = 0L
     @Volatile private var visible = 0
     @Volatile private var cachedSession = "{}"
     @Volatile private var mainAckAt = SystemClock.uptimeMillis()
@@ -96,7 +97,16 @@ internal object AppDiagnostics {
         })
         worker.execute { runCatching { recoverAndStart() } }
         worker.scheduleWithFixedDelay({ runCatching {
-            if (visible > 0 || PhoneCameraBackgroundService.running || MonitoringForegroundService.isRunning) sample()
+            val active = visible > 0 || PhoneCameraBackgroundService.running || MonitoringForegroundService.isRunning
+            // Coleta reduzida de 30 s em cache, nao mantem servico ou wake lock.
+            // Android pode suspender esta tarefa quando o processo estiver em cache.
+            if (active) sample() else {
+                val now = SystemClock.uptimeMillis()
+                if (now - lastBackgroundSampleAt >= 30000L) {
+                    lastBackgroundSampleAt = now
+                    sample()
+                }
+            }
         } }, 10, 10, TimeUnit.SECONDS)
     }
 
@@ -123,6 +133,11 @@ internal object AppDiagnostics {
             if (exit != null) lastExit = JSONObject().put("at", exit.timestamp).put("reason", exit.reason)
                 .put("status", exit.status).put("importance", exit.importance)
                 .put("pssKiB", exit.pss).put("rssKiB", exit.rss)
+                .put("processState", when (exit.importance) {
+                    100 -> "foreground"; 125 -> "foreground_service"; 200 -> "visible"
+                    300 -> "service"; 400 -> "cached"; else -> "other"
+                })
+                .put("details", DiagnosticPolicy.safe(exit.description.orEmpty(), 500))
                 .put("classification", DiagnosticPolicy.exitProblem(exit.reason) ?: "Sem evidência de falha")
             // ANR trace is text; native crash tombstones may be binary protobuf, so do not decode those.
             if (exit?.reason == 6) runCatching {
@@ -176,14 +191,27 @@ internal object AppDiagnostics {
         } } finally { queuedEvents.decrementAndGet() } }
     }
 
+    /** Process background-memory signals without blocking the Android callback. */
+    fun trimMemory(level: Int) {
+        event("Android", "onTrimMemory=$level")
+        if (level >= 60) worker.execute { runCatching {
+            val now = SystemClock.uptimeMillis()
+            // First high-pressure signal triggers an early sample; bursts are throttled.
+            if (now - lastBackgroundSampleAt >= 10000L) {
+                lastBackgroundSampleAt = now
+                sample()
+            }
+        } }
+    }
+
     fun heartbeat(value: String) {
         worker.execute { flutter = DiagnosticPolicy.safe(value, 2000); flutterAt = SystemClock.uptimeMillis() }
     }
 
     fun report(callback: (String) -> Unit) {
         worker.execute {
-            val result = runCatching { JSONObject().put("automatic", true).put("sampleIntervalSeconds", 10)
-                .put("retainedSamples", 30).put("retainedEvents", 120).put("uiActionsImmediate", true).put("persistenceOk", persistenceOk)
+            val result = runCatching { JSONObject().put("automatic", true).put("sampleIntervalSeconds", 10).put("backgroundSampleIntervalSeconds", 30)
+                .put("retainedSamples", 60).put("retainedEvents", 120).put("uiActionsImmediate", true).put("persistenceOk", persistenceOk)
                 .put("pendingIncidents", incidents)
                 .put("lastExit", lastExit).put("lastUiAction", json(uiPrefs.getString("last", null)))
                 .put("previousSession", previous)
@@ -222,7 +250,8 @@ internal object AppDiagnostics {
             .put("foreground", visible > 0).put("interactive", power.isInteractive)
             .put("powerSave", power.isPowerSaveMode).put("thermalStatus", power.currentThermalStatus)
             .put("javaHeapBytes", runtime.totalMemory() - runtime.freeMemory()).put("javaHeapMaxBytes", runtime.maxMemory())
-            .put("nativeHeapBytes", Debug.getNativeHeapAllocatedSize()).put("availableRamBytes", memory.availMem)
+            .put("nativeHeapBytes", Debug.getNativeHeapAllocatedSize())
+            .put("processPssKiB", Debug.getPss()).put("availableRamBytes", memory.availMem)
             .put("lowMemory", memory.lowMemory).put("totalRamBytes", memory.totalMem)
             .put("freeStorageBytes", app.filesDir.usableSpace)
             .put("uidRxBytes", TrafficStats.getUidRxBytes(app.applicationInfo.uid))
@@ -241,7 +270,7 @@ internal object AppDiagnostics {
         // Only inspect the main stack after a missed probe while foreground; never label it ANR.
         if (visible > 0 && uiAge > 20000) sample.put("mainStallStack", Looper.getMainLooper().thread.stackTrace.take(20).joinToString("\n"))
         samples.addLast(sample)
-        while (samples.size > 30) samples.removeFirst()
+        while (samples.size > 60) samples.removeFirst()
         persist()
     }
 
@@ -264,6 +293,6 @@ internal object AppDiagnostics {
             .put("transmission", DiagnosticPolicy.safe(PhoneCameraBackgroundService.automaticReport(), 24000))
             .put("rtspStage", app.getSharedPreferences("rtsp_diagnostics", Context.MODE_PRIVATE).getString("stage", "none"))
             .toString()
-        persistenceOk = prefs.edit().putString("current", cachedSession).commit() // worker only, bounded to 30 samples/120 events
+        persistenceOk = prefs.edit().putString("current", cachedSession).commit() // worker only, bounded to 60 samples/120 events
     }
 }
