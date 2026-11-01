@@ -12,6 +12,7 @@ import 'bike_mode_screen.dart';
 import 'native_transmitter_screen.dart';
 import 'error_center_screen.dart';
 import 'google_maps_key_screen.dart';
+import 'gemini_map_settings_screen.dart';
 import 'launch_mode_screen.dart';
 import 'multi_camera_screen.dart';
 import 'presets_screen.dart';
@@ -85,6 +86,12 @@ class SettingsScreen extends StatelessWidget {
             title: 'Tema e cores',
             subtitle: 'Sistema, Claro ou Escuro; Turquesa, Azul, Roxo ou Laranja.',
             onTap: () => _push(context, const AppearanceSettingsScreen()),
+          ),
+          _SettingsTile(
+            icon: Icons.auto_awesome_outlined,
+            title: 'Gemini para Mapas',
+            subtitle: 'Inserir, salvar, mostrar e testar a chave Gemini para buscar locais com IA.',
+            onTap: () => _push(context, const GeminiMapSettingsScreen()),
           ),
           _SettingsTile(
             icon: Icons.vpn_key_outlined,

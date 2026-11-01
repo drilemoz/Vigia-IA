@@ -34,7 +34,9 @@
         android:label="Vigia IA"
         android:name="com.vigiaia.app.VigiaApplication"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:fullBackupContent="@xml/gemini_backup_rules"
+        android:dataExtractionRules="@xml/gemini_data_extraction_rules">
         <activity
             android:name=".MainActivity"
             android:exported="true"

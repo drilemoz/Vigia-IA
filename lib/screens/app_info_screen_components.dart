@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.324',
+          version: '1.0.325',
           current: true,
+          changes: [
+            'Gemini opcional em Configurações com chave protegida, salvar, copiar, colar, remover e testar.',
+            'Busca por linguagem natural em Mapas, com resultados confirmados pelo índice local ou OpenStreetMap.',
+            'IA não calcula rotas nem substitui GPS ou pesquisa offline.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.324',
+          current: false,
           changes: [
             'Busca de municípios pelo nome e limites administrativos recuperada no Planejamento.',
             'Diálogo de ritmo com controles de pausas em duas linhas e altura adaptativa.',
@@ -2767,8 +2777,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.324',
+          version: '1.0.325',
           current: true,
+          changes: [
+            'Gemini opcional em Configurações com chave protegida, salvar, copiar, colar, remover e testar.',
+            'Busca por linguagem natural em Mapas, com resultados confirmados pelo índice local ou OpenStreetMap.',
+            'IA não calcula rotas nem substitui GPS ou pesquisa offline.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.324',
+          current: false,
           changes: [
             'Busca de municípios pelo nome e limites administrativos recuperada no Planejamento.',
             'Diálogo de ritmo com controles de pausas em duas linhas e altura adaptativa.',

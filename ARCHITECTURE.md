@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.325+325
+
+## Gemini Maps opcional
+
+`GeminiMapService` usa HTTPS POST `v1beta/models/{modelo}:generateContent` e `x-goog-api-key`, nunca chave na URL. A chave é armazenada em preferências privadas Android **somente criptografada** pelo `protectSecret` (AES-GCM / Android Keystore) existente; o bootstrap inclui `MainActivity` e regras de exclusão de backups. A tela `GeminiMapSettingsScreen` configura chave e modelo, testa a API e permite remoção. `GeminiMapAssistantScreen` recebe uma pergunta textual explícita, obtém somente uma expressão de pesquisa sugerida e chama `MapDestinationSearchService.searchSubmitted` para localizar resultados verdadeiros no OSM/índice local. A seleção abre os detalhes do lugar, de onde o usuário pode iniciar navegação. Não confia em coordenadas, distâncias ou locais gerados pelo LLM; nenhum envio automático de GPS. A chave Gemini é independente da chave Maps SDK for Android. A consulta só funciona online, com custo/cota conforme plano do usuário. Incompatibilidades entre modelos devem ser testadas no aparelho.
+
 # Arquitetura — Vigia IA 1.0.324+324
 
 ## 1.0.324+324 · Pesquisa, planejamento e topo integrado

@@ -25,6 +25,10 @@ if [[ -f test/widget_test.dart ]] && grep -q 'MyApp' test/widget_test.dart; then
 fi
 
 cp "$MANIFEST_SOURCE" android/app/src/main/AndroidManifest.xml
+# Evitar incluir a chave Gemini criptografada em backup do Android.
+mkdir -p android/app/src/main/res/xml
+cp "$ROOT/tool/android/gemini_backup_rules.xml" android/app/src/main/res/xml/gemini_backup_rules.xml
+cp "$ROOT/tool/android/gemini_data_extraction_rules.xml" android/app/src/main/res/xml/gemini_data_extraction_rules.xml
 
 rm -rf android/app/src/main/kotlin/*
 KOTLIN_DIR="android/app/src/main/kotlin/com/vigiaia/app"

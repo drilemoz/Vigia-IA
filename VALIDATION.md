@@ -1,4 +1,8 @@
-# Validação Vigia IA 1.0.324+324
+# Validação Vigia IA 1.0.325+325
+
+- Gemini Maps opcional; regressão Python de 359 testes e verificação preventiva aprovadas.
+- Testes Flutter, compilação Gradle e API real pendentes; detalhes em `VALIDATION-1.0.325.md`.
+
 
 - Código-fonte: `RELEASE-1.0.324.md` e `VALIDATION-1.0.324.md`.
 - Testes estruturais: `tool/test_maps_search_ui_324.py`, mais testes Flutter de classificação Nominatim, prévia e HUD.

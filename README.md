@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.324+324`
+**Versão atual:** `1.0.325+325`
+
+## Atualização 1.0.325+325 · Gemini opcional no Vigia Maps
+
+Configurações > Gemini para Mapas: chave protegida pelo Android Keystore/AES-GCM (separada do Google Maps), salvar, revelar, ocultar, colar, copiar, remover, seleção de modelo e teste de conexão real. A busca tradicional do mapa possui ação **Buscar com Gemini**: transforma a solicitação em texto de consulta, confirma locais por Nominatim/OpenStreetMap/índice local e só então oferece um ponto navegável. Sem chave, rede ou resultados, a navegação offline normal permanece disponível. Nenhuma chave, pergunta ou coordenada é registrada no diagnóstico ou embarcada no código. Consulte `RELEASE-1.0.325.md` e `VALIDATION-1.0.325.md`.
 
 ## Atualização 1.0.324+324 · Busca e interface dos Mapas
 

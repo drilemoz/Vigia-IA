@@ -530,6 +530,47 @@ class MainActivity : FlutterActivity() {
                     result.error("keystore_decrypt", error.message, null)
                 }
             }
+            "geminiModel" -> {
+                result.success(getSharedPreferences("vigiaia_gemini_private", Context.MODE_PRIVATE)
+                    .getString("model", "gemini-3.5-flash-lite"))
+            }
+            "saveGeminiModel" -> {
+                val model = call.argument<String>("value").orEmpty()
+                if (model != "gemini-3.5-flash-lite" && model != "gemini-3.8-flash") {
+                    result.error("invalid_model", "Modelo indisponível.", null)
+                } else {
+                    val ok = getSharedPreferences("vigiaia_gemini_private", Context.MODE_PRIVATE)
+                        .edit().putString("model", model).commit()
+                    if (ok) result.success(model) else result.error("save_model", "Não foi possível salvar.", null)
+                }
+            }
+            "geminiKeyStatus" -> {
+                try {
+                    result.success(geminiKeyStatus())
+                } catch (error: Throwable) {
+                    result.error("gemini_key_status", "Não foi possível consultar a chave.", null)
+                }
+            }
+            "saveGeminiApiKey" -> {
+                try {
+                    val value = call.argument<String>("value")?.trim().orEmpty()
+                    if (value.isNotEmpty() && (value.length > 4096 || value.any { it.isWhitespace() })) {
+                        result.error("invalid_key", "Formato de chave inválido.", null)
+                    } else {
+                        saveGeminiApiKey(value)
+                        result.success(geminiKeyStatus())
+                    }
+                } catch (error: Throwable) {
+                    result.error("gemini_key_save", "Não foi possível salvar a chave.", null)
+                }
+            }
+            "revealGeminiApiKey" -> {
+                try {
+                    result.success(readGeminiApiKey())
+                } catch (error: Throwable) {
+                    result.error("gemini_key_read", "Não foi possível ler a chave.", null)
+                }
+            }
             "googleMapsKeyStatus" -> {
                 try {
                     result.success(googleMapsKeyStatus())
@@ -1392,6 +1433,42 @@ class MainActivity : FlutterActivity() {
                 else -> "none"
             },
             "masked" to masked,
+        )
+    }
+
+    // Credencial Gemini: nunca aparece em logs, backups ou metadados do APK.
+    // A criptografia usa a chave AES-GCM vinculada ao Android Keystore existente.
+    private val geminiPrefsName = "vigiaia_gemini_private"
+    private val geminiPrefsKey = "api_key_protected"
+
+    private fun readGeminiApiKey(): String? {
+        val encrypted = getSharedPreferences(geminiPrefsName, Context.MODE_PRIVATE)
+            .getString(geminiPrefsKey, null) ?: return null
+        return try {
+            unprotectSecret(encrypted)?.trim()?.takeIf { it.isNotEmpty() }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun saveGeminiApiKey(value: String) {
+        val prefs = getSharedPreferences(geminiPrefsName, Context.MODE_PRIVATE)
+        if (value.isEmpty()) {
+            if (!prefs.edit().remove(geminiPrefsKey).commit()) {
+                throw IllegalStateException("Falha ao remover chave")
+            }
+        } else {
+            if (!prefs.edit().putString(geminiPrefsKey, protectSecret(value)).commit()) {
+                throw IllegalStateException("Falha ao salvar chave")
+            }
+        }
+    }
+
+    private fun geminiKeyStatus(): Map<String, Any> {
+        val value = readGeminiApiKey()
+        return mapOf(
+            "configured" to (value != null),
+            "masked" to (value?.let { "••••••••" + it.takeLast(4) } ?: ""),
         )
     }
 

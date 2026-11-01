@@ -1,3 +1,12 @@
+## 1.0.325+325 (2026-11-01)
+
+- Gemini opcional para assistência a busca geográfica, sem substituir Nominatim/OpenStreetMap, GPS, rota Bike ou mapas offline.
+- Configuração separada da chave Google Maps: salvar/testar/revelar/ocultar/copiar/colar/remover com Android Keystore/AES-GCM.
+- Busca por pergunta em texto, sugestões de consulta e verificação de resultados cartográficos antes de exibir a opção Navegar.
+- API externa só é chamada mediante ação explícita; sem coordenadas enviadas ao Gemini. Alertas de conectividade, cota e cobrança; resposta da IA não cria POIs sem fonte.
+- Backups excluem a preferência criptografada Gemini e bootstrap Android preserva as regras.
+- Testes preventivos acrescentados; build/teste Flutter no GitHub Actions pendentes.
+
 ## 1.0.324+324 (2026-11-01)
 
 - Busca de cidades/municípios retornados como limites administrativos aceita como destino; pesquisa online explícita e seleção de resultados orientada.

@@ -31,8 +31,8 @@ class ActiveBikePace323(unittest.TestCase):
         self.assertIn("'ritmo_navegacao_recalculado'",s)
         self.assertNotIn("recordUiAction('mapas', selection.preferences.toString()", s)
     def test_release(self):
-        self.assertIn('version: 1.0.324+324', read('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.324.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.324.md').is_file())
+        self.assertIn('version: 1.0.325+325', read('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.325.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.325.md').is_file())
 
 if __name__=='__main__': unittest.main()

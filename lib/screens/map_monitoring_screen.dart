@@ -70,6 +70,8 @@ import '../services/map_view_policy.dart';
 import '../services/google_maps_key_service.dart';
 import '../services/map_view_settings_service.dart';
 import 'google_maps_key_screen.dart';
+import 'gemini_map_settings_screen.dart';
+import 'gemini_map_assistant_screen.dart';
 import '../services/native_platform_service.dart';
 import '../services/offline_map_service.dart';
 import '../services/route_explorer_service.dart';
@@ -4716,6 +4718,19 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   ListTile(
                     dense: true,
                     visualDensity: VisualDensity.compact,
+                    leading: const Icon(Icons.auto_awesome_outlined),
+                    title: const Text('Gemini para Mapas'),
+                    subtitle: const Text('Salvar e testar sua chave para busca assistida de locais.'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      unawaited(Navigator.of(context).push<void>(
+                        MaterialPageRoute(builder: (_) => const GeminiMapSettingsScreen())));
+                    },
+                  ),
+                  ListTile(
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
                     leading: const Icon(Icons.vpn_key_outlined),
                     title: const Text('Chave do Google Maps'),
                     subtitle: Text(GoogleMapsKeyService.instance.hasKey
@@ -5854,6 +5869,37 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
   }
 
+  Future<void> _openGeminiMapAssistant() async {
+    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'buscar_com_gemini');
+    final current = _routeState.current;
+    if (current == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Aguardando GPS para localizar os resultados da busca.')));
+      return;
+    }
+    await Future.wait<void>([
+      _destinationSearch.initialize(),
+      _offlineMaps.initialize(),
+      _routeExplorer.initialize(),
+    ]);
+    if (!mounted) return;
+    final offlineOnly = _connectivity.isOffline ||
+        _offlineMaps.mode == OfflineMapMode.offline;
+    final selected = await Navigator.of(context).push<MapDestinationSearchResult>(
+      MaterialPageRoute(builder: (_) => GeminiMapAssistantScreen(
+        current: current,
+        onlineAllowed: !offlineOnly,
+        offlineMaps: _offlineMaps.packages,
+        offlinePoiPackages: _routeExplorer.offlinePackages,
+      )),
+    );
+    if (!mounted || selected == null) return;
+    await _destinationSearch.rememberRecentPlace(selected);
+    if (!mounted) return;
+    _focusSearchResult(selected);
+    unawaited(_showMapLocationDetails(selected));
+  }
+
   Future<void> _showDestinationSearch() async {
     await Future.wait<void>([
       _destinationSearch.initialize(),
@@ -5949,6 +5995,18 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         ],
                       ),
                     ),
+                    if (!offlineOnly)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                            unawaited(_openGeminiMapAssistant());
+                          },
+                          icon: const Icon(Icons.auto_awesome_outlined),
+                          label: const Text('Buscar com Gemini (opcional)'),
+                        ),
+                      ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: TextField(
