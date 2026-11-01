@@ -1,6 +1,10 @@
-**Versão atual:** `1.0.323+323`
+**Versão atual:** `1.0.324+324`
 
-## Atualização 1.0.323+323 · Alterar ritmo durante a navegação
+## Atualização 1.0.324+324 · Busca e interface dos Mapas
+
+Pesquisa de cidades/municípios pelo nome com consulta online explícita e resultados selecionáveis; assistente de ritmo reorganizado em duas linhas; mapa sob cabeçalho translúcido, prévia adaptativa e melhor distinção de GPS/rumo. A comparação continua limitada às métricas realmente disponíveis. Ver `RELEASE-1.0.324.md` e `VALIDATION-1.0.324.md`.
+
+## Atualização 1.0.323+323 · Ajustar ritmo em navegação ativa
 
 O painel detalhado da navegação de bicicleta agora contém **Ajustar ritmo**: altere velocidade média, horas por dia, equilíbrio e uso do histórico sem encerrar a rota. O tempo restante e o planejamento por dias são recalculados; a navegação mantém o painel aberto. As ações são identificadas no diagnóstico sem registrar coordenadas ou valores de campos. Ver `RELEASE-1.0.323.md` e `VALIDATION-1.0.323.md`.
 

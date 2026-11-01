@@ -17,9 +17,9 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.323+323\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.324+324\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            source = source.replace('Ajuste de velocidade e horas pedaladas por dia disponível durante a navegação de bicicleta.',
+            source = source.replace('Pesquisa por nome no Planejamento aceita cidades retornadas como limites administrativos; busca online explícita e seleção orientada.',
                                     'Corrigido erro nas verificações de atualização')
             (root / 'lib/services/update_news_catalog.dart').write_text(source, 'utf8')
             policy.validate(root)
@@ -28,13 +28,13 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.323+323\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.324+324\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 323', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 324', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
-            path.write_text(source.replace('Ajuste de velocidade e horas pedaladas por dia disponível durante a navegação de bicicleta.',
+            path.write_text(source.replace('Pesquisa por nome no Planejamento aceita cidades retornadas como limites administrativos; busca online explícita e seleção orientada.',
                                            'TODO'), 'utf8')
             with self.assertRaisesRegex(ValueError, 'mensagens'):
                 policy.validate(root)

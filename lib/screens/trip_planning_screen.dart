@@ -287,19 +287,31 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             final validCities = _origin != null && _destination != null &&
                 (_origin!.latitude - _destination!.latitude).abs() +
                 (_origin!.longitude - _destination!.longitude).abs() > 0.000002;
-            return AlertDialog(
-              icon: Icon(step == 0 ? Icons.route_rounded : Icons.directions_bike_rounded),
-              title: Text(step == 0 ? 'Nova rota · 1 de 2' : 'Ritmo da pedalada · 2 de 2'),
-              content: SizedBox(
-                width: 540,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.55),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
+            final keyboardInset = MediaQuery.viewInsetsOf(ctx).bottom;
+            final maxHeight = MediaQuery.sizeOf(ctx).height -
+                keyboardInset - MediaQuery.paddingOf(ctx).vertical - 32;
+            return Dialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 510, maxHeight: maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(step == 0 ? Icons.route_rounded : Icons.directions_bike_rounded,
+                      color: Theme.of(ctx).colorScheme.primary, size: 29),
+                    const SizedBox(height: 8),
+                    Text(step == 0 ? 'Nova rota · 1 de 2' : 'Ritmo da pedalada · 2 de 2',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(ctx).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    Flexible(child: SingleChildScrollView(
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
                       children: step == 0 ? <Widget>[
-                        Text('Selecione origem e destino. A lupa pesquisa online; itens salvos aparecem offline.',
+                        Text('Digite o destino e toque em Buscar (ou na lupa). Selecione um resultado para continuar. Locais salvos funcionam offline.',
                           style: Theme.of(ctx).textTheme.bodySmall),
                         const SizedBox(height: 14),
                         _cityField(origin: true),
@@ -326,30 +338,30 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                         Text('Os tempos são estimativas, não incluem relevo e vento.',
                             style: Theme.of(ctx).textTheme.bodySmall),
                       ],
-                    ),
-                  ),
+                      ),
+                    )),
+                    const SizedBox(height: 10),
+                    OverflowBar(alignment: MainAxisAlignment.end,
+                      spacing: 8, overflowSpacing: 6, children: [
+                      TextButton(onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Cancelar')),
+                      if (step == 1)
+                        OutlinedButton(onPressed: () => dialogSetState(() => step = 0),
+                          child: const Text('Voltar')),
+                      FilledButton.icon(
+                        onPressed: step == 0
+                            ? (validCities && !_locating
+                                ? () { FocusManager.instance.primaryFocus?.unfocus();
+                                    dialogSetState(() => step = 1); }
+                                : null)
+                            : () { shouldCalculate = true; Navigator.pop(ctx); },
+                        icon: Icon(step == 0 ? Icons.arrow_forward_rounded : Icons.route_rounded),
+                        label: Text(step == 0 ? 'Avançar' : 'Ver trajeto'),
+                      ),
+                    ]),
+                  ]),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar'),
-                ),
-                if (step == 1)
-                  OutlinedButton(
-                    onPressed: () => dialogSetState(() => step = 0),
-                    child: const Text('Voltar'),
-                  ),
-                FilledButton.icon(
-                  onPressed: step == 0
-                      ? (validCities && !_locating
-                          ? () { FocusManager.instance.primaryFocus?.unfocus(); dialogSetState(() => step = 1); }
-                          : null)
-                      : () { shouldCalculate = true; Navigator.pop(ctx); },
-                  icon: Icon(step == 0 ? Icons.arrow_forward_rounded : Icons.route_rounded),
-                  label: Text(step == 0 ? 'Avançar' : 'Ver trajeto'),
-                ),
-              ],
             );
           },
         ),
@@ -657,6 +669,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           ),
         ),
         textInputAction: TextInputAction.search,
+        autocorrect: false,
         onTap: () => _activateCityField(origin: origin),
         onChanged: (text) => _typing(text, origin: origin),
         onSubmitted: (_) => unawaited(_searchCity(origin: origin)),
@@ -674,18 +687,30 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final results = _citySearch.results.where((item) =>
       item.kind != MapDestinationKind.pointOfInterest).take(8).toList();
     final activeText = (_lookingForOrigin ? _originField : _destinationField).text.trim();
-    if (activeText.isEmpty || results.isEmpty && !_citySearch.searchLoading) {
-      if (activeText.isEmpty) return const SizedBox.shrink();
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7),
-        child: Text(_citySearch.searchStatusMessage ??
-            'Digite uma cidade; toque na lupa para pesquisar pela internet.',
-            style: Theme.of(context).textTheme.bodySmall),
-      );
+    final selected = _lookingForOrigin ? _origin : _destination;
+    if (activeText.isEmpty ||
+        (selected != null && selected.title == activeText)) {
+      return const SizedBox.shrink();
     }
-    return Card(
-      child: Column(children: [
-        if (_citySearch.searchLoading) const LinearProgressIndicator(),
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      OutlinedButton.icon(
+        onPressed: _citySearch.searchLoading ? null :
+            () => unawaited(_searchCity(origin: _lookingForOrigin)),
+        icon: _citySearch.searchLoading
+            ? const SizedBox(width: 17, height: 17,
+                child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.search_rounded, size: 19),
+        label: Text(_citySearch.searchLoading
+            ? 'Buscando "$activeText"…' : 'Buscar "$activeText" online',
+            maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
+      if (_citySearch.searchStatusMessage != null)
+        Padding(padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Text(_citySearch.searchStatusMessage!,
+            style: Theme.of(context).textTheme.bodySmall)),
+      if (results.isNotEmpty) ...[
+        Text('Selecione um resultado para habilitar Avançar',
+            style: Theme.of(context).textTheme.labelSmall),
         for (final place in results)
           ListTile(
             dense: true,
@@ -695,57 +720,83 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             trailing: place.storedLocally ? const Icon(Icons.offline_pin_outlined, size: 18) : null,
             onTap: () => _selectCity(place),
           ),
-      ]),
-    );
+      ],
+    ]);
   }
 
-  Widget _settings() => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Ritmo da viagem', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text('Velocidade média: ${_speedKmh.toStringAsFixed(0)} km/h'),
-        Slider(value: _speedKmh, min: 5, max: 40, divisions: 35,
-            label: '${_speedKmh.toStringAsFixed(0)} km/h',
-            onChanged: (v) { setState(() => _speedKmh = v); _refreshDraftPreferences(); }),
-        Text('Pedal por dia: ${_hoursPerDay.toStringAsFixed(0)} h'),
-        Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
-            label: '${_hoursPerDay.toStringAsFixed(0)} h',
-            onChanged: (v) { setState(() => _hoursPerDay = v); _refreshDraftPreferences(); }),
-        Wrap(spacing: 12, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          ActionChip(
-            avatar: const Icon(Icons.schedule_rounded, size: 19),
-            label: Text('Saída ${_departure.format(context)}'),
-            onPressed: () async {
-              final value = await showTimePicker(context: context, initialTime: _departure);
-              if (value == null || !mounted) return;
-              setState(() => _departure = value);
-              _refreshDraftPreferences();
-            },
-          ),
-          _choice('Pausas a cada', _breakEveryKm, const [15, 20, 30], 'km', (v) {
-            setState(() => _breakEveryKm = v); _refreshDraftPreferences();
-          }),
-          _choice('Pausa', _breakMinutes, const [5, 10, 15, 20], 'min', (v) {
-            setState(() => _breakMinutes = v); _refreshDraftPreferences();
-          }),
-          _choice('Almoço', _lunchMinutes, const [0, 30, 40, 60], 'min', (v) {
-            setState(() => _lunchMinutes = v); _refreshDraftPreferences();
-          }),
-        ]),
-      ]),
+  Widget _settings() => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      borderRadius: BorderRadius.circular(18),
     ),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Ritmo da viagem', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 6),
+      Text('Velocidade média: ${_speedKmh.toStringAsFixed(0)} km/h'),
+      Slider(value: _speedKmh, min: 5, max: 40, divisions: 35,
+          label: '${_speedKmh.toStringAsFixed(0)} km/h',
+          onChanged: (v) { setState(() => _speedKmh = v); _refreshDraftPreferences(); }),
+      Text('Pedal por dia: ${_hoursPerDay.toStringAsFixed(0)} h'),
+      Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
+          label: '${_hoursPerDay.toStringAsFixed(0)} h',
+          onChanged: (v) { setState(() => _hoursPerDay = v); _refreshDraftPreferences(); }),
+      const SizedBox(height: 6),
+      Row(children: [
+        Expanded(child: OutlinedButton.icon(
+          onPressed: () async {
+            final value = await showTimePicker(context: context, initialTime: _departure);
+            if (value == null || !mounted) return;
+            setState(() => _departure = value);
+            _refreshDraftPreferences();
+          },
+          icon: const Icon(Icons.schedule_rounded, size: 18),
+          label: FittedBox(fit: BoxFit.scaleDown,
+            child: Text('Saída ${_departure.format(context)}')),
+        )),
+        const SizedBox(width: 8),
+        Expanded(child: _choice('A cada', _breakEveryKm,
+          const [15, 20, 30], 'km', (v) {
+            setState(() => _breakEveryKm = v); _refreshDraftPreferences();
+          })),
+      ]),
+      const SizedBox(height: 8),
+      Row(children: [
+        Expanded(child: _choice('Pausa', _breakMinutes,
+          const [5, 10, 15, 20], 'min', (v) {
+            setState(() => _breakMinutes = v); _refreshDraftPreferences();
+          })),
+        const SizedBox(width: 8),
+        Expanded(child: _choice('Almoço', _lunchMinutes,
+          const [0, 30, 40, 60], 'min', (v) {
+            setState(() => _lunchMinutes = v); _refreshDraftPreferences();
+          })),
+      ]),
+    ]),
   );
 
   Widget _choice(String label, int selected, List<int> options, String unit,
       ValueChanged<int> change) => PopupMenuButton<int>(
-    tooltip: label,
+    tooltip: '$label ($selected $unit)',
     onSelected: change,
     itemBuilder: (_) => [for (final v in options)
       PopupMenuItem(value: v, child: Text('$v $unit'))],
-    child: Chip(label: Text('$label: $selected $unit'),
-      avatar: const Icon(Icons.tune_rounded, size: 16)),
+    child: Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Row(children: [
+        const Icon(Icons.tune_rounded, size: 17),
+        const SizedBox(width: 6),
+        Expanded(child: FittedBox(fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text('$label: $selected $unit', maxLines: 1))),
+        const Icon(Icons.arrow_drop_down_rounded, size: 18),
+      ]),
+    ),
   );
 
   List<MapDestinationSearchResult> _nearbyRoutePlaces(PlannedBikeTrip trip) {

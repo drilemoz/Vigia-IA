@@ -1,3 +1,12 @@
+## 1.0.324+324 (2026-11-01)
+
+- Busca de cidades/municípios retornados como limites administrativos aceita como destino; pesquisa online explícita e seleção de resultados orientada.
+- Diálogo responsivo de Planejamento com saída, intervalo de pausas, pausa e almoço organizados em duas linhas.
+- Mapas sem barra superior branca: mapa estendido sob cabeçalho integrado, com HUD reposicionado.
+- Prévia de rota com limite de altura/rolagem, comparação de distâncias e dados desconhecidos explicitados.
+- GPS distingue direção por bússola de velocidade ausente; tempos de pedal arredondados uniformemente.
+- Módulos de câmera, IA e rede preservados; compilação Android pendente.
+
 ## 1.0.323+323 (2026-10-30)
 
 - Adicionado botão **Ajustar ritmo** ao painel detalhado da navegação Bike já iniciada, com edição de velocidade manual, horas de pedal por dia, equilíbrio e média aprendida opcional.

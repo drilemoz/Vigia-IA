@@ -123,23 +123,33 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
     currentIndex: 5,
     onDestinationSelected: (index) =>
         navigateToMainDestination(context, index, currentIndex: 5),
-    appBar: AppBar(
-      title: const Text('Mapas'),
-      actions: [
-        IconButton(
-          tooltip: 'Configurações gerais',
-          onPressed: () => unawaited(_openTool(const SettingsScreen())),
-          icon: const Icon(Icons.settings_outlined),
-        ),
-      ],
-    ),
-    body: MapMonitoringScreen(
-    key: const ValueKey<String>('workspace-map'),
-    workspaceVisible: !_toolVisible,
-    navigationSearchRequests: _destinationSearchRequests,
-    onChooseWorkspaceMode: () => unawaited(_chooseMode()),
-    onOpenWorkspaceTools: () => unawaited(_showTools()),
-    workspaceModeLabel: _mode.label,
-    ),
+    // Sem AppBar branca: mapa permanece sob o status bar e o cabeçalho.
+    body: Stack(children: [
+      MapMonitoringScreen(
+        key: const ValueKey<String>('workspace-map'),
+        workspaceVisible: !_toolVisible,
+        workspaceHeaderHeight: 58,
+        navigationSearchRequests: _destinationSearchRequests,
+        onChooseWorkspaceMode: () => unawaited(_chooseMode()),
+        onOpenWorkspaceTools: () => unawaited(_showTools()),
+        workspaceModeLabel: _mode.label,
+      ),
+      Positioned(
+        top: MediaQuery.paddingOf(context).top,
+        left: 12, right: 12,
+        height: 56,
+        child: Row(children: [
+          const Expanded(child: Text('Mapas',
+            style: TextStyle(color: Colors.white, fontSize: 23,
+              fontWeight: FontWeight.w700,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 8)]))),
+          IconButton(
+            tooltip: 'Configurações gerais',
+            onPressed: () => unawaited(_openTool(const SettingsScreen())),
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+          ),
+        ]),
+      ),
+    ]),
   );
 }

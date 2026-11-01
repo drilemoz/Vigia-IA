@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.324+324
+
+- Código-fonte: `RELEASE-1.0.324.md` e `VALIDATION-1.0.324.md`.
+- Testes estruturais: `tool/test_maps_search_ui_324.py`, mais testes Flutter de classificação Nominatim, prévia e HUD.
+- Flutter SDK/Gradle não disponíveis localmente: execução no GitHub Actions pendente.
+
 # Validação Vigia IA 1.0.323+323
 
 - Ajuste de ritmo durante navegação Bike, teste preventivo e documentação: `RELEASE-1.0.323.md`, `VALIDATION-1.0.323.md`.

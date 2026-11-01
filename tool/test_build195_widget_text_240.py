@@ -24,7 +24,7 @@ class Build195WidgetTextRegression(unittest.TestCase):
 
     def test_rejects_old_unrendered_heading_word(self):
         x = self.files[:]
-        x[3] = x[3].replace("find.text('GPS · 92°')", "find.text('GPS · rumo 92°')")
+        x[3] = x[3].replace("find.text('GPS · Rumo GPS 92°')", "find.text('GPS · rumo 92°')")
         self.assertTrue(audit(*x))
 
     def test_rejects_loss_of_rich_text_unit(self):

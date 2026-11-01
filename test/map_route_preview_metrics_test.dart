@@ -23,6 +23,15 @@ void main() {
     expect(chosen.durationSource, contains('10.0 km/h'));
   });
 
+  test('minutos da prévia e plano diário usam arredondamento para cima', () {
+    final chosen = MapRoutePreviewMetrics.forRoute(
+      route: route(33500, 100),
+      mode: MapTravelMode.bicycle,
+      bikePreferences: const BikeTravelPreferences(averageSpeedKmh: 11),
+    );
+    expect(chosen.durationLabel, '3h03');
+  });
+
   test('rota carro usa tempo fornecido e não o ritmo de bicicleta', () {
     final chosen = MapRoutePreviewMetrics.forRoute(
       route: route(30000, 1800),

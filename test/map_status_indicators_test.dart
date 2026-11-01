@@ -37,14 +37,25 @@ void main() {
       home: Scaffold(body: Center(child: MapFocusSpeedPill(
         reading: const MapSpeedReading(24.55, 'GPS'),
         heading: 91.8,
+        headingSourceLabel: 'Rumo GPS',
         onTap: () => taps++,
       ))),
     ));
     expect(find.text('24.6 km/h'), findsOneWidget);
-    expect(find.text('GPS · 92°'), findsOneWidget);
+    expect(find.text('GPS · Rumo GPS 92°'), findsOneWidget);
     await tester.tap(find.byType(MapFocusSpeedPill));
     expect(taps, 1);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sem velocidade GPS mas com bussola valida identifica a fonte', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: Center(child: MapFocusSpeedPill(
+        reading: null, heading: 323, headingSourceLabel: 'Bússola',
+        onTap: () {},
+      ))),
+    ));
+    expect(find.text('Sem velocidade · Bússola 323°'), findsOneWidget);
   });
 
   testWidgets('velocimetro sem leitura nao inventa numero ou rumo', (tester) async {
@@ -54,6 +65,6 @@ void main() {
       ))),
     ));
     expect(find.text('-- km/h'), findsOneWidget);
-    expect(find.text('Sem leitura · rumo --'), findsOneWidget);
+    expect(find.text('Sem velocidade · sem direção atual'), findsOneWidget);
   });
 }

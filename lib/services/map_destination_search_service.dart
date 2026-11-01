@@ -537,7 +537,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.323');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.324');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -617,7 +617,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.323');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.324');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -750,7 +750,7 @@ class MapDestinationSearchService extends ChangeNotifier {
 
   Future<String> _readNearbyResponse(Uri endpoint, String query) async {
     final request = await _client.postUrl(endpoint);
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.323');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.324');
     request.headers.contentType = ContentType(
       'application', 'x-www-form-urlencoded', charset: 'utf-8',
     );
@@ -836,7 +836,7 @@ class MapDestinationSearchService extends ChangeNotifier {
         final request = await _client.getUrl(uri).timeout(const Duration(seconds: 6));
         request.headers.set(
           HttpHeaders.userAgentHeader,
-          'VigiaIA/1.0.323 map-reverse-search',
+          'VigiaIA/1.0.324 map-reverse-search',
         );
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
         final response = await request.close().timeout(const Duration(seconds: 8));
@@ -937,7 +937,7 @@ class MapDestinationSearchService extends ChangeNotifier {
       },
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.323 map-search');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.324 map-search');
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     final response = await request.close().timeout(const Duration(seconds: 15));
     final body = await utf8.decoder.bind(response).join();
@@ -961,9 +961,12 @@ class MapDestinationSearchService extends ChangeNotifier {
       final type = item['type']?.toString();
       final category = item['category']?.toString();
       final title = MapDestinationRanking.canonicalTitle(item);
-      final kind = category == 'place'
-          ? MapDestinationKindX.fromOsmType(type)
-          : MapDestinationKind.pointOfInterest;
+      // Nominatim frequentemente retorna cidades/municipios como limites
+      // administrativos (boundary=administrative), nao como place. Nao
+      // esconder esses resultados na pesquisa de origem/destino.
+      final addressType = item['addresstype']?.toString();
+      final kind = MapDestinationKindX.fromNominatim(
+        category: category, type: type, addressType: addressType);
       results.add(
         MapDestinationSearchResult(
           id: 'nominatim:${item['osm_type']}:${item['osm_id']}',

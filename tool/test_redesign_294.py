@@ -9,7 +9,8 @@ class Redesign294(unittest.TestCase):
     self.assertNotIn("label: 'Ajustes'",nav)
     self.assertEqual(nav.count("label: '"),6)
     self.assertIn("tooltip: 'Configurações gerais'",src('lib/screens/monitor_screen.dart'))
-    self.assertIn('appBar: AppBar(',src('lib/screens/map_workspace_shell.dart'))
+    self.assertIn('body: Stack(children:',src('lib/screens/map_workspace_shell.dart'))
+    self.assertNotIn('appBar: AppBar(',src('lib/screens/map_workspace_shell.dart'))
     self.assertIn('return Scaffold(',src('lib/screens/settings_screen.dart'))
     self.assertNotIn('currentIndex: 5',src('lib/screens/settings_screen.dart'))
   def test_video_control_combines_fps_quality_and_torch(self):
@@ -45,6 +46,6 @@ class Redesign294(unittest.TestCase):
     self.assertIn('exportToDownloads()',src('lib/screens/monitor_screen_ai_tools.dart'))
     self.assertIn('Downloads/Vigia IA',src('android/app/src/main/kotlin/com/vigiaia/app/MainActivity.kt'))
   def test_version(self):
-    self.assertIn('version: 1.0.323+323',src('pubspec.yaml'))
-    self.assertTrue((ROOT/'RELEASE-1.0.323.md').exists())
+    self.assertIn('version: 1.0.324+324',src('pubspec.yaml'))
+    self.assertTrue((ROOT/'RELEASE-1.0.324.md').exists())
 if __name__=='__main__': unittest.main()

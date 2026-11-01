@@ -25,11 +25,11 @@ def audit(source: str, pill: str, strip_tests: str, pill_tests: str) -> list[str
         errors.append('dois testes de telemetria devem validar valor e unidade juntos')
     if "expect(find.text('19.8'), findsOneWidget);" in strip_tests:
         errors.append('expectativa antiga do numero isolado reapareceu')
-    if "'${reading?.source ?? 'Sem leitura'} · '" not in pill:
+    if "'${reading?.source ?? 'Sem velocidade'} · '" not in pill:
         errors.append('formato original da fonte no velocimetro mudou')
-    if "'${heading == null ? 'rumo --' : '${heading!.round()}°'}'" not in pill:
+    if "'${heading == null ? 'sem direção atual' : '$headingSourceLabel ${heading!.round()}°'}'" not in pill:
         errors.append('formato original do rumo no velocimetro mudou')
-    if "expect(find.text('GPS · 92°'), findsOneWidget);" not in pill_tests:
+    if "expect(find.text('GPS · Rumo GPS 92°'), findsOneWidget);" not in pill_tests:
         errors.append('expectativa do indicador de rumo nao corresponde ao widget')
     if "expect(find.text('GPS · rumo 92°'), findsOneWidget);" in pill_tests:
         errors.append('expectativa de palavra rumo inexistente reapareceu')

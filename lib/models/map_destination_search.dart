@@ -19,6 +19,22 @@ extension MapDestinationKindX on MapDestinationKind {
         MapDestinationKind.place => 'Local',
       };
 
+  /// Municípios retornados como boundary=administrative pelo Nominatim
+  /// também são destinos válidos, sem aceitar outros POIs por engano.
+  static MapDestinationKind fromNominatim({
+    required String? category,
+    required String? type,
+    required String? addressType,
+  }) {
+    if (category == 'place' ||
+        (category == 'boundary' && type == 'administrative') ||
+        const <String>{'city', 'town', 'village', 'municipality', 'county'}
+            .contains(addressType)) {
+      return fromOsmType(addressType ?? type);
+    }
+    return MapDestinationKind.pointOfInterest;
+  }
+
   static MapDestinationKind fromOsmType(String? value) {
     return switch (value?.trim().toLowerCase()) {
       'city' => MapDestinationKind.city,

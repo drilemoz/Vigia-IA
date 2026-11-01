@@ -59,7 +59,7 @@ class MapRoutePreviewCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
         child: Column(mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
@@ -126,10 +126,13 @@ class MapRoutePreviewCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (routes.length > 1 && firstMetrics != null && selectedIndex > 0)
-              Text(metrics.distanceDifference(firstMetrics),
+            if (routes.length > 1 && firstMetrics != null) ...[
+              Text(selectedIndex == 0
+                  ? 'Rota 2: ${MapRoutePreviewMetrics.forRoute(route: routes[1], mode: target.travelMode, bikePreferences: bikePreferences).distanceDifference(firstMetrics)}'
+                  : 'Rota ${selectedIndex + 1}: ${metrics.distanceDifference(firstMetrics)}',
                 style: Theme.of(context).textTheme.bodySmall),
-            Text('Relevo, qualidade e tipo de via: sem dados comparáveis nesta prévia.',
+            ],
+            Text('Comparação limitada a distância e tempo. Relevo, pavimento e segurança sem dados verificados.',
               style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 8),
             Row(children: [

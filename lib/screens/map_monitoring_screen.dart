@@ -132,6 +132,7 @@ class MapMonitoringScreen extends StatefulWidget {
     this.onAiVoiceChanged,
     this.initialPointOfInterest,
     this.workspaceVisible = true,
+    this.workspaceHeaderHeight = 0,
     this.navigationSearchRequests,
     this.onChooseWorkspaceMode,
     this.onOpenWorkspaceTools,
@@ -154,6 +155,8 @@ class MapMonitoringScreen extends StatefulWidget {
   final ValueChanged<bool>? onAiVoiceChanged;
   final RouteExplorerResult? initialPointOfInterest;
   final bool workspaceVisible;
+  /// Espaço reservado aos controles do cabeçalho sobre o mapa integrado.
+  final double workspaceHeaderHeight;
   final ValueListenable<int>? navigationSearchRequests;
   final VoidCallback? onChooseWorkspaceMode;
   final VoidCallback? onOpenWorkspaceTools;
@@ -2757,7 +2760,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   String _formatTripDuration(Duration duration) {
-    final minutes = duration.inMinutes;
+    final minutes = (duration.inSeconds + 59) ~/ 60;
     if (minutes < 60) return '$minutes min';
     final hours = minutes ~/ 60;
     final rest = minutes % 60;
@@ -2949,7 +2952,16 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   ),
                 ]),
                 ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 10),
+                  childrenPadding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+                  backgroundColor: Colors.transparent,
+                  collapsedBackgroundColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(color: scheme.outlineVariant)),
+                  collapsedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(color: scheme.outlineVariant)),
                   initiallyExpanded: false,
                   title: const Text('Ajustar pausas e refeições',
                       style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
@@ -6646,7 +6658,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         ? '© Stadia Maps · © OpenMapTiles · © OpenStreetMap contributors'
         : _openFreeMapAttribution;
     final topInset = safePadding.top + MapUxPolicy.controlEdge +
-        (_rideSettings.immersive ? 26 : 0);
+        widget.workspaceHeaderHeight + (_rideSettings.immersive ? 26 : 0);
     final bottomInset = safePadding.bottom + MapUxPolicy.controlEdge;
     final navigationAudioEnabled = _mapViewSettings.navigationVoiceEnabled;
     final aiAudioEnabled = _aiVoiceEnabled;
@@ -7224,8 +7236,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   right: 12,
                   child: MapSystemHud(
                     batteryPercent: _phoneBattery,
-                    gpsReady: _routeState.availability == LocationTrackingAvailability.ready,
-                    speedSource: speedReading?.source,
+                    gpsReady: liveGps != null,
+                    speedSource: liveGps == null ? 'Sem sinal atual' : speedReading?.source,
                   ),
                 ),
 
@@ -7381,6 +7393,12 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   child: MapFocusSpeedPill(
                     reading: speedReading,
                     heading: _displayHeadingFor(current).headingDegrees,
+                    headingSourceLabel: switch (_displayHeadingFor(current).source) {
+                      MapHeadingSource.sensor => 'Bússola',
+                      MapHeadingSource.gps => 'Rumo GPS',
+                      MapHeadingSource.route => 'Rota',
+                      MapHeadingSource.unavailable => 'Direção',
+                    },
                     onTap: () => unawaited(_showSpeedDetails()),
                   ),
                 ),
@@ -7612,7 +7630,10 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 Positioned(
                   left: 8, right: 8,
                   bottom: bottomInset + 38,
-                  child: MapRoutePreviewCard(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.47),
+                    child: SingleChildScrollView(
+                      child: MapRoutePreviewCard(
                     target: _previewTarget!,
                     routes: _previewRoutes,
                     selectedIndex: _previewIndex,
@@ -7630,7 +7651,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         ? null : () => unawaited(_showBikeTripPlan()),
                     onStart: _startPreviewNavigation,
                     onSave: _savePreviewRoute,
-                  ),
+                    ),
+                  )),
                 ),
               if (navigationTarget != null &&
                   (compactHud || (!showSelectedPoiCard && !showSelectedMapLocationCard)) &&

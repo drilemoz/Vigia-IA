@@ -30,9 +30,9 @@ class Build244FlutterAnalyzeTests(unittest.TestCase):
         self.assertIn('Duration(milliseconds: 500)', scanner)
 
     def test_version_and_release_synced(self):
-        self.assertIn('version: 1.0.323+323', source('pubspec.yaml'))
-        self.assertIn("AppBuildVersion(version: '1.0.323', build: 323)", source('lib/services/update_news_catalog.dart'))
-        self.assertTrue((ROOT/'RELEASE-1.0.323.md').exists())
+        self.assertIn('version: 1.0.324+324', source('pubspec.yaml'))
+        self.assertIn("AppBuildVersion(version: '1.0.324', build: 324)", source('lib/services/update_news_catalog.dart'))
+        self.assertTrue((ROOT/'RELEASE-1.0.324.md').exists())
 
 
 if __name__ == '__main__':

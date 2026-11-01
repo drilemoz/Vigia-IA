@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.323+323
+# Arquitetura — Vigia IA 1.0.324+324
+
+## 1.0.324+324 · Pesquisa, planejamento e topo integrado
+
+A pesquisa remota de locais continua explícita conforme a política de uso do Nominatim e agora classifica `boundary=administrative` como cidade/município válido. `TripPlanningScreen` apresenta resultados selecionáveis e uma ação Buscar textual; usa `Dialog` responsivo com controles 2x2 e sem alterar armazenamento de preferências. `MapWorkspaceShell` conserva `MapMonitoringScreen` montado e desenha cabeçalho flutuante, reservando altura de controle pelo campo `workspaceHeaderHeight`, sem deslocar o mapa-base. `MapRoutePreviewMetrics` e `_formatTripDuration` compartilham arredondamento para cima em minutos; `MapFocusSpeedPill` identifica a fonte real do rumo separadamente da velocidade GPS. Prévia de rota rola quando limitada pelo espaço disponível. Não atribui segurança/relevo sem dados.
 
 ## Vigia IA 1.0.323+323 · Edição do ritmo em rota ativa
 

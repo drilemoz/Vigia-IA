@@ -33,7 +33,9 @@ class MapRoutePreviewMetrics {
       }
       return MapRoutePreviewMetrics._(
         distanceMeters: distance,
-        durationMinutes: (distance / 1000 / speed * 60).round(),
+        // Mesmo critério do planejamento diário: segundos calculados e
+        // minutos arredondados para cima, sem subestimar a duração.
+        durationMinutes: ((distance / 1000 / speed * 3600).round() + 59) ~/ 60,
         durationSource: 'Tempo estimado pelo ritmo configurado (${speed.toStringAsFixed(1)} km/h), sem pausas',
       );
     }

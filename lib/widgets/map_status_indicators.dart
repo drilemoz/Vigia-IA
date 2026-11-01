@@ -39,9 +39,10 @@ class MapSystemHud extends StatelessWidget {
 
 class MapFocusSpeedPill extends StatelessWidget {
   const MapFocusSpeedPill({super.key, required this.reading,
-    required this.heading, required this.onTap});
+    required this.heading, this.headingSourceLabel = 'Direção', required this.onTap});
   final MapSpeedReading? reading;
   final double? heading;
+  final String headingSourceLabel;
   final VoidCallback onTap;
 
   @override
@@ -56,8 +57,8 @@ class MapFocusSpeedPill extends StatelessWidget {
             Text('${reading?.kmh.toStringAsFixed(1) ?? '--'} km/h',
               style: const TextStyle(color: Colors.white,
                 fontSize: 20, fontWeight: FontWeight.w900)),
-            Text('${reading?.source ?? 'Sem leitura'} · '
-                '${heading == null ? 'rumo --' : '${heading!.round()}°'}',
+            Text('${reading?.source ?? 'Sem velocidade'} · '
+                '${heading == null ? 'sem direção atual' : '$headingSourceLabel ${heading!.round()}°'}',
               style: const TextStyle(color: Color(0xFFAAD1DE), fontSize: 10)),
           ]),
       ),

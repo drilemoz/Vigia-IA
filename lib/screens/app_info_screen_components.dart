@@ -77,8 +77,19 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.323',
+          version: '1.0.324',
           current: true,
+          changes: [
+            'Busca de municípios pelo nome e limites administrativos recuperada no Planejamento.',
+            'Diálogo de ritmo com controles de pausas em duas linhas e altura adaptativa.',
+            'Mapa contínuo sob o cabeçalho; prévia e indicadores de GPS ajustados.',
+            'Tempos Bike apresentados com arredondamento consistente.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.323',
+          current: false,
           changes: [
             'Ajuste de velocidade e horas por dia disponível durante a navegação Bike.',
             'ETA e plano por dias recalculados sem encerrar o trajeto.',
@@ -2756,8 +2767,19 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.323',
+          version: '1.0.324',
           current: true,
+          changes: [
+            'Busca de municípios pelo nome e limites administrativos recuperada no Planejamento.',
+            'Diálogo de ritmo com controles de pausas em duas linhas e altura adaptativa.',
+            'Mapa contínuo sob o cabeçalho; prévia e indicadores de GPS ajustados.',
+            'Tempos Bike apresentados com arredondamento consistente.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.323',
+          current: false,
           changes: [
             'Ajuste de velocidade e horas por dia disponível durante a navegação Bike.',
             'ETA e plano por dias recalculados sem encerrar o trajeto.',

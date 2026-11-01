@@ -13,7 +13,7 @@ checks={
  'edição voluntária do ritmo': 'onEditPace: () => unawaited(_editPreviewBikePace())' in screen and 'onPressed: onEditPace' in preview,
  'preferência guardada na prévia': 'bikePreferences: _effectiveBikeTravelPreferences' in screen and 'bikePreferences: bikePreferences' in preview,
  'sem ritmo fixo de 15 km/h na prévia': 'final speed = plan?.estimate.preferences.averageSpeedKmh ?? 15.0' not in screen,
- 'comparação declarando limites': 'Relevo, qualidade e tipo de via: sem dados comparáveis' in preview,
+ 'comparação declarando limites': 'Comparação limitada a distância e tempo. Relevo, pavimento e segurança sem dados verificados.' in preview,
  'tempo de bicicleta configurado': 'bikePreferences.averageSpeedKmh' in metrics,
  'tempo ausente não inventado': 'tempo indisponível' in metrics,
  'proximidade projetada no segmento': 'final squared = dx * dx + dy * dy;' in planner,
