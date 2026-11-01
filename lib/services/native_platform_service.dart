@@ -202,6 +202,25 @@ class NativePlatformService {
     }
   }
 
+  /// A tela opcional de APIs deve ser retomada depois das permissões.
+  Future<bool> apiSetupPending() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      return await _channel.invokeMethod<bool>('apiSetupPending') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> markPermissionsReviewed() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      return await _channel.invokeMethod<bool>('markPermissionsReviewed') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<bool> markOnboardingCompleted() async {
     if (!Platform.isAndroid) return true;
     try {

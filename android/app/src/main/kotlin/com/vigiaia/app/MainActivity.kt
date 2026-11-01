@@ -615,6 +615,8 @@ class MainActivity : FlutterActivity() {
                 }
             }
             "onboardingCompleted" -> result.success(onboardingCompleted())
+            "apiSetupPending" -> result.success(apiSetupPending())
+            "markPermissionsReviewed" -> result.success(markPermissionsReviewed())
             "markOnboardingCompleted" -> result.success(markOnboardingCompleted())
             "publishCameraMedia" -> {
                 val path = call.argument<String>("path").orEmpty()
@@ -932,13 +934,30 @@ class MainActivity : FlutterActivity() {
 
     private fun onboardingMarkerFile(): File = File(noBackupFilesDir, "access_guide_completed_v2")
 
+    private fun apiSetupMarkerFile(): File = File(noBackupFilesDir, "api_setup_pending_v1")
+
     private fun onboardingCompleted(): Boolean = onboardingMarkerFile().exists()
+
+    // Marcador sem credenciais. Mantém a etapa de APIs ao reabrir o app.
+    private fun apiSetupPending(): Boolean =
+        !onboardingCompleted() && apiSetupMarkerFile().exists()
+
+    private fun markPermissionsReviewed(): Boolean = try {
+        val marker = apiSetupMarkerFile()
+        marker.parentFile?.mkdirs()
+        marker.writeText("pending")
+        marker.exists()
+    } catch (_: Throwable) {
+        false
+    }
 
     private fun markOnboardingCompleted(): Boolean = try {
         val marker = onboardingMarkerFile()
         marker.parentFile?.mkdirs()
         marker.writeText("completed")
-        marker.exists()
+        val complete = marker.exists()
+        if (complete) apiSetupMarkerFile().delete()
+        complete
     } catch (_: Throwable) {
         false
     }

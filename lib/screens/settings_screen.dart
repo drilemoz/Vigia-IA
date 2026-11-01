@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/app_metadata.dart';
 import '../services/export_preferences_service.dart';
 import 'access_guide_screen.dart';
+import 'api_services_setup_screen.dart';
 import 'advanced_settings_screen.dart';
 import 'audio_settings_screen.dart';
 import 'alerts_clips_screen.dart';
@@ -75,6 +76,12 @@ class SettingsScreen extends StatelessWidget {
         title: 'Preferências',
         subtitle: 'Áudio, aparência e opções gerais do aplicativo.',
         children: [
+          _SettingsTile(
+            icon: Icons.key_rounded,
+            title: 'Serviços e APIs',
+            subtitle: 'Gerencie Gemini, Google Maps e Stadia Maps em um só lugar.',
+            onTap: () => _push(context, const ApiServicesSetupScreen()),
+          ),
           _SettingsTile(
             icon: Icons.library_music_outlined,
             title: 'Áudios e voz',

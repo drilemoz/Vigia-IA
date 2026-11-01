@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.325',
+          version: '1.0.326',
           current: true,
+          changes: [
+            'Após as permissões, assistente opcional para Gemini, Google Maps e Stadia Maps.',
+            'Links para obter cada chave; telas atuais de gerenciar, testar e remover preservadas.',
+            'Retomada após interrupções sem reapresentar o assistente nas atualizações.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.325',
+          current: false,
           changes: [
             'Gemini opcional em Configurações com chave protegida, salvar, copiar, colar, remover e testar.',
             'Busca por linguagem natural em Mapas, com resultados confirmados pelo índice local ou OpenStreetMap.',
@@ -2777,8 +2787,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.325',
+          version: '1.0.326',
           current: true,
+          changes: [
+            'Após as permissões, assistente opcional para Gemini, Google Maps e Stadia Maps.',
+            'Links para obter cada chave; telas atuais de gerenciar, testar e remover preservadas.',
+            'Retomada após interrupções sem reapresentar o assistente nas atualizações.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.325',
+          current: false,
           changes: [
             'Gemini opcional em Configurações com chave protegida, salvar, copiar, colar, remover e testar.',
             'Busca por linguagem natural em Mapas, com resultados confirmados pelo índice local ou OpenStreetMap.',

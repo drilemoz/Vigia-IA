@@ -26,6 +26,7 @@ class OfflineMapPlanningContext {
 Future<void> showOfflineMapManager(
   BuildContext context, {
   OfflineMapPlanningContext planning = const OfflineMapPlanningContext(),
+  bool openStadiaKeyInitially = false,
 }) async {
   final service = OfflineMapService.instance;
   await service.initialize();
@@ -41,16 +42,23 @@ Future<void> showOfflineMapManager(
         heightFactor: hasPackages || service.busy || height < 740
             ? 0.92
             : 0.73,
-        child: _OfflineMapManagerSheet(planning: planning),
+        child: _OfflineMapManagerSheet(
+          planning: planning,
+          openStadiaKeyInitially: openStadiaKeyInitially,
+        ),
       );
     },
   );
 }
 
 class _OfflineMapManagerSheet extends StatefulWidget {
-  const _OfflineMapManagerSheet({required this.planning});
+  const _OfflineMapManagerSheet({
+    required this.planning,
+    this.openStadiaKeyInitially = false,
+  });
 
   final OfflineMapPlanningContext planning;
+  final bool openStadiaKeyInitially;
 
   @override
   State<_OfflineMapManagerSheet> createState() =>
@@ -72,6 +80,11 @@ class _OfflineMapManagerSheetState extends State<_OfflineMapManagerSheet> {
     super.initState();
     _service.addListener(_refresh);
     unawaited(_loadStorage());
+    if (widget.openStadiaKeyInitially) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_configureStadiaKey());
+      });
+    }
   }
 
   @override

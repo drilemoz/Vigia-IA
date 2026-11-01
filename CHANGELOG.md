@@ -1,3 +1,12 @@
+## 1.0.326+326 (2026-11-01)
+
+- Nova etapa **Serviços e APIs** após a tela de permissões, antes da seleção do modo: Gemini, Google Maps e Stadia Maps opcionais.
+- Links oficiais para obter cada chave e atalhos para os controles atuais de salvar, testar, mostrar, copiar, colar e remover.
+- Marcador local da etapa pendente em `noBackupFilesDir`, sem informações sensíveis; retoma após interrupção, preserva credenciais e não volta após concluir.
+- Novo acesso centralizado em Configurações, sem remover os menus individuais já existentes.
+- Uso offline e provedor OpenStreetMap mantidos sem chave; nenhuma solicitação automática de API.
+- Verificação preventiva local executada; Flutter analyze/test, APK e teste no aparelho exigem GitHub Actions.
+
 ## 1.0.325+325 (2026-11-01)
 
 - Gemini opcional para assistência a busca geográfica, sem substituir Nominatim/OpenStreetMap, GPS, rota Bike ou mapas offline.

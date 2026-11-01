@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/native_platform_service.dart';
-import 'launch_mode_screen.dart';
+import 'api_services_setup_screen.dart';
 
 class AccessGuideScreen extends StatefulWidget {
   const AccessGuideScreen({
@@ -81,19 +81,18 @@ class _AccessGuideScreenState extends State<AccessGuideScreen> {
       if (mounted) Navigator.of(context).pop();
       return;
     }
-    final marked = await _native.markOnboardingCompleted();
+    final marked = await _native.markPermissionsReviewed();
     if (!mounted) return;
     if (!marked) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível concluir o acesso inicial. Tente novamente.'),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Não foi possível salvar a etapa de permissões. Tente novamente.'),
+      ));
       return;
     }
     await Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => LaunchModeScreen(
+        builder: (_) => ApiServicesSetupScreen(
+          initialSetup: true,
           startMonitorOnLoad: widget.startMonitorOnLoad,
         ),
       ),
@@ -305,7 +304,7 @@ class _AccessGuideScreenState extends State<AccessGuideScreen> {
                   FilledButton.icon(
                     onPressed: _continue,
                     icon: const Icon(Icons.arrow_forward_rounded),
-                    label: Text(widget.manualReview ? 'Voltar' : 'Continuar para o app'),
+                    label: Text(widget.manualReview ? 'Voltar' : 'Continuar para serviços e APIs'),
                   ),
                   const SizedBox(height: 8),
                   TextButton.icon(

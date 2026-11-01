@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/gemini_map_service.dart';
+import '../services/native_platform_service.dart';
 
 /// Mesma convenção do Uai Cortes: chave local, mascarar, salvar e testar.
 class GeminiMapSettingsScreen extends StatefulWidget {
@@ -183,6 +184,20 @@ class _GeminiMapSettingsScreenState extends State<GeminiMapSettingsScreen> {
           ),
           if (_busy) const Padding(padding: EdgeInsets.all(12), child: LinearProgressIndicator()),
           if (_result != null) Card(child: Padding(padding: const EdgeInsets.all(14), child: Text(_result!))),
+          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Text('Como conseguir sua chave', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 6),
+          const Text('1. Abra o Google AI Studio.\n'
+              '2. Entre na sua conta e escolha ou crie um projeto.\n'
+              '3. Gere uma chave de API Gemini e copie-a.\n'
+              '4. Cole a chave acima, salve e use Testar conexão.'),
+          OutlinedButton.icon(
+            onPressed: () => NativePlatformService.instance
+                .openExternalUrl('https://aistudio.google.com/apikey'),
+            icon: const Icon(Icons.open_in_new_rounded),
+            label: const Text('Obter chave no Google AI Studio'),
+          ),
           const SizedBox(height: 12),
           const Text('Atenção: chamadas online podem consumir cota ou gerar cobrança. Somente as perguntas enviadas voluntariamente são transmitidas ao Gemini. Nunca inclua segredos ou informações sensíveis nas consultas.'),
         ],

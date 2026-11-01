@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.326+326
+
+## Assistente de primeira instalação: permissões → APIs → modo
+
+`AccessGuideScreen` mantém as permissões e grava `markPermissionsReviewed` ao avançar; a nova `ApiServicesSetupScreen` mostra três cartões opcionais e reaproveita `GeminiMapSettingsScreen`, `GoogleMapsKeyScreen` e o gerenciador Stadia já existente (`showOfflineMapManager(openStadiaKeyInitially: true)`), sem criar outro repositório de credenciais. A tela oferece links dos respectivos fornecedores. Avançar ou configurar depois chama `markOnboardingCompleted`, antes de `LaunchModeScreen`. `MainActivity` persiste apenas `api_setup_pending_v1` no diretório `noBackupFilesDir`, limpa esse marcador quando o onboarding fica concluído, e `_StartupGate` retoma a etapa se o processo for interrompido. Usuários com onboarding já concluído não voltam ao assistente em atualizações. Menu Configurações > Serviços e APIs abre a mesma central com `initialSetup: false`. Todas as APIs permanecem opcionais, e nenhuma chave passa pelos logs de navegação.
+
 # Arquitetura — Vigia IA 1.0.325+325
 
 ## Gemini Maps opcional

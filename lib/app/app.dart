@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../core/vigia_design.dart';
 import '../screens/access_guide_screen.dart';
+import '../screens/api_services_setup_screen.dart';
 import '../screens/native_transmitter_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/map_workspace_shell.dart';
@@ -67,6 +68,7 @@ class _StartupGateState extends State<_StartupGate> {
 
   final StartupGuard _startupGuard = const StartupGuard();
   bool? _onboardingCompleted;
+  bool _apiSetupPending = false;
   AppLaunchMode? _launchMode;
   bool _launchModeLoaded = false;
   bool _resumeMonitoring = false;
@@ -89,6 +91,12 @@ class _StartupGateState extends State<_StartupGate> {
           ),
         ) ??
         false;
+    final apiSetupPending = !completed
+        ? (await _startupGuard.run<bool>(
+                NativePlatformService.instance.apiSetupPending,
+                timeout: _requiredStartupTimeout,
+              ) ?? false)
+        : false;
     final launchMode = completed
         ? await _startupGuard.run<AppLaunchMode?>(
             AppLaunchModeService.instance.initialize,
@@ -112,6 +120,7 @@ class _StartupGateState extends State<_StartupGate> {
     setState(() {
       _resumeMonitoring = resumeMonitoring;
       _onboardingCompleted = completed;
+      _apiSetupPending = apiSetupPending;
       _launchMode = launchMode;
       _launchModeLoaded = true;
     });
@@ -213,6 +222,11 @@ class _StartupGateState extends State<_StartupGate> {
             launchMode == AppLaunchMode.transmission || _resumeMonitoring,
         transmitterExclusive: launchMode == AppLaunchMode.transmission,
         child: destination,
+      );
+    }
+    if (_apiSetupPending) {
+      return const UpdateNewsHost(
+        child: ApiServicesSetupScreen(initialSetup: true),
       );
     }
     return const UpdateNewsHost(child: AccessGuideScreen());

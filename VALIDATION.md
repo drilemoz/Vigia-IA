@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.326+326
+
+- Fonte: `RELEASE-1.0.326.md` e `VALIDATION-1.0.326.md`.
+- Testes do novo fluxo: `tool/test_api_services_setup_326.py`.
+- SDK Flutter e build Android não disponíveis localmente; verificar compilação, fluxo em instalação limpa e retomada pelo GitHub Actions/aparelho.
+
 # Validação Vigia IA 1.0.325+325
 
 - Gemini Maps opcional; regressão Python de 359 testes e verificação preventiva aprovadas.

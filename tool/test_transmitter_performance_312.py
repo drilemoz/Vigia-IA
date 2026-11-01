@@ -40,8 +40,8 @@ class TransmitterPerformance312Tests(unittest.TestCase):
                              content('android/app/src/main/kotlin/com/minhacamera/' + name))
 
     def test_version(self):
-        self.assertIn('version: 1.0.325+325', content('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.325.md').is_file())
+        self.assertIn('version: 1.0.326+326', content('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.326.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.325+325`
+**Versão atual:** `1.0.326+326`
+
+## Atualização 1.0.326+326 · Serviços e APIs na primeira abertura
+
+Após as permissões, uma nova etapa opcional reúne Gemini, Google Maps Platform e Stadia Maps, com links para obtenção das chaves e acesso às interfaces de gerenciamento e teste existentes. O assistente somente conclui o onboarding depois desta etapa, pode ser retomado após uma interrupção, e não reaparece em atualizações. Em Configurações > Serviços e APIs as três opções continuam disponíveis. A navegação offline funciona sem credenciais. Veja `RELEASE-1.0.326.md` e `VALIDATION-1.0.326.md`.
 
 ## Atualização 1.0.325+325 · Gemini opcional no Vigia Maps
 
