@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.327',
+          version: '1.0.328',
           current: true,
+          changes: [
+            'Configurações agora mostra apenas Serviços e APIs, sem atalhos duplicados para Gemini ou Google Maps.',
+            'Painel do mapa e assistente Gemini encaminham à mesma central para gerenciar credenciais.',
+            'As seis integrações, chaves protegidas e navegação offline foram preservadas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.327',
+          current: false,
           changes: [
             'Central unificada com seis serviços e guia de obtenção de todas as APIs.',
             'Chaves de Geoapify e OpenRouteService com gerenciamento protegido e testes de conexão.',
@@ -2797,8 +2807,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.327',
+          version: '1.0.328',
           current: true,
+          changes: [
+            'Configurações agora mostra apenas Serviços e APIs, sem atalhos duplicados para Gemini ou Google Maps.',
+            'Painel do mapa e assistente Gemini encaminham à mesma central para gerenciar credenciais.',
+            'As seis integrações, chaves protegidas e navegação offline foram preservadas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.327',
+          current: false,
           changes: [
             'Central unificada com seis serviços e guia de obtenção de todas as APIs.',
             'Chaves de Geoapify e OpenRouteService com gerenciamento protegido e testes de conexão.',

@@ -41,7 +41,11 @@ check("status.state == 'tocando' && _pendingStation != null" in radio,
 check('enum _RadioSection { discover, recent, favorites, manual }' in radio and
       'String _radioFilterLabel(' in radio and '_maxBitrate' in radio,
       'abas/filtros da rádio ausentes')
-check('height: items.isEmpty && !service.loading ? 470 : 690' in mapui and
+# 1.0.327: a busca passou a folha inferior responsiva; o painel de POIs
+# segue compacto quando vazio, sem voltar ao dialogo de 690 px.
+check(('showModalBottomSheet<void>' in mapui and
+       'usableHeight * 0.78' in mapui and
+       'height: math.min(480.0' in mapui) and
       'height: filtered.isEmpty && !service.loading ? 420 : 650' in mapui,
       'diálogos vazios não foram compactados')
 check('class RadioSleepTimer' in text('lib/services/radio_sleep_timer.dart') and

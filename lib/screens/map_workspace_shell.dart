@@ -135,20 +135,28 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
         workspaceModeLabel: _mode.label,
       ),
       Positioned(
-        top: MediaQuery.paddingOf(context).top,
+        top: MediaQuery.paddingOf(context).top + 4,
         left: 12, right: 12,
-        height: 56,
-        child: Row(children: [
-          const Expanded(child: Text('Mapas',
-            style: TextStyle(color: Colors.white, fontSize: 23,
-              fontWeight: FontWeight.w700,
-              shadows: [Shadow(color: Colors.black54, blurRadius: 8)]))),
-          IconButton(
-            tooltip: 'Configurações gerais',
-            onPressed: () => unawaited(_openTool(const SettingsScreen())),
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+        height: 50,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xCC081D2C),
+            borderRadius: BorderRadius.circular(16),
           ),
-        ]),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 14, right: 4),
+            child: Row(children: [
+              const Expanded(child: Text('Mapas',
+                style: TextStyle(color: Colors.white, fontSize: 21,
+                  fontWeight: FontWeight.w700))),
+              IconButton(
+                tooltip: 'Configurações gerais',
+                onPressed: () => unawaited(_openTool(const SettingsScreen())),
+                icon: const Icon(Icons.settings_outlined, color: Colors.white),
+              ),
+            ]),
+          ),
+        ),
       ),
     ]),
   );

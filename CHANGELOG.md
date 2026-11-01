@@ -1,3 +1,11 @@
+## 1.0.328+328 (2026-11-01)
+
+- Removidos atalhos individuais de Gemini e Google Maps em Configurações; todos os seis serviços agora são gerenciados em Serviços e APIs.
+- Painel do mapa e assistente Gemini apontam para a mesma central; mensagem de ausência de chave Google Maps também conduz à central.
+- Preservados cadastro, segurança, testes manuais, navegação offline e demais recursos do mapa.
+- Incorporadas melhorias da variante paralela 1.0.327: busca unificada com Gemini, rádio e cabeçalho dos mapas.
+- Versionamento e verificações sincronizados.
+
 ## 1.0.327+327 (2026-11-01)
 
 - Central de APIs com seis serviços e ajuda individual em pop-up, mais guia geral.

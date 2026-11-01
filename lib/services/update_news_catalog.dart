@@ -8,16 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.327', build: 327);
+      AppBuildVersion(version: '1.0.328', build: 328);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.327', build: 327),
+      version: AppBuildVersion(version: '1.0.328', build: 328),
       changes: <String>[
-        'Central de Serviços e APIs ampliada para seis provedores opcionais, incluindo Geoapify, OpenRouteService e Open-Meteo.',
-        'Ajuda individual e guia geral explicam como conseguir as chaves, limites e alternativas gratuitas.',
-        'Geoapify e OpenRouteService: salvar, colar, revelar, copiar, remover e testar conexões com chaves protegidas.',
-        'Google Maps ganhou controles de colar, copiar e verificar configuração, distinguindo o teste real pelo SDK.',
+        'Configurações agora concentra as seis APIs em uma única entrada, sem duplicar Gemini e Google Maps.',
+        'Atalhos de APIs no painel do mapa e na busca Gemini levam à mesma central.',
+        'Chaves, ajuda, testes e serviços existentes foram preservados.',
       ],
     ),
   ]);

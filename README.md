@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.327+327`
+**Versão atual:** `1.0.328+328`
+
+## Atualização 1.0.328+328 · Configurações sem APIs duplicadas
+
+Em Configurações > Preferências, a entrada **Serviços e APIs** é o único ponto de acesso às seis integrações. Os atalhos individuais de Gemini e Google Maps foram removidos dessa tela; no painel do mapa e no aviso de busca Gemini, as credenciais também são gerenciadas pela central. Chaves salvas, telas internas, ajuda e mapas offline foram preservados; inclui a busca unificada, o rádio e o cabeçalho do mapa da outra variante 1.0.327. Ver `RELEASE-1.0.328.md` e `VALIDATION-1.0.328.md`.
 
 ## Atualização 1.0.327+327 · Central de APIs e ajuda
 

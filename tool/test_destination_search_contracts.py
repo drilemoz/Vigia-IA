@@ -34,7 +34,9 @@ class DestinationSearchContracts(unittest.TestCase):
         ui = source('lib/screens/map_monitoring_screen.dart')
         self.assertIn('em linha reta', ui)
         self.assertIn('resultSection(item, query)', ui)
-        self.assertIn('Visualizar rota até o destino', ui)
+        self.assertIn("label: const Text('Ver')", ui)
+        self.assertIn('use Navegar no cartão', ui)
+        self.assertIn('_focusSearchResult(item)', ui)
         self.assertIn("return 'Cache local';", ui)
 
     def test_pure_dart_regressions_exist(self):

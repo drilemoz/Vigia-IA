@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.327+327
+# Arquitetura — Vigia IA 1.0.328+328
 
 ## Assistente de primeira instalação: permissões → APIs → modo
 
@@ -2506,3 +2506,7 @@ Marcador selecionavel de localizacao.
 ## Evolução 1.0.327 — gerenciamento de APIs
 
 A central `ApiServicesSetupScreen` mantém o onboarding pré-existente e lista seis serviços. `api_service_help.dart` centraliza pop-ups offline de obtenção; `PartnerApiKeyScreen` gerencia Geoapify e OpenRouteService; `PartnerApiKeyService` usa o canal `vigiaia/native` com uma lista explícita de provedores permitidos. O Android criptografa credenciais pelo mesmo AES-GCM/Android Keystore existente, sem expor as credenciais em relatórios; `vigiaia_partner_api_private.xml` fica excluído do backup. Os testes HTTP são opt-in e não constituem integração nas rotas/buscas. Serviços atuais de rotas, buscas e clima não mudaram.
+
+## Evolução 1.0.328 — centralização sem atalhos duplicados
+
+A única entrada permanente em Configurações > Preferências para provedores externos é `ApiServicesSetupScreen`. No painel de configuração do mapa e na busca assistida Gemini, o acesso para gerenciar credenciais é encaminhado a essa mesma central. As telas específicas de cada provedor permanecem como detalhes internos da central, sem migração de credenciais e sem alteração nas fontes de dados offline.

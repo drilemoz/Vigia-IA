@@ -6,7 +6,7 @@ import '../models/offline_map_package.dart';
 import '../models/offline_poi_package.dart';
 import '../services/gemini_map_service.dart';
 import '../services/map_destination_search_service.dart';
-import 'gemini_map_settings_screen.dart';
+import 'api_services_setup_screen.dart';
 
 /// Respostas da IA não criam pontos automaticamente: apenas consultas
 /// verificadas via Nominatim/dados locais entram na lista selecionável.
@@ -126,12 +126,12 @@ class _GeminiMapAssistantScreenState extends State<GeminiMapAssistantScreen> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.key_rounded),
-            title: const Text('Configurar chave Gemini'),
-            subtitle: const Text('Necessária apenas para a busca assistida.'),
+            title: const Text('Serviços e APIs'),
+            subtitle: const Text('Abra Gemini na central para configurar a busca assistida.'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () async {
               await Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const GeminiMapSettingsScreen()));
+                MaterialPageRoute(builder: (_) => const ApiServicesSetupScreen()));
               if (mounted) await _loadStatus();
             },
           ),

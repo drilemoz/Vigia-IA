@@ -12,8 +12,6 @@ import 'appearance_settings_screen.dart';
 import 'bike_mode_screen.dart';
 import 'native_transmitter_screen.dart';
 import 'error_center_screen.dart';
-import 'google_maps_key_screen.dart';
-import 'gemini_map_settings_screen.dart';
 import 'launch_mode_screen.dart';
 import 'multi_camera_screen.dart';
 import 'presets_screen.dart';
@@ -79,7 +77,7 @@ class SettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.key_rounded,
             title: 'Serviços e APIs',
-            subtitle: 'Gerencie Gemini, Google Maps e Stadia Maps em um só lugar.',
+            subtitle: 'Gerencie as seis integrações, suas chaves e orientações em um só lugar.',
             onTap: () => _push(context, const ApiServicesSetupScreen()),
           ),
           _SettingsTile(
@@ -93,18 +91,6 @@ class SettingsScreen extends StatelessWidget {
             title: 'Tema e cores',
             subtitle: 'Sistema, Claro ou Escuro; Turquesa, Azul, Roxo ou Laranja.',
             onTap: () => _push(context, const AppearanceSettingsScreen()),
-          ),
-          _SettingsTile(
-            icon: Icons.auto_awesome_outlined,
-            title: 'Gemini para Mapas',
-            subtitle: 'Inserir, salvar, mostrar e testar a chave Gemini para buscar locais com IA.',
-            onTap: () => _push(context, const GeminiMapSettingsScreen()),
-          ),
-          _SettingsTile(
-            icon: Icons.vpn_key_outlined,
-            title: 'Chave do Google Maps',
-            subtitle: 'Use a sua própria chave para ativar o mapa Google.',
-            onTap: () => _push(context, const GoogleMapsKeyScreen()),
           ),
         ],
       ),

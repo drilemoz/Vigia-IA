@@ -27,9 +27,9 @@ class Build269NavigationTimers321(unittest.TestCase):
         self.assertIn('setUiSection(_mainDestinations[index].label)', nav)
 
     def test_current_version_synced(self):
-        self.assertIn('version: 1.0.327+327', (ROOT / 'pubspec.yaml').read_text('utf-8'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.327.md').is_file())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.327.md').is_file())
+        self.assertIn('version: 1.0.328+328', (ROOT / 'pubspec.yaml').read_text('utf-8'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.328.md').is_file())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.328.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

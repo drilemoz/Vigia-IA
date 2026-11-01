@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.328+328
+
+- Verificador integral aprovado; 377 testes Python executados (1 ignorado). Centralização dos atalhos de credenciais em Configurações e Mapas. Veja `VALIDATION-1.0.328.md`.
+- A instalação, Flutter analyze/test e APK precisam de verificação real no CI/Android.
+
 # Validação Vigia IA 1.0.327+327
 
 Veja `VALIDATION-1.0.327.md`. Testes preventivos aprovados (368 casos, 1 ignorado); Flutter analyze/test/build e testes em aparelho pendentes.

@@ -17,9 +17,9 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.327+327\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.328+328\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            source = source.replace('Central de Serviços e APIs ampliada para seis provedores opcionais, incluindo Geoapify, OpenRouteService e Open-Meteo.',
+            source = source.replace('Configurações agora concentra as seis APIs em uma única entrada, sem duplicar Gemini e Google Maps.',
                                     'Corrigido erro nas verificações de atualização')
             (root / 'lib/services/update_news_catalog.dart').write_text(source, 'utf8')
             policy.validate(root)
@@ -28,13 +28,13 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.327+327\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.328+328\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 327', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 328', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
-            path.write_text(source.replace('Central de Serviços e APIs ampliada para seis provedores opcionais, incluindo Geoapify, OpenRouteService e Open-Meteo.',
+            path.write_text(source.replace('Configurações agora concentra as seis APIs em uma única entrada, sem duplicar Gemini e Google Maps.',
                                            'TODO'), 'utf8')
             with self.assertRaisesRegex(ValueError, 'mensagens'):
                 policy.validate(root)

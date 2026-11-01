@@ -69,9 +69,8 @@ import '../services/map_hud_presentation.dart';
 import '../services/map_view_policy.dart';
 import '../services/google_maps_key_service.dart';
 import '../services/map_view_settings_service.dart';
-import 'google_maps_key_screen.dart';
-import 'gemini_map_settings_screen.dart';
-import 'gemini_map_assistant_screen.dart';
+import 'api_services_setup_screen.dart';
+import '../services/gemini_map_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/offline_map_service.dart';
 import '../services/route_explorer_service.dart';
@@ -558,6 +557,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     _appActive = active && widget.workspaceVisible;
     if (_appActive) {
       unawaited(_resumeVisibleInternalCameras());
+      unawaited(_refreshRadioStatus());
       unawaited(_connectivity.checkNow(force: true));
       return;
     }
@@ -1539,14 +1539,6 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     }
   }
 
-  Future<void> _promptGoogleMapsKeyScreen() async {
-    if (!mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const GoogleMapsKeyScreen()),
-    );
-    await GoogleMapsKeyService.instance.refresh();
-    if (mounted) setState(() {});
-  }
 
   Future<void> _promptGoogleMapsKey() async {
     if (!mounted) return;
@@ -1555,7 +1547,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       builder: (dialogContext) => AlertDialog(
         title: const Text('Chave do Google Maps necessária'),
         content: const Text(
-          'Para usar o Google Maps, cadastre sua própria chave em Configurações. '
+          'Para usar o Google Maps, cadastre sua chave em Serviços e APIs. '
           'Enquanto isso, o mapa atual continua sendo usado.',
         ),
         actions: [
@@ -1565,14 +1557,14 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Cadastrar chave'),
+            child: const Text('Serviços e APIs'),
           ),
         ],
       ),
     );
     if (open != true || !mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const GoogleMapsKeyScreen()),
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const ApiServicesSetupScreen()),
     );
     await GoogleMapsKeyService.instance.refresh();
     if (mounted) setState(() {});
@@ -4718,28 +4710,20 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   ListTile(
                     dense: true,
                     visualDensity: VisualDensity.compact,
-                    leading: const Icon(Icons.auto_awesome_outlined),
-                    title: const Text('Gemini para Mapas'),
-                    subtitle: const Text('Salvar e testar sua chave para busca assistida de locais.'),
+                    leading: const Icon(Icons.key_rounded),
+                    title: const Text('Serviços e APIs'),
+                    subtitle: const Text('Configure Gemini, Google Maps e demais serviços na central.'),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
                       unawaited(Navigator.of(context).push<void>(
-                        MaterialPageRoute(builder: (_) => const GeminiMapSettingsScreen())));
-                    },
-                  ),
-                  ListTile(
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    leading: const Icon(Icons.vpn_key_outlined),
-                    title: const Text('Chave do Google Maps'),
-                    subtitle: Text(GoogleMapsKeyService.instance.hasKey
-                        ? 'Configurada: ${GoogleMapsKeyService.instance.status.masked}'
-                        : 'Não configurada. Toque para digitar a sua chave.'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      unawaited(_promptGoogleMapsKeyScreen());
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ApiServicesSetupScreen(),
+                        ),
+                      ).then((_) async {
+                        await GoogleMapsKeyService.instance.refresh();
+                        if (mounted) setState(() {});
+                      }));
                     },
                   ),
                     ],
@@ -5834,6 +5818,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         },
       ),
     );
+    if (mounted) unawaited(_refreshRadioStatus());
   }
 
   Future<void> _showBikePanel() async {
@@ -5869,37 +5854,6 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
   }
 
-  Future<void> _openGeminiMapAssistant() async {
-    AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'buscar_com_gemini');
-    final current = _routeState.current;
-    if (current == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Aguardando GPS para localizar os resultados da busca.')));
-      return;
-    }
-    await Future.wait<void>([
-      _destinationSearch.initialize(),
-      _offlineMaps.initialize(),
-      _routeExplorer.initialize(),
-    ]);
-    if (!mounted) return;
-    final offlineOnly = _connectivity.isOffline ||
-        _offlineMaps.mode == OfflineMapMode.offline;
-    final selected = await Navigator.of(context).push<MapDestinationSearchResult>(
-      MaterialPageRoute(builder: (_) => GeminiMapAssistantScreen(
-        current: current,
-        onlineAllowed: !offlineOnly,
-        offlineMaps: _offlineMaps.packages,
-        offlinePoiPackages: _routeExplorer.offlinePackages,
-      )),
-    );
-    if (!mounted || selected == null) return;
-    await _destinationSearch.rememberRecentPlace(selected);
-    if (!mounted) return;
-    _focusSearchResult(selected);
-    unawaited(_showMapLocationDetails(selected));
-  }
-
   Future<void> _showDestinationSearch() async {
     await Future.wait<void>([
       _destinationSearch.initialize(),
@@ -5928,13 +5882,95 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     final controller = TextEditingController();
     var query = '';
     var submittedSearch = false;
+    var searchSerial = 0;
+    var busyWithGemini = false;
+    var dialogActive = true;
+    String? searchNote;
+
+    Future<void> runUnifiedSearch(String text, StateSetter refresh) async {
+      final typed = text.trim();
+      final serial = ++searchSerial;
+      refresh(() {
+        query = typed;
+        submittedSearch = typed.isNotEmpty;
+        busyWithGemini = false;
+        searchNote = null;
+      });
+      if (typed.isEmpty) {
+        _destinationSearch.updateLocalQuery(
+          query: '', current: current,
+          offlineMaps: _offlineMaps.packages,
+          offlinePoiPackages: _routeExplorer.offlinePackages,
+          onlyDownloaded: offlineOnly,
+        );
+        return;
+      }
+
+      // IA opcional, acionada apenas pelo botão/enviar. A localização é
+      // resolvida pelo catálogo do mapa, nunca pelas coordenadas da Gemini.
+      var effectiveQuery = typed;
+      var assisted = false;
+      if (!offlineOnly && typed.length >= 3) {
+        try {
+          final status = await GeminiMapService.instance.status();
+          if (!dialogActive || serial != searchSerial) return;
+          if (status.configured) {
+            refresh(() { busyWithGemini = true; searchNote = 'Interpretando pesquisa com Gemini…'; });
+            final suggestion = await GeminiMapService.instance
+                .interpret(typed).timeout(const Duration(seconds: 16));
+            if (!dialogActive || serial != searchSerial) return;
+            effectiveQuery = suggestion.searchQuery;
+            assisted = true;
+          }
+        } catch (_) {
+          if (!dialogActive || serial != searchSerial) return;
+          // Falta de internet, chave, modelo ou cota não bloqueia o mapa.
+          searchNote = 'Gemini indisponível. Pesquisa normal ativada.';
+        }
+      }
+      if (!dialogActive || serial != searchSerial) return;
+      refresh(() { busyWithGemini = false; });
+      Future<void> searchMap(String value) => _destinationSearch.searchSubmitted(
+        query: value,
+        current: current,
+        onlineAllowed: !offlineOnly,
+        offlineMaps: _offlineMaps.packages,
+        offlinePoiPackages: _routeExplorer.offlinePackages,
+      );
+      try {
+        await searchMap(effectiveQuery);
+        if (!dialogActive || serial != searchSerial) return;
+        if (assisted && _destinationSearch.results.isEmpty && effectiveQuery != typed) {
+          await searchMap(typed);
+          if (!dialogActive || serial != searchSerial) return;
+          refresh(() { searchNote = 'Sem resultados confirmados pela IA. Mostrando busca normal.'; });
+        } else if (assisted) {
+          refresh(() { searchNote = 'Gemini ajudou a interpretar; locais confirmados pelo mapa.'; });
+        } else if (searchNote != null) {
+          refresh(() {});
+        }
+      } catch (_) {
+        if (!dialogActive || serial != searchSerial) return;
+        // Uma falha da rede não deve quebrar a tela do mapa.
+        _destinationSearch.updateLocalQuery(
+          query: typed, current: current,
+          offlineMaps: _offlineMaps.packages,
+          offlinePoiPackages: _routeExplorer.offlinePackages,
+          onlyDownloaded: offlineOnly,
+        );
+        refresh(() { searchNote = 'Busca online indisponível. Mostrando resultados locais.'; });
+      }
+    }
     try {
-      await showMapCenteredDialog<void>(
+      await showModalBottomSheet<void>(
         context: context,
-        maxWidth: 620,
-        maxHeightFactor: 0.90,
-        barrierLabel: 'Fechar pesquisa no mapa',
-        builder: (sheetContext) => StatefulBuilder(
+        isScrollControlled: true,
+        useSafeArea: true,
+        showDragHandle: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        builder: (sheetContext) => Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
+          child: StatefulBuilder(
           builder: (sheetContext, setSheetState) => ListenableBuilder(
               listenable: _destinationSearch,
               builder: (context, _) {
@@ -5957,8 +5993,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     ...items.where((item) =>
                         service.resultSection(item, query) == group),
                 ];
+                final usableHeight = MediaQuery.sizeOf(sheetContext).height -
+                    MediaQuery.viewInsetsOf(sheetContext).bottom -
+                    MediaQuery.paddingOf(sheetContext).top - 32;
                 return SizedBox(
-                  height: items.isEmpty && !service.loading ? 470 : 690,
+                  height: math.min(480.0, math.max(220.0, usableHeight * 0.78)).toDouble(),
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -5988,25 +6027,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                           const SizedBox(height: 3),
                           Text(
                             offlineOnly
-                                ? 'Offline · cidades, comunidades e pontos já salvos.'
-                                : 'Pesquise cidades, comunidades, endereços e pontos. A busca online ocorre somente ao enviar.',
+                                ? 'Busca offline em locais e mapas já salvos.'
+                                : 'Digite o local e toque em Buscar. Gemini ajuda quando disponível; caso contrário, usamos o mapa.',
                             style: Theme.of(sheetContext).textTheme.bodySmall,
                           ),
                         ],
                       ),
                     ),
-                    if (!offlineOnly)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: () {
-                            Navigator.of(sheetContext).pop();
-                            unawaited(_openGeminiMapAssistant());
-                          },
-                          icon: const Icon(Icons.auto_awesome_outlined),
-                          label: const Text('Buscar com Gemini (opcional)'),
-                        ),
-                      ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: TextField(
@@ -6019,23 +6046,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                           suffixIcon: IconButton(
                             tooltip: 'Pesquisar',
                             icon: const Icon(Icons.arrow_forward_rounded),
-                            onPressed: service.searchLoading
-                                ? null
-                                : () async {
-                                    final submitted = controller.text.trim();
-                                    setSheetState(() {
-                                      query = submitted;
-                                      submittedSearch = true;
-                                    });
-                                    await service.searchSubmitted(
-                                      query: submitted,
-                                      current: current,
-                                      onlineAllowed: !offlineOnly,
-                                      offlineMaps: _offlineMaps.packages,
-                                      offlinePoiPackages:
-                                          _routeExplorer.offlinePackages,
-                                    );
-                                  },
+                            onPressed: service.searchLoading || busyWithGemini
+                                ? null : () => unawaited(runUnifiedSearch(
+                                      controller.text, setSheetState)),
                           ),
                         ),
                         onChanged: (value) {
@@ -6043,6 +6056,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                           setSheetState(() {
                             query = typed;
                             submittedSearch = false;
+                            busyWithGemini = false;
+                            searchNote = null;
+                            searchSerial++;
                           });
                           service.updateLocalQuery(
                             query: typed,
@@ -6052,31 +6068,23 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                             onlyDownloaded: offlineOnly,
                           );
                         },
-                        onSubmitted: service.searchLoading
-                            ? null
-                            : (value) async {
-                                final submitted = value.trim();
-                                setSheetState(() {
-                                  query = submitted;
-                                  submittedSearch = true;
-                                });
-                                await service.searchSubmitted(
-                                  query: submitted,
-                                  current: current,
-                                  onlineAllowed: !offlineOnly,
-                                  offlineMaps: _offlineMaps.packages,
-                                  offlinePoiPackages:
-                                      _routeExplorer.offlinePackages,
-                                );
-                              },
+                        onSubmitted: service.searchLoading || busyWithGemini
+                            ? null : (value) => unawaited(runUnifiedSearch(
+                                  value, setSheetState)),
                       ),
                     ),
-                    if (service.searchLoading || service.suggestionsLoading)
+                    if (service.searchLoading || service.suggestionsLoading || busyWithGemini)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: LinearProgressIndicator(
-                          minHeight: service.searchLoading ? 3 : 2,
+                          minHeight: service.searchLoading || busyWithGemini ? 3 : 2,
                         ),
+                      ),
+                    if (searchNote != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                        child: Text(searchNote!,
+                          style: Theme.of(sheetContext).textTheme.bodySmall),
                       ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 9, 16, 6),
@@ -6138,7 +6146,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                                       ? offlineOnly
                                           ? 'Nenhuma cidade salva nesta região. Baixe mapas e pesquise enquanto estiver online.'
                                           : 'Nenhuma cidade disponível. Use Atualizar acima para tentar outra consulta.'
-                                      : service.searchLoading
+                                      : busyWithGemini || service.searchLoading
                                           ? 'Pesquisando…'
                                           : offlineOnly
                                               ? 'Nada encontrado nos dados offline salvos.'
@@ -6189,13 +6197,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                                           Navigator.of(sheetContext).pop();
                                           _focusSearchResult(item);
                                         },
-                                        trailing: IconButton.filledTonal(
-                                          tooltip: 'Visualizar rota até o destino',
-                                          icon: const Icon(Icons.route_rounded),
+                                        trailing: TextButton.icon(
+                                          icon: const Icon(Icons.visibility_outlined, size: 18),
+                                          label: const Text('Ver'),
                                           onPressed: () {
                                             unawaited(service.rememberRecentPlace(item));
                                             Navigator.of(sheetContext).pop();
-                                            unawaited(_previewRouteToSearchResult(item));
+                                            _focusSearchResult(item);
                                           },
                                         ),
                                       ),
@@ -6209,7 +6217,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                         child: Text(
-                          'Distâncias em linha reta. A busca online envia o texto e uma região aproximada ao Nominatim (OSM); não limita destinos distantes. Localidades próximas: Overpass.',
+                          'Toque em Ver para abrir o local no mapa; use Navegar no cartão. Ao enviar a pesquisa, o texto pode ser consultado na Gemini e no OSM. Distâncias em linha reta.',
                           textAlign: TextAlign.center,
                           style: Theme.of(sheetContext).textTheme.labelSmall,
                         ),
@@ -6218,9 +6226,12 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 ));
               },
             ),
+          ),
         ),
       );
     } finally {
+      dialogActive = false;
+      ++searchSerial;
       controller.dispose();
     }
   }
@@ -7259,7 +7270,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 top: 0,
                 left: 0,
                 right: 0,
-                height: cameraButtonTop + 18,
+                height: topInset + MapUxPolicy.controlSize + 20,
                 child: IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -7287,7 +7298,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   ),
                 ),
               ),
-              if (_rideSettings.immersive)
+              if (_rideSettings.immersive && widget.workspaceHeaderHeight <= 0)
                 Positioned(
                   top: safePadding.top + 2,
                   left: 12,
@@ -7486,27 +7497,6 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   ),
                 ),
               ),
-              if (focusLevel == 0 && hud.showRadioShortcut)
-                Positioned(
-                  top: cameraButtonTop + MapUxPolicy.controlSize + 8,
-                  left: MapUxPolicy.controlEdge,
-                  child: _MapControlButton(
-                    tooltip: _radioState == 'tocando'
-                        ? 'Rádio tocando · abrir player'
-                        : _radioState == 'pausado'
-                            ? 'Rádio pausada · abrir player'
-                            : 'Rádio online',
-                    icon: _radioState == 'tocando'
-                        ? Icons.graphic_eq_rounded
-                        : _radioState == 'pausado'
-                            ? Icons.pause_circle_outline_rounded
-                            : Icons.radio_rounded,
-                    active: _radioState == 'tocando' ||
-                        _radioState == 'conectando' ||
-                        _radioState == 'pausado',
-                    onPressed: () => unawaited(_showRadioPanel()),
-                  ),
-                ),
               if (_routeState.availability != LocationTrackingAvailability.ready)
                 Positioned(
                   left: MapUxPolicy.controlEdge,
@@ -7540,6 +7530,25 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       ),
                     if (canRenderNavigation3d && focusLevel == 0)
                       MapControlGap(horizontal: horizontalControls),
+                    // Rádio toca no serviço Android: acesso visível também
+                    // durante navegação e modo foco, independentemente do HUD.
+                    if (hud.showRadioShortcut) ...[
+                      _MapControlButton(
+                        tooltip: _radioState == 'tocando'
+                            ? 'Rádio tocando · abrir player'
+                            : _radioState == 'pausado'
+                                ? 'Rádio pausada · abrir player'
+                                : 'Rádio conectando · abrir player',
+                        icon: _radioState == 'tocando'
+                            ? Icons.graphic_eq_rounded
+                            : _radioState == 'pausado'
+                                ? Icons.pause_circle_outline_rounded
+                                : Icons.radio_rounded,
+                        active: true,
+                        onPressed: () => unawaited(_showRadioPanel()),
+                      ),
+                      MapControlGap(horizontal: horizontalControls),
+                    ],
                     if (focusLevel == 0 && enabledAudioChannels > 0) _MapControlButton(
                       tooltip: enabledAudioChannels == 0
                           ? 'Áudio do mapa silenciado'
