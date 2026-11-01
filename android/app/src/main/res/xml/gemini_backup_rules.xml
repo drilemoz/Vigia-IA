@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <exclude domain="sharedpref" path="vigiaia_gemini_private.xml"/>
+    <exclude domain="sharedpref" path="vigiaia_partner_api_private.xml"/>
+    <exclude domain="sharedpref" path="vigiaia_google_maps.xml"/>
 </full-backup-content>

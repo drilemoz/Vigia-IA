@@ -2,8 +2,12 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="vigiaia_gemini_private.xml"/>
+        <exclude domain="sharedpref" path="vigiaia_partner_api_private.xml"/>
+        <exclude domain="sharedpref" path="vigiaia_google_maps.xml"/>
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="vigiaia_gemini_private.xml"/>
+        <exclude domain="sharedpref" path="vigiaia_partner_api_private.xml"/>
+        <exclude domain="sharedpref" path="vigiaia_google_maps.xml"/>
     </device-transfer>
 </data-extraction-rules>

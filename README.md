@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.326+326`
+**Versão atual:** `1.0.327+327`
+
+## Atualização 1.0.327+327 · Central de APIs e ajuda
+
+Central única com seis provedores opcionais: Gemini, Google Maps, Stadia Maps, Geoapify, OpenRouteService e Open-Meteo. Instruções por provedor e guia geral, com links oficiais e alertas sobre limites. As novas chaves Geoapify e OpenRouteService são protegidas no Android e podem ser salvas, copiadas, removidas e testadas manualmente. O clima Open-Meteo existente não precisa de chave. A integração de Geoapify na busca e OpenRouteService em rotas ocorrerá em versões futuras. Veja `RELEASE-1.0.327.md` e `VALIDATION-1.0.327.md`.
+
+**Versão histórica:** `1.0.326+326`
 
 ## Atualização 1.0.326+326 · Serviços e APIs na primeira abertura
 

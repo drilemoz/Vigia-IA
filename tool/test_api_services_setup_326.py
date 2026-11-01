@@ -39,10 +39,7 @@ class ApiServicesSetup326Tests(unittest.TestCase):
         setup=src('lib/screens/api_services_setup_screen.dart')
         for term in ('GeminiMapSettingsScreen', 'GoogleMapsKeyScreen', 'showOfflineMapManager',
                      'openStadiaKeyInitially: true',
-                     'https://aistudio.google.com/apikey',
-                     'https://console.cloud.google.com/google/maps-apis',
-                     'https://client.stadiamaps.com/dashboard/',
-                     'OpenStreetMap', 'Sem chave', 'Gerenciar chave'):
+                     'OpenStreetMap', 'Sem chave', 'Gerenciar chave', 'Geoapify', 'OpenRouteService', 'Open-Meteo'):
             # Case for status label 'Sem chave'
             self.assertIn(term,setup)
         offline=src('lib/widgets/offline_map_manager_sheet.dart')
@@ -51,11 +48,16 @@ class ApiServicesSetup326Tests(unittest.TestCase):
         self.assertIn('ApiServicesSetupScreen()',src('lib/screens/settings_screen.dart'))
         gemini=src('lib/screens/gemini_map_settings_screen.dart')
         self.assertIn('https://aistudio.google.com/apikey',gemini)
+        help_screen=src('lib/screens/api_service_help.dart')
+        for url in ('https://aistudio.google.com/apikey',
+                    'https://console.cloud.google.com/google/maps-apis',
+                    'https://client.stadiamaps.com/dashboard/'):
+            self.assertIn(url, help_screen)
         self.assertNotIn('gemini_api_key=', setup)
 
     def test_version_and_documentation(self):
-        self.assertIn('version: 1.0.326+326',src('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.326.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.326.md').is_file())
+        self.assertIn('version: 1.0.327+327',src('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.327.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.327.md').is_file())
 
 if __name__ == '__main__': unittest.main()

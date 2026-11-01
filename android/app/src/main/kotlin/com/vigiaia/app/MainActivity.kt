@@ -571,6 +571,42 @@ class MainActivity : FlutterActivity() {
                     result.error("gemini_key_read", "Não foi possível ler a chave.", null)
                 }
             }
+            "partnerApiKeyStatus" -> {
+                try {
+                    val provider = partnerProvider(call.argument<String>("provider"))
+                    result.success(partnerApiKeyStatus(provider))
+                } catch (_: IllegalArgumentException) {
+                    result.error("invalid_provider", "Provedor desconhecido.", null)
+                } catch (_: Throwable) {
+                    result.error("partner_key_status", "Não foi possível consultar a chave.", null)
+                }
+            }
+            "savePartnerApiKey" -> {
+                try {
+                    val provider = partnerProvider(call.argument<String>("provider"))
+                    val value = call.argument<String>("value")?.trim().orEmpty()
+                    if (value.isNotEmpty() && (value.length > 4096 || value.any { it.isWhitespace() })) {
+                        result.error("invalid_key", "Chave inválida: espaços ou tamanho excessivo.", null)
+                    } else {
+                        savePartnerApiKey(provider, value)
+                        result.success(partnerApiKeyStatus(provider))
+                    }
+                } catch (_: IllegalArgumentException) {
+                    result.error("invalid_provider", "Provedor desconhecido.", null)
+                } catch (_: Throwable) {
+                    result.error("partner_key_save", "Não foi possível salvar a chave.", null)
+                }
+            }
+            "revealPartnerApiKey" -> {
+                try {
+                    val provider = partnerProvider(call.argument<String>("provider"))
+                    result.success(readPartnerApiKey(provider))
+                } catch (_: IllegalArgumentException) {
+                    result.error("invalid_provider", "Provedor desconhecido.", null)
+                } catch (_: Throwable) {
+                    result.error("partner_key_read", "Não foi possível ler a chave.", null)
+                }
+            }
             "googleMapsKeyStatus" -> {
                 try {
                     result.success(googleMapsKeyStatus())
@@ -1485,6 +1521,39 @@ class MainActivity : FlutterActivity() {
 
     private fun geminiKeyStatus(): Map<String, Any> {
         val value = readGeminiApiKey()
+        return mapOf(
+            "configured" to (value != null),
+            "masked" to (value?.let { "••••••••" + it.takeLast(4) } ?: ""),
+        )
+    }
+
+    // Credenciais dos provedores opcionais; sem cópias em logs ou nos backups.
+    private val partnerPrefsName = "vigiaia_partner_api_private"
+    private fun partnerProvider(value: String?): String = when (value) {
+        "geoapify" -> "geoapify"
+        "openrouteservice" -> "openrouteservice"
+        else -> throw IllegalArgumentException("Provedor desconhecido")
+    }
+
+    private fun readPartnerApiKey(provider: String): String? {
+        val encrypted = getSharedPreferences(partnerPrefsName, Context.MODE_PRIVATE)
+            .getString(provider, null) ?: return null
+        return try {
+            unprotectSecret(encrypted)?.trim()?.takeIf { it.isNotEmpty() }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun savePartnerApiKey(provider: String, value: String) {
+        val editor = getSharedPreferences(partnerPrefsName, Context.MODE_PRIVATE).edit()
+        if (value.isEmpty()) editor.remove(provider)
+        else editor.putString(provider, protectSecret(value))
+        if (!editor.commit()) throw IllegalStateException("Falha ao salvar credencial")
+    }
+
+    private fun partnerApiKeyStatus(provider: String): Map<String, Any> {
+        val value = readPartnerApiKey(provider)
         return mapOf(
             "configured" to (value != null),
             "masked" to (value?.let { "••••••••" + it.takeLast(4) } ?: ""),

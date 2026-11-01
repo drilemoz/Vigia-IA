@@ -8,16 +8,16 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.326', build: 326);
+      AppBuildVersion(version: '1.0.327', build: 327);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.326', build: 326),
+      version: AppBuildVersion(version: '1.0.327', build: 327),
       changes: <String>[
-        'Configuração inicial: após as permissões, serviços e APIs opcionais Gemini, Google Maps e Stadia Maps.',
-        'Como obter as três chaves e acesso aos controles existentes de salvar, testar e remover.',
-        'Assistente retoma a etapa de APIs após interrupção e não reaparece a cada atualização.',
-
+        'Central de Serviços e APIs ampliada para seis provedores opcionais, incluindo Geoapify, OpenRouteService e Open-Meteo.',
+        'Ajuda individual e guia geral explicam como conseguir as chaves, limites e alternativas gratuitas.',
+        'Geoapify e OpenRouteService: salvar, colar, revelar, copiar, remover e testar conexões com chaves protegidas.',
+        'Google Maps ganhou controles de colar, copiar e verificar configuração, distinguindo o teste real pelo SDK.',
       ],
     ),
   ]);

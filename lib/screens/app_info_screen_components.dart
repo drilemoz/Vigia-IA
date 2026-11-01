@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.326',
+          version: '1.0.327',
           current: true,
+          changes: [
+            'Central unificada com seis serviços e guia de obtenção de todas as APIs.',
+            'Chaves de Geoapify e OpenRouteService com gerenciamento protegido e testes de conexão.',
+            'Open-Meteo preservado sem chave; Google Maps com controles de copiar, colar e verificação local.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.326',
+          current: false,
           changes: [
             'Após as permissões, assistente opcional para Gemini, Google Maps e Stadia Maps.',
             'Links para obter cada chave; telas atuais de gerenciar, testar e remover preservadas.',
@@ -2787,8 +2797,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.326',
+          version: '1.0.327',
           current: true,
+          changes: [
+            'Central unificada com seis serviços e guia de obtenção de todas as APIs.',
+            'Chaves de Geoapify e OpenRouteService com gerenciamento protegido e testes de conexão.',
+            'Open-Meteo preservado sem chave; Google Maps com controles de copiar, colar e verificação local.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.326',
+          current: false,
           changes: [
             'Após as permissões, assistente opcional para Gemini, Google Maps e Stadia Maps.',
             'Links para obter cada chave; telas atuais de gerenciar, testar e remover preservadas.',

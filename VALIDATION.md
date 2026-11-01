@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.327+327
+
+Veja `VALIDATION-1.0.327.md`. Testes preventivos aprovados (368 casos, 1 ignorado); Flutter analyze/test/build e testes em aparelho pendentes.
+
 # Validação Vigia IA 1.0.326+326
 
 - Fonte: `RELEASE-1.0.326.md` e `VALIDATION-1.0.326.md`.

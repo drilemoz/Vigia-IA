@@ -1,3 +1,10 @@
+## 1.0.327+327 (2026-11-01)
+
+- Central de APIs com seis serviços e ajuda individual em pop-up, mais guia geral.
+- Credenciais protegidas de Geoapify e OpenRouteService com gerenciamento completo e teste por demanda; sem integrar buscas/rotas até versões seguintes.
+- Open-Meteo atual mantido sem duplicação, sem exigência de chave; Google Maps recebeu colar, copiar, revelar e verificação de configuração.
+- Nova política de exclusão de backup para credenciais das duas APIs; versionamento sincronizado.
+
 ## 1.0.326+326 (2026-11-01)
 
 - Nova etapa **Serviços e APIs** após a tela de permissões, antes da seleção do modo: Gemini, Google Maps e Stadia Maps opcionais.

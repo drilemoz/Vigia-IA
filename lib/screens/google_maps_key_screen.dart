@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'api_service_help.dart';
 
 import '../services/google_maps_key_service.dart';
 import '../services/native_platform_service.dart';
@@ -19,7 +22,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
   bool _obscure = true;
   bool _saving = false;
   String? _error;
-  String? _savedKey;
+  bool _hasSavedUserKey = false;
 
   @override
   void initState() {
@@ -29,12 +32,8 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
 
   Future<void> _load() async {
     await _service.refresh();
-    final key = _service.status.isUserKey ? await _service.reveal() : null;
     if (!mounted) return;
-    setState(() {
-      _savedKey = key;
-      if (key != null) _controller.text = key;
-    });
+    setState(() => _hasSavedUserKey = _service.status.isUserKey);
   }
 
   @override
@@ -56,7 +55,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
     try {
       await _service.save(_controller.text);
       if (!mounted) return;
-      setState(() => _savedKey = _controller.text.trim());
+      setState(() { _hasSavedUserKey = true; _controller.clear(); _obscure = true; });
       _showMessage(
         'Chave salva. Se o mapa Google já estiver aberto, feche e abra o app '
         'para aplicar.',
@@ -96,7 +95,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
       await _service.save('');
       if (!mounted) return;
       setState(() {
-        _savedKey = null;
+        _hasSavedUserKey = false;
         _controller.clear();
         _error = null;
       });
@@ -106,6 +105,60 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
       setState(() => _error = 'Não foi possível remover a chave: $error');
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _paste() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (!mounted) return;
+      final clipboardText = data?.text;
+      if (clipboardText == null || clipboardText.isEmpty) {
+        _showMessage('Área de transferência vazia.');
+        return;
+      }
+      setState(() { _controller.text = clipboardText; _error = null; });
+    } catch (_) {
+      if (mounted) _showMessage('Não foi possível colar a chave.');
+    }
+  }
+
+  Future<void> _copy() async {
+    try {
+      final key = _controller.text.isNotEmpty
+          ? _controller.text : (_hasSavedUserKey ? await _service.reveal() : null);
+      if (!mounted) return;
+      if (key == null || key.isEmpty) {
+        _showMessage('Não existe chave do usuário para copiar.');
+        return;
+      }
+      await Clipboard.setData(ClipboardData(text: key));
+      if (mounted) _showMessage('Chave copiada. Limpe a área de transferência após usar.');
+    } catch (_) {
+      if (mounted) _showMessage('Não foi possível copiar a chave.');
+    }
+  }
+
+  Future<void> _toggleReveal() async {
+    if (!_obscure) { setState(() => _obscure = true); return; }
+    if (_controller.text.isEmpty && _hasSavedUserKey) {
+      final key = await _service.reveal();
+      if (!mounted) return;
+      if (key == null || key.isEmpty) { _showMessage('Não foi possível ler a chave salva.'); return; }
+      _controller.text = key;
+    }
+    setState(() => _obscure = false);
+  }
+
+  Future<void> _check() async {
+    try {
+      await _service.refresh();
+      if (!mounted) return;
+      _showMessage(_service.status.configured
+          ? 'Chave disponível. A validação real depende de abrir o mapa com Maps SDK for Android e das restrições do Google Cloud.'
+          : 'Não há chave configurada. Abra Configurações e cadastre uma chave.');
+    } catch (_) {
+      if (mounted) _showMessage('Não foi possível consultar a configuração.');
     }
   }
 
@@ -126,7 +179,10 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
           _ => 'Nenhuma chave configurada',
         };
         return Scaffold(
-          appBar: AppBar(title: const Text('Chave do Google Maps')),
+          appBar: AppBar(title: const Text('Chave do Google Maps'), actions: [
+            IconButton(tooltip: 'Como obter?', icon: const Icon(Icons.help_outline_rounded),
+              onPressed: () => showApiServiceHelp(context, ApiHelpProvider.googleMaps)),
+          ]),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
             children: [
@@ -181,7 +237,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                     icon: Icon(_obscure
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined),
-                    onPressed: () => setState(() => _obscure = !_obscure),
+                    onPressed: _saving ? null : () => unawaited(_toggleReveal()),
                   ),
                 ),
               ),
@@ -195,7 +251,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                       label: const Text('Salvar chave'),
                     ),
                   ),
-                  if (_savedKey != null) ...[
+                  if (_hasSavedUserKey) ...[
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: _saving ? null : () => unawaited(_remove()),
@@ -205,6 +261,18 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                   ],
                 ],
               ),
+              const SizedBox(height: 10),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                OutlinedButton.icon(onPressed: _saving ? null : () => unawaited(_paste()),
+                  icon: const Icon(Icons.content_paste_rounded), label: const Text('Colar')),
+                OutlinedButton.icon(onPressed: _saving ? null : () => unawaited(_copy()),
+                  icon: const Icon(Icons.copy_outlined), label: const Text('Copiar')),
+                OutlinedButton.icon(onPressed: _saving ? null : () => unawaited(_check()),
+                  icon: const Icon(Icons.fact_check_outlined), label: const Text('Verificar configuração')),
+              ]),
+              const SizedBox(height: 8),
+              Text('O Maps SDK for Android valida a chave quando o mapa Google é aberto. Verificar configuração não consulta servidores Google e não confirma restrições de SHA-1.',
+                style: theme.textTheme.bodySmall),
               const SizedBox(height: 20),
               Text('Como obter uma chave',
                   style: theme.textTheme.titleSmall

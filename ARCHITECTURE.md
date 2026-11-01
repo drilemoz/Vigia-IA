@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.326+326
+# Arquitetura — Vigia IA 1.0.327+327
 
 ## Assistente de primeira instalação: permissões → APIs → modo
 
@@ -2501,3 +2501,8 @@ Marcador selecionavel de localizacao.
 
 - Correção estrita de estilo exigido pelo Flutter Analyzer no assistente de Planejamento. Os `if` de GPS, atualização de preferências e exclusão de viagens agora usam chaves obrigatórias.
 - Nenhuma alteração de arquitetura, estado persistido, serviços de mapas, modelo de viagens ou interoperabilidade MCRP.
+
+
+## Evolução 1.0.327 — gerenciamento de APIs
+
+A central `ApiServicesSetupScreen` mantém o onboarding pré-existente e lista seis serviços. `api_service_help.dart` centraliza pop-ups offline de obtenção; `PartnerApiKeyScreen` gerencia Geoapify e OpenRouteService; `PartnerApiKeyService` usa o canal `vigiaia/native` com uma lista explícita de provedores permitidos. O Android criptografa credenciais pelo mesmo AES-GCM/Android Keystore existente, sem expor as credenciais em relatórios; `vigiaia_partner_api_private.xml` fica excluído do backup. Os testes HTTP são opt-in e não constituem integração nas rotas/buscas. Serviços atuais de rotas, buscas e clima não mudaram.
