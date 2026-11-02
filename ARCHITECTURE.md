@@ -1,3 +1,19 @@
+# Arquitetura — Vigia IA 1.0.330+330
+
+## Receptor Minha Câmera H.264 / MJPEG
+
+`MinhaCameraMjpegSource` mantém o contrato VideoSource e os indicadores remotos, mas passa a selecionar MJPEG ou H.264 pela API MCRP `/control/<token>/status` (`x-stream-codec`). O streaming H.264 é HTTP Annex-B `/h264/<token>` do mesmo host/porta e usa `RtspCameraSource(rawH264: true)`, com LibVLC `:demux=h264`, fonte VLC única e snapshots para a IA quando ativada. O endereço H.264 é derivado de URL de pareamento previamente validada, nunca aceito arbitrariamente da rede pública. A fonte antiga MCRP v1 e MJPEG seguem intactas. HTTP 409 de `/live/` serve como fallback. A tela MCRP agora usa essa mesma fonte para ambos os codecs.
+
+## Vigilância de congelamento RTSP
+
+`RtspCameraSource` confirma streaming somente após snapshot não vazio e verifica ausência de novas capturas inclusive quando VLC sinaliza `isPlaying`. O watchdog inicia ao anexar a view, aguarda 25s pelo primeiro quadro e tenta recuperação após 18s sem captura, limitada a três reconexões pela política já existente. Não considera conteúdo idêntico do quadro como erro, pois uma cena parada é válida. Falha de screenshot pode não significar falha de vídeo; validar em hardware.
+
+# Arquitetura — Vigia IA 1.0.329+329
+
+## Estabilidade RTSP (LibVLC / teste Media3 separado)
+
+`RtspCameraSource` mantém uma única instância VLC por fonte, cronometra a abertura após a superfície nativa ser anexada e limita a recuperação a três tentativas de backoff por sessão. `RtspRecoveryPolicy` é pura e testável; confirmação de primeiro frame exige bytes não vazios do snapshot, ao contrário de `isPlaying`. A captura periódica RGB só ocorre quando `emitFrames` é verdadeiro (IA). O player Media3 continua no teste isolado, pois ainda não entrega quadros RGB ao monitoramento e a compatibilidade H.265 precisa de aparelho real. Nenhuma migração dos módulos de mapa, sensores, gravação ou MCRP.
+
 # Arquitetura — Vigia IA 1.0.328+328
 
 ## Assistente de primeira instalação: permissões → APIs → modo

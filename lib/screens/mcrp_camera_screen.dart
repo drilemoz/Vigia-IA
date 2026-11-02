@@ -371,7 +371,6 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
   @override
   Widget build(BuildContext context) {
     final client = _client;
-    final codec = _status['x-stream-codec'] ?? 'mjpeg';
     final model = (_info?['device'] is Map) ? (_info!['device'] as Map)['model']?.toString() : null;
     return Scaffold(
       appBar: AppBar(title: const Text('Câmera remota · Vigia IA')),
@@ -444,11 +443,9 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             title: const Text('Analisar vídeo com IA no Vigia IA'),
-            subtitle: Text(codec == 'h264'
-                ? 'A IA local exige MJPEG. Alterne o codec para MJPEG.'
-                : 'Desligado: apenas visualização. Ligado: detector local e caixas de objetos.'),
+            subtitle: const Text('MJPEG ou H.264: a IA recebe quadros do vídeo, se o VLC permitir snapshots.'),
             value: _analyze,
-            onChanged: codec == 'h264' ? null : (value) => setState(() => _analyze = value),
+            onChanged: (value) => setState(() => _analyze = value),
           ),
           const SizedBox(height: 10),
           AspectRatio(aspectRatio: _previewQuarterTurns.isOdd ? 9 / 16 : 16 / 9,
@@ -457,11 +454,8 @@ class _McrpCameraScreenState extends State<McrpCameraScreen> {
                 child: Transform(
                   alignment: Alignment.center,
                   transform: Matrix4.diagonal3Values(_mirrorPreview ? -1 : 1, 1, 1),
-                  child: codec == 'h264'
-                    ? _McrpVlcView(key: ValueKey('h264_$_streamRevision'),
-                        url: client.address.h264.toString(), h264: true)
-                    : _McrpMjpegView(key: ValueKey('mjpeg_$_streamRevision'),
-                        url: client.address.liveUrl.toString(), analysisEnabled: _analyze),
+                  child: _McrpMjpegView(key: ValueKey('remote_$_streamRevision'),
+                    url: client.address.liveUrl.toString(), analysisEnabled: _analyze),
                 ),
               ),
             ),

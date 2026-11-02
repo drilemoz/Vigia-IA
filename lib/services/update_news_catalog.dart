@@ -8,15 +8,15 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.328', build: 328);
+      AppBuildVersion(version: '1.0.330', build: 330);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.328', build: 328),
+      version: AppBuildVersion(version: '1.0.330', build: 330),
       changes: <String>[
-        'Configurações agora concentra as seis APIs em uma única entrada, sem duplicar Gemini e Google Maps.',
-        'Atalhos de APIs no painel do mapa e na busca Gemini levam à mesma central.',
-        'Chaves, ajuda, testes e serviços existentes foram preservados.',
+        'O Vigia IA agora recebe H.264 do Minha Câmera pelo fluxo privado HTTP Annex-B, além de MJPEG.',
+        'O monitor e a câmera remota alternam automaticamente de codec e podem analisar quadros H.264 com a IA.',
+        'O watchdog RTSP observa a ausência prolongada de quadros capturados, mesmo com VLC em reprodução.',
       ],
     ),
   ]);

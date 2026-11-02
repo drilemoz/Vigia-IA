@@ -77,8 +77,28 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.328',
+          version: '1.0.330',
           current: true,
+          changes: [
+            'Minha Câmera H.264: recepção HTTP Annex-B pelo VLC no monitoramento e na IA.',
+            'Troca automática entre MJPEG e H.264 conforme o status remoto, sem dois players simultâneos.',
+            'RTSP: watchdog identifica ausência prolongada de snapshots mesmo com VLC em reprodução.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.329',
+          current: false,
+          changes: [
+            'RTSP: reconexões limitadas e progressivas para evitar loops de reprodução.',
+            'Primeiro quadro confirmado separadamente, sem depender apenas do estado VLC.',
+            'Media3 segue em teste independente; IA e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.328',
+          current: false,
           changes: [
             'Configurações agora mostra apenas Serviços e APIs, sem atalhos duplicados para Gemini ou Google Maps.',
             'Painel do mapa e assistente Gemini encaminham à mesma central para gerenciar credenciais.',
@@ -2807,8 +2827,28 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.328',
+          version: '1.0.330',
           current: true,
+          changes: [
+            'Minha Câmera H.264: recepção HTTP Annex-B pelo VLC no monitoramento e na IA.',
+            'Troca automática entre MJPEG e H.264 conforme o status remoto, sem dois players simultâneos.',
+            'RTSP: watchdog identifica ausência prolongada de snapshots mesmo com VLC em reprodução.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.329',
+          current: false,
+          changes: [
+            'RTSP: reconexões limitadas e progressivas para evitar loops de reprodução.',
+            'Primeiro quadro confirmado separadamente, sem depender apenas do estado VLC.',
+            'Media3 segue em teste independente; IA e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.328',
+          current: false,
           changes: [
             'Configurações agora mostra apenas Serviços e APIs, sem atalhos duplicados para Gemini ou Google Maps.',
             'Painel do mapa e assistente Gemini encaminham à mesma central para gerenciar credenciais.',

@@ -56,8 +56,8 @@ class ApiServices327Tests(unittest.TestCase):
         self.assertIn('showApiServiceHelp(context, ApiHelpProvider.googleMaps)',screen)
 
     def test_version(self):
-        self.assertIn('version: 1.0.328+328',read('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.328.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.328.md').is_file())
+        self.assertIn('version: 1.0.330+330',read('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.330.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.330.md').is_file())
 
 if __name__ == '__main__': unittest.main()

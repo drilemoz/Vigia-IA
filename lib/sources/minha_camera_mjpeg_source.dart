@@ -14,9 +14,11 @@ import '../services/minha_camera_telemetry.dart';
 import '../services/data_usage_service.dart';
 import '../services/minha_camera_live_url.dart';
 import '../services/minha_camera_mjpeg_parser.dart';
+import 'rtsp_camera_source.dart';
 
-/// Receptor somente de leitura do MJPEG do Minha Câmera 1.4.35.
-/// O A3 transmite; o detector já existente do Vigia analisa no aparelho receptor.
+/// Receptor MCRP adaptativo: MJPEG ou H.264 Annex-B recebido por LibVLC.
+/// A escolha vem do status do transmissor, com fallback HTTP 409 do /live/.
+/// Uma única fonte de vídeo fica ativa por vez, inclusive para a IA do Vigia.
 class MinhaCameraMjpegSource implements VideoSource {
   MinhaCameraMjpegSource({
     required this.liveUrl,
@@ -30,6 +32,11 @@ class MinhaCameraMjpegSource implements VideoSource {
   final StreamController<RgbFrame> _frames = StreamController<RgbFrame>.broadcast();
   final StreamController<VideoSourceStatus> _statuses = StreamController<VideoSourceStatus>.broadcast();
   final ValueNotifier<Uint8List?> _preview = ValueNotifier<Uint8List?>(null);
+  final ValueNotifier<bool> _h264Preview = ValueNotifier<bool>(false);
+  RtspCameraSource? _h264Source;
+  StreamSubscription<RgbFrame>? _h264Frames;
+  StreamSubscription<VideoSourceStatus>? _h264Statuses;
+  String _codec = 'mjpeg';
   HttpClient? _client;
   Timer? _retry;
   Timer? _telemetryTimer;
@@ -84,7 +91,7 @@ class MinhaCameraMjpegSource implements VideoSource {
   }
 
   Future<void> _receive(int generation) async {
-    if (_disposed || generation != _generation) return;
+    if (_disposed || generation != _generation || _codec != 'mjpeg') return;
     final client = _client;
     if (client == null) return;
     final parser = MinhaCameraMjpegParser();
@@ -95,8 +102,7 @@ class MinhaCameraMjpegSource implements VideoSource {
       final response = await request.close().timeout(const Duration(seconds: 7));
       if (response.statusCode == HttpStatus.conflict) {
         await response.drain<void>();
-        _status(VideoSourceState.error,
-            'A câmera remota está em H.264. Selecione MJPEG no transmissor.');
+        await _useH264(generation);
         return;
       }
       if (response.statusCode != HttpStatus.ok ||
@@ -107,10 +113,10 @@ class MinhaCameraMjpegSource implements VideoSource {
       }
       var receivedAny = false;
       await for (final chunk in response.timeout(const Duration(seconds: 9))) {
-        if (_disposed || generation != _generation) return;
+        if (_disposed || generation != _generation || _codec != 'mjpeg') return;
         DataUsageService.instance.record(DataUsageModule.cameras, received: chunk.length);
         for (final jpeg in parser.add(chunk)) {
-          if (_disposed || generation != _generation) return;
+          if (_disposed || generation != _generation || _codec != 'mjpeg') return;
           receivedAny = true;
           _failures = 0;
           _status(VideoSourceState.streaming, emitFrames
@@ -133,7 +139,7 @@ class MinhaCameraMjpegSource implements VideoSource {
       if (!receivedAny) throw const FormatException('Fluxo sem quadros JPEG.');
       throw const SocketException('Transmissão encerrada.');
     } catch (_) {
-      if (_disposed || generation != _generation) return;
+      if (_disposed || generation != _generation || _codec != 'mjpeg') return;
       _failures++;
       _status(VideoSourceState.reconnecting,
           'Reconectando à câmera remota na rede local…');
@@ -158,6 +164,12 @@ class MinhaCameraMjpegSource implements VideoSource {
         headers,
         networkLatencyMs: watch.elapsedMilliseconds,
       );
+      final announcedCodec = headers['x-stream-codec']?.toLowerCase();
+      if (announcedCodec == 'h264' && _codec != 'h264') {
+        unawaited(_useH264(generation));
+      } else if (announcedCodec == 'mjpeg' && _codec != 'mjpeg') {
+        unawaited(_useMjpeg(generation));
+      }
     } catch (_) {
       // O vídeo funciona independentemente da API de telemetria.
       if (generation == _generation && remoteStatusNotifier.value != null &&
@@ -167,6 +179,66 @@ class MinhaCameraMjpegSource implements VideoSource {
     } finally {
       _telemetryBusy = false;
     }
+  }
+
+  Future<void> _useH264(int generation) async {
+    if (_disposed || generation != _generation || _codec == 'h264') return;
+    final uri = MinhaCameraLiveUrl.h264FromLive(liveUrl);
+    if (uri == null) return;
+    _codec = 'h264';
+    _retry?.cancel();
+    _retry = null;
+    _client?.close(force: true);
+    _client = null;
+    _preview.value = null;
+    _status(VideoSourceState.connecting, 'Conectando ao H.264 do Minha Câmera…');
+    final source = RtspCameraSource(
+      url: uri.toString(), rawH264: true, analysisInterval: analysisInterval,
+      emitFrames: emitFrames,
+    );
+    _h264Source = source;
+    _h264Frames = source.frames.listen((frame) {
+      if (!_disposed && generation == _generation && _codec == 'h264' && !_frames.isClosed) {
+        _frames.add(frame);
+      }
+    });
+    _h264Statuses = source.statuses.listen((status) {
+      if (!_disposed && generation == _generation && _codec == 'h264') {
+        _status(status.state, status.message ?? 'Minha Câmera • H.264');
+      }
+    });
+    try {
+      await source.start();
+      if (_disposed || generation != _generation || _codec != 'h264') return;
+      // A prévia utiliza exatamente o mesmo player que fornece snapshots à IA.
+      _h264Preview.value = true;
+    } catch (_) {
+      if (!_disposed && generation == _generation && _codec == 'h264') {
+        _status(VideoSourceState.error, 'Falha ao iniciar H.264 da câmera remota.');
+      }
+    }
+  }
+
+  Future<void> _useMjpeg(int generation) async {
+    if (_disposed || generation != _generation || _codec == 'mjpeg') return;
+    _codec = 'mjpeg';
+    _h264Preview.value = false;
+    await _h264Frames?.cancel();
+    _h264Frames = null;
+    await _h264Statuses?.cancel();
+    _h264Statuses = null;
+    final old = _h264Source;
+    _h264Source = null;
+    if (old != null) await old.dispose();
+    if (_disposed || generation != _generation || _codec != 'mjpeg') return;
+    _client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 5)
+      ..autoUncompress = false;
+    _failures = 0;
+    _lastPreview = null;
+    _lastAnalysis = null;
+    _status(VideoSourceState.connecting, 'Alternando para MJPEG…');
+    unawaited(_receive(generation));
   }
 
   Future<void> _emitRgb(Uint8List jpeg, DateTime capturedAt, int generation) async {
@@ -191,28 +263,42 @@ class MinhaCameraMjpegSource implements VideoSource {
   }
 
   @override
-  Widget buildPreview() => ValueListenableBuilder<Uint8List?>(
-        valueListenable: _preview,
-        builder: (context, bytes, _) => bytes == null
-            ? const ColoredBox(
-                color: Color(0xFF293747),
-                child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.videocam_off_outlined, size: 34, color: Color(0xFFBDD5E7)),
-                  SizedBox(height: 10),
-                  Text('Aguardando sinal da câmera remota',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFFEDF5FC), fontWeight: FontWeight.w600)),
-                ])),
-              )
-            : Center(child: Image.memory(
-                bytes, fit: BoxFit.contain, gaplessPlayback: true,
-                filterQuality: FilterQuality.low,
-              )),
-      );
+  Widget buildPreview() => ValueListenableBuilder<bool>(
+    valueListenable: _h264Preview,
+    builder: (context, h264, _) => h264 && _h264Source != null
+        ? _h264Source!.buildPreview()
+        : ValueListenableBuilder<Uint8List?>(
+            valueListenable: _preview,
+            builder: (context, bytes, _) => bytes == null
+                ? const ColoredBox(
+                    color: Color(0xFF293747),
+                    child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(Icons.videocam_off_outlined, size: 34, color: Color(0xFFBDD5E7)),
+                      SizedBox(height: 10),
+                      Text('Aguardando sinal da câmera remota',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFFEDF5FC), fontWeight: FontWeight.w600)),
+                    ])),
+                  )
+                : Center(child: Image.memory(
+                    bytes, fit: BoxFit.contain, gaplessPlayback: true,
+                    filterQuality: FilterQuality.low,
+                  )),
+          ),
+  );
 
   @override
   Future<void> stop() async {
     _generation++;
+    _codec = 'mjpeg';
+    _h264Preview.value = false;
+    await _h264Frames?.cancel();
+    _h264Frames = null;
+    await _h264Statuses?.cancel();
+    _h264Statuses = null;
+    final old = _h264Source;
+    _h264Source = null;
+    if (old != null) await old.dispose();
     _retry?.cancel();
     _retry = null;
     _telemetryTimer?.cancel();
@@ -236,6 +322,7 @@ class MinhaCameraMjpegSource implements VideoSource {
     await stop();
     _disposed = true;
     _preview.dispose();
+    _h264Preview.dispose();
     remoteStatusNotifier.dispose();
     await _frames.close();
     await _statuses.close();

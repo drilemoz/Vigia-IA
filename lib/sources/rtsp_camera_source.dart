@@ -9,7 +9,12 @@ import '../models/rgb_frame.dart';
 import '../services/error_log_service.dart';
 import '../services/frame_converter.dart';
 import '../services/rtsp_diagnostics_service.dart';
+import '../services/minha_camera_live_url.dart';
+import '../services/rtsp_recovery_policy.dart';
+import '../services/rtsp_frame_watchdog_policy.dart';
 
+/// Fonte VLC para monitoramento (inclusive captura de quadros para a IA).
+/// Media3 continua isolado na tela de teste, sem concorrer com este player.
 class RtspCameraSource implements VideoSource {
   RtspCameraSource({
     required this.url,
@@ -17,6 +22,7 @@ class RtspCameraSource implements VideoSource {
     this.emitFrames = true,
     this.softwareDecoding = false,
     this.forceTcp = true,
+    this.rawH264 = false,
   });
 
   final String url;
@@ -24,21 +30,32 @@ class RtspCameraSource implements VideoSource {
   final bool emitFrames;
   final bool softwareDecoding;
   final bool forceTcp;
+  /// HTTP com vídeo AVC Annex-B (não é RTSP), validado pelo QR local.
+  final bool rawH264;
   final _frames = StreamController<RgbFrame>.broadcast();
   final _statuses = StreamController<VideoSourceStatus>.broadcast();
   final ErrorLogService _logs = ErrorLogService.instance;
   final RtspDiagnosticsService _diagnostics = RtspDiagnosticsService.instance;
+  final RtspRecoveryPolicy _recovery = RtspRecoveryPolicy();
+  final RtspFrameWatchdogPolicy _healthPolicy = const RtspFrameWatchdogPolicy();
 
   VlcPlayerController? _controller;
   Timer? _snapshotTimer;
+  Timer? _watchdog;
+  Timer? _reconnectTimer;
   bool _snapshotInFlight = false;
+  bool _reconnecting = false;
   bool _disposed = false;
   bool _previewLogged = false;
   bool _playingLogged = false;
   bool _bufferingLogged = false;
+  bool _frameConfirmed = false;
+  bool _recoveryExhaustionLogged = false;
+  bool _snapshotWarningLogged = false;
   String? _lastPlayerError;
+  DateTime? _attachedAt;
+  DateTime? _lastSnapshotProbe;
   DateTime _lastSuccessfulFrame = DateTime.fromMillisecondsSinceEpoch(0);
-  DateTime _lastReconnect = DateTime.fromMillisecondsSinceEpoch(0);
 
   VlcPlayerController? get controller => _controller;
 
@@ -51,8 +68,9 @@ class RtspCameraSource implements VideoSource {
   VlcMediaSource get _mediaSource => VlcMediaSource(
         uri: Uri.parse(url),
         mediaOptions: <String>[
-          ':network-caching=500',
-          if (forceTcp) ':rtsp-tcp',
+          if (rawH264) ':network-caching=220' else ':network-caching=500',
+          if (rawH264) ':demux=h264',
+          if (!rawH264 && forceTcp) ':rtsp-tcp',
           ':no-audio',
           if (softwareDecoding) ...<String>[
             ':avcodec-hw=none',
@@ -66,19 +84,26 @@ class RtspCameraSource implements VideoSource {
   Future<void> start() async {
     if (_disposed) throw StateError('Fonte RTSP ja descartada.');
     final uri = Uri.tryParse(url);
-    if (uri == null || uri.scheme.toLowerCase() != 'rtsp' || uri.host.isEmpty) {
-      throw FormatException('Informe uma URL RTSP valida.');
+    if (uri == null || (rawH264
+        ? !MinhaCameraLiveUrl.isValidH264(url)
+        : uri.scheme.toLowerCase() != 'rtsp' || uri.host.isEmpty)) {
+      throw const FormatException('Endereco do fluxo de video invalido.');
     }
     if (_controller != null) return;
 
     await _diagnostics.mark('source_start', address: url);
-    // Inicio registrado antes da criacao do LibVLC nativo.
     await _logs.record(
       level: ErrorLogLevel.info,
-      source: 'RTSP',
-      message: 'Fonte RTSP iniciada; aguardando o player VLC.',
-      context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url), 'softwareDecoding': softwareDecoding},
+      source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+      message: 'Fonte VLC iniciada; aguardando player e primeiro quadro.',
+      context: <String, Object?>{
+        'host': RtspDiagnosticsService.safeHost(url),
+        'engine': 'LibVLC',
+        'transport': rawH264 ? 'HTTP Annex-B' : (forceTcp ? 'TCP' : 'VLC padrao'),
+        'softwareDecoding': softwareDecoding,
+      },
     );
+    if (_disposed) return;
 
     _statuses.add(const VideoSourceStatus(
       VideoSourceState.connecting,
@@ -93,9 +118,13 @@ class RtspCameraSource implements VideoSource {
     );
     _controller = controller;
     await _diagnostics.mark('controller_created', address: url);
-    _lastSuccessfulFrame = DateTime.now();
+    if (_disposed || _controller != controller) return;
     controller.addListener(_onPlayerChanged);
 
+    // O prazo de abertura so comeca quando a view nativa estiver anexada.
+    _watchdog = Timer.periodic(const Duration(seconds: 2), (_) {
+      _checkPlayback();
+    });
     if (emitFrames) {
       _snapshotTimer = Timer.periodic(analysisInterval, (_) {
         unawaited(_captureSnapshot());
@@ -104,26 +133,31 @@ class RtspCameraSource implements VideoSource {
   }
 
   void _onPlayerChanged() {
-    final value = _controller?.value;
-    if (value == null || _statuses.isClosed) return;
+    if (_disposed || _controller == null || _statuses.isClosed) return;
+    final value = _controller!.value;
     if (value.hasError) {
+      if (_recovery.exhausted && _recoveryExhaustionLogged) return;
       final message = value.errorDescription ?? 'Falha no stream RTSP.';
       if (_lastPlayerError != message) {
         _lastPlayerError = message;
         unawaited(_diagnostics.mark('player_error', address: url));
         unawaited(_logs.record(
           level: ErrorLogLevel.error,
-          source: 'RTSP',
-          message: 'O player VLC reportou uma falha na transmissão RTSP.',
-          details: message,
-          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url), 'softwareDecoding': softwareDecoding},
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'O player VLC reportou falha na transmissão.',
+          // Erros nativos podem conter URL com senha: não exportar details.
+          context: <String, Object?>{
+            'host': RtspDiagnosticsService.safeHost(url),
+            'engine': 'LibVLC',
+            'transport': rawH264 ? 'HTTP Annex-B' : (forceTcp ? 'TCP' : 'VLC padrao'),
+          },
         ));
       }
-      _statuses.add(VideoSourceStatus(
+      _statuses.add(const VideoSourceStatus(
         VideoSourceState.error,
-        message: value.errorDescription ?? 'Falha no stream RTSP.',
+        message: 'Falha na reprodução RTSP. Tentando recuperar...',
       ));
-      unawaited(_attemptReconnect());
+      _scheduleReconnect('player_error');
       return;
     }
     if (value.isPlaying) {
@@ -132,12 +166,17 @@ class RtspCameraSource implements VideoSource {
         unawaited(_diagnostics.mark('playing', address: url));
         unawaited(_logs.record(
           level: ErrorLogLevel.info,
-          source: 'RTSP',
-          message: 'O player VLC informou reprodução em andamento.',
-          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url), 'softwareDecoding': softwareDecoding},
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'VLC iniciou a reprodução (quadro ainda não confirmado).',
+          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url)},
         ));
       }
-      _statuses.add(const VideoSourceStatus(VideoSourceState.streaming));
+      if (_frameConfirmed) {
+        _statuses.add(const VideoSourceStatus(VideoSourceState.streaming));
+      } else {
+        _statuses.add(const VideoSourceStatus(VideoSourceState.connecting,
+          message: 'VLC conectado; aguardando quadro de vídeo…'));
+      }
     } else if (value.isBuffering) {
       if (!_bufferingLogged) {
         _bufferingLogged = true;
@@ -150,73 +189,165 @@ class RtspCameraSource implements VideoSource {
     }
   }
 
-  Future<void> _captureSnapshot() async {
-    if (_snapshotInFlight || _disposed) return;
+  void _checkPlayback() {
     final controller = _controller;
-    if (controller == null || !controller.isAttached) return;
+    if (_disposed || controller == null || !controller.isAttached) return;
+    final now = DateTime.now();
+    _attachedAt ??= now;
+    if (_reconnectTimer != null || _reconnecting) return;
+    if (!emitFrames && controller.value.isPlaying && !_snapshotInFlight &&
+        (_lastSnapshotProbe == null ||
+         now.difference(_lastSnapshotProbe!) >= const Duration(seconds: 4))) {
+      // Sem IA, sondar periodicamente sem conversao RGB para detectar
+      // congelamento; nao ficar apenas no primeiro quadro da transmissao.
+      _lastSnapshotProbe = now;
+      unawaited(_captureSnapshot());
+    }
+    // isPlaying nao confirma um quadro novo. Sem IA, o snapshot e sondado
+    // a cada 4 s, e com IA ele segue a cadencia configurada.
+    final issue = _healthPolicy.check(
+      now: now,
+      attachedAt: _attachedAt!,
+      lastSuccessfulSnapshot: _frameConfirmed ? _lastSuccessfulFrame : null,
+    );
+    if (issue == RtspFrameIssue.firstFrameTimeout) {
+      _scheduleReconnect('first_frame_timeout');
+    } else if (issue == RtspFrameIssue.possibleFrameStall) {
+      _scheduleReconnect('possible_frame_stall');
+    }
+  }
+
+  Future<void> _captureSnapshot() async {
+    if (_snapshotInFlight || _disposed || _reconnecting) return;
+    final controller = _controller;
+    if (controller == null || !controller.isAttached || !controller.value.isPlaying) return;
 
     _snapshotInFlight = true;
     try {
-      final bytes = await controller.takeSnapshot(width: 640);
-      if (bytes.isEmpty) {
-        throw StateError('Snapshot RTSP vazio.');
+      final bytes = await controller.takeSnapshot(width: 640)
+          .timeout(const Duration(seconds: 6));
+      if (bytes.isEmpty) throw StateError('Snapshot RTSP vazio.');
+      // Somente decodificar em RGB quando necessário para IA, evitando CPU
+      // extra no modo de prévia da câmera secundária.
+      RgbFrame? frame;
+      if (emitFrames) {
+        frame = await FrameConverter.fromEncoded(bytes, capturedAt: DateTime.now());
       }
-      final frame = await FrameConverter.fromEncoded(
-        bytes,
-        capturedAt: DateTime.now(),
-      );
+      if (_disposed || _controller != controller) return;
       _lastSuccessfulFrame = DateTime.now();
-      if (!_frames.isClosed) _frames.add(frame);
-    } catch (error, stackTrace) {
-      final staleFor = DateTime.now().difference(_lastSuccessfulFrame);
-      if (staleFor > const Duration(seconds: 6)) {
-        unawaited(
-          _logs.recordException(
-            source: 'RTSP',
-            error: error,
-            stackTrace: stackTrace,
-            message: 'Frames RTSP deixaram de chegar; reconexão iniciada.',
-            context: <String, Object?>{'host': Uri.tryParse(url)?.host ?? ''},
-            level: ErrorLogLevel.warning,
-          ),
-        );
-        await _attemptReconnect();
+      if (!_frameConfirmed) {
+        _frameConfirmed = true;
+        unawaited(_diagnostics.mark('first_frame', address: url));
+        unawaited(_logs.record(
+          level: ErrorLogLevel.info,
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'Primeiro quadro RTSP confirmado por snapshot VLC.',
+          context: <String, Object?>{
+            'host': RtspDiagnosticsService.safeHost(url),
+            'engine': 'LibVLC',
+            'transport': rawH264 ? 'HTTP Annex-B' : (forceTcp ? 'TCP' : 'VLC padrao'),
+          },
+        ));
       }
+      _reconnectTimer?.cancel();
+      _reconnectTimer = null;
+      if (!_statuses.isClosed) {
+        _statuses.add(const VideoSourceStatus(VideoSourceState.streaming));
+      }
+      _recovery.confirmedFrame();
+      _recoveryExhaustionLogged = false;
+      _snapshotWarningLogged = false;
+      if (frame != null && !_frames.isClosed) _frames.add(frame);
+    } catch (_) {
+      if (!_snapshotWarningLogged) {
+        _snapshotWarningLogged = true;
+        unawaited(_logs.record(
+          level: ErrorLogLevel.warning,
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'Snapshot do VLC indisponível; reprodução pode continuar.',
+          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url)},
+        ));
+      }
+      // Falha de captura isolada não prova falha do transporte ou do decoder.
     } finally {
       _snapshotInFlight = false;
     }
   }
 
-  Future<void> _attemptReconnect() async {
+  void _scheduleReconnect(String reason) {
     final controller = _controller;
-    if (controller == null || !controller.isAttached || _disposed) return;
-    final now = DateTime.now();
-    if (now.difference(_lastReconnect) < const Duration(seconds: 5)) return;
-    _lastReconnect = now;
-    if (!_statuses.isClosed) {
-      _statuses.add(const VideoSourceStatus(
-        VideoSourceState.reconnecting,
-        message: 'Reconectando ao RTSP...',
-      ));
-    }
-    try {
-      await controller.setMedia(_mediaSource, autoPlay: true);
-    } catch (error, stackTrace) {
-      if (!_statuses.isClosed) {
-        _statuses.add(VideoSourceStatus(
-          VideoSourceState.error,
-          message: 'Reconexao RTSP falhou: $error',
+    if (_disposed || controller == null || !controller.isAttached ||
+        _reconnectTimer != null || _reconnecting ||
+        (_recovery.exhausted && _recoveryExhaustionLogged)) return;
+    final delay = _recovery.scheduleNext();
+    if (delay == null) {
+      if (!_recoveryExhaustionLogged) {
+        _recoveryExhaustionLogged = true;
+        unawaited(_diagnostics.mark('recovery_exhausted', address: url));
+        unawaited(_logs.record(
+          level: ErrorLogLevel.warning,
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'Limite de 3 reconexões atingido; reabra a câmera para tentar novamente.',
+          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url)},
         ));
       }
-      unawaited(
-        _logs.recordException(
-          source: 'RTSP',
-          error: error,
-          stackTrace: stackTrace,
-          message: 'Falha ao reconectar o stream RTSP.',
-          context: <String, Object?>{'host': Uri.tryParse(url)?.host ?? ''},
-        ),
-      );
+      if (!_statuses.isClosed) {
+        _statuses.add(const VideoSourceStatus(
+          VideoSourceState.error,
+          message: 'RTSP indisponível após 3 tentativas. Reabra a câmera.',
+        ));
+      }
+      return;
+    }
+    final attempt = _recovery.attempts;
+    _statuses.add(VideoSourceStatus(
+      VideoSourceState.reconnecting,
+      message: 'Reconectando RTSP ($attempt/3)...',
+    ));
+    unawaited(_diagnostics.mark('reconnect_scheduled', address: url));
+    unawaited(_logs.record(
+      level: ErrorLogLevel.info,
+      source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+      message: 'Reconexão RTSP agendada.',
+      context: <String, Object?>{
+        'host': RtspDiagnosticsService.safeHost(url),
+        'attempt': attempt,
+        'delaySeconds': delay.inSeconds,
+        'reason': reason,
+      },
+    ));
+    _reconnectTimer = Timer(delay, () {
+      _reconnectTimer = null;
+      unawaited(_reconnect());
+    });
+  }
+
+  Future<void> _reconnect() async {
+    final controller = _controller;
+    if (_disposed || controller == null || !controller.isAttached || _reconnecting) return;
+    _reconnecting = true;
+    _playingLogged = false;
+    _bufferingLogged = false;
+    _lastPlayerError = null;
+    _frameConfirmed = false;
+    _attachedAt = DateTime.now();
+    _lastSnapshotProbe = null;
+    try {
+      await controller.setMedia(_mediaSource, autoPlay: true);
+      if (!_disposed && _controller == controller) {
+        unawaited(_diagnostics.mark('reconnect_sent', address: url));
+      }
+    } catch (_) {
+      if (!_disposed && _controller == controller) {
+        unawaited(_logs.record(
+          level: ErrorLogLevel.error,
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'Falha ao reiniciar a transmissão RTSP.',
+          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url)},
+        ));
+      }
+    } finally {
+      _reconnecting = false;
     }
   }
 
@@ -230,34 +361,31 @@ class RtspCameraSource implements VideoSource {
       _previewLogged = true;
       unawaited(_diagnostics.mark('preview_requested', address: url));
     }
-    return VlcPlayer(
-      controller: controller,
-      fit: VlcVideoFit.contain,
-    );
+    return VlcPlayer(controller: controller, fit: VlcVideoFit.contain);
   }
 
   @override
   Future<void> stop() async {
-    await _diagnostics.mark('stopped', address: url);
     _snapshotTimer?.cancel();
     _snapshotTimer = null;
+    _watchdog?.cancel();
+    _watchdog = null;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     final controller = _controller;
     _controller = null;
+    await _diagnostics.mark('stopped', address: url);
     if (controller != null) {
       controller.removeListener(_onPlayerChanged);
       try {
         if (controller.isAttached) await controller.stop();
-      } catch (error, stackTrace) {
-        unawaited(
-          _logs.recordException(
-            source: 'RTSP',
-            error: error,
-            stackTrace: stackTrace,
-            message: 'Aviso ao interromper o stream RTSP.',
-            context: <String, Object?>{'host': Uri.tryParse(url)?.host ?? ''},
-            level: ErrorLogLevel.warning,
-          ),
-        );
+      } catch (_) {
+        unawaited(_logs.record(
+          level: ErrorLogLevel.warning,
+          source: rawH264 ? 'Minha Câmera H.264' : 'RTSP',
+          message: 'Aviso ao interromper o stream RTSP.',
+          context: <String, Object?>{'host': RtspDiagnosticsService.safeHost(url)},
+        ));
       }
       controller.dispose();
     }

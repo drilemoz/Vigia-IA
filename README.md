@@ -1,4 +1,15 @@
-**Versão atual:** `1.0.328+328`
+**Versão atual:** `1.0.330+330`
+
+## Atualização 1.0.330+330 · H.264 entre celulares e RTSP sem quadros
+
+Monitoramento e tela MCRP recebem H.264 Annex-B por HTTP `/h264/<token>` com LibVLC `demux=h264`, além de MJPEG `/live/<token>`. Alternância por `x-stream-codec` ou resposta HTTP 409; IA local usa snapshots quando habilitada. O watchdog de RTSP monitora primeira captura e ausência prolongada de snapshots, mesmo com `isPlaying`, mantendo reconexões limitadas. Preservados os módulos de mapas, sensores, navegação e Media3 isolado. Build Android e testes físicos permanecem pendentes. Ver `RELEASE-1.0.330.md` e `VALIDATION-1.0.330.md`.
+
+**Versão anterior:** `1.0.329+329`
+
+## Atualização 1.0.329+329 · Estabilidade de RTSP
+
+Reconexão limitada a três tentativas por sessão (2, 5 e 10 segundos), watchdog iniciado após anexar o player, confirmação independente do primeiro quadro quando o VLC permite snapshot e logs sem credenciais. O LibVLC continua sendo o motor do monitoramento/IA; a prévia Media3 permanece isolada para evitar regressão em H.265 e na captura da IA. Não inclui gravação RTSP nem JPEG manual. Ver `RELEASE-1.0.329.md` e `VALIDATION-1.0.329.md`.
+
 
 ## Atualização 1.0.328+328 · Configurações sem APIs duplicadas
 

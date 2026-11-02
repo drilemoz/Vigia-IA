@@ -1,3 +1,23 @@
+## 1.0.330+330 (2026-11-02)
+
+- Integrada recepção de H.264 Annex-B HTTP do Minha Câmera (rota privada `/h264/<token>`) pelo LibVLC com `:demux=h264` no monitoramento e na Central MCRP.
+- Troca automática MJPEG/H.264 pelo cabeçalho `x-stream-codec` da telemetria, ou HTTP 409 quando o transmissor já está em H.264, sem alterar a chave de pareamento existente.
+- Preservado MJPEG e a conversão de quadros para IA; H.264 pode oferecer snapshots para a mesma IA com decodificação VLC, sem encoder adicional.
+- RTSP: timeout de primeira captura de 25s, checagem de quadro recente após 18s e snapshot de verificação a cada 4s sem IA. Reconexões continuam limitadas em 2/5/10s.
+- Ao contrário de `isPlaying`, o estado streaming depende da captura confirmada. O watchdog apenas indica possível congelamento; snapshot indisponível pode gerar falso positivo, requer testes em aparelho.
+- Compatibilidade: Media3 permanece isolado; módulos mapas, sensores, gravação e navegação não modificados.
+- Verificações estruturais e testes locais em CI; compilação Flutter e testes físicos pendentes.
+
+## 1.0.329+329 (2026-11-02)
+
+- RTSP/VLC: recuperação limitada a três tentativas com atrasos progressivos, sem reconexões indefinidas.
+- Timeout de início contado após anexar a superfície do player; evita timeout por demora em abrir a prévia.
+- Confirmação e diagnóstico de primeiro quadro por snapshot independente do estado `isPlaying`; sem atribuir sucesso de vídeo apenas a uma porta TCP aberta.
+- Em prévia sem IA, confirmação sem converter todos os quadros para RGB; erros de snapshot isolados não derrubam uma imagem em reprodução.
+- Logs do controlador RTSP mostram somente host, motor, transporte e estágios; credenciais excluídas de erros emitidos para UI.
+- Media3 RTSP segue em teste independente sem IA; os módulos mapas, sensores, câmera local e MCRP não foram alterados.
+- Acrescentados testes da política de recuperação. Build Flutter e execução em hardware ainda pendentes.
+
 ## 1.0.328+328 (2026-11-01)
 
 - Removidos atalhos individuais de Gemini e Google Maps em Configurações; todos os seis serviços agora são gerenciados em Serviços e APIs.

@@ -1,3 +1,18 @@
+# Validação Vigia IA 1.0.330+330
+
+- Executar `tool/verify_project.sh` e testes de URL /live/ → /h264/.
+- No Android: testar transmissor Minha Câmera alternando MJPEG/H.264, monitoramento ao vivo, IA local e câmera secundária.
+- Confirmar libVLC H.264 Annex-B, reinício após quedas Wi-Fi, 25s de primeira captura e 18s de liveness com reconexões limitadas.
+- Verificar impacto do snapshot nas câmeras cuja libVLC não disponibiliza capturas.
+- `flutter analyze`, `flutter test`, build Android e testes em aparelhos reais pendentes se o Flutter SDK não estiver disponível.
+
+# Validação Vigia IA 1.0.329+329
+
+- `tool/verify_project.sh`: executar localmente.
+- `test/rtsp_recovery_policy_test.dart`: executar no Flutter SDK.
+- `flutter analyze`, `flutter test` e `flutter build apk`: pendentes se SDK não estiver disponível.
+- Verificar RTSP H.265 com `/onvif1` e `/onvif2` em aparelho físico sem registrar senha no diagnóstico.
+
 # Validação Vigia IA 1.0.328+328
 
 - Verificador integral aprovado; 377 testes Python executados (1 ignorado). Centralização dos atalhos de credenciais em Configurações e Mapas. Veja `VALIDATION-1.0.328.md`.

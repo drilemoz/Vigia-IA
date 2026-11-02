@@ -37,6 +37,24 @@ class MinhaCameraLiveUrl {
     return local ? uri : null;
   }
 
+  /// Fluxo AVC Annex-B HTTP do Minha Câmera; preserva a validação do QR.
+  /// Nunca aceita uma URL /h264/ arbitrária como entrada pública.
+  static Uri? h264FromLive(String liveUrl) {
+    final live = parse(liveUrl);
+    if (live == null) return null;
+    return live.replace(path: '/h264/${live.pathSegments.last}');
+  }
+
+  static bool isValidH264(String input) {
+    final uri = Uri.tryParse(input);
+    if (uri == null || !RegExp(r'^/h264/[0-9a-f]{32}$').hasMatch(uri.path)) {
+      return false;
+    }
+    final candidate = uri.replace(path: '/live/${uri.pathSegments.last}');
+    return parse(candidate.toString()) != null &&
+        h264FromLive(candidate.toString()).toString() == uri.toString();
+  }
+
   static bool isValid(String? input) => input != null && parse(input) != null;
 
   static String? accessToken(String? input) {
