@@ -32,6 +32,6 @@ class UnifiedMap327(unittest.TestCase):
   self.assertIn('height: 50',shell)
   self.assertIn('const Color(0xCC081D2C)',shell)
  def test_version_sync(self):
-  self.assertIn('version: 1.0.330+330',file('pubspec.yaml'))
-  self.assertTrue((R/'RELEASE-1.0.330.md').exists())
+  self.assertIn('version: 1.0.331+331',file('pubspec.yaml'))
+  self.assertTrue((R/'RELEASE-1.0.331.md').exists())
 if __name__=='__main__': unittest.main()

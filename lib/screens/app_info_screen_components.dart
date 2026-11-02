@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.330',
+          version: '1.0.331',
           current: true,
+          changes: [
+            'CI: corrigido o contrato MCRP legado que bloqueava indevidamente a IA em H.264.',
+            'Teste preventivo confirma separação do parser MJPEG e dos quadros H.264 via LibVLC.',
+            'Recepção de câmeras, central de APIs e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.330',
+          current: false,
           changes: [
             'Minha Câmera H.264: recepção HTTP Annex-B pelo VLC no monitoramento e na IA.',
             'Troca automática entre MJPEG e H.264 conforme o status remoto, sem dois players simultâneos.',
@@ -2827,8 +2837,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.330',
+          version: '1.0.331',
           current: true,
+          changes: [
+            'CI: corrigido o contrato MCRP legado que bloqueava indevidamente a IA em H.264.',
+            'Teste preventivo confirma separação do parser MJPEG e dos quadros H.264 via LibVLC.',
+            'Recepção de câmeras, central de APIs e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.330',
+          current: false,
           changes: [
             'Minha Câmera H.264: recepção HTTP Annex-B pelo VLC no monitoramento e na IA.',
             'Troca automática entre MJPEG e H.264 conforme o status remoto, sem dois players simultâneos.',

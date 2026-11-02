@@ -8,11 +8,11 @@ class UpdateNewsCatalog {
   /// A popup de Novidades e exclusiva da versao empacotada atual.
   /// O historico completo continua na tela Sobre > Mudancas.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.330', build: 330);
+      AppBuildVersion(version: '1.0.331', build: 331);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.330', build: 330),
+      version: AppBuildVersion(version: '1.0.331', build: 331),
       changes: <String>[
         'O Vigia IA agora recebe H.264 do Minha Câmera pelo fluxo privado HTTP Annex-B, além de MJPEG.',
         'O monitor e a câmera remota alternam automaticamente de codec e podem analisar quadros H.264 com a IA.',

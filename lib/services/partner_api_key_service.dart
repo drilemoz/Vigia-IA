@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 /// Credenciais opcionais protegidas pelo Keystore no código Android.
-/// Na 1.0.330 os testes são explícitos; as chamadas de busca/rota vêm em releases posteriores.
+/// Na 1.0.331 os testes são explícitos; as chamadas de busca/rota vêm em releases posteriores.
 enum PartnerApiProvider { geoapify, openrouteservice }
 
 class PartnerKeyStatus {

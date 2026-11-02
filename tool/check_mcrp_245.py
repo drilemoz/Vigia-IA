@@ -6,6 +6,7 @@ read=lambda n:(root/n).read_text(encoding='utf8')
 screen=read('lib/screens/mcrp_camera_screen.dart')
 client=read('lib/services/mcrp_client.dart')
 source=read('lib/sources/minha_camera_mjpeg_source.dart')
+vlc_source=read('lib/sources/rtsp_camera_source.dart')
 native=read('lib/services/native_platform_service.dart')
 android=read('android/app/src/main/kotlin/com/vigiaia/app/MainActivity.kt')
 checks={
@@ -24,7 +25,21 @@ checks={
   'sobreposição objetiva': 'DetectionOverlay(' in screen and '_detections = detections' in screen,
   'desligar IA preserva vídeo': "if (widget.analysisEnabled) unawaited(_startAi(generation));" in screen,
   'limpeza stream': '_source.dispose()' in screen and 'detector.dispose()' in screen,
-  'não processar H264 como MJPEG IA': "onChanged: codec == 'h264' ? null" in screen,
+  # Desde a 1.0.331, H.264 tem IA local por snapshots do LibVLC. O antigo
+  # bloqueio do botao de IA era uma restricao da 1.0.245 e nao vale mais.
+  # H.264 NUNCA deve entrar no parser MJPEG nem ser decodificado como JPEG.
+  'não processar H264 como MJPEG IA': (
+      "if (_disposed || generation != _generation || _codec != 'mjpeg') return;" in source
+      and 'for (final jpeg in parser.add(chunk)) {' in source
+      and "if (response.statusCode == HttpStatus.conflict) {" in source
+      and 'await _useH264(generation);' in source
+      and 'rawH264: true' in source
+      and '_h264Frames = source.frames.listen((frame)' in source
+      and 'emitFrames: emitFrames' in source
+      and "if (rawH264) ':demux=h264'" in vlc_source
+      and 'takeSnapshot(width: 640)' in vlc_source
+      and 'analysisEnabled: _analyze' in screen
+  ),
   'galeria usando arquivo stream': 'publishCameraMedia(' in native and 'file.inputStream().use' in android,
   'MediaStore imagens/vídeos': 'MediaStore.Images.Media.EXTERNAL_CONTENT_URI' in android and 'MediaStore.Video.Media.EXTERNAL_CONTENT_URI' in android,
   'galeria sem bytes na ponte': '"publishCameraMedia" -> {' in android and 'bytes' not in android.split('private fun publishCameraMedia(')[1].split('private fun saveBytesToDownloads')[0],

@@ -1,3 +1,7 @@
+## 1.0.331+331 (2026-11-02)
+- APK 277: corrigido contrato de CI antigo que exigia IA H.264 desabilitada. Pipeline H.264 de 1.0.330 preservado, teste agora confirma decoder correto e isolamento MJPEG.
+- Testes preventivos separados para codecs e metadados sincronizados.
+
 ## 1.0.330+330 (2026-11-02)
 
 - Integrada recepção de H.264 Annex-B HTTP do Minha Câmera (rota privada `/h264/<token>`) pelo LibVLC com `:demux=h264` no monitoramento e na Central MCRP.

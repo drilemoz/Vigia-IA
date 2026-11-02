@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.330+330`
+**Versão atual:** `1.0.331+331`
+
+## Atualização 1.0.331+331 · Correção do verificador MCRP (APK 277)
+
+O gate legado MCRP 245 não reconhecia a IA com H.264 introduzida na 1.0.330. Contratos agora confirmam decodificação separada (JPEG pelo parser MJPEG; H.264 por LibVLC e snapshots RGB), sem desativar a IA. Nenhuma modificação funcional de codec. Ver `RELEASE-1.0.331.md` e `VALIDATION-1.0.331.md`.
+
+**Versão anterior:** `1.0.330+330`
+
 
 ## Atualização 1.0.330+330 · H.264 entre celulares e RTSP sem quadros
 

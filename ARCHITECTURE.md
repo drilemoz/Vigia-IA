@@ -1,3 +1,8 @@
+# Arquitetura — Vigia IA 1.0.331+331
+
+- A fonte adaptativa `MinhaCameraMjpegSource` recebe MJPEG por parser próprio e delega H.264 Annex-B a `RtspCameraSource` (LibVLC); os quadros RGB para IA vêm dos snapshots da fonte apropriada.
+- O contrato de CI MCRP 245 foi atualizado para testar essa separação, e não exigir a desativação antiga da IA H.264. Sem alteração no pipeline de vídeo.
+
 # Arquitetura — Vigia IA 1.0.330+330
 
 ## Receptor Minha Câmera H.264 / MJPEG

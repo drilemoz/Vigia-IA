@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.331+331
+
+- Gate MCRP 245 adaptado ao H.264 em 1.0.330 e testes específicos 331 incluídos na validação preventiva.
+- `tool/verify_project.sh`: aprovado (exit 0); 385 testes Python na suíte agregada (384 aprovados, 1 ignorado). Flutter analyze/test/build e teste em aparelho pendentes.
+
 # Validação Vigia IA 1.0.330+330
 
 - Executar `tool/verify_project.sh` e testes de URL /live/ → /h264/.
