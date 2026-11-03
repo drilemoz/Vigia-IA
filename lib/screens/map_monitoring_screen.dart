@@ -4854,18 +4854,6 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   ],
                 ),
               ),
-              if (widget.onChooseWorkspaceMode != null)
-                ListTile(
-                  leading: const Icon(Icons.explore_outlined),
-                  title: const Text('Modo do mapa'),
-                  subtitle: Text(widget.workspaceModeLabel ?? 'Explorar'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {
-                  AutomaticDiagnosticsService.instance.recordUiAction('mapas_menu', 'modo_do_mapa');
-                    Navigator.of(sheetContext).pop();
-                    widget.onChooseWorkspaceMode?.call();
-                  },
-                ),
               if (widget.onOpenWorkspaceTools != null)
                 ListTile(
                   leading: const Icon(Icons.apps_rounded),
@@ -5911,7 +5899,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       // resolvida pelo catálogo do mapa, nunca pelas coordenadas da Gemini.
       var effectiveQuery = typed;
       var assisted = false;
-      if (!offlineOnly && typed.length >= 3) {
+      final looksLikeNaturalLanguage = RegExp(
+        r'^(onde|qual|quais|procure|encontre|mostrar|mostre|preciso|quero|tem |existe|\?)(\b|\s)',
+        caseSensitive: false,
+      ).hasMatch(typed) || typed.contains('?');
+      if (!offlineOnly && typed.length >= 3 && looksLikeNaturalLanguage) {
         try {
           final status = await GeminiMapService.instance.status();
           if (!dialogActive || serial != searchSerial) return;
@@ -7313,55 +7305,68 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
               // O mapa permanece sob as áreas do sistema; somente os controles
               // respeitam notch/status/navigation bar para evitar faixas vazias.
+              // Faixa superior única: Vigia IA · Explorar · Perto/Região/Rota · Camadas.
+              // Evita duas linhas de controles e libera o espaço do antigo cabeçalho.
               if (focusLevel < 2) Positioned(
                 top: topInset,
                 left: MapUxPolicy.controlEdge,
-                child: compactHud
-                    ? _MapControlButton(
-                        tooltip: 'Configurações do mapa',
-                        icon: Icons.settings_rounded,
-                        onPressed: () => unawaited(_showMapOptions()),
-                      )
-                    : _MapBrandButton(onTap: () => unawaited(_showMapOptions())),
-              ),
-              if (focusLevel < 2) Positioned(
-                top: topInset,
-                left: MapUxPolicy.controlEdge +
-                    (compactHud ? MapUxPolicy.controlSize : 89) + 6,
-                right: MapUxPolicy.controlEdge + MapUxPolicy.controlSize + 6,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: navigation3dActive
-                      ? _Navigation3DModePill(
-                          mode: navigationTarget.travelMode,
-                          compact: compactHud,
-                        )
-                      : _MapQuickViewBar(
-                          selected: _quickView,
-                          routeAvailable: _routeState.route.length >= 2 ||
-                              navigationTarget != null ||
-                              _previewRoutes.isNotEmpty,
-                          onSelected: _selectQuickView,
-                          compact: compactHud,
-                        ),
-                ),
-              ),
-              if (focusLevel == 0) Positioned(
-                top: topInset,
                 right: MapUxPolicy.controlEdge,
-                child: _MapControlButton(
-                  tooltip: 'Aparência e camadas do mapa',
-                  icon: Icons.layers_rounded,
-                  active: offlineProvider != null ||
-                      networkOffline ||
-                      mapAppearance != MapAppearancePreset.standard,
-                  onPressed: () {
-                    if (navigation3dActive) {
-                      setState(() => _navigation3dEnabled = false);
-                    }
-                    unawaited(_showLayerPicker());
-                  },
-                ),
+                height: MapUxPolicy.controlSize,
+                child: Row(children: [
+                  compactHud
+                      ? _MapControlButton(
+                          tooltip: 'Configurações do mapa',
+                          icon: Icons.settings_rounded,
+                          onPressed: () => unawaited(_showMapOptions()),
+                        )
+                      : _MapBrandButton(onTap: () => unawaited(_showMapOptions())),
+                  if (widget.onChooseWorkspaceMode != null) ...[
+                    const SizedBox(width: 4),
+                    _MapWorkspaceModeShortcut(
+                      label: widget.workspaceModeLabel ?? 'Explorar',
+                      compact: compactHud,
+                      onPressed: widget.onChooseWorkspaceMode!,
+                    ),
+                  ],
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: navigation3dActive
+                            ? _Navigation3DModePill(
+                                mode: navigationTarget.travelMode,
+                                compact: true,
+                              )
+                            : _MapQuickViewBar(
+                                selected: _quickView,
+                                routeAvailable: _routeState.route.length >= 2 ||
+                                    navigationTarget != null ||
+                                    _previewRoutes.isNotEmpty,
+                                onSelected: _selectQuickView,
+                                compact: true,
+                              ),
+                      ),
+                    ),
+                  ),
+                  if (focusLevel == 0) ...[
+                    const SizedBox(width: 4),
+                    _MapControlButton(
+                      tooltip: 'Aparência e camadas do mapa',
+                      icon: Icons.layers_rounded,
+                      active: offlineProvider != null || networkOffline ||
+                          mapAppearance != MapAppearancePreset.standard,
+                      onPressed: () {
+                        if (navigation3dActive) {
+                          setState(() => _navigation3dEnabled = false);
+                        }
+                        unawaited(_showLayerPicker());
+                      },
+                    ),
+                  ],
+                ]),
               ),
               if (focusLevel == 0)
                 Positioned(
@@ -8490,6 +8495,45 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
   }
 
+}
+
+class _MapWorkspaceModeShortcut extends StatelessWidget {
+  const _MapWorkspaceModeShortcut({
+    required this.label,
+    required this.compact,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool compact;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: 'Modo do mapa: $label',
+    child: Material(
+      color: const Color(0xF0081D31),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onPressed,
+        child: SizedBox(
+          height: MapUxPolicy.controlSize,
+          width: compact ? 36 : 74,
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.explore_rounded, color: Color(0xFF19D2BC), size: 17),
+            if (!compact) ...[
+              const SizedBox(width: 3),
+              Flexible(child: Text(label, maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white,
+                  fontSize: 10, fontWeight: FontWeight.w700))),
+            ],
+          ]),
+        ),
+      ),
+    ),
+  );
 }
 
 class _MapBrandButton extends StatelessWidget {

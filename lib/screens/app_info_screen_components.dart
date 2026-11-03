@@ -77,12 +77,20 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.333',
+          version: '1.0.334',
           current: true,
           changes: [
-            'Google Maps: Secret MAPS_API_KEY opcional embutido no manifesto do APK.',
-            'A central distingue chave guardada no aparelho de SDK configurado na compilação.',
-            'Preservados OpenStreetMap offline, RTSP, câmera H.264/MJPEG e demais serviços.',
+            'Exportar e importar chaves de APIs em backup criptografado por senha.',
+            'Busca e pontos próximos com limite de espera e resposta de erro visível.',
+            'Mapa sem cabeçalho redundante, com Explorar na barra de controles.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.333',
+          current: false,
+          changes: [
+            'Google Maps via MAPS_API_KEY opcional no build e status de SDK separado da chave do usuário.',
           ],
         ),
         SizedBox(height: 10),
@@ -2856,12 +2864,20 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.333',
+          version: '1.0.334',
           current: true,
           changes: [
-            'Google Maps: Secret MAPS_API_KEY opcional embutido no manifesto do APK.',
-            'A central distingue chave guardada no aparelho de SDK configurado na compilação.',
-            'Preservados OpenStreetMap offline, RTSP, câmera H.264/MJPEG e demais serviços.',
+            'Exportar e importar chaves de APIs em backup criptografado por senha.',
+            'Busca e pontos próximos com limite de espera e resposta de erro visível.',
+            'Mapa sem cabeçalho redundante, com Explorar na barra de controles.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.333',
+          current: false,
+          changes: [
+            'Google Maps via MAPS_API_KEY opcional no build e status de SDK separado da chave do usuário.',
           ],
         ),
         SizedBox(height: 10),

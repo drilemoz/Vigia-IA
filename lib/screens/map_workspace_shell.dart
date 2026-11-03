@@ -128,35 +128,11 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
       MapMonitoringScreen(
         key: const ValueKey<String>('workspace-map'),
         workspaceVisible: !_toolVisible,
-        workspaceHeaderHeight: 58,
+        workspaceHeaderHeight: 0,
         navigationSearchRequests: _destinationSearchRequests,
         onChooseWorkspaceMode: () => unawaited(_chooseMode()),
         onOpenWorkspaceTools: () => unawaited(_showTools()),
         workspaceModeLabel: _mode.label,
-      ),
-      Positioned(
-        top: MediaQuery.paddingOf(context).top + 4,
-        left: 12, right: 12,
-        height: 50,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: const Color(0xCC081D2C),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 14, right: 4),
-            child: Row(children: [
-              const Expanded(child: Text('Mapas',
-                style: TextStyle(color: Colors.white, fontSize: 21,
-                  fontWeight: FontWeight.w700))),
-              IconButton(
-                tooltip: 'Configurações gerais',
-                onPressed: () => unawaited(_openTool(const SettingsScreen())),
-                icon: const Icon(Icons.settings_outlined, color: Colors.white),
-              ),
-            ]),
-          ),
-        ),
       ),
     ]),
   );

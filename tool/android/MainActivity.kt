@@ -51,6 +51,11 @@ import io.flutter.plugin.common.EventChannel
 import java.io.File
 import java.nio.ByteBuffer
 import java.security.KeyStore
+import java.security.SecureRandom
+import java.io.ByteArrayOutputStream
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -98,6 +103,7 @@ class MainActivity : FlutterActivity() {
     private var pendingAudioImportSlot: String? = null
     private var pendingDocumentSaveResult: MethodChannel.Result? = null
     private var pendingOfflineMapImportResult: MethodChannel.Result? = null
+    private var pendingApiArchiveResult: MethodChannel.Result? = null
     private var pendingDocumentBytes: ByteArray? = null
     private var pendingDocumentMimeType: String? = null
     private var pendingRecordingPermissionResult: MethodChannel.Result? = null
@@ -117,6 +123,7 @@ class MainActivity : FlutterActivity() {
     private val recordAudioPermissionRequestCode = 4416
     private val documentSaveRequestCode = 4417
     private val offlineMapImportRequestCode = 4418
+    private val apiArchiveImportRequestCode = 4419
 
     private companion object {
         // A chave do Maps SDK é obtida exclusivamente do manifesto do APK.
@@ -681,6 +688,25 @@ class MainActivity : FlutterActivity() {
                 beginDocumentSave(fileName, mimeType, bytes, result)
             }
             "pickOfflineMapPackage" -> beginOfflineMapImport(result)
+            "encryptApiArchive" -> {
+                try {
+                    val payload = call.argument<String>("payload").orEmpty()
+                    val password = call.argument<String>("password").orEmpty()
+                    result.success(encryptApiArchive(payload, password))
+                } catch (_: Throwable) {
+                    result.error("api_archive_encrypt", "Não foi possível proteger o arquivo.", null)
+                }
+            }
+            "decryptApiArchive" -> {
+                try {
+                    val bytes = call.argument<ByteArray>("bytes") ?: byteArrayOf()
+                    val password = call.argument<String>("password").orEmpty()
+                    result.success(decryptApiArchive(bytes, password))
+                } catch (_: Throwable) {
+                    result.error("api_archive_decrypt", "Senha incorreta ou arquivo inválido.", null)
+                }
+            }
+            "pickApiArchive" -> beginApiArchiveImport(result)
             "requestNotificationPermission" -> requestNotificationPermission(result)
             "notificationsAllowed" -> result.success(notificationsAllowed())
             "localNetworkPermissionStatus" -> result.success(localNetworkPermissionStatus())
@@ -910,6 +936,34 @@ class MainActivity : FlutterActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == apiArchiveImportRequestCode) {
+            val pending = pendingApiArchiveResult
+            pendingApiArchiveResult = null
+            if (pending == null) return
+            val uri = data?.data
+            if (resultCode != Activity.RESULT_OK || uri == null) {
+                pending.success(null)
+                return
+            }
+            try {
+                val buffer = ByteArrayOutputStream()
+                contentResolver.openInputStream(uri)?.use { input ->
+                    val chunk = ByteArray(4096)
+                    while (true) {
+                        val size = input.read(chunk)
+                        if (size < 0) break
+                        require(buffer.size() + size <= 65536) { "Arquivo grande demais" }
+                        buffer.write(chunk, 0, size)
+                    }
+                } ?: throw IllegalStateException("Arquivo inacessível")
+                val bytes = buffer.toByteArray()
+                require(bytes.size >= 48) { "Arquivo vazio/inválido" }
+                pending.success(bytes)
+            } catch (_: Throwable) {
+                pending.error("api_archive_read", "Não foi possível ler o arquivo de APIs (máximo 64 KiB).", null)
+            }
+            return
+        }
         if (requestCode == audioImportRequestCode) {
             val pending = pendingAudioImportResult
             val slot = pendingAudioImportSlot
@@ -1152,6 +1206,68 @@ class MainActivity : FlutterActivity() {
             }
         }
         return ok
+    }
+
+    // Backup portável: AES-256-GCM com senha derivada por PBKDF2-HMAC-SHA256.
+    // Arquivo: magic(8) + salt(16) + nonce(12) + ciphertext autenticado.
+    // NÃO usa a chave Android Keystore: o arquivo deve abrir em outro aparelho.
+    private val apiArchiveMagic = "VIGAAPI1".toByteArray(Charsets.US_ASCII)
+    private val apiArchiveIterations = 210_000
+
+    private fun apiArchiveKey(password: String, salt: ByteArray): SecretKeySpec {
+        require(password.length in 10..256) { "Senha fora do limite" }
+        val spec = PBEKeySpec(password.toCharArray(), salt, apiArchiveIterations, 256)
+        return try {
+            val material = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+                .generateSecret(spec).encoded
+            try { SecretKeySpec(material, "AES") }
+            finally { material.fill(0) }
+        } finally { spec.clearPassword() }
+    }
+
+    private fun encryptApiArchive(payload: String, password: String): ByteArray {
+        val plain = payload.toByteArray(Charsets.UTF_8)
+        require(plain.size in 2..16384) { "Dados fora do limite" }
+        val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
+        val nonce = ByteArray(12).also { SecureRandom().nextBytes(it) }
+        val header = apiArchiveMagic + salt + nonce
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, apiArchiveKey(password, salt),
+            GCMParameterSpec(128, nonce))
+        cipher.updateAAD(header)
+        return header + cipher.doFinal(plain)
+    }
+
+    private fun decryptApiArchive(bytes: ByteArray, password: String): String {
+        require(bytes.size in 53..65536 &&
+            bytes.copyOfRange(0, 8).contentEquals(apiArchiveMagic)) { "Formato inválido" }
+        val header = bytes.copyOfRange(0, 36)
+        val salt = bytes.copyOfRange(8, 24)
+        val nonce = bytes.copyOfRange(24, 36)
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, apiArchiveKey(password, salt),
+            GCMParameterSpec(128, nonce))
+        cipher.updateAAD(header)
+        val plain = cipher.doFinal(bytes.copyOfRange(36, bytes.size))
+        require(plain.size <= 16384) { "Conteúdo fora do limite" }
+        return String(plain, Charsets.UTF_8)
+    }
+
+    private fun beginApiArchiveImport(result: MethodChannel.Result) {
+        if (pendingApiArchiveResult != null) {
+            result.error("api_archive_busy", "Seleção já em andamento.", null)
+            return
+        }
+        pendingApiArchiveResult = result
+        try {
+            startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+            }, apiArchiveImportRequestCode)
+        } catch (_: Throwable) {
+            pendingApiArchiveResult = null
+            result.error("api_archive_picker", "Não foi possível selecionar o arquivo.", null)
+        }
     }
 
     private fun beginOfflineMapImport(result: MethodChannel.Result) {

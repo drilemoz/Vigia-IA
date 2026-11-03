@@ -1,3 +1,14 @@
+# Arquitetura — Vigia IA 1.0.334+334
+
+## Backup de credenciais e limites da interface de mapas
+
+- `ApiCredentialsBackupService` coleta somente credenciais locais de Gemini, Google Maps (chave do usuário), Stadia, Geoapify, OpenRouteService e modelo Gemini salvo, sob ação explícita.
+- `MainActivity` cifra JSON até 16 KiB em formato `VIGAAPI1 + salt(16) + IV(12) + AES-256-GCM`, derivando a chave com PBKDF2-HMAC-SHA256, 210.000 iterações. Senha não é salva; exportar usa SAF e importar limita o arquivo a 64 KiB e verifica a autenticidade antes da prévia. Operações nunca adicionam chaves ao GitHub/Drive, logs ou relatório.
+- A chave `MAPS_API_KEY` incorporada ao manifesto do APK não é incluída; Open-Meteo não exige chave. Importação só substitui as entradas presentes; não testa cotas automaticamente.
+- `MapWorkspaceShell` remove o banner superior e usa controles do `MapMonitoringScreen`, com seletor de modo diretamente na primeira linha. Não altera GPS ou camadas.
+- `MapDestinationSearchService` e `RouteExplorerService` aplicam prazo final às consultas, com fallback offline/cache. Consultas de nomes simples vão primeiro ao Nominatim; linguagem natural pode usar Gemini.
+- O SDK Google Maps não é provedor para downloads MBTiles offline. Mapas locais continuam de acordo com licenças OSM e termos dos provedores autorizados.
+
 # Arquitetura — Vigia IA 1.0.333+333
 
 ## Chave do Google Maps — autenticação de build, não runtime

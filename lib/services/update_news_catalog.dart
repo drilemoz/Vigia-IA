@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versao instalada aparece no popup Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.333', build: 333);
+      AppBuildVersion(version: '1.0.334', build: 334);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.333', build: 333),
+      version: AppBuildVersion(version: '1.0.334', build: 334),
       changes: <String>[
-        'Google Maps: o APK pode incluir uma chave opcional configurada no GitHub Secret MAPS_API_KEY.',
-        'A central diferencia chave salva no aparelho de Maps SDK habilitado no APK.',
-        'Sem chave no APK, o mapa Google permanece bloqueado e o OpenStreetMap/offline funciona normalmente.',
+        'Serviços e APIs: exportação e importação de chaves protegidas por senha em arquivo portável.',
+        'Pesquisa de cidades e pontos próximos: tempos máximos de resposta e alternativa local.',
+        'Mapa: faixa superior compacta com atalho Explorar junto de Vigia IA, Perto, Região e Rota.',
       ],
     ),
   ]);

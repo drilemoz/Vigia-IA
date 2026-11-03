@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.334+334
+
+- Backup criptografado de APIs com senha e SAF, e alteração de UI/mapa: validar em APK Android real.
+- Testes estruturais locais do novo fluxo `tool/test_api_backup_map_ui_334.py` e regressões: 399 testes Python (398 aprovados, 1 ignorado). `tool/verify_project.sh` exit 0.
+- Kotlin/JVM do cifrador portável: roundtrip, senha incorreta e adulteração rejeitados. Flutter SDK não está disponível neste ambiente.
+
 # Validação Vigia IA 1.0.333+333
 
 - Contratos de build/SDK e distinção entre chave salva e chave no manifesto; CI Secret opcional, sem credenciais em código.

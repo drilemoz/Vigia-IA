@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.333+333`
+**Versão atual:** `1.0.334+334`
+
+## Atualização 1.0.334+334 · Backup de APIs e ajustes na busca/mapa
+
+A central Serviços e APIs exporta/importa um backup portátil `.vigiaapis` criptografado por senha, com prévia/confirmacão de substituição de credenciais. Apenas chaves fornecidas no aparelho são exportadas; `MAPS_API_KEY` do manifesto e Open-Meteo não entram no arquivo. Busca direta de cidades evita esperar pela IA quando a entrada é somente um nome de local; Overpass e Nominatim têm limites de espera e exibem estados de falha. O cabeçalho "Mapas" foi removido para juntar Vigia IA, Explorar, Perto, Região, Rota e Camadas na mesma faixa. Google Maps permanece online; mapas offline continuam no fluxo OSM/MBTiles, respeitando termos de licença. Testes Android pendentes.
+
+**Versão anterior:** `1.0.333+333`
 
 ## Atualização 1.0.333+333 · Google Maps via chave do APK
 

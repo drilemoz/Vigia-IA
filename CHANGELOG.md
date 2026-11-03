@@ -1,3 +1,9 @@
+## 1.0.334+334 (2026-11-03)
+- Central de serviços: exportar/importar até cinco credenciais configuradas via arquivo `.vigiaapis` protegido por senha (AES-256-GCM, PBKDF2-HMAC-SHA256, 210.000 iterações, salt/nonce aleatórios); confirmar antes de sobrescrever e nunca apagar ausentes. Open-Meteo não exige chave; chave Google Maps do manifesto não é exportável.
+- Pesquisas online de cidades e pontos próximos com limites máximos para o carregamento, fallback local em falhas e consultas diretas sem Gemini para nomes de lugares simples.
+- Interface do mapa: cabeçalho extra removido e modo Explorar movido para a linha de Vigia IA, Perto, Região, Rota e Camadas; item repetido de modo retirado do menu.
+- Google Maps online e OSM/Stadia MBTiles offline preservados; proibição de download offline de tiles Google respeitada.
+
 ## 1.0.333+333 (2026-11-03)
 - Google Maps: GitHub Actions aceita Secret opcional `MAPS_API_KEY` e Gradle o insere no AndroidManifest (sem registrar credenciais).
 - Removida injeção em memória de metadados Android, não documentada como configuração do SDK.

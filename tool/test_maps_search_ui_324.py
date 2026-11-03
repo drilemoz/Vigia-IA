@@ -41,7 +41,7 @@ class MapSearchUi324(unittest.TestCase):
         shell=read('lib/screens/map_workspace_shell.dart')
         self.assertNotIn('appBar: AppBar(',shell)
         self.assertIn('body: Stack(children:',shell)
-        self.assertIn('workspaceHeaderHeight: 58',shell)
+        self.assertIn('workspaceHeaderHeight: 0',shell)
         map_screen=read('lib/screens/map_monitoring_screen.dart')
         self.assertIn('widget.workspaceHeaderHeight +',map_screen)
         self.assertIn('constraints.maxHeight * 0.47',map_screen)

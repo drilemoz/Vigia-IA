@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/gemini_map_service.dart';
+import '../services/api_credentials_backup_service.dart';
 import '../services/google_maps_key_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/partner_api_key_service.dart';
@@ -100,6 +101,104 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
     if (mounted) await _refresh();
   }
 
+  bool _transferring = false;
+
+  Future<String?> _askBackupPassword({required bool exporting}) async {
+    final password = TextEditingController();
+    final confirmation = TextEditingController();
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(exporting ? 'Exportar APIs protegidas' : 'Importar APIs protegidas'),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(exporting
+                  ? 'O arquivo será criptografado com sua senha e pode ser importado em outro Android. Guarde a senha: não é possível recuperá-la.'
+                  : 'Selecione um arquivo .vigiaapis e digite a senha usada na exportação.'),
+              const SizedBox(height: 12),
+              TextField(controller: password, obscureText: true,
+                maxLength: 256, decoration: const InputDecoration(
+                  labelText: 'Senha (mínimo de 10 caracteres)',
+                  border: OutlineInputBorder())),
+              if (exporting) TextField(controller: confirmation, obscureText: true,
+                maxLength: 256, decoration: const InputDecoration(
+                  labelText: 'Confirmar senha', border: OutlineInputBorder())),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancelar')),
+            FilledButton(
+              onPressed: () {
+                if (password.text.length < 10 ||
+                    (exporting && password.text != confirmation.text)) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(const SnackBar(
+                    content: Text('Senha muito curta ou confirmação diferente.')));
+                  return;
+                }
+                Navigator.pop(dialogContext, password.text);
+              },
+              child: Text(exporting ? 'Escolher destino' : 'Selecionar arquivo'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      password.dispose();
+      confirmation.dispose();
+    }
+  }
+
+  Future<void> _transferApiKeys({required bool exporting}) async {
+    if (_transferring) return;
+    final password = await _askBackupPassword(exporting: exporting);
+    if (!mounted || password == null) return;
+    setState(() => _transferring = true);
+    try {
+      final service = ApiCredentialsBackupService.instance;
+      if (exporting) {
+        final saved = await service.exportEncrypted(password);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(saved
+          ? 'Arquivo de APIs criptografado exportado com sucesso.'
+          : 'Exportação cancelada: nada foi salvo.')));
+      } else {
+        final archive = await service.selectAndDecrypt(password);
+        if (!mounted || archive == null) return;
+        final label = archive.providers.join(', ');
+        final confirmed = await showDialog<bool>(context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Confirmar importação'),
+            content: Text('Provedores no arquivo: $label.\n\n'
+              'As chaves presentes substituirão as correspondentes neste aparelho. '
+              'As demais serão mantidas. A chave incorporada ao APK do Google Maps NÃO muda.'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancelar')),
+              FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Importar')),
+            ],
+          ),
+        );
+        if (confirmed != true || !mounted) return;
+        await service.apply(archive);
+        await _refresh();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Chaves importadas. Use Testar em cada provedor para validar.')));
+      }
+    } catch (error) {
+      if (!mounted) return;
+      // A mensagem de plataforma nunca inclui a senha nem chaves.
+      final message = error is FormatException ? error.message :
+          'Não foi possível concluir a operação. Confira a senha e o arquivo.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) setState(() => _transferring = false);
+    }
+  }
+
   Future<void> _finish() async {
     if (_finishing) return;
     if (!widget.initialSetup) {
@@ -151,8 +250,25 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
               icon: const Icon(Icons.menu_book_rounded),
               label: const Text('Como conseguir todas as APIs?'),
             ),
+            const SizedBox(height: 10),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              OutlinedButton.icon(
+                onPressed: _transferring ? null : () => _transferApiKeys(exporting: true),
+                icon: const Icon(Icons.file_upload_outlined),
+                label: const Text('Exportar APIs'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _transferring ? null : () => _transferApiKeys(exporting: false),
+                icon: const Icon(Icons.file_download_outlined),
+                label: const Text('Importar APIs'),
+              ),
+            ]),
+            const SizedBox(height: 6),
+            const Text('Backup com senha (AES-256-GCM). Inclui somente chaves configuradas; '
+              'Open-Meteo não tem chave e a chave Google Maps incorporada ao APK não é exportada.',
+              style: TextStyle(fontSize: 12)),
             const SizedBox(height: 14),
-            if (_loading) const LinearProgressIndicator(),
+            if (_loading || _transferring) const LinearProgressIndicator(),
             _ApiServiceCard(
               icon: Icons.auto_awesome_rounded,
               title: 'Google Gemini',

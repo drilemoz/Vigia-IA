@@ -179,10 +179,10 @@ class MapDestinationSearchService extends ChangeNotifier {
         quick = await _fetchNearbyPlaces(
           current,
           radiusKm: quickNearbyRadiusKm,
-          timeout: const Duration(seconds: 16),
+          timeout: const Duration(seconds: 8),
           maximumItems: 180,
           allowMirror: true,
-        );
+        ).timeout(const Duration(seconds: 10));
       } catch (_) {
         quickFailed = true;
         // Uma falha na fase curta não deve impedir a busca regional.
@@ -210,10 +210,10 @@ class MapDestinationSearchService extends ChangeNotifier {
           final expanded = await _fetchNearbyPlaces(
             current,
             radiusKm: nearbyRadiusKm,
-            timeout: const Duration(seconds: 22),
+            timeout: const Duration(seconds: 7),
             maximumItems: 220,
             allowMirror: true,
-          );
+          ).timeout(const Duration(seconds: 8));
           if (expanded.isNotEmpty) {
             fetchedAny = true;
             _mergeKnownPlaces(expanded);
@@ -335,6 +335,7 @@ class MapDestinationSearchService extends ChangeNotifier {
   }) {
     final text = query.trim();
     _searchRevision++;
+    _setSearchLoading(false);
     if (text.isEmpty) {
       _results = const <MapDestinationSearchResult>[];
       _searchStatusMessage = null;
@@ -426,7 +427,7 @@ class MapDestinationSearchService extends ChangeNotifier {
           ? 'Não foi possível concluir a pesquisa.'
           : 'Mostrando resultados salvos.';
     } finally {
-      _setSearchLoading(false);
+      if (revision == _searchRevision) _setSearchLoading(false);
     }
   }
 
@@ -537,7 +538,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.333');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -545,7 +546,8 @@ class MapDestinationSearchService extends ChangeNotifier {
     );
     request.write('data=${Uri.encodeQueryComponent(query.toString())}');
     final response = await request.close().timeout(const Duration(seconds: 22));
-    final body = await utf8.decoder.bind(response).join();
+    final body = await utf8.decoder.bind(response).join()
+        .timeout(const Duration(seconds: 7));
     DataUsageService.instance.record(
       DataUsageModule.nearby,
       received: utf8.encode(body).length,
@@ -617,7 +619,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.333');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -750,7 +752,7 @@ class MapDestinationSearchService extends ChangeNotifier {
 
   Future<String> _readNearbyResponse(Uri endpoint, String query) async {
     final request = await _client.postUrl(endpoint);
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.333');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334');
     request.headers.contentType = ContentType(
       'application', 'x-www-form-urlencoded', charset: 'utf-8',
     );
@@ -836,11 +838,12 @@ class MapDestinationSearchService extends ChangeNotifier {
         final request = await _client.getUrl(uri).timeout(const Duration(seconds: 6));
         request.headers.set(
           HttpHeaders.userAgentHeader,
-          'VigiaIA/1.0.333 map-reverse-search',
+          'VigiaIA/1.0.334 map-reverse-search',
         );
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
         final response = await request.close().timeout(const Duration(seconds: 8));
-        final body = await utf8.decoder.bind(response).join();
+        final body = await utf8.decoder.bind(response).join()
+        .timeout(const Duration(seconds: 7));
         DataUsageService.instance.record(
           DataUsageModule.nearby,
           received: utf8.encode(body).length,
@@ -937,7 +940,7 @@ class MapDestinationSearchService extends ChangeNotifier {
       },
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.333 map-search');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334 map-search');
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     final response = await request.close().timeout(const Duration(seconds: 15));
     final body = await utf8.decoder.bind(response).join();

@@ -334,7 +334,10 @@ class RouteExplorerService extends ChangeNotifier {
         return _results;
       }
 
-      final onlineResults = await _fetchOnline(current);
+      // Limite total: não deixar o indicador de pontos girar por minutos
+      // enquanto instâncias Overpass respondem lentamente ou falham.
+      final onlineResults = await _fetchOnline(current)
+          .timeout(const Duration(seconds: 18));
       _results = onlineResults;
       _resultsUpdatedAt = DateTime.now();
       _lastSearchOrigin = current;
@@ -791,7 +794,7 @@ class RouteExplorerService extends ChangeNotifier {
         final request = await client.postUrl(Uri.parse(endpoint))
             .timeout(const Duration(seconds: 8));
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.333 route-explorer');
+        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334 route-explorer');
         request.headers.contentType = ContentType(
           'application', 'x-www-form-urlencoded', charset: 'utf-8',
         );
