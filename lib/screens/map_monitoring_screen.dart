@@ -8873,7 +8873,7 @@ class _MapRouteOverview extends StatelessWidget {
               message: route?.ascentMeters == null
                   ? 'Sem dados de subida disponíveis nesta rota.'
                   : 'Desnível positivo: ${route!.ascentMeters!.round()} m. '
-                    'Descida acumulada: ${route.descentMeters?.round() ?? 0} m.',
+                    'Descida acumulada: ${route?.descentMeters?.round() ?? 0} m.',
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Text('Subidas', style: TextStyle(color: Color(0xFFB6C8D7), fontSize: 9)),
                 Text(route?.ascentMeters == null

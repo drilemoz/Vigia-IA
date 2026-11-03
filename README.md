@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.335+335`
+**Versão atual:** `1.0.336+336`
+
+## Correção 1.0.336+336 · APK 281 (Flutter Analyze)
+
+Corrigidos os oito diagnósticos de `flutter analyze --fatal-infos --fatal-warnings` no workflow 281: acesso anulável à descida da rota, import redundante e asserção redundante no backup de APIs, além de cinco guardas `if` sem chaves em Geoapify e ORS. Os comportamentos de busca, navegação, segurança das credenciais e mapa offline foram preservados. A compilação Flutter/Android ainda precisa de validação em CI. Ver `RELEASE-1.0.336.md` e `VALIDATION-1.0.336.md`.
+
+**Versão anterior:** `1.0.335+335`
+
 
 ## Atualização 1.0.335+335 · Integração de APIs e mapa
 

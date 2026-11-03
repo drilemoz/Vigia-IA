@@ -54,7 +54,7 @@ class GeoapifyPoiService {
       final request = await client.getUrl(uri).timeout(const Duration(seconds: 6));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.336');
       final response = await request.close().timeout(const Duration(seconds: 8));
       final body = await response.transform(utf8.decoder).join()
           .timeout(const Duration(seconds: 8));
@@ -83,16 +83,24 @@ class GeoapifyPoiService {
     for (final feature in (decoded['features'] as List).whereType<Map>()) {
       final geometry = feature['geometry'];
       final properties = feature['properties'];
-      if (geometry is! Map || properties is! Map) continue;
+      if (geometry is! Map || properties is! Map) {
+        continue;
+      }
       final coords = geometry['coordinates'];
       if (coords is! List || coords.length < 2 ||
-          coords[0] is! num || coords[1] is! num) continue;
+          coords[0] is! num || coords[1] is! num) {
+        continue;
+      }
       final latitude = (coords[1] as num).toDouble();
       final longitude = (coords[0] as num).toDouble();
       if (!latitude.isFinite || !longitude.isFinite ||
-          latitude.abs() > 90 || longitude.abs() > 180) continue;
+          latitude.abs() > 90 || longitude.abs() > 180) {
+        continue;
+      }
       final tags = properties['categories'];
-      if (tags is! List) continue;
+      if (tags is! List) {
+        continue;
+      }
       RouteExplorerCategory? category;
       for (final entry in categories.entries) {
         if (!enabled.contains(entry.key)) continue;

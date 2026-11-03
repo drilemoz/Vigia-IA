@@ -7,16 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versao instalada aparece no popup Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.335', build: 335);
+      AppBuildVersion(version: '1.0.336', build: 336);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.335', build: 335),
+      version: AppBuildVersion(version: '1.0.336', build: 336),
       changes: <String>[
-        'Geoapify participa da busca e complementa pontos próximos quando o OSM falha.',
-        'OpenRouteService opcional para rotas ciclísticas, com retorno ao Valhalla.',
-        'Open-Meteo: até 48 h de previsão, índice UV, radiação solar e clima da rota sob demanda.',
-        'Buscar pontos na cidade selecionada sem mudar o GPS; configurar até dois atalhos rápidos no mapa.',
+        'APK 281: corrigida análise estática Flutter para compilar mapas, rotas e backup de APIs.',
+        'Preservados Geoapify, OpenRouteService, previsão Open-Meteo de 48 horas e mapa offline.',
+        'Correções de nulidade, blocos if e imports sem alterar funcionalidades existentes.',
       ],
     ),
   ]);

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -142,8 +141,9 @@ class ApiCredentialsBackupService {
       await PartnerApiKeyService.instance.save(
           PartnerApiProvider.openrouteservice, keys['openrouteservice']!);
     }
-    if (backup._geminiModel != null) {
-      await GeminiMapService.instance.saveModel(backup._geminiModel!);
+    final restoredModel = backup._geminiModel;
+    if (restoredModel != null) {
+      await GeminiMapService.instance.saveModel(restoredModel);
     }
   }
 

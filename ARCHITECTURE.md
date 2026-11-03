@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.336+336
+
+## Correção estática de integração APK 281
+
+- `map_monitoring_screen.dart`: acesso seguro a `descentMeters` quando a rota for nula. Dados de subida/descida continuam opcionais, sem estimativas inventadas.
+- `api_credentials_backup_service.dart`: import `typed_data` redundante removido e valor nullable do modelo Gemini consolidado antes da restauração; criptografia e SAF inalterados.
+- `geoapify_map_search_service.dart`, `geoapify_poi_service.dart` e `map_cycling_route_service.dart`: guardas curtas com blocos explícitos para obedecer `curly_braces_in_flow_control_structures`, sem mudar predicados/semântica.
+- Serviços opcionais e fallbacks permanecem inalterados.
+
 # Arquitetura — Vigia IA 1.0.335+335
 
 ## Integrações opcionais e limites offline

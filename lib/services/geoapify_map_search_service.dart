@@ -38,7 +38,7 @@ class GeoapifyMapSearchService {
       ).timeout(const Duration(seconds: 5));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.336');
       final response = await request.close().timeout(const Duration(seconds: 6));
       final body = await response.transform(utf8.decoder).join()
           .timeout(const Duration(seconds: 6));
@@ -70,12 +70,16 @@ class GeoapifyMapSearchService {
       final longitude = (raw['lon'] as num?)?.toDouble();
       if (latitude == null || longitude == null ||
           !latitude.isFinite || !longitude.isFinite ||
-          latitude.abs() > 90 || longitude.abs() > 180) continue;
+          latitude.abs() > 90 || longitude.abs() > 180) {
+        continue;
+      }
       final resultType = raw['result_type']?.toString();
       final kind = MapDestinationKindX.fromOsmType(resultType);
       final title = (raw['name'] ?? raw['city'] ?? raw['formatted'])
           ?.toString().trim() ?? '';
-      if (title.isEmpty) continue;
+      if (title.isEmpty) {
+        continue;
+      }
       final subtitle = raw['formatted']?.toString().trim() ?? kind.label;
       // Distância real é calculada pelo serviço chamador com fórmula geodésica.
       final id = (raw['place_id']?.toString().isNotEmpty ?? false)

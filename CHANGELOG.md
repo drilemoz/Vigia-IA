@@ -1,3 +1,9 @@
+## 1.0.336+336 (2026-11-03)
+- APK 281: corrigidos os oito diagnósticos de flutter analyze (um erro, um warning e seis infos) em quatro serviços/telas de mapas e APIs.
+- Descida da rota acessada com null-safety, import de typed_data redundante removido, modelo Gemini restaurado sem `!` desnecessário e blocos if/continue/throw com chaves.
+- Preservados Geoapify/ORS/Open-Meteo, fallbacks OSM/Valhalla, importação/exportação cifrada, câmeras e módulos opcionais.
+- Sincronizados build, catálogo Novidades, notas, documentação e verificadores. Flutter/Android ainda requer CI.
+
 ## 1.0.335+335 (2026-11-03)
 - Geoapify Geocoding nas pesquisas confirmadas, com Nominatim/índice offline como alternativa; Geoapify Places é alternativa quando Overpass não retorna POIs.
 - OpenRouteService para bicicleta com manobras, distância, duração e elevação (quando disponível), com fallback Valhalla; nenhum token embutido no código.

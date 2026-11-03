@@ -77,8 +77,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.335',
+          version: '1.0.336',
           current: true,
+          changes: [
+            'APK 281: corrigidas oito ocorrências apontadas pelo flutter analyze.',
+            'Preservados Geoapify, ORS, Open-Meteo, mapas offline e backup de APIs.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.335',
+          current: false,
           changes: [
             'Geoapify nas pesquisas e POIs; OpenRouteService para rotas de bicicleta com alternativa Valhalla.',
             'Open-Meteo com até 48 h, radiação solar, UV e clima sob demanda na rota.',
@@ -2874,8 +2883,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.335',
+          version: '1.0.336',
           current: true,
+          changes: [
+            'APK 281: corrigidas oito ocorrências apontadas pelo flutter analyze.',
+            'Preservados Geoapify, ORS, Open-Meteo, mapas offline e backup de APIs.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.335',
+          current: false,
           changes: [
             'Geoapify nas pesquisas e POIs; OpenRouteService para rotas de bicicleta com alternativa Valhalla.',
             'Open-Meteo com até 48 h, radiação solar, UV e clima sob demanda na rota.',

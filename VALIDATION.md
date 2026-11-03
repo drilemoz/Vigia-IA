@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.336+336
+
+- Logs do APK 281: verificações preventivas passaram (406 testes); `flutter analyze` falhou com oito diagnósticos, corrigidos neste fonte.
+- Verificação preventiva local: exit 0; 413 testes Python (412 aprovados, 1 ignorado). Ver `VALIDATION-1.0.336.md`.
+- Pendente: executar o `flutter analyze --fatal-infos --fatal-warnings`, `flutter test` e APK no GitHub Actions. Não confundir testes estáticos com compilação.
+
 # Validação Vigia IA 1.0.335+335
 
 - `tool/verify_project.sh`: aprovado (exit 0); suíte agregada 406 testes Python (405 aprovados, 1 ignorado), incluindo 7 novos contratos de integração Geoapify/ORS/Open-Meteo/POIs por cidade/atalhos.

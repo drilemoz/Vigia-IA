@@ -71,7 +71,7 @@ class MapCyclingRouteService {
       <String, String>{'json': payload},
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.336');
     request.headers.set('X-Client-Id', 'com.vigiaia.app');
     final response = await request.close().timeout(const Duration(seconds: 12));
     final body = await utf8.decoder.bind(response).join();
@@ -109,7 +109,7 @@ class MapCyclingRouteService {
       request.headers.set(HttpHeaders.authorizationHeader, key);
       request.headers.set(HttpHeaders.acceptHeader, 'application/geo+json, application/json');
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.336');
       request.add(utf8.encode(payload));
       final response = await request.close().timeout(const Duration(seconds: 9));
       final body = await response.transform(utf8.decoder).join()
@@ -137,7 +137,9 @@ class MapCyclingRouteService {
       throw const FormatException('GeoJSON ORS sem rota');
     }
     final feature = (data['features'] as List).first;
-    if (feature is! Map) throw const FormatException('Rota ORS inválida');
+    if (feature is! Map) {
+      throw const FormatException('Rota ORS inválida');
+    }
     final geometry = feature['geometry'];
     if (geometry is! Map || geometry['coordinates'] is! List) {
       throw const FormatException('Geometria ORS inválida');
@@ -145,14 +147,18 @@ class MapCyclingRouteService {
     final points = <LatLng>[];
     for (final raw in (geometry['coordinates'] as List)) {
       if (raw is! List || raw.length < 2 ||
-          raw[0] is! num || raw[1] is! num) continue;
+          raw[0] is! num || raw[1] is! num) {
+        continue;
+      }
       final lat = (raw[1] as num).toDouble();
       final lon = (raw[0] as num).toDouble();
       if (lat.isFinite && lon.isFinite && lat.abs() <= 90 && lon.abs() <= 180) {
         points.add(LatLng(lat, lon));
       }
     }
-    if (points.length < 2) throw const FormatException('Rota ORS sem pontos');
+    if (points.length < 2) {
+      throw const FormatException('Rota ORS sem pontos');
+    }
     final properties = feature['properties'];
     if (properties is! Map || properties['summary'] is! Map) {
       throw const FormatException('Rota ORS sem resumo');
@@ -168,14 +174,20 @@ class MapCyclingRouteService {
     if (segments is List) {
       for (final segment in segments.whereType<Map>()) {
         final steps = segment['steps'];
-        if (steps is! List) continue;
+        if (steps is! List) {
+          continue;
+        }
         for (final step in steps.whereType<Map>()) {
           final waypoints = step['way_points'];
-          if (waypoints is! List || waypoints.length < 2) continue;
+          if (waypoints is! List || waypoints.length < 2) {
+            continue;
+          }
           final begin = (waypoints[0] as num?)?.toInt();
           final end = (waypoints[1] as num?)?.toInt();
           if (begin == null || end == null || begin < 0 ||
-              end < begin || end >= points.length) continue;
+              end < begin || end >= points.length) {
+            continue;
+          }
           maneuvers.add(MapCyclingManeuver(
             instruction: step['instruction']?.toString() ?? 'Continuar',
             beginShapeIndex: begin,
