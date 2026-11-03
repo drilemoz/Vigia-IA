@@ -1,4 +1,12 @@
-# Arquitetura — Vigia IA 1.0.331+331
+# Arquitetura — Vigia IA 1.0.333+333
+
+## Chave do Google Maps — autenticação de build, não runtime
+
+O Google Maps SDK for Android obtém `com.google.android.geo.API_KEY` no AndroidManifest. `android/app/build.gradle.kts` define `${MAPS_API_KEY}` com prioridade para variável de ambiente (`MAPS_API_KEY`) e fallback ao `android/local.properties` local; o workflow usa `secrets.MAPS_API_KEY`, opcional e não impresso. O Secret é incorporado no APK e, por isso, **não é confidencial após a distribuição**: restrinja-o ao aplicativo `com.vigiaia.app`, SHA-1 da assinatura final e Maps SDK for Android. Sem chave, o renderer Google não é montado, preservando OSM/offline. Não há injeção em memória do `ApplicationInfo.metaData`.
+
+A chave digitada no aplicativo permanece criptografada via Android Keystore, apenas para gerenciamento local: `configured`/`userConfigured` podem ser verdadeiros sem `sdkReady`. `GoogleMapsKeyService.hasKey` exige `sdkReady`, que corresponde a chave plausível no manifesto, não a autenticação confirmada. A UI não declara sucesso de conexão; o teste real depende do Maps SDK/Google Cloud no dispositivo. Geoapify/ORS permanecem limitados a teste de chaves nesta etapa.
+
+# Arquitetura — Vigia IA 1.0.332+332
 
 - A fonte adaptativa `MinhaCameraMjpegSource` recebe MJPEG por parser próprio e delega H.264 Annex-B a `RtspCameraSource` (LibVLC); os quadros RGB para IA vêm dos snapshots da fonte apropriada.
 - O contrato de CI MCRP 245 foi atualizado para testar essa separação, e não exigir a desativação antiga da IA H.264. Sem alteração no pipeline de vídeo.

@@ -7,17 +7,28 @@ import 'package:flutter/services.dart';
 class GoogleMapsKeyStatus {
   const GoogleMapsKeyStatus({
     required this.configured,
+    required this.sdkReady,
+    required this.buildConfigured,
+    required this.userConfigured,
     required this.source,
     required this.masked,
   });
 
   static const GoogleMapsKeyStatus none = GoogleMapsKeyStatus(
     configured: false,
+    sdkReady: false,
+    buildConfigured: false,
+    userConfigured: false,
     source: 'none',
     masked: '',
   );
 
+  /// Existe alguma chave salva no aparelho ou embutida no APK.
   final bool configured;
+  /// Manifesto do APK possui uma chave Google Maps plausível (não valida Cloud).
+  final bool sdkReady;
+  final bool buildConfigured;
+  final bool userConfigured;
 
   /// `user` (digitada pelo usuário), `build` (embutida no APK) ou `none`.
   final String source;
@@ -26,11 +37,10 @@ class GoogleMapsKeyStatus {
   bool get isUserKey => source == 'user';
 }
 
-/// Guarda a chave do Google Maps de cada usuário (criptografada no Android
-/// Keystore) e informa se o mapa Google pode ser aberto com segurança.
-///
-/// Sem chave, o Maps SDK derruba o app ao criar o mapa. Por isso a tela de mapa
-/// consulta [hasKey] antes de montar o `GoogleMap`.
+/// Guarda uma chave fornecida pelo usuário para gerenciamento criptografado.
+/// Apenas a chave do manifesto do APK pode habilitar o Maps SDK; a chave
+/// informada pela UI NÃO modifica o manifesto instalado.
+/// Sem chave de build, o app mantém o mapa OSM e não cria um GoogleMap.
 class GoogleMapsKeyService extends ChangeNotifier {
   GoogleMapsKeyService._();
 
@@ -42,7 +52,8 @@ class GoogleMapsKeyService extends ChangeNotifier {
   bool _initialized = false;
 
   GoogleMapsKeyStatus get status => _status;
-  bool get hasKey => _status.configured;
+  /// Proteção: não abrir GoogleMap somente porque uma chave foi salva na UI.
+  bool get hasKey => _status.sdkReady;
   bool get initialized => _initialized;
 
   Future<void> initialize() async {
@@ -105,6 +116,9 @@ class GoogleMapsKeyService extends ChangeNotifier {
     if (data == null) return GoogleMapsKeyStatus.none;
     return GoogleMapsKeyStatus(
       configured: data['configured'] == true,
+      sdkReady: data['sdkReady'] == true,
+      buildConfigured: data['buildConfigured'] == true,
+      userConfigured: data['userConfigured'] == true,
       source: (data['source'] as String?) ?? 'none',
       masked: (data['masked'] as String?) ?? '',
     );

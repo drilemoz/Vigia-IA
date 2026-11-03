@@ -122,6 +122,9 @@ jobs:
           APP_VERSION_NAME: ${{ steps.meta.outputs.version }}
           APP_BUILD_NUMBER: ${{ steps.meta.outputs.build_number }}
           VIGIAIA_CI_MULTI_APK: '1'
+          # Opcional: o Gradle coloca esta chave no AndroidManifest do APK.
+          # Nunca imprimir o valor nem comitar a chave no repositório.
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
         run: |
           set -euo pipefail
           test -n "$ANDROID_KEYSTORE_PATH" || { echo "ANDROID_KEYSTORE_PATH ausente" >&2; exit 1; }

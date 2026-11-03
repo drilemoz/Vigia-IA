@@ -1,3 +1,17 @@
+## 1.0.333+333 (2026-11-03)
+- Google Maps: GitHub Actions aceita Secret opcional `MAPS_API_KEY` e Gradle o insere no AndroidManifest (sem registrar credenciais).
+- Removida injeção em memória de metadados Android, não documentada como configuração do SDK.
+- Separados status `sdkReady`/`buildConfigured` de `userConfigured`: chaves criptografadas salvas via UI não liberam o renderer Google.
+- Central de APIs descreve capacidade real dos seis serviços, evitando confundir chave salva, uso ativo e teste HTTP.
+- Interface e ajuda explicam requisito de novo APK assinado com SHA-1 autorizado; fallback OSM/offline preservado.
+- Falta validação do Maps SDK em aparelho e CI Flutter/Android; nenhuma chave real incluída.
+
+## 1.0.332+332 (2026-11-02)
+- APK 278: eliminada ocorrência `curly_braces_in_flow_control_structures` em `RtspCameraSource._scheduleReconnect` usando guarda explícita com chaves, sem alterar o fluxo de execução.
+- Acrescentada regressão específica do lint e sincronizados versão/build, Novidades, telas Sobre, scripts e documentação.
+- MCRP H.264/MJPEG, watchdog, IA, central de APIs e mapas preservados.
+- `flutter analyze`, `flutter test` e build de APK exigem confirmação no GitHub Actions.
+
 ## 1.0.331+331 (2026-11-02)
 - APK 277: corrigido contrato de CI antigo que exigia IA H.264 desabilitada. Pipeline H.264 de 1.0.330 preservado, teste agora confirma decoder correto e isolamento MJPEG.
 - Testes preventivos separados para codecs e metadados sincronizados.

@@ -119,15 +119,15 @@ class MainActivity : FlutterActivity() {
     private val offlineMapImportRequestCode = 4418
 
     private companion object {
-        // Chave gravada no manifest em tempo de build (MAPS_API_KEY), lida uma vez
-        // antes de qualquer injecao da chave do usuario.
+        // A chave do Maps SDK é obtida exclusivamente do manifesto do APK.
+        // A chave criptografada do usuario fica disponível para gerenciamento,
+        // mas não modifica o manifesto nem ativa o SDK nesta instalacao.
         var googleMapsBuildKey: String? = null
         var googleMapsBuildKeyLoaded: Boolean = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         resumeMonitorRequested = intent?.getBooleanExtra("resume_monitor", false) == true
-        applyStoredGoogleMapsKey()
         super.onCreate(savedInstanceState)
     }
 
@@ -1411,10 +1411,10 @@ class MainActivity : FlutterActivity() {
         return generator.generateKey()
     }
 
-    // ---- Chave do Google Maps informada pelo usuario ----
-    // O Maps SDK le a chave de com.google.android.geo.API_KEY. Quando o usuario
-    // cadastra a propria chave, ela e guardada criptografada (Keystore) e injetada
-    // nos metadados do app antes de o primeiro mapa ser criado.
+    // ---- Google Maps: manifesto do APK vs. chave do usuario ----
+    // O Maps SDK documenta a chave em <application> no AndroidManifest.
+    // Não modificar ApplicationInfo.metaData em memória: não é uma API oficial
+    // para configurar/atualizar as credenciais do Maps SDK em runtime.
     private val googleMapsMetaName = "com.google.android.geo.API_KEY"
     private val googleMapsPrefsName = "vigiaia_google_maps"
     private val googleMapsPrefsKey = "user_key_protected"
@@ -1430,61 +1430,48 @@ class MainActivity : FlutterActivity() {
     }
 
     @Suppress("DEPRECATION")
-    private fun injectGoogleMapsKey(key: String) {
-        try {
-            val info = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-            info.metaData?.putString(googleMapsMetaName, key)
-        } catch (_: Throwable) {
-        }
-        try {
-            applicationInfo.metaData?.putString(googleMapsMetaName, key)
-        } catch (_: Throwable) {
-        }
-    }
-
-    @Suppress("DEPRECATION")
     private fun captureBuildGoogleMapsKey() {
         if (googleMapsBuildKeyLoaded) return
         googleMapsBuildKeyLoaded = true
         googleMapsBuildKey = try {
             packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-                .metaData?.getString(googleMapsMetaName)?.trim()?.takeIf { it.isNotEmpty() }
+                .metaData?.getString(googleMapsMetaName)?.trim()?.takeIf {
+                    it.startsWith("AIza") && it.length >= 30 && it.none { char -> char.isWhitespace() }
+                }
         } catch (_: Throwable) {
             null
         }
     }
 
-    private fun applyStoredGoogleMapsKey() {
-        captureBuildGoogleMapsKey()
-        val userKey = readUserGoogleMapsKey()
-        if (userKey != null) injectGoogleMapsKey(userKey)
-    }
-
     private fun saveGoogleMapsKey(value: String) {
-        captureBuildGoogleMapsKey()
+        // Salva apenas para gerenciar/copiar a chave. A ativação do Google Maps
+        // exige um NOVO APK compilado com MAPS_API_KEY configurada.
         val prefs = getSharedPreferences(googleMapsPrefsName, Context.MODE_PRIVATE)
         if (value.isEmpty()) {
-            prefs.edit().remove(googleMapsPrefsKey).apply()
-            injectGoogleMapsKey(googleMapsBuildKey ?: "")
+            if (!prefs.edit().remove(googleMapsPrefsKey).commit()) {
+                throw IllegalStateException("Falha ao remover chave Google Maps")
+            }
         } else {
-            prefs.edit().putString(googleMapsPrefsKey, protectSecret(value)).apply()
-            injectGoogleMapsKey(value)
+            if (!prefs.edit().putString(googleMapsPrefsKey, protectSecret(value)).commit()) {
+                throw IllegalStateException("Falha ao salvar chave Google Maps")
+            }
         }
     }
 
     private fun googleMapsKeyStatus(): Map<String, Any> {
         captureBuildGoogleMapsKey()
         val userKey = readUserGoogleMapsKey()
-        val effective = userKey ?: googleMapsBuildKey
-        val masked = effective?.let {
-            val tail = if (it.length <= 4) it else it.takeLast(4)
-            "••••••••••••$tail"
-        } ?: ""
+        val buildKey = googleMapsBuildKey
+        val displayKey = userKey ?: buildKey
+        val masked = displayKey?.let { "••••••••••••${it.takeLast(4)}" } ?: ""
         return mapOf(
-            "configured" to (effective != null),
+            "configured" to (userKey != null || buildKey != null),
+            "sdkReady" to (buildKey != null),
+            "buildConfigured" to (buildKey != null),
+            "userConfigured" to (userKey != null),
             "source" to when {
                 userKey != null -> "user"
-                googleMapsBuildKey != null -> "build"
+                buildKey != null -> "build"
                 else -> "none"
             },
             "masked" to masked,

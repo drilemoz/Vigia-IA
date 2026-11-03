@@ -35,6 +35,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
   bool _finishing = false;
   bool _geminiConfigured = false;
   bool _googleConfigured = false;
+  bool _googleSdkReady = false;
   bool _stadiaConfigured = false;
   bool _geoapifyConfigured = false;
   bool _orsConfigured = false;
@@ -49,6 +50,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
     if (mounted) setState(() => _loading = true);
     bool gemini = false;
     bool google = false;
+    bool googleSdkReady = false;
     bool stadia = false;
     bool geoapify = false;
     bool ors = false;
@@ -60,6 +62,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
     try {
       await GoogleMapsKeyService.instance.refresh();
       google = GoogleMapsKeyService.instance.status.configured;
+      googleSdkReady = GoogleMapsKeyService.instance.status.sdkReady;
     } catch (_) {}
     try {
       await OfflineMapService.instance.initialize();
@@ -78,6 +81,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
       _loading = false;
       _geminiConfigured = gemini;
       _googleConfigured = google;
+      _googleSdkReady = googleSdkReady;
       _stadiaConfigured = stadia;
       _geoapifyConfigured = geoapify;
       _orsConfigured = ors;
@@ -154,6 +158,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
               title: 'Google Gemini',
               description: 'Assistência para interpretar pesquisas de locais em linguagem natural. Usa conexão e cota da sua conta.',
               configured: _geminiConfigured,
+              integrationNote: 'Integrado à busca assistida; chave salva não confirma cota ou autenticação.',
               onConfigure: () => _openScreen(const GeminiMapSettingsScreen()),
               onHelp: () => showApiServiceHelp(context, ApiHelpProvider.gemini),
               helpLabel: 'Obter chave no AI Studio',
@@ -162,8 +167,13 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
             _ApiServiceCard(
               icon: Icons.map_outlined,
               title: 'Google Maps Platform',
-              description: 'Mapa Google opcional. Requer Maps SDK for Android, faturamento e restrições Android para o pacote e certificado do app.',
+              description: 'Mapa Google opcional. Exige chave incluída no APK, faturamento e restrições do pacote/certificado.',
               configured: _googleConfigured,
+              integrationNote: _googleSdkReady
+                  ? 'Chave presente no APK; autenticação depende do Google Cloud e SHA-1.'
+                  : _googleConfigured
+                      ? 'Chave salva apenas neste aparelho; SDK NÃO habilitado neste APK.'
+                      : 'SDK inativo: configure MAPS_API_KEY no build (GitHub Secret).',
               onConfigure: () => _openScreen(const GoogleMapsKeyScreen()),
               onHelp: () => showApiServiceHelp(context, ApiHelpProvider.googleMaps),
               helpLabel: 'Obter chave no Google Cloud',
@@ -174,6 +184,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
               title: 'Stadia Maps',
               description: 'Para downloads de mapas e estilos autorizados. Mantenha os limites, créditos e termos definidos pela Stadia Maps.',
               configured: _stadiaConfigured,
+              integrationNote: 'Integrado ao download de mapas; disponibilidade depende do provedor.',
               onConfigure: _openStadia,
               onHelp: () => showApiServiceHelp(context, ApiHelpProvider.stadia),
               helpLabel: 'Obter chave no painel Stadia',
@@ -184,6 +195,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
               title: 'Geoapify',
               description: 'Busca de endereços e pontos de interesse. Chave disponível para teste; integração à pesquisa na próxima etapa.',
               configured: _geoapifyConfigured,
+              integrationNote: 'Somente gerenciamento e teste de chave; busca real ainda não usa Geoapify.',
               onConfigure: () => _openScreen(const PartnerApiKeyScreen(provider: PartnerApiProvider.geoapify)),
               onHelp: () => showApiServiceHelp(context, ApiHelpProvider.geoapify),
               helpLabel: 'Como conseguir a chave?',
@@ -194,6 +206,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
               title: 'OpenRouteService · HeiGIT',
               description: 'Rotas ciclísticas e elevação. Chave disponível para teste; integração ao roteamento em outra versão.',
               configured: _orsConfigured,
+              integrationNote: 'Somente gerenciamento e teste de chave; rotas ainda utilizam Valhalla.',
               onConfigure: () => _openScreen(const PartnerApiKeyScreen(provider: PartnerApiProvider.openrouteservice)),
               onHelp: () => showApiServiceHelp(context, ApiHelpProvider.openrouteservice),
               helpLabel: 'Como conseguir a chave?',
@@ -205,12 +218,16 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
               description: 'Previsão meteorológica já integrada. O endpoint gratuito para uso não comercial não precisa de chave. Ampliações futuras: radiação solar, UV e previsão da rota.',
               configured: false,
               keyRequired: false,
+              integrationNote: 'Previsão básica integrada ao mapa; não exige chave no acesso público não comercial.',
               onConfigure: () => showApiServiceHelp(context, ApiHelpProvider.openMeteo),
               onHelp: () => showApiServiceHelp(context, ApiHelpProvider.openMeteo),
               helpLabel: 'Entender o serviço',
             ),
             const SizedBox(height: 14),
-            Text('Cada serviço usa sua própria chave protegida. As opções de salvar, colar, mostrar/ocultar, copiar, testar e remover são oferecidas nas telas próprias. Google Maps exige validação pelo SDK Android. Nunca inclua chaves em relatórios.',
+            Text('Chave cadastrada não significa API autenticada ou recurso integrado. '
+              'Para Google Maps, só uma chave incorporada ao APK habilita o SDK; '
+              'chaves de usuário armazenadas no Android são apenas gerenciadas. '
+              'Nunca inclua credenciais em relatórios.',
               style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 22),
             FilledButton.icon(
@@ -244,6 +261,7 @@ class _ApiServiceCard extends StatelessWidget {
     required this.onHelp,
     required this.helpLabel,
     this.keyRequired = true,
+    this.integrationNote,
   });
   final IconData icon;
   final String title;
@@ -253,6 +271,7 @@ class _ApiServiceCard extends StatelessWidget {
   final VoidCallback onHelp;
   final String helpLabel;
   final bool keyRequired;
+  final String? integrationNote;
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +297,11 @@ class _ApiServiceCard extends StatelessWidget {
           Text(!keyRequired ? 'Sem chave · disponível automaticamente'
               : configured ? 'Chave cadastrada' : 'Sem chave · opcional',
             style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+          if (integrationNote != null) ...[
+            const SizedBox(height: 5),
+            Text(integrationNote!,
+              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+          ],
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 6, children: [
             FilledButton.tonalIcon(

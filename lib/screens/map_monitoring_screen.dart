@@ -1521,8 +1521,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     }
   }
 
-  // Sem chave, o Maps SDK derruba o app ao criar o mapa. Só usa o Google Maps
-  // quando existe chave; caso contrário mantém o mapa atual.
+  // Usa Google Maps apenas se o APK contém chave no AndroidManifest.
+  // Uma chave salva em tempo de execução não ativa o SDK neste APK.
   bool get _usingGoogleMap =>
       _mapViewSettings.provider == MapProvider.google &&
       !_connectivity.isOffline &&
@@ -1545,10 +1545,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     final open = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Chave do Google Maps necessária'),
+        title: const Text('Google Maps não habilitado neste APK'),
         content: const Text(
-          'Para usar o Google Maps, cadastre sua chave em Serviços e APIs. '
-          'Enquanto isso, o mapa atual continua sendo usado.',
+          'O Maps SDK exige MAPS_API_KEY na compilação do APK. '
+          'Salvar uma chave em Serviços e APIs não ativa o mapa nesta instalação. '
+          'OpenStreetMap e mapas offline continuam disponíveis.',
         ),
         actions: [
           TextButton(

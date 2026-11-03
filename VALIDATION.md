@@ -1,4 +1,11 @@
-# Validação Vigia IA 1.0.331+331
+# Validação Vigia IA 1.0.333+333
+
+- Contratos de build/SDK e distinção entre chave salva e chave no manifesto; CI Secret opcional, sem credenciais em código.
+- `tool/verify_project.sh` aprovado (exit 0), incluindo 392 testes de regressão (391 aprovados, 1 ignorado); 5 testes específicos do Maps SDK aprovados.
+- Ainda requer no GitHub Actions: `flutter analyze`, `flutter test`, Gradle assembleRelease e testes com chave válida e certificado SHA-1 do APK.
+- A presença de `sdkReady` não prova autenticação; Google Cloud faturamento e restrições devem ser verificadas no aparelho.
+
+# Validação Vigia IA 1.0.332+332
 
 - Gate MCRP 245 adaptado ao H.264 em 1.0.330 e testes específicos 331 incluídos na validação preventiva.
 - `tool/verify_project.sh`: aprovado (exit 0); 385 testes Python na suíte agregada (384 aprovados, 1 ignorado). Flutter analyze/test/build e teste em aparelho pendentes.

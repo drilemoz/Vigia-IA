@@ -33,9 +33,10 @@ const Map<ApiHelpProvider, ApiHelpInfo> apiHelp = {
       'Crie um projeto no Google Cloud Console e configure faturamento.',
       'Ative Maps SDK for Android e crie uma chave de API.',
       'Restrinja a chave ao pacote com.vigiaia.app e ao SHA-1 da assinatura do APK.',
-      'Cole e salve. Confirme abrindo o mapa Google; um teste HTTP genérico não valida a restrição Android.',
+      'No GitHub, cadastre a chave como Secret MAPS_API_KEY e gere um novo APK assinado.',
+      'Salvar uma chave apenas no aparelho não configura o Maps SDK. Confira o mapa e o Logcat após instalar o novo APK.',
     ], 'https://console.cloud.google.com/google/maps-apis', keyRequired: true,
-    warning: 'O Google exige faturamento habilitado. Verifique os preços e limites na conta; não é uma API sem risco de cobrança.'),
+    warning: 'O Google exige faturamento habilitado. A chave vai no manifesto do APK: aplique restrições Android (pacote e SHA-1). Não comite credenciais.'),
   ApiHelpProvider.stadia: ApiHelpInfo(
     'Stadia Maps', 'Downloads de mapas autorizados e controle local de créditos.', [
       'Crie sua conta ou entre no painel Stadia Maps.',

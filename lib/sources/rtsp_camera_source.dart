@@ -278,7 +278,9 @@ class RtspCameraSource implements VideoSource {
     final controller = _controller;
     if (_disposed || controller == null || !controller.isAttached ||
         _reconnectTimer != null || _reconnecting ||
-        (_recovery.exhausted && _recoveryExhaustionLogged)) return;
+        (_recovery.exhausted && _recoveryExhaustionLogged)) {
+      return;
+    }
     final delay = _recovery.scheduleNext();
     if (delay == null) {
       if (!_recoveryExhaustionLogged) {

@@ -57,8 +57,8 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
       if (!mounted) return;
       setState(() { _hasSavedUserKey = true; _controller.clear(); _obscure = true; });
       _showMessage(
-        'Chave salva. Se o mapa Google já estiver aberto, feche e abra o app '
-        'para aplicar.',
+        'Chave salva de forma criptografada. Para ativar o Maps SDK, '
+        'é necessário compilar o APK com o Secret MAPS_API_KEY.',
       );
     } catch (error) {
       if (!mounted) return;
@@ -74,8 +74,8 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Remover chave?'),
         content: const Text(
-          'O mapa Google ficará indisponível até você cadastrar outra chave. '
-          'O mapa atual continua funcionando normalmente.',
+          'Remover esta chave salva no aparelho não altera a chave que já '
+          'foi incorporada no APK. O mapa OSM continua disponível.',
         ),
         actions: [
           TextButton(
@@ -154,9 +154,12 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
     try {
       await _service.refresh();
       if (!mounted) return;
-      _showMessage(_service.status.configured
-          ? 'Chave disponível. A validação real depende de abrir o mapa com Maps SDK for Android e das restrições do Google Cloud.'
-          : 'Não há chave configurada. Abra Configurações e cadastre uma chave.');
+      final status = _service.status;
+      _showMessage(status.sdkReady
+          ? 'Maps SDK configurado no APK. Isso não confirma autenticação, cotas ou SHA-1 no Google Cloud.'
+          : status.userConfigured
+              ? 'Chave salva neste aparelho, mas NÃO incorporada ao APK. Configure o Secret MAPS_API_KEY e gere novo APK.'
+              : 'Maps SDK não habilitado neste APK. Configure o Secret MAPS_API_KEY na compilação.');
     } catch (_) {
       if (mounted) _showMessage('Não foi possível consultar a configuração.');
     }
@@ -173,11 +176,11 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
       animation: _service,
       builder: (context, _) {
         final status = _service.status;
-        final sourceLabel = switch (status.source) {
-          'user' => 'Sua chave (guardada de forma criptografada)',
-          'build' => 'Chave embutida neste APK',
-          _ => 'Nenhuma chave configurada',
-        };
+        final sourceLabel = status.sdkReady
+            ? 'Maps SDK configurado no APK (não validado online)'
+            : status.userConfigured
+                ? 'Chave salva no aparelho · SDK inativo neste APK'
+                : 'Maps SDK não configurado neste APK';
         return Scaffold(
           appBar: AppBar(title: const Text('Chave do Google Maps'), actions: [
             IconButton(tooltip: 'Como obter?', icon: const Icon(Icons.help_outline_rounded),
@@ -188,7 +191,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: status.configured
+                  color: status.sdkReady
                       ? theme.colorScheme.primaryContainer.withValues(alpha: 0.55)
                       : theme.colorScheme.errorContainer.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(14),
@@ -197,7 +200,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                   padding: const EdgeInsets.all(14),
                   child: Row(
                     children: [
-                      Icon(status.configured
+                      Icon(status.sdkReady
                           ? Icons.check_circle_rounded
                           : Icons.error_outline_rounded),
                       const SizedBox(width: 12),
@@ -208,10 +211,10 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                             Text(sourceLabel,
                                 style: const TextStyle(fontWeight: FontWeight.w800)),
                             if (status.configured)
-                              Text(status.masked)
-                            else
+                              Text(status.masked),
+                            if (!status.sdkReady)
                               const Text(
-                                'Sem chave, o Google Maps não abre. O mapa atual continua disponível.',
+                                'O mapa Google exige uma chave incluída na compilação; OSM/offline continua disponível.',
                               ),
                           ],
                         ),
@@ -271,7 +274,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                   icon: const Icon(Icons.fact_check_outlined), label: const Text('Verificar configuração')),
               ]),
               const SizedBox(height: 8),
-              Text('O Maps SDK for Android valida a chave quando o mapa Google é aberto. Verificar configuração não consulta servidores Google e não confirma restrições de SHA-1.',
+              Text('O Maps SDK for Android valida a chave incluída no manifesto quando abre o mapa. Salvar nesta tela não altera o APK; o teste local não comprova autenticação ou SHA-1.',
                 style: theme.textTheme.bodySmall),
               const SizedBox(height: 20),
               Text('Como obter uma chave',
@@ -285,7 +288,8 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                 '4. Em Credenciais, crie uma chave de API.\n'
                 '5. Restrinja a chave a apps Android: pacote com.vigiaia.app e a '
                 'impressão digital SHA-1 do certificado que assinou este APK.\n'
-                '6. Cole a chave acima e salve.',
+                '6. Para ativar o mapa Google: crie no GitHub o Secret MAPS_API_KEY '
+                'e gere um novo APK assinado. Colar nesta tela apenas guarda a chave, sem ativar o SDK.',
               ),
               const SizedBox(height: 10),
               OutlinedButton.icon(
@@ -296,8 +300,9 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'A chave fica só neste aparelho e é usada apenas pelo mapa Google. '
-                'O custo de uso, se houver, é da sua conta Google Cloud.',
+                'A chave salva nesta tela é protegida no aparelho, mas não é injetada no SDK. '
+                'Uma chave MAPS_API_KEY usada na compilação ficará no APK e deve ter restrições Android '
+                '(pacote e SHA-1). Cobranças e cotas são da sua conta Google Cloud.',
                 style: theme.textTheme.bodySmall,
               ),
             ],

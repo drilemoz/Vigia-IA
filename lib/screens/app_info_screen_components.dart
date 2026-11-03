@@ -77,8 +77,27 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.331',
+          version: '1.0.333',
           current: true,
+          changes: [
+            'Google Maps: Secret MAPS_API_KEY opcional embutido no manifesto do APK.',
+            'A central distingue chave guardada no aparelho de SDK configurado na compilação.',
+            'Preservados OpenStreetMap offline, RTSP, câmera H.264/MJPEG e demais serviços.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.332',
+          current: false,
+          changes: [
+            'APK 278: corrigido lint Dart na reconexão RTSP.',
+            'Watchdog, central de APIs e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.331',
+          current: false,
           changes: [
             'CI: corrigido o contrato MCRP legado que bloqueava indevidamente a IA em H.264.',
             'Teste preventivo confirma separação do parser MJPEG e dos quadros H.264 via LibVLC.',
@@ -2837,8 +2856,27 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.331',
+          version: '1.0.333',
           current: true,
+          changes: [
+            'Google Maps: Secret MAPS_API_KEY opcional embutido no manifesto do APK.',
+            'A central distingue chave guardada no aparelho de SDK configurado na compilação.',
+            'Preservados OpenStreetMap offline, RTSP, câmera H.264/MJPEG e demais serviços.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.332',
+          current: false,
+          changes: [
+            'APK 278: corrigido lint Dart na reconexão RTSP.',
+            'Watchdog, central de APIs e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.331',
+          current: false,
           changes: [
             'CI: corrigido o contrato MCRP legado que bloqueava indevidamente a IA em H.264.',
             'Teste preventivo confirma separação do parser MJPEG e dos quadros H.264 via LibVLC.',

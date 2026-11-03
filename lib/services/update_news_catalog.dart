@@ -5,22 +5,20 @@ class UpdateNewsCatalog {
 
   final List<UpdateRelease> releases;
 
-  /// A popup de Novidades e exclusiva da versao empacotada atual.
-  /// O historico completo continua na tela Sobre > Mudancas.
+  /// Apenas a versao instalada aparece no popup Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.331', build: 331);
+      AppBuildVersion(version: '1.0.333', build: 333);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.331', build: 331),
+      version: AppBuildVersion(version: '1.0.333', build: 333),
       changes: <String>[
-        'O Vigia IA agora recebe H.264 do Minha Câmera pelo fluxo privado HTTP Annex-B, além de MJPEG.',
-        'O monitor e a câmera remota alternam automaticamente de codec e podem analisar quadros H.264 com a IA.',
-        'O watchdog RTSP observa a ausência prolongada de quadros capturados, mesmo com VLC em reprodução.',
+        'Google Maps: o APK pode incluir uma chave opcional configurada no GitHub Secret MAPS_API_KEY.',
+        'A central diferencia chave salva no aparelho de Maps SDK habilitado no APK.',
+        'Sem chave no APK, o mapa Google permanece bloqueado e o OpenStreetMap/offline funciona normalmente.',
       ],
     ),
   ]);
-
 
   UpdateRelease? releaseFor(AppBuildVersion installed) {
     for (final release in releases) {

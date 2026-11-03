@@ -17,9 +17,9 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.331+331\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.333+333\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            source = source.replace('O Vigia IA agora recebe H.264 do Minha Câmera pelo fluxo privado HTTP Annex-B, além de MJPEG.',
+            source = source.replace('Google Maps: o APK pode incluir uma chave opcional configurada no GitHub Secret MAPS_API_KEY.',
                                     'Corrigido erro nas verificações de atualização')
             (root / 'lib/services/update_news_catalog.dart').write_text(source, 'utf8')
             policy.validate(root)
@@ -28,13 +28,13 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.331+331\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.333+333\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 331', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 333', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
-            path.write_text(source.replace('O Vigia IA agora recebe H.264 do Minha Câmera pelo fluxo privado HTTP Annex-B, além de MJPEG.',
+            path.write_text(source.replace('Google Maps: o APK pode incluir uma chave opcional configurada no GitHub Secret MAPS_API_KEY.',
                                            'TODO'), 'utf8')
             with self.assertRaisesRegex(ValueError, 'mensagens'):
                 policy.validate(root)

@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.331+331`
+**Versão atual:** `1.0.333+333`
+
+## Atualização 1.0.333+333 · Google Maps via chave do APK
+
+O Google Maps SDK exige chave no manifesto do APK; o build do GitHub Actions aceita o Secret opcional `MAPS_API_KEY` e o Gradle aceita a mesma variável de ambiente ou `android/local.properties` local. Não há chave real no repositório. A chave digitada no aplicativo continua criptografada para gerenciamento, mas **não ativa o SDK** nesta instalação; a central distingue claramente as duas situações. Sem chave no APK, usa OSM/offline. O Map SDK ainda precisa de teste autenticado em dispositivo com pacote e SHA-1 autorizados. Geoapify e ORS continuam só configuração/teste; Open-Meteo, Gemini e Stadia preservados. Ver `RELEASE-1.0.333.md` e `VALIDATION-1.0.333.md`.
+
+## Atualização 1.0.332+332 · Correção Flutter Analyze (APK 278)
+
+O APK 278 passou pela verificação preventiva (385 testes), mas o `flutter analyze --fatal-infos --fatal-warnings` falhou em `lib/sources/rtsp_camera_source.dart:281` por `curly_braces_in_flow_control_structures`. Foi adicionado um bloco explícito `{ return; }` à guarda de reconexão, sem alterar condições, temporização ou funcionalidade. Novo teste de regressão impede o retorno do lint. Fontes MCRP H.264/MJPEG, IA, mapas e central de APIs preservados. Ver `RELEASE-1.0.332.md` e `VALIDATION-1.0.332.md`.
 
 ## Atualização 1.0.331+331 · Correção do verificador MCRP (APK 277)
 

@@ -10,7 +10,16 @@ val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localPropertiesFile.inputStream().use(localProperties::load)
 }
-val googleMapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
+// Chave opcional inserida no manifesto no momento da compilação.
+// O SDK Google Maps não dispõe de uma API oficial para trocar essa chave
+// dinamicamente; salvar um valor no Android Keystore não altera o APK.
+val googleMapsApiKey = System.getenv("MAPS_API_KEY")?.trim()?.takeIf { it.isNotEmpty() }
+    ?: localProperties.getProperty("MAPS_API_KEY", "").trim()
+if (googleMapsApiKey.isNotEmpty() &&
+    (!googleMapsApiKey.startsWith("AIza") || googleMapsApiKey.length < 30 ||
+     googleMapsApiKey.any { it.isWhitespace() })) {
+    throw GradleException("MAPS_API_KEY inválida. Confira o Secret ou android/local.properties.")
+}
 
 android {
     namespace = "com.vigiaia.app"
