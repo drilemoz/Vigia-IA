@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.337+337
+
+- Alterações: localizador pt-BR, painel compacto, posição GPS recente para orientações, polylines e atalho sem duplicação. Novo teste Dart de tradução e regressão Python de interface/contratos.
+- `tool/verify_project.sh` aprovado (exit 0), com 421 testes Python executados (420 aprovados, 1 ignorado). Verificações complementares e sincronização de versão aprovadas; detalhes em `VALIDATION-1.0.337.md`.
+- Flutter SDK não disponível neste ambiente: ainda confirmar `flutter analyze`, `flutter test`, build APK e renderização real em aparelho.
+
 # Validação Vigia IA 1.0.336+336
 
 - Logs do APK 281: verificações preventivas passaram (406 testes); `flutter analyze` falhou com oito diagnósticos, corrigidos neste fonte.

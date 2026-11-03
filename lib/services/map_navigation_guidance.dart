@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../models/map_cycling_route.dart';
 import '../models/map_route_point.dart';
+import 'map_navigation_instruction_ptbr.dart';
 
 class MapNavigationProgress {
   const MapNavigationProgress({
@@ -152,8 +153,9 @@ class MapNavigationGuidance {
     }
 
     return _ManeuverState(
-      currentInstruction: current.instruction,
-      nextInstruction: next?.instruction,
+      currentInstruction: MapNavigationInstructionPtBr.localize(current.instruction),
+      nextInstruction: next == null
+          ? null : MapNavigationInstructionPtBr.localize(next.instruction),
       distanceToNextManeuverMeters: distanceToNext,
     );
   }

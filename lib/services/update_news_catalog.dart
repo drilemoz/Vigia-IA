@@ -5,17 +5,17 @@ class UpdateNewsCatalog {
 
   final List<UpdateRelease> releases;
 
-  /// Apenas a versao instalada aparece no popup Novidades.
+  /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.336', build: 336);
+      AppBuildVersion(version: '1.0.337', build: 337);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.336', build: 336),
+      version: AppBuildVersion(version: '1.0.337', build: 337),
       changes: <String>[
-        'APK 281: corrigida análise estática Flutter para compilar mapas, rotas e backup de APIs.',
-        'Preservados Geoapify, OpenRouteService, previsão Open-Meteo de 48 horas e mapa offline.',
-        'Correções de nulidade, blocos if e imports sem alterar funcionalidades existentes.',
+        'Navegação com instruções e avisos em português brasileiro.',
+        'Painel compacto como padrão, com detalhes expandidos quando necessário.',
+        'GPS desatualizado pausa as orientações; traçado mais fino e menos controles repetidos.',
       ],
     ),
   ]);

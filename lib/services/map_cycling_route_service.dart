@@ -7,6 +7,7 @@ import '../models/map_cycling_route.dart';
 import '../models/map_travel_mode.dart';
 import 'data_usage_service.dart';
 import 'partner_api_key_service.dart';
+import 'map_navigation_instruction_ptbr.dart';
 
 /// Busca rotas viárias para o perfil de deslocamento escolhido. A tela mantém
 /// direção direta como fallback quando a rede ou o serviço de roteamento não
@@ -62,7 +63,7 @@ class MapCyclingRouteService {
       ],
       'costing': travelMode.valhallaCosting,
       'units': 'km',
-      'language': 'pt-PT',
+      'language': 'pt-BR',
       'alternates': safeAlternativeCount,
     });
     final uri = Uri.https(
@@ -71,7 +72,7 @@ class MapCyclingRouteService {
       <String, String>{'json': payload},
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.336');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.337');
     request.headers.set('X-Client-Id', 'com.vigiaia.app');
     final response = await request.close().timeout(const Duration(seconds: 12));
     final body = await utf8.decoder.bind(response).join();
@@ -98,6 +99,7 @@ class MapCyclingRouteService {
       ],
       'elevation': true,
       'instructions': true,
+      'language': 'pt',
     });
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
@@ -109,7 +111,7 @@ class MapCyclingRouteService {
       request.headers.set(HttpHeaders.authorizationHeader, key);
       request.headers.set(HttpHeaders.acceptHeader, 'application/geo+json, application/json');
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.336');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.337');
       request.add(utf8.encode(payload));
       final response = await request.close().timeout(const Duration(seconds: 9));
       final body = await response.transform(utf8.decoder).join()
@@ -189,7 +191,9 @@ class MapCyclingRouteService {
             continue;
           }
           maneuvers.add(MapCyclingManeuver(
-            instruction: step['instruction']?.toString() ?? 'Continuar',
+            instruction: MapNavigationInstructionPtBr.localize(
+              step['instruction']?.toString() ?? 'Continuar',
+            ),
             beginShapeIndex: begin,
             endShapeIndex: end,
             distanceMeters: (step['distance'] as num?)?.toDouble() ?? 0,
@@ -278,7 +282,7 @@ class MapCyclingRouteService {
               : null;
           maneuvers.add(
             MapCyclingManeuver(
-              instruction: instruction,
+              instruction: MapNavigationInstructionPtBr.localize(instruction),
               beginShapeIndex:
                   shapeOffset + ((maneuver['begin_shape_index'] as num?)?.toInt() ?? 0),
               endShapeIndex:

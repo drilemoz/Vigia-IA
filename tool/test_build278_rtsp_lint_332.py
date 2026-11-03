@@ -19,9 +19,9 @@ class Build278RtspLint332(unittest.TestCase):
         self.assertIsNotNone(match, 'A guarda RTSP deve ter bloco de retorno entre chaves')
 
     def test_version_and_news(self):
-        self.assertIn('version: 1.0.336+336', (ROOT / 'pubspec.yaml').read_text('utf-8'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.336.md').is_file())
-        self.assertIn("AppBuildVersion(version: '1.0.336', build: 336)",
+        self.assertIn('version: 1.0.337+337', (ROOT / 'pubspec.yaml').read_text('utf-8'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.337.md').is_file())
+        self.assertIn("AppBuildVersion(version: '1.0.337', build: 337)",
                       (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf-8'))
 
 if __name__ == '__main__':

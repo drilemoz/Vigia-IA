@@ -14,12 +14,12 @@ class RouteAndDiagnostics322(unittest.TestCase):
         self.assertIn("'Velocidade média manual'",s)
         self.assertIn("'Tempo máximo pedalando por dia'",s)
         self.assertIn("'Equilibrar os dias'",s)
-    def test_full_navigation_guidance_initially_visible(self):
+    def test_navigation_guidance_compact_by_default(self):
         s=read('lib/screens/map_monitoring_screen.dart')
         for fn, nextfn in [('_startPreviewNavigation','_navigateToSearchResult'),('_navigateToSearchResult','_focusGooglePoint')]:
             section=s.split('Future<void> '+fn+'(',1)[1].split('Future<void> '+nextfn+'(',1)[0]
-            self.assertIn('_navigationPanelMinimized = false;',section)
-        self.assertIn('  bool _navigationPanelMinimized = false;',s)
+            self.assertIn('_navigationPanelMinimized = true;',section)
+        self.assertIn('  bool _navigationPanelMinimized = true;',s)
         self.assertNotIn('if (focusLevel == 0 && navigationTarget != null &&',s)
         self.assertNotIn('if (focusLevel == 0 && _previewTarget != null &&',s)
         self.assertIn('MapNavigationMetricCell(',s)
@@ -46,8 +46,8 @@ class RouteAndDiagnostics322(unittest.TestCase):
         self.assertIn('isRtspExitClose',s)
         self.assertIn('pode ser registro anterior',s)
     def test_release(self):
-        self.assertIn('version: 1.0.336+336',read('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.336.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.336.md').is_file())
+        self.assertIn('version: 1.0.337+337',read('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.337.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.337.md').is_file())
 
 if __name__=='__main__':unittest.main()

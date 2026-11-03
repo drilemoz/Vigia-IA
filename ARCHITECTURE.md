@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.337+337
+
+## Navegação com localização recente e tradução
+
+- `MapCyclingRouteService` solicita `language: pt` no GeoJSON OpenRouteService e `language: pt-BR` no Valhalla. `MapNavigationInstructionPtBr` faz uma conversão offline limitada a manobras comuns em inglês, preservando nomes de ruas e instruções já em português. `MapNavigationGuidance` retorna instruções normalizadas para UI e TTS.
+- `MapMonitoringScreen` só calcula progresso/novas manobras a partir de um ponto com timestamp fresco segundo `MapTelemetryPolicy` (janela de 20 s). A rotina de atualização visual existente descarta progresso quando a posição expira; a rota planejada continua visível, mas não apresenta uma manobra antiga como atual.
+- `_NavigationBanner` inicia compacto e oferece expansão manual; o modo detalhado só mostra cartões de POIs quando existem resultados. A mesma paleta é aplicada às polylines Google/OSM, com duas camadas finas em vez do traçado preto padrão.
+- O atalho de modo redundante com rótulo Navegar fica oculto enquanto há rota ativa; menus, módulos, funções de gravação, Gemini/Geoapify/ORS/Open-Meteo e MBTiles permanecem sem alteração funcional.
+
 # Arquitetura — Vigia IA 1.0.336+336
 
 ## Correção estática de integração APK 281

@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.336',
+          version: '1.0.337',
           current: true,
+          changes: [
+            'Orientações e voz em português brasileiro, inclusive quando a API retornar inglês.',
+            'Painel de navegação compacto por padrão, com expansão manual e pontos úteis opcionais.',
+            'Aviso para GPS antigo, rota mais fina e controles repetidos reduzidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.336',
+          current: false,
           changes: [
             'APK 281: corrigidas oito ocorrências apontadas pelo flutter analyze.',
             'Preservados Geoapify, ORS, Open-Meteo, mapas offline e backup de APIs.',
@@ -2883,8 +2893,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.336',
+          version: '1.0.337',
           current: true,
+          changes: [
+            'Orientações e voz em português brasileiro, inclusive quando a API retornar inglês.',
+            'Painel de navegação compacto por padrão, com expansão manual e pontos úteis opcionais.',
+            'Aviso para GPS antigo, rota mais fina e controles repetidos reduzidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.336',
+          current: false,
           changes: [
             'APK 281: corrigidas oito ocorrências apontadas pelo flutter analyze.',
             'Preservados Geoapify, ORS, Open-Meteo, mapas offline e backup de APIs.',

@@ -28,8 +28,8 @@ class NativeElapsed311Contracts(unittest.TestCase):
         self.assertNotIn('NativeCameraTransmitterService.status()', tick)
 
     def test_versao_publica_e_testes_de_clock(self):
-        self.assertIn('version: 1.0.336+336', (ROOT/'pubspec.yaml').read_text())
-        self.assertTrue((ROOT / 'RELEASE-1.0.336.md').is_file())
+        self.assertIn('version: 1.0.337+337', (ROOT/'pubspec.yaml').read_text())
+        self.assertTrue((ROOT / 'RELEASE-1.0.337.md').is_file())
         tests = (ROOT / 'test/native_elapsed_counter_test.dart').read_text()
         self.assertIn('11);', tests)
         self.assertIn('12);', tests)

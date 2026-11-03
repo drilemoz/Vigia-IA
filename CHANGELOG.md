@@ -1,3 +1,11 @@
+## 1.0.337+337 (2026-11-03)
+- ORS com instruções `pt` e Valhalla `pt-BR`; normalização local pt-BR para respostas em inglês de rotas/cache antigos, compartilhada pela navegação e voz.
+- Navegação abre com painel compacto; expansão manual permanece, com detalhes em menor altura e cartões de POIs somente quando existem dados.
+- Orientações e distâncias das próximas manobras são pausadas quando a posição GPS não é recente; rota planejada preservada sem inventar progresso.
+- Traçado das rotas no Google Maps passa a definir cor explícita (em vez do padrão preto), largura mais fina e contraste; OSM segue mesma proporção.
+- Atalho redundante Navegar oculto quando já há navegação ativa. APIs, mapas offline e outros módulos preservados.
+- Código e versão atualizados; testes Flutter/Android ainda dependem do CI.
+
 ## 1.0.336+336 (2026-11-03)
 - APK 281: corrigidos os oito diagnósticos de flutter analyze (um erro, um warning e seis infos) em quatro serviços/telas de mapas e APIs.
 - Descida da rota acessada com null-safety, import de typed_data redundante removido, modelo Gemini restaurado sem `!` desnecessário e blocos if/continue/throw com chaves.

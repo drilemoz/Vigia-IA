@@ -29,8 +29,9 @@ checks = {
         '_distance(food.distanceMeters)' in screen and
         '_distance(rest.distanceMeters)' in screen and
         '_distance(stop.distanceMeters)' in screen,
-    'placeholder para ponto indisponivel preservado':
-        all(f'{name} == null ? \'--\'' in screen for name in ('water', 'food', 'rest', 'stop')),
+    'chips vazios nao ocupam o mapa na navegacao compacta':
+        all(f'if ({name} != null)' in screen for name in ('water', 'food', 'rest', 'stop')) and
+        'if (water != null || food != null || rest != null || stop != null)' in screen,
     'sem duplicacao de classes privadas':
         'class _NavigationMetricCell' not in screen and
         'class _NavigationPoiChip' not in screen,

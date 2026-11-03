@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.336+336`
+**Versão atual:** `1.0.337+337`
+
+## Navegação 1.0.337+337 — português brasileiro, segurança GPS e painel compacto
+
+As requisições do ORS passam a pedir instruções em português (`pt`), e o Valhalla em `pt-BR`. Uma normalização offline cobre mensagens conhecidas em inglês de rotas antigas, inclusive voz. A navegação começa com um painel reduzido e pode ser expandida manualmente; pontos sem dados deixam de ocupar espaço no painel. A interface e a orientação de manobras deixam de usar posições GPS com mais de 20 segundos; distâncias da rota continuam identificadas como planejadas quando falta localização atual. O traçado Google/OSM tem cor explícita e largura menor. Durante navegação ativa, evita exibir o atalho Navegar duplicado na linha superior. Consulte `RELEASE-1.0.337.md` e `VALIDATION-1.0.337.md`. Flutter analyze/test e APK devem ser validados no CI.
+
+**Versão anterior:** `1.0.336+336`
 
 ## Correção 1.0.336+336 · APK 281 (Flutter Analyze)
 

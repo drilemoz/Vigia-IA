@@ -294,7 +294,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   bool _camerasVisible = false;
   bool _stopMapOwnedSourcesWhenHidden = true;
   bool? _fullscreenCameraSecondary;
-  bool _navigationPanelMinimized = false;
+  bool _navigationPanelMinimized = true;
   // null = HUD automático por contexto; tocar no indicador alterna a exibição.
   bool? _hudExpandedOverride;
 
@@ -348,6 +348,10 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     unawaited(SystemUiService.edgeToEdge());
     _hudTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       if (!mounted || !widget.workspaceVisible) return;
+      if (_routeState.navigationTarget != null &&
+          !MapTelemetryPolicy.isFresh(_routeState.current)) {
+        _navigationProgress = null; // Nunca manter manobra antiga como atual.
+      }
       setState(() {}); // Revê a idade de GPS, bússola e clima sem rede.
       _telemetryPanelTick.value += 1;
       _hudFreshnessTicks += 1;
@@ -369,7 +373,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   void _onWorkspaceNavigationRequest() {
     if (!mounted || !widget.workspaceVisible) return;
-    if (_routeState.current == null) {
+    if (!MapTelemetryPolicy.isFresh(_routeState.current)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ative o GPS para iniciar uma rota a partir de sua posicao.')),
       );
@@ -1376,16 +1380,21 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   MapNavigationProgress? _evaluateNavigationProgress(MapRoutePoint? current) {
     final route = _cyclingRoute;
-    if (current == null || route == null || _routeState.navigationTarget == null) {
+    if (!MapTelemetryPolicy.isFresh(current) || route == null ||
+        _routeState.availability != LocationTrackingAvailability.ready ||
+        _routeState.navigationTarget == null) {
       return null;
     }
-    return _navigationGuidance.evaluate(route: route, position: current);
+    return _navigationGuidance.evaluate(route: route, position: current!);
   }
 
   Future<void> _maybeRecalculateCyclingRoute(MapRoutePoint current) async {
     final target = _routeState.navigationTarget;
     final progress = _navigationProgress;
-    if (target == null || progress == null || _cyclingRouteLoading) return;
+    if (target == null || progress == null || _cyclingRouteLoading ||
+        !MapTelemetryPolicy.isFresh(current)) {
+      return;
+    }
     if (_lastNavigationProgressPointAt == current.recordedAt) return;
     _lastNavigationProgressPointAt = current.recordedAt;
     if (progress.arrived || !progress.offRoute) {
@@ -2294,8 +2303,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _cyclingRouteAlternatives = routes;
       _selectedCyclingRouteIndex = selected;
       _cyclingRoute = route;
-      _navigationProgress = current == null
-          ? null : _navigationGuidance.evaluate(route: route, position: current);
+      _navigationProgress = !MapTelemetryPolicy.isFresh(current)
+          ? null : _navigationGuidance.evaluate(route: route, position: current!);
       _bikeTripEstimate = target.travelMode == MapTravelMode.bicycle
           ? _bikeTripPlanner.estimate(
               distanceMeters: route.distanceMeters,
@@ -2309,7 +2318,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _navigation3dRendererFailed = false;
       _navigation3dFollowing = true;
       _followPosition = true;
-      _navigationPanelMinimized = false;
+      _navigationPanelMinimized = true;
     });
     await _routeState.navigateTo(target);
     unawaited(_mapViewSettings.setLastTravelMode(target.travelMode));
@@ -2363,7 +2372,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _offRouteSamples = 0;
       _lastRouteRecalculatedAt = null;
       _lastNavigationProgressPointAt = null;
-      _navigationPanelMinimized = false;
+      _navigationPanelMinimized = true;
     });
     unawaited(_mapViewSettings.setLastTravelMode(travelMode));
     await _routeState.navigateTo(target);
@@ -2468,6 +2477,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   );
 
   Set<gmaps.Polyline> _googlePolylines(List<List<LatLng>> routeSegments) {
+    final palette = MapAppearancePolicy.palette(
+      _resolvedMapAppearance(Theme.of(context).brightness),
+    );
     final lines = <gmaps.Polyline>{};
     for (var index = 0; index < _cyclingRouteAlternatives.length; index++) {
       if (index == _selectedCyclingRouteIndex) continue;
@@ -2497,11 +2509,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
           .toList(growable: false);
       lines.add(gmaps.Polyline(
         polylineId: const gmaps.PolylineId('cycling-route-casing'),
-        points: points, width: 10,
+        points: points, width: 7,
+        color: palette.routeCasingColor.withValues(alpha: 0.72),
       ));
       lines.add(gmaps.Polyline(
         polylineId: const gmaps.PolylineId('cycling-route'),
-        points: points, width: 6,
+        points: points, width: 4,
+        color: palette.routeColor,
       ));
     }
     for (var index = 0; index < routeSegments.length; index++) {
@@ -2510,7 +2524,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         points: routeSegments[index]
             .map((p) => gmaps.LatLng(p.latitude, p.longitude))
             .toList(growable: false),
-        width: 5,
+        width: 3,
+        color: palette.routeColor,
       ));
     }
     if (_rideSettings.roadOverlayEnabled && _roadSegments.isNotEmpty) {
@@ -2612,9 +2627,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 preferences: _effectiveBikeTravelPreferences,
               )
             : null;
-        _navigationProgress = current == null
+        _navigationProgress = !MapTelemetryPolicy.isFresh(current)
             ? null
-            : _navigationGuidance.evaluate(route: route, position: current);
+            : _navigationGuidance.evaluate(route: route, position: current!);
       });
       if (target.travelMode == MapTravelMode.bicycle) {
         unawaited(_refreshBikeTripPlan(route: route, target: target));
@@ -2660,9 +2675,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
               preferences: _effectiveBikeTravelPreferences,
             )
           : null;
-      _navigationProgress = current == null
+      _navigationProgress = !MapTelemetryPolicy.isFresh(current)
           ? null
-          : _navigationGuidance.evaluate(route: route, position: current);
+          : _navigationGuidance.evaluate(route: route, position: current!);
       _offRouteSamples = 0;
       _lastNavigationProgressPointAt = null;
     });
@@ -7178,15 +7193,15 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         if (_cyclingRoute != null)
                           Polyline(
                             points: _cyclingRoute!.points,
-                            strokeWidth: 10,
+                            strokeWidth: 7,
                             color: mapPalette.routeCasingColor.withValues(
-                              alpha: 0.92,
+                              alpha: 0.72,
                             ),
                           ),
                         if (_cyclingRoute != null)
                           Polyline(
                             points: _cyclingRoute!.points,
-                            strokeWidth: 6,
+                            strokeWidth: 4,
                             color: mapPalette.routeColor,
                           ),
                       ],
@@ -7197,7 +7212,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                           .map(
                             (segment) => Polyline(
                               points: segment,
-                              strokeWidth: 5,
+                              strokeWidth: 3,
                               color: mapPalette.routeColor,
                             ),
                           )
@@ -7492,7 +7507,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                           onPressed: () => unawaited(_showMapOptions()),
                         )
                       : _MapBrandButton(onTap: () => unawaited(_showMapOptions())),
-                  if (widget.onChooseWorkspaceMode != null) ...[
+                  if (widget.onChooseWorkspaceMode != null &&
+                      !(navigationTarget != null &&
+                        widget.workspaceModeLabel?.toLowerCase() == 'navegar')) ...[
                     const SizedBox(width: 4),
                     _MapWorkspaceModeShortcut(
                       label: widget.workspaceModeLabel ?? 'Explorar',
@@ -7951,6 +7968,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     routeAlternatives: _cyclingRouteAlternatives,
                     selectedRouteIndex: _selectedCyclingRouteIndex,
                     guidance: _navigationProgress,
+                    positionFresh: _routeState.availability ==
+                        LocationTrackingAvailability.ready &&
+                        MapTelemetryPolicy.isFresh(current),
                     bikeEstimate: _bikeTripEstimate,
                     bikeTripPlan: _bikeTripPlan,
                     bikeTripPlanLoading: _bikeTripPlanLoading,
@@ -7963,7 +7983,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     recordControl: MapNavigationRecordControl(
                       recording: _routeState.recording,
                       paused: _routeState.paused,
-                      canRecord: current != null,
+                      canRecord: MapTelemetryPolicy.isFresh(current),
                       hasRoute: _routeState.route.length >= 2,
                       onToggleRecording: _routeState.recording
                           ? () => unawaited(_finishRecording())
@@ -8012,6 +8032,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     routeAlternatives: _cyclingRouteAlternatives,
                     selectedRouteIndex: _selectedCyclingRouteIndex,
                     guidance: _navigationProgress,
+                    positionFresh: _routeState.availability ==
+                        LocationTrackingAvailability.ready &&
+                        MapTelemetryPolicy.isFresh(current),
                     bikeEstimate: _bikeTripEstimate,
                     bikeTripPlan: _bikeTripPlan,
                     bikeTripPlanLoading: _bikeTripPlanLoading,
@@ -8024,7 +8047,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     recordControl: MapNavigationRecordControl(
                       recording: _routeState.recording,
                       paused: _routeState.paused,
-                      canRecord: current != null,
+                      canRecord: MapTelemetryPolicy.isFresh(current),
                       hasRoute: _routeState.route.length >= 2,
                       onToggleRecording: _routeState.recording
                           ? () => unawaited(_finishRecording())
@@ -10612,6 +10635,7 @@ class _NavigationBanner extends StatelessWidget {
     required this.routeAlternatives,
     required this.selectedRouteIndex,
     required this.guidance,
+    required this.positionFresh,
     required this.bikeEstimate,
     required this.bikeTripPlan,
     required this.bikeTripPlanLoading,
@@ -10639,6 +10663,7 @@ class _NavigationBanner extends StatelessWidget {
   final List<MapCyclingRoute> routeAlternatives;
   final int selectedRouteIndex;
   final MapNavigationProgress? guidance;
+  final bool positionFresh;
   final BikeTripEstimate? bikeEstimate;
   final BikeTripPlan? bikeTripPlan;
   final bool bikeTripPlanLoading;
@@ -10776,25 +10801,31 @@ class _NavigationBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final progress = guidance;
+    final progress = positionFresh ? guidance : null;
     final route = roadRoute;
-    final warning = fallbackMessage != null || networkOffline;
+    final warning = fallbackMessage != null || networkOffline || !positionFresh;
 
-    final currentInstruction = progress?.arrived == true
-        ? 'Destino alcançado'
-        : progress?.currentInstruction ?? target.label;
+    final currentInstruction = !positionFresh
+        ? 'Aguardando localização GPS'
+        : progress?.arrived == true
+            ? 'Destino alcançado'
+            : progress?.currentInstruction ?? target.label;
     final nextManeuver = progress?.nextInstruction;
     final nextManeuverDistance = progress?.distanceToNextManeuverMeters;
     final hasUpcomingManeuver = progress?.arrived != true &&
         nextManeuver != null &&
         nextManeuverDistance != null;
 
-    final primaryInstruction = hasUpcomingManeuver
+    final primaryInstruction = !positionFresh
+        ? currentInstruction
+        : hasUpcomingManeuver
         ? '${_cleanInstruction(nextManeuver)} em ${_distance(nextManeuverDistance)}'
         : currentInstruction;
 
     late final String secondaryInstruction;
-    if (progress?.arrived == true) {
+    if (!positionFresh) {
+      secondaryInstruction = 'Orientações pausadas até receber nova posição.';
+    } else if (progress?.arrived == true) {
       secondaryInstruction = 'Você chegou ao destino.';
     } else if (fallbackMessage != null) {
       secondaryInstruction = fallbackMessage!;
@@ -10856,12 +10887,12 @@ class _NavigationBanner extends StatelessWidget {
     final accent = warning ? scheme.secondary : scheme.primary;
 
     if (minimized) {
-      final iconSize = docked ? 40.0 : 52.0;
-      final iconGlyphSize = docked ? 24.0 : 31.0;
+      // Modo padrão no pedal: manobra legível, destino e ações em ~2 linhas.
+      // A gravação continua disponível, sem três botões empilhados.
       return Material(
-        elevation: 10,
+        elevation: 8,
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(docked ? 18 : 20),
+        borderRadius: BorderRadius.circular(18),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: docked ? onToggleMinimized : null,
@@ -10870,89 +10901,69 @@ class _NavigationBanner extends StatelessWidget {
               color: panelColor,
               border: Border.all(color: accent.withValues(alpha: 0.22)),
             ),
-            padding: EdgeInsets.fromLTRB(
-              docked ? 9 : 12,
-              docked ? 7 : 9,
-              docked ? 4 : 8,
-              docked ? 7 : 9,
-            ),
-            child: Row(
-              children: [
+            padding: const EdgeInsets.fromLTRB(9, 6, 7, 5),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Row(children: [
                 Container(
-                  width: iconSize,
-                  height: iconSize,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accent.withValues(alpha: 0.15),
-                    border: Border.all(
-                      color: accent.withValues(alpha: 0.65),
-                      width: 2,
-                    ),
+                    color: accent.withValues(alpha: 0.13),
+                    border: Border.all(color: accent.withValues(alpha: 0.5)),
                   ),
                   child: Icon(
-                    _maneuverIcon(primaryInstruction),
+                    !positionFresh ? Icons.gps_off_rounded
+                        : _maneuverIcon(primaryInstruction),
                     color: accent,
-                    size: iconGlyphSize,
+                    size: 25,
                   ),
                 ),
-                SizedBox(width: docked ? 8 : 10),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        primaryInstruction,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: foreground,
-                          fontSize: docked ? 13.5 : 15,
-                          height: 1.0,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${_distance(remainingDistance)} · $remainingTime${following ? '' : ' · mapa livre'}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: foreground.withValues(alpha: 0.70),
-                          fontSize: docked ? 10.5 : 11,
-                          height: 1.0,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: 8),
+                Expanded(child: Text(
+                  primaryInstruction,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground, fontSize: 14, height: 1.06,
+                    fontWeight: FontWeight.w800,
                   ),
+                )),
+                _navigationSmallButton(
+                  tooltip: 'Expandir detalhes da navegação',
+                  icon: Icons.keyboard_arrow_up_rounded,
+                  onPressed: onToggleMinimized,
                 ),
-                if (recordControl != null) ...[
-                  const SizedBox(width: 4),
-                  recordControl!,
-                ],
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _navigationSmallButton(
-                      tooltip: following ? 'Já está seguindo posição' : 'Seguir posição',
-                      icon: Icons.my_location_rounded,
-                      onPressed: following ? null : onFollowRequested,
-                    ),
-                    _navigationSmallButton(
-                      tooltip: 'Expandir navegação',
-                      icon: Icons.keyboard_arrow_up_rounded,
-                      onPressed: onToggleMinimized,
-                    ),
-                    _navigationSmallButton(
-                      tooltip: 'Parar navegação',
-                      icon: Icons.close_rounded,
-                      onPressed: onStop,
-                    ),
-                  ],
+                _navigationSmallButton(
+                  tooltip: 'Encerrar navegação',
+                  icon: Icons.close_rounded,
+                  onPressed: onStop,
                 ),
-              ],
-            ),
+              ]),
+              Row(children: [
+                const SizedBox(width: 3),
+                Expanded(child: Text(
+                  !positionFresh
+                      ? '${target.label} · posição GPS indisponível'
+                      : '${target.label} · ${_distance(remainingDistance)} · $remainingTime'
+                          '${following ? '' : ' · mapa livre'}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground.withValues(alpha: 0.78),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                )),
+                if (!following && onFollowRequested != null && positionFresh)
+                  _navigationSmallButton(
+                    tooltip: 'Voltar a seguir minha localização',
+                    icon: Icons.my_location_rounded,
+                    onPressed: onFollowRequested,
+                  ),
+                ?recordControl,
+              ]),
+            ]),
           ),
         ),
       );
@@ -10965,7 +10976,7 @@ class _NavigationBanner extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
+        padding: const EdgeInsets.fromLTRB(10, 5, 10, 7),
         decoration: BoxDecoration(
           color: panelColor,
           border: Border.all(color: accent.withValues(alpha: 0.25)),
@@ -10998,23 +11009,24 @@ class _NavigationBanner extends StatelessWidget {
           const SizedBox(height: 6),
           Row(children: [
             Container(
-              width: 54, height: 54,
+              width: 46, height: 46,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: accent.withValues(alpha: 0.15),
                 border: Border.all(color: accent.withValues(alpha: 0.55)),
               ),
-              child: Icon(networkOffline ? Icons.wifi_off_rounded :
+              child: Icon(!positionFresh ? Icons.gps_off_rounded :
+                  networkOffline ? Icons.wifi_off_rounded :
                   progress?.offRoute == true ? Icons.alt_route_rounded :
                   _maneuverIcon(primaryInstruction),
-                size: 32, color: accent),
+                size: 27, color: accent),
             ),
             const SizedBox(width: 10),
             Expanded(child: Column(mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(primaryInstruction, maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: foreground, fontSize: 18,
+                style: TextStyle(color: foreground, fontSize: 16,
                   height: 1.05, fontWeight: FontWeight.w900)),
               const SizedBox(height: 3),
               Text(secondaryInstruction, maxLines: 1,
@@ -11023,18 +11035,18 @@ class _NavigationBanner extends StatelessWidget {
                   fontSize: 11)),
             ])),
           ]),
-          if (!following && onFollowRequested != null)
+          if (positionFresh && !following && onFollowRequested != null)
             Align(alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: onFollowRequested,
                 icon: const Icon(Icons.pan_tool_alt_rounded, size: 16),
                 label: const Text('Mapa livre · tocar para seguir'),
               )),
-          const SizedBox(height: 8),
+          const SizedBox(height: 5),
           Row(children: [
             Expanded(child: MapNavigationMetricCell(
               icon: Icons.flag_rounded, value: _distance(remainingDistance),
-              label: 'restantes', accent: accent,
+              label: positionFresh ? 'restantes' : 'planejados', accent: accent,
               foreground: foreground, compact: true)),
             Expanded(child: MapNavigationMetricCell(
               icon: Icons.schedule_rounded, value: remainingTime,
@@ -11046,7 +11058,7 @@ class _NavigationBanner extends StatelessWidget {
               foreground: foreground, compact: true)),
             Expanded(child: MapNavigationMetricCell(
               icon: Icons.route_rounded,
-              value: '${(progressFraction * 100).round()}%',
+              value: positionFresh ? '${(progressFraction * 100).round()}%' : '--',
               label: 'concluído', accent: accent,
               foreground: foreground, compact: true)),
             if (routeAlternatives.length > 1)
@@ -11077,35 +11089,46 @@ class _NavigationBanner extends StatelessWidget {
                 label: const Text('Ajustar ritmo'),
               ),
             ]),
-          const SizedBox(height: 6),
-          ClipRRect(borderRadius: BorderRadius.circular(6),
+          const SizedBox(height: 4),
+          if (positionFresh) ClipRRect(borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(value: progressFraction, minHeight: 4,
               backgroundColor: foreground.withValues(alpha: 0.12),
               valueColor: AlwaysStoppedAnimation<Color>(accent))),
-          const SizedBox(height: 7),
-          SizedBox(height: 60,
-            child: ListView(scrollDirection: Axis.horizontal, children: [
-              SizedBox(width: 100, child: MapNavigationPoiChip(
-                icon: Icons.water_drop_rounded, label: 'Água',
-                distance: water == null ? '--' : _distance(water.distanceMeters),
-                foreground: foreground, accent: accent, compact: true)),
-              const SizedBox(width: 6),
-              SizedBox(width: 100, child: MapNavigationPoiChip(
-                icon: Icons.restaurant_rounded, label: 'Comida',
-                distance: food == null ? '--' : _distance(food.distanceMeters),
-                foreground: foreground, accent: accent, compact: true)),
-              const SizedBox(width: 6),
-              SizedBox(width: 100, child: MapNavigationPoiChip(
-                icon: Icons.chair_alt_rounded, label: 'Descanso',
-                distance: rest == null ? '--' : _distance(rest.distanceMeters),
-                foreground: foreground, accent: accent, compact: true)),
-              const SizedBox(width: 6),
-              SizedBox(width: 100, child: MapNavigationPoiChip(
-                icon: Icons.local_gas_station_rounded, label: 'Parada',
-                distance: stop == null ? '--' : _distance(stop.distanceMeters),
-                foreground: foreground, accent: accent, compact: true)),
-            ]),
-          ),
+          if (water != null || food != null || rest != null || stop != null) ...[
+            const SizedBox(height: 5),
+            SizedBox(height: 56,
+              child: ListView(scrollDirection: Axis.horizontal, children: [
+                if (water != null) ...[
+                  SizedBox(width: 100, child: MapNavigationPoiChip(
+                    icon: Icons.water_drop_rounded, label: 'Água',
+                    distance: _distance(water.distanceMeters),
+                    foreground: foreground, accent: accent, compact: true)),
+                  const SizedBox(width: 5),
+                ],
+                if (food != null) ...[
+                  SizedBox(width: 100, child: MapNavigationPoiChip(
+                    icon: Icons.restaurant_rounded, label: 'Comida',
+                    distance: _distance(food.distanceMeters),
+                    foreground: foreground, accent: accent, compact: true)),
+                  const SizedBox(width: 5),
+                ],
+                if (rest != null) ...[
+                  SizedBox(width: 100, child: MapNavigationPoiChip(
+                    icon: Icons.chair_alt_rounded, label: 'Descanso',
+                    distance: _distance(rest.distanceMeters),
+                    foreground: foreground, accent: accent, compact: true)),
+                  const SizedBox(width: 5),
+                ],
+                if (stop != null)
+                  SizedBox(width: 100, child: MapNavigationPoiChip(
+                    icon: Icons.local_gas_station_rounded, label: 'Parada',
+                    distance: _distance(stop.distanceMeters),
+                    foreground: foreground, accent: accent, compact: true)),
+              ]),
+            ),
+          ],
+          if (water != null || food != null || rest != null || stop != null ||
+              bikeTripPlanLoading || bikeTripPlan != null)
           Row(children: [
             Expanded(child: Text('Pontos próximos por distância, não por estrada',
               maxLines: 2, style: TextStyle(fontSize: 9,
