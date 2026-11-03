@@ -39,16 +39,16 @@ class MapsSdkBuildKey333Tests(unittest.TestCase):
         central = src('lib/screens/api_services_setup_screen.dart')
         for term in ('Google Gemini','Google Maps Platform','Stadia Maps','Geoapify',
                      'OpenRouteService', 'Open-Meteo', 'chave salva', 'sdkReady',
-                     'Somente gerenciamento e teste de chave', 'não exige chave'):
+                     'Busca de destinos e alternativa de pontos próximos online', 'não exige chave'):
             self.assertIn(term, central)
         config = src('lib/screens/google_maps_key_screen.dart')
         self.assertIn('O Maps SDK for Android valida a chave', config)
         self.assertIn('MAPS_API_KEY', config)
         self.assertIn('não é injetada no SDK', config)
     def test_version(self):
-        self.assertIn('version: 1.0.334+334', src('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.334.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.334.md').is_file())
+        self.assertIn('version: 1.0.335+335', src('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.335.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.335.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

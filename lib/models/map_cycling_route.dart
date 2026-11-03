@@ -26,10 +26,15 @@ class MapCyclingRoute {
     required this.distanceMeters,
     required this.durationSeconds,
     this.maneuvers = const <MapCyclingManeuver>[],
+    this.ascentMeters,
+    this.descentMeters,
   });
 
   final List<LatLng> points;
   final double distanceMeters;
   final double durationSeconds;
   final List<MapCyclingManeuver> maneuvers;
+  /// Elevação calculada pelo provedor da rota, se disponibilizada.
+  final double? ascentMeters;
+  final double? descentMeters;
 }

@@ -1,3 +1,14 @@
+# Arquitetura — Vigia IA 1.0.335+335
+
+## Integrações opcionais e limites offline
+
+- `GeoapifyMapSearchService` usa a chave cifrada da central apenas após o usuário confirmar a busca; converte resultados de geocodificação e mantém o fallback Nominatim e o índice local. `GeoapifyPoiService` consulta Places no máximo uma vez quando a resposta Overpass estiver vazia, sem gerar alertas falsos.
+- `MapCyclingRouteService` tenta ORS para bicicleta mediante chave válida, interpreta GeoJSON em ordem [longitude,latitude,elevação], manobras e métricas; falhas e falta de chave retornam ao Valhalla. Dados de elevação são campos opcionais da rota, não medição local.
+- `RouteExplorerService.searchAround` disponibiliza POIs manuais da cidade/pino selecionado em coleção separada: não modifica resultados de proximidade e alertas gerados pelo GPS. O painel explicita qual origem está selecionada.
+- `MapRideSettingsService` persiste até dois atalhos configuráveis (`offline`, `radio`, `bike`, `speed`) e não replica botões automáticos do HUD.
+- `MapWeatherService` usa Open-Meteo sem chave (nas condições de uso gratuito não comercial), com cache de até 48 h incluindo radiação global W/m² e UV, e consulta manual de três pontos da rota conforme estimativa de tempo de viagem; o cache do GPS não é alterado por consultas da rota.
+- Google Maps SDK permanece online; downloads offline continuam apenas por provedores autorizados de MBTiles/OSM. Todas as APIs são opcionais, sem credenciais nos relatórios.
+
 # Arquitetura — Vigia IA 1.0.334+334
 
 ## Backup de credenciais e limites da interface de mapas

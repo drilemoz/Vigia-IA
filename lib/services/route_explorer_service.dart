@@ -21,6 +21,7 @@ import 'route_explorer_alert_policy.dart';
 import 'route_explorer_poi_catalog.dart';
 import 'route_explorer_overpass_policy.dart';
 import 'data_usage_service.dart';
+import 'geoapify_poi_service.dart';
 
 class RouteExplorerService extends ChangeNotifier {
   RouteExplorerService._();
@@ -47,6 +48,11 @@ class RouteExplorerService extends ChangeNotifier {
   bool _initialized = false;
   bool _routeListenerAttached = false;
   bool _loading = false;
+  bool _areaLoading = false;
+  bool _usedGeoapifyForLatest = false;
+  String? _areaError;
+  List<RouteExplorerResult> _areaResults = const <RouteExplorerResult>[];
+  DateTime? _areaUpdatedAt;
   String? _error;
   String? _statusMessage;
   String _lastSource = 'none';
@@ -73,6 +79,12 @@ class RouteExplorerService extends ChangeNotifier {
 
   bool get initialized => _initialized;
   bool get loading => _loading;
+  bool get areaLoading => _areaLoading;
+  String? get areaError => _areaError;
+  DateTime? get areaUpdatedAt => _areaUpdatedAt;
+  List<RouteExplorerResult> get areaResults => List<RouteExplorerResult>.unmodifiable(
+    _areaResults.where((item) => _settings.categories.contains(item.category)),
+  );
   String? get error => _error;
   String? get statusMessage => _statusMessage;
   String get lastSource => _lastSource;
@@ -345,7 +357,7 @@ class RouteExplorerService extends ChangeNotifier {
       _lastSearchHeadingDegrees = current.headingDegrees;
       _lastPoiUiOrigin = current;
       _lastPoiUiRefreshAt = _resultsUpdatedAt;
-      _lastSource = 'online';
+      _lastSource = _usedGeoapifyForLatest ? 'geoapify' : 'online';
       _statusMessage = onlineResults.isEmpty
           ? 'Nenhum local compatível encontrado neste raio.'
           : _statusMessage ?? 'Busca online concluída.';
@@ -386,6 +398,46 @@ class RouteExplorerService extends ChangeNotifier {
       _loading = false;
       notifyListeners();
       _routeState.releaseLocationIfIdle();
+    }
+  }
+
+  /// Consulta manual no local selecionado no mapa. Não altera pontos do GPS,
+  /// rotas, alertas automáticos nem pacotes offline da posição real.
+  Future<void> searchAround(MapRoutePoint center) async {
+    await initialize();
+    if (_areaLoading) return;
+    _areaLoading = true;
+    _areaError = null;
+    _areaResults = const <RouteExplorerResult>[];
+    notifyListeners();
+    try {
+      if (_connectivity.isOffline) {
+        final centerLatLng = LatLng(center.latitude, center.longitude);
+        _areaResults = <RouteExplorerResult>[
+          for (final package in _offlinePackages)
+            for (final item in package.items)
+              if (_distance.as(LengthUnit.Meter, centerLatLng,
+                  LatLng(item.latitude, item.longitude)) <=
+                  _settings.radiusKm * 1000)
+                item.copyWith(
+                  distanceMeters: _distance.as(LengthUnit.Meter,
+                    centerLatLng, LatLng(item.latitude, item.longitude)),
+                  source: 'offline',
+                ),
+        ];
+        if (_areaResults.isEmpty) {
+          _areaError = 'Sem internet e sem pontos offline nesta região.';
+        }
+      } else {
+        _areaResults = await _fetchOnline(center)
+            .timeout(const Duration(seconds: 18));
+      }
+      _areaUpdatedAt = DateTime.now();
+    } catch (_) {
+      _areaError = 'Não foi possível consultar pontos nesta região.';
+    } finally {
+      _areaLoading = false;
+      notifyListeners();
     }
   }
 
@@ -706,6 +758,7 @@ class RouteExplorerService extends ChangeNotifier {
   /// Pesquisa em fases para evitar uma consulta nwr enorme e minimizar 504.
   /// Se alguma fase retornar resultados, falhas posteriores não os apagam.
   Future<List<RouteExplorerResult>> _fetchOnline(MapRoutePoint current) async {
+    _usedGeoapifyForLatest = false;
     final requestedKm = _settings.radiusKm;
     final radii = <int>{
       if (requestedKm > 5) 5,
@@ -738,6 +791,24 @@ class RouteExplorerService extends ChangeNotifier {
         // Se a instância falhou até para um raio pequeno, não insistir com
         // requisições cada vez maiores na mesma atualização.
         break;
+      }
+    }
+    // Somente quando Overpass não traz resultados: consulta parceira opcional.
+    // Não usa Geoapify para todos os refreshes e não consome cota sem chave.
+    if (collected.isEmpty) {
+      try {
+        final partner = await GeoapifyPoiService.search(
+          origin: current, radiusKm: requestedKm,
+          enabled: _settings.categories,
+        ).timeout(const Duration(seconds: 9));
+        if (partner != null && partner.isNotEmpty) {
+          _usedGeoapifyForLatest = true;
+          _effectiveOnlineRadiusKm = requestedKm;
+          _statusMessage = 'Pontos da região consultados via Geoapify.';
+          return _prioritizeCategoryDiversity(partner);
+        }
+      } catch (_) {
+        // Preserva Overpass/cache sem divulgar dados das credenciais.
       }
     }
     if (effectiveRadius == 0 && collected.isEmpty && lastFailure != null) {
@@ -794,7 +865,7 @@ class RouteExplorerService extends ChangeNotifier {
         final request = await client.postUrl(Uri.parse(endpoint))
             .timeout(const Duration(seconds: 8));
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334 route-explorer');
+        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335 route-explorer');
         request.headers.contentType = ContentType(
           'application', 'x-www-form-urlencoded', charset: 'utf-8',
         );

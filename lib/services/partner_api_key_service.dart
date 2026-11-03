@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 /// Credenciais opcionais protegidas pelo Keystore no código Android.
-/// Na 1.0.331 os testes são explícitos; as chamadas de busca/rota vêm em releases posteriores.
+/// Credenciais opcionais agora utilizadas nas pesquisas e rotas sob demanda.
 enum PartnerApiProvider { geoapify, openrouteservice }
 
 class PartnerKeyStatus {
@@ -63,7 +63,7 @@ class PartnerApiKeyService {
           'apiKey': key,
         }),
       PartnerApiProvider.openrouteservice => Uri.https(
-        'api.heigit.org', '/openrouteservice/v2/directions/cycling-regular', {
+        'api.openrouteservice.org', '/v2/directions/cycling-regular', {
           'start': '-47.8825,-15.7942', 'end': '-47.8790,-15.7915',
         }),
     };
@@ -79,7 +79,7 @@ class PartnerApiKeyService {
       final code = response.statusCode;
       // Drena no máximo o cabeçalho efetivo e fecha; não armazena ou exibe o corpo.
       await response.drain<void>().timeout(const Duration(seconds: 10));
-      if (code == 200) return 'API respondeu com sucesso (HTTP 200). O uso no mapa será integrado em uma próxima versão.';
+      if (code == 200) return 'API respondeu com sucesso (HTTP 200). O uso no mapa depende de conexão, cota e operação disponível.';
       if (code == 401 || code == 403) return 'Acesso negado (HTTP $code). Verifique a chave e suas restrições.';
       if (code == 429) return 'Limite de requisições atingido (HTTP 429).';
       return 'O serviço respondeu HTTP $code. Confira a configuração e tente mais tarde.';

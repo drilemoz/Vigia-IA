@@ -1,3 +1,10 @@
+# Validação Vigia IA 1.0.335+335
+
+- `tool/verify_project.sh`: aprovado (exit 0); suíte agregada 406 testes Python (405 aprovados, 1 ignorado), incluindo 7 novos contratos de integração Geoapify/ORS/Open-Meteo/POIs por cidade/atalhos.
+- Sincronização de versão e release aprovada; testes Dart de decodificação de GeoJSON, geocodificação, POIs e previsão UV/solar adicionados, **não executados** sem Flutter.
+- Pendências: `flutter analyze`, `flutter test`, build APK, testes com credenciais válidas, tela real, conexão e GPS; nenhum desses resultados foi presumido.
+- Sem chaves novas não há dependências obrigatórias: Nominatim, Overpass, Valhalla e MBTiles/OSM anteriores permanecem disponíveis.
+
 # Validação Vigia IA 1.0.334+334
 
 - Backup criptografado de APIs com senha e SAF, e alteração de UI/mapa: validar em APK Android real.

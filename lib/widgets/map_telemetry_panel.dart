@@ -721,7 +721,7 @@ class MapWeatherForecastStrip extends StatelessWidget {
 
   String _time(DateTime value) {
     final local = value.toLocal();
-    return '${local.hour.toString().padLeft(2, '0')}:00';
+    return '${local.day}/${local.month} ${local.hour.toString().padLeft(2, '0')}h';
   }
 
   @override

@@ -43,9 +43,15 @@ class MapWeatherForecastHour {
     this.windSpeedKmh,
     this.windGustKmh,
     this.windDirectionDegrees,
+    this.uvIndex,
+    this.shortwaveRadiationWm2,
   });
 
   final DateTime time;
+  /// Previsão UV para a hora, não medição do sensor.
+  final double? uvIndex;
+  /// Irradiância global horizontal prevista (W/m²), não potência do painel.
+  final double? shortwaveRadiationWm2;
   final double? temperatureC;
   final double? apparentTemperatureC;
   final double? precipitationProbabilityPercent;
@@ -64,6 +70,8 @@ class MapWeatherForecastHour {
         windSpeedKmh,
         windGustKmh,
         windDirectionDegrees,
+        uvIndex,
+        shortwaveRadiationWm2,
       ].any((value) => value != null);
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -76,6 +84,8 @@ class MapWeatherForecastHour {
         'windSpeedKmh': windSpeedKmh,
         'windGustKmh': windGustKmh,
         'windDirectionDegrees': windDirectionDegrees,
+        'uvIndex': uvIndex,
+        'shortwaveRadiationWm2': shortwaveRadiationWm2,
       };
 
   factory MapWeatherForecastHour.fromJson(Map<String, dynamic> json) {
@@ -105,6 +115,8 @@ class MapWeatherForecastHour {
       windSpeedKmh: number(json['windSpeedKmh']),
       windGustKmh: number(json['windGustKmh']),
       windDirectionDegrees: number(json['windDirectionDegrees']),
+      uvIndex: number(json['uvIndex']),
+      shortwaveRadiationWm2: number(json['shortwaveRadiationWm2']),
     );
   }
 }

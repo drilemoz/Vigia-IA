@@ -3844,6 +3844,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         final livePressure = MapWeatherPolicy.currentValue(snapshot, snapshot.surfacePressureHpa);
         final condition = MapWeatherPolicy.conditionLabel(liveCondition?.value);
         final assessment = MapWeatherPolicy.assessForRide(snapshot);
+        final nextHour = snapshot.hourlyForecast.isEmpty ||
+                MapWeatherPolicy.onlineOutdated(snapshot)
+            ? null : snapshot.hourlyForecast.first;
         final current = _routeState.current;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3920,6 +3923,20 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   icon: Icons.compress_rounded,
                 ),
                 MapTelemetryMetricTile(
+                  label: 'Radiação solar · previsão',
+                  value: nextHour?.shortwaveRadiationWm2 == null
+                      ? '--' : '${nextHour!.shortwaveRadiationWm2!.round()} W/m²',
+                  detail: 'Estimativa meteorológica, não geração do painel solar',
+                  icon: Icons.wb_sunny_outlined,
+                ),
+                MapTelemetryMetricTile(
+                  label: 'Índice UV · previsão',
+                  value: nextHour?.uvIndex == null
+                      ? '--' : nextHour!.uvIndex!.toStringAsFixed(1),
+                  detail: 'Previsão horária; não é medição local',
+                  icon: Icons.sunny,
+                ),
+                MapTelemetryMetricTile(
                   label: 'Origem dos dados',
                   value: snapshot.origin.label,
                   detail: MapWeatherPolicy.onlineOutdated(snapshot)
@@ -3932,8 +3949,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
             const SizedBox(height: 18),
             Text(
               MapWeatherPolicy.onlineOutdated(snapshot)
-                  ? 'Previsão horária · histórico antigo'
-                  : 'Previsão horária',
+                  ? 'Previsão de 48 h · dados antigos'
+                  : 'Previsão horária · até 48 h',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -3959,6 +3976,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   icon: const Icon(Icons.refresh_rounded),
                   label: const Text('Atualizar'),
                 ),
+                if (_cyclingRoute?.points.isNotEmpty == true)
+                  OutlinedButton.icon(
+                    onPressed: _weather.loading
+                        ? null : () => unawaited(_showWeatherAlongRoute()),
+                    icon: const Icon(Icons.route_rounded),
+                    label: const Text('Clima na rota'),
+                  ),
                 OutlinedButton.icon(
                   onPressed: !_mapViewSettings.weatherVoiceEnabled ||
                           MapWeatherPolicy.buildVoiceMessage(snapshot).isEmpty
@@ -3979,6 +4003,62 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
           ],
         );
       },
+    );
+  }
+
+  Future<void> _showWeatherAlongRoute() async {
+    final route = _cyclingRoute;
+    if (route == null || route.points.length < 2) return;
+    final future = _weather.forecastAlongRoute(
+      points: route.points,
+      estimatedTravelTime: Duration(seconds: route.durationSeconds.round()),
+    );
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Clima ao longo da rota'),
+        content: SizedBox(
+          width: 400,
+          child: FutureBuilder(
+            future: future,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData && !snapshot.hasError) {
+                return const Column(mainAxisSize: MainAxisSize.min, children: [
+                  LinearProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text('Consultando três pontos da rota…'),
+                ]);
+              }
+              if (snapshot.hasError) {
+                return const Text('Não foi possível obter a previsão da rota. Confira a internet.');
+              }
+              return SingleChildScrollView(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  for (final item in snapshot.data!)
+                    ListTile(
+                      title: Text(item.label),
+                      subtitle: Text(item.hour == null
+                        ? 'Sem previsão válida para o horário estimado.'
+                        : 'Chuva ${item.hour!.precipitationProbabilityPercent?.round() ?? '--'}% · '
+                          'Vento ${item.hour!.windSpeedKmh?.round() ?? '--'} km/h · '
+                          'Radiação ${item.hour!.shortwaveRadiationWm2?.round() ?? '--'} W/m² · '
+                          'UV ${item.hour!.uvIndex?.toStringAsFixed(1) ?? '--'}'),
+                      trailing: Text('${item.estimatedAt.toLocal().hour.toString().padLeft(2, '0')}h'),
+                    ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text('Previsões são estimativas dos horários de passagem e podem mudar. Não são medições do trajeto.'),
+                  ),
+                ]),
+              );
+            },
+          ),
+        ),
+        actions: [TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Fechar'),
+        )],
+      ),
     );
   }
 
@@ -4821,6 +4901,50 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     setState(() {});
   }
 
+  Future<void> _showMapQuickShortcuts() async {
+    final selected = _rideSettings.mapQuickShortcuts.toList(growable: true);
+    final result = await showDialog<List<String>>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, refresh) => AlertDialog(
+          title: const Text('Atalhos do mapa'),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Text('Escolha até dois botões extras. Os controles já exibidos automaticamente não serão duplicados.'),
+              for (final item in const <(String, String, IconData)>[
+                ('offline', 'Mapas offline', Icons.offline_pin_rounded),
+                ('radio', 'Rádio online', Icons.radio_rounded),
+                ('bike', 'Bike e sensores', Icons.pedal_bike_rounded),
+                ('speed', 'Alertas de velocidade', Icons.speed_rounded),
+              ])
+                CheckboxListTile(
+                  dense: true,
+                  secondary: Icon(item.$3),
+                  title: Text(item.$2),
+                  value: selected.contains(item.$1),
+                  onChanged: (checked) => refresh(() {
+                    if (checked == true && !selected.contains(item.$1) && selected.length < 2) {
+                      selected.add(item.$1);
+                    } else if (checked == false) {
+                      selected.remove(item.$1);
+                    }
+                  }),
+                ),
+              Text('${selected.length}/2 atalhos selecionados'),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, selected), child: const Text('Salvar')),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+    await _rideSettings.update(shortcuts: result);
+    if (mounted) setState(() {});
+  }
+
   Future<void> _showMapOptions() async {
     AutomaticDiagnosticsService.instance.recordUiAction('mapas', 'abrir_opcoes_mapa');
     await showMapCenteredDialog<void>(
@@ -4913,6 +5037,17 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                             : _mapController.camera.center)
                         : LatLng(current.latitude, current.longitude)));
                   }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.tune_rounded),
+                title: const Text('Atalhos rápidos no mapa'),
+                subtitle: Text(_rideSettings.mapQuickShortcuts.isEmpty
+                    ? 'Nenhum · escolha até dois ícones'
+                    : '${_rideSettings.mapQuickShortcuts.length} de 2 selecionados'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  unawaited(_showMapQuickShortcuts());
                 },
               ),
               ListTile(
@@ -5501,6 +5636,18 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     await _routeExplorer.initialize();
     if (!mounted) return;
     var filter = _poiFilter;
+    final selectedArea = _selectedMapLocation;
+    final MapRoutePoint? areaCenter = selectedArea == null ? null : MapRoutePoint(
+      latitude: selectedArea.latitude,
+      longitude: selectedArea.longitude,
+      recordedAt: DateTime.now(),
+      accuracyMeters: 0,
+      speedMetersPerSecond: 0,
+      speedAvailable: false,
+      headingAvailable: false,
+    );
+    var viewSelectedArea = areaCenter != null;
+    if (areaCenter != null) unawaited(_routeExplorer.searchAround(areaCenter));
     await showMapCenteredDialog<void>(
       context: context,
       maxWidth: 560,
@@ -5511,11 +5658,16 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
               listenable: _routeExplorer,
               builder: (context, _) {
                 final service = _routeExplorer;
-                final filtered = service.activeResults
+                final lookingAtArea = viewSelectedArea && areaCenter != null;
+                final sourceResults = lookingAtArea
+                    ? service.areaResults : service.activeResults;
+                final busy = lookingAtArea ? service.areaLoading : service.loading;
+                final searchError = lookingAtArea ? service.areaError : service.error;
+                final filtered = sourceResults
                     .where((item) => _matchesPoiFilter(item, filter))
                     .toList(growable: false);
                 return SizedBox(
-                  height: filtered.isEmpty && !service.loading ? 420 : 650,
+                  height: filtered.isEmpty && !busy ? 420 : 650,
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -5527,17 +5679,19 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Próximos pontos',
+                                Text(
+                                  lookingAtArea ? 'Pontos na região selecionada' : 'Próximos pontos',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,
                                   ),
                                 ),
                                 Text(
-                                  '${service.effectiveOnlineRadiusKm ?? service.settings.radiusKm} km · '
-                                  '${service.lastSource == 'offline' ? 'Pacote offline' : service.lastSource == 'cache' ? 'Cache anterior' : service.lastSource == 'online' ? 'OSM mapeado' : 'Sem consulta'} · '
-                                  '${service.resultsUpdatedAt == null ? 'data desconhecida' : 'consulta ${_formatOfflinePackageDate(service.resultsUpdatedAt!)}'}',
+                                  lookingAtArea
+                                    ? '${selectedArea!.title} · raio ${service.settings.radiusKm} km · consulta manual'
+                                    : '${service.effectiveOnlineRadiusKm ?? service.settings.radiusKm} km · '
+                                      '${service.lastSource == 'offline' ? 'Pacote offline' : service.lastSource == 'cache' ? 'Cache anterior' : service.lastSource == 'online' ? 'OSM mapeado' : service.lastSource == 'geoapify' ? 'Geoapify' : 'Sem consulta'} · '
+                                      '${service.resultsUpdatedAt == null ? 'data desconhecida' : 'consulta ${_formatOfflinePackageDate(service.resultsUpdatedAt!)}'}',
                                   style: Theme.of(sheetContext).textTheme.bodySmall,
                                 ),
                               ],
@@ -5559,8 +5713,24 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         ],
                       ),
                     ),
-                    if (service.loading)
+                    if (busy)
                       const LinearProgressIndicator(minHeight: 2),
+                    if (areaCenter != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Wrap(spacing: 8, children: [
+                          ChoiceChip(
+                            label: Text('Em ${selectedArea!.title}'),
+                            selected: viewSelectedArea,
+                            onSelected: (_) => setSheetState(() => viewSelectedArea = true),
+                          ),
+                          ChoiceChip(
+                            label: const Text('Perto do GPS'),
+                            selected: !viewSelectedArea,
+                            onSelected: (_) => setSheetState(() => viewSelectedArea = false),
+                          ),
+                        ]),
+                      ),
                     SizedBox(
                       height: 40,
                       child: ListView(
@@ -5593,9 +5763,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         children: [
                           Expanded(
                             child: FilledButton.tonalIcon(
-                              onPressed: service.loading
+                              onPressed: busy
                                   ? null
-                                  : () => unawaited(_refreshNearby()),
+                                  : () => lookingAtArea
+                                      ? unawaited(service.searchAround(areaCenter))
+                                      : unawaited(_refreshNearby()),
                               icon: const Icon(Icons.refresh_rounded),
                               label: const Text('Atualizar'),
                             ),
@@ -5603,7 +5775,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                           const SizedBox(width: 8),
                           Expanded(
                             child: OutlinedButton.icon(
-                              onPressed: service.loading || service.activeResults.isEmpty
+                              onPressed: lookingAtArea || busy || sourceResults.isEmpty
                                   ? null
                                   : () {
                                       Navigator.of(sheetContext).pop();
@@ -5617,8 +5789,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       ),
                     ),
                     Expanded(
-                      child: service.error != null && service.activeResults.isEmpty
-                          ? _MapEmptyState(message: service.error!)
+                      child: searchError != null && sourceResults.isEmpty
+                          ? _MapEmptyState(message: searchError)
                           : filtered.isEmpty
                               ? const _MapEmptyState(
                                   message:
@@ -7555,6 +7727,43 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       ),
                       MapControlGap(horizontal: horizontalControls),
                     ],
+                    if (focusLevel == 0 && _rideSettings.mapQuickShortcuts.contains('offline')) ...[
+                      _MapControlButton(
+                        tooltip: 'Gerenciar mapas offline',
+                        icon: Icons.offline_pin_rounded,
+                        onPressed: () => unawaited(_openOfflineMaps()),
+                      ),
+                      MapControlGap(horizontal: horizontalControls),
+                    ],
+                    if (focusLevel == 0 &&
+                        _rideSettings.mapQuickShortcuts.contains('radio') &&
+                        !hud.showRadioShortcut) ...[
+                      _MapControlButton(
+                        tooltip: 'Rádio online',
+                        icon: Icons.radio_rounded,
+                        onPressed: () => unawaited(_showRadioPanel()),
+                      ),
+                      MapControlGap(horizontal: horizontalControls),
+                    ],
+                    if (focusLevel == 0 &&
+                        _rideSettings.mapQuickShortcuts.contains('bike') &&
+                        !hud.showBikeShortcut) ...[
+                      _MapControlButton(
+                        tooltip: 'Bike e sensores',
+                        icon: Icons.pedal_bike_rounded,
+                        onPressed: () => unawaited(_showBikePanel()),
+                      ),
+                      MapControlGap(horizontal: horizontalControls),
+                    ],
+                    if (focusLevel == 0 &&
+                        _rideSettings.mapQuickShortcuts.contains('speed')) ...[
+                      _MapControlButton(
+                        tooltip: 'Alertas de velocidade',
+                        icon: Icons.speed_rounded,
+                        onPressed: () => unawaited(_showSpeedAlertSettings()),
+                      ),
+                      MapControlGap(horizontal: horizontalControls),
+                    ],
                     if (focusLevel == 0 && enabledAudioChannels > 0) _MapControlButton(
                       tooltip: enabledAudioChannels == 0
                           ? 'Áudio do mapa silenciado'
@@ -8660,12 +8869,17 @@ class _MapRouteOverview extends StatelessWidget {
                 ]),
             ),
             const _MapOverviewDivider(),
-            const Tooltip(
-              message: 'O provedor desta rota ainda não informa o perfil de elevação.',
+            Tooltip(
+              message: route?.ascentMeters == null
+                  ? 'Sem dados de subida disponíveis nesta rota.'
+                  : 'Desnível positivo: ${route!.ascentMeters!.round()} m. '
+                    'Descida acumulada: ${route.descentMeters?.round() ?? 0} m.',
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text('Subidas', style: TextStyle(color: Color(0xFFB6C8D7), fontSize: 9)),
-                Text('--', style: TextStyle(color: Colors.white,
-                  fontSize: 15, fontWeight: FontWeight.w900)),
+                const Text('Subidas', style: TextStyle(color: Color(0xFFB6C8D7), fontSize: 9)),
+                Text(route?.ascentMeters == null
+                    ? '--' : '${route!.ascentMeters!.round()} m',
+                    style: const TextStyle(color: Colors.white,
+                      fontSize: 15, fontWeight: FontWeight.w900)),
               ]),
             ),
             const SizedBox(width: 7),

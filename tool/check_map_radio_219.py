@@ -46,7 +46,7 @@ check('enum _RadioSection { discover, recent, favorites, manual }' in radio and
 check(('showModalBottomSheet<void>' in mapui and
        'usableHeight * 0.78' in mapui and
        'height: math.min(480.0' in mapui) and
-      'height: filtered.isEmpty && !service.loading ? 420 : 650' in mapui,
+      'height: filtered.isEmpty && !busy ? 420 : 650' in mapui,
       'diálogos vazios não foram compactados')
 check('class RadioSleepTimer' in text('lib/services/radio_sleep_timer.dart') and
       'RadioSleepTimer.schedule(' in radio, 'temporizador local da rádio ausente')

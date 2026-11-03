@@ -1,3 +1,10 @@
+## 1.0.335+335 (2026-11-03)
+- Geoapify Geocoding nas pesquisas confirmadas, com Nominatim/índice offline como alternativa; Geoapify Places é alternativa quando Overpass não retorna POIs.
+- OpenRouteService para bicicleta com manobras, distância, duração e elevação (quando disponível), com fallback Valhalla; nenhum token embutido no código.
+- Open-Meteo 48 h: UV e radiação solar com cache compatível; previsão da rota consultada apenas por ação explícita.
+- Consultar POIs na área de destino selecionado, sem contaminar avisos de proximidade do GPS; atalhos do mapa configuráveis (até dois, sem duplicados automáticos).
+- Documentação, versão e contratos ajustados. Flutter/Android e APIs autenticadas devem ser testados no aparelho/CI.
+
 ## 1.0.334+334 (2026-11-03)
 - Central de serviços: exportar/importar até cinco credenciais configuradas via arquivo `.vigiaapis` protegido por senha (AES-256-GCM, PBKDF2-HMAC-SHA256, 210.000 iterações, salt/nonce aleatórios); confirmar antes de sobrescrever e nunca apagar ausentes. Open-Meteo não exige chave; chave Google Maps do manifesto não é exportável.
 - Pesquisas online de cidades e pontos próximos com limites máximos para o carregamento, fallback local em falhas e consultas diretas sem Gemini para nomes de lugares simples.

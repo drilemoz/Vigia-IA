@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/esp32_module.dart';
@@ -155,6 +156,49 @@ class MapWeatherService extends ChangeNotifier {
     }
   }
 
+  /// Previsão ao longo da rota, sob demanda. Não altera a telemetria do GPS
+  /// nem executa chamadas automaticamente enquanto o usuário pedala.
+  Future<List<({String label, DateTime estimatedAt, MapWeatherForecastHour? hour})>>
+      forecastAlongRoute({
+    required List<LatLng> points,
+    required Duration estimatedTravelTime,
+  }) async {
+    if (points.length < 2) return const [];
+    const fractions = <double>[0, 0.5, 1];
+    final start = DateTime.now();
+    Future<({String label, DateTime estimatedAt, MapWeatherForecastHour? hour})>
+        sampleAt(int index) async {
+      final fraction = fractions[index];
+      final pointIndex = ((points.length - 1) * fraction).round();
+      final position = points[pointIndex];
+      final target = start.add(Duration(seconds:
+          (estimatedTravelTime.inSeconds * fraction).round()));
+      final forecast = await _fetchOnline(
+        position.latitude, position.longitude,
+      ).timeout(const Duration(seconds: 12));
+      MapWeatherForecastHour? closest;
+      var difference = const Duration(days: 30);
+      for (final hour in forecast.hourlyForecast) {
+        final delta = hour.time.difference(target).abs();
+        if (delta < difference) {
+          closest = hour;
+          difference = delta;
+        }
+      }
+      // Nunca apresentar o fim da janela como previsão para chegadas futuras.
+      if (difference > const Duration(minutes: 90)) closest = null;
+      return (
+        label: const <String>['Partida', 'Meio da rota', 'Chegada'][index],
+        estimatedAt: target,
+        hour: closest,
+      );
+    }
+    final results = await Future.wait([
+      for (var index = 0; index < fractions.length; index++) sampleAt(index),
+    ]).timeout(const Duration(seconds: 16));
+    return results;
+  }
+
   Future<MapWeatherOnlineData> _fetchOnline(
     double latitude,
     double longitude,
@@ -182,8 +226,10 @@ class MapWeatherService extends ChangeNotifier {
         'wind_speed_10m',
         'wind_gusts_10m',
         'wind_direction_10m',
+        'uv_index',
+        'shortwave_radiation',
       ].join(','),
-      'forecast_hours': '12',
+      'forecast_hours': '48',
       'timezone': 'GMT',
       if (_providerApiKey.isNotEmpty) 'apikey': _providerApiKey,
     };
@@ -192,7 +238,7 @@ class MapWeatherService extends ChangeNotifier {
       ..connectionTimeout = const Duration(seconds: 5);
     final request = await client.getUrl(uri);
     request.headers.set('accept', 'application/json');
-    request.headers.set('user-agent', 'VigiaIA/1.0.334 (weather)');
+    request.headers.set('user-agent', 'VigiaIA/1.0.335 (weather)');
     final response = await request.close().timeout(const Duration(seconds: 8));
     final body = await utf8.decoder
         .bind(response)
@@ -452,6 +498,8 @@ class MapWeatherService extends ChangeNotifier {
             _round(item.precipitationProbabilityPercent, 0),
             _round(item.windSpeedKmh, 1),
             _round(item.windGustKmh, 1),
+            _round(item.uvIndex, 1),
+            _round(item.shortwaveRadiationWm2, 0),
             item.weatherCode,
           ].join(':'),
         value.origin.name,
@@ -553,7 +601,7 @@ class MapWeatherService extends ChangeNotifier {
     }
 
     final result = <MapWeatherForecastHour>[];
-    for (var index = 0; index < times.length && result.length < 12; index++) {
+    for (var index = 0; index < times.length && result.length < 48; index++) {
       final time = _parseDate(times[index]);
       if (time == null) continue;
       final item = MapWeatherForecastHour(
@@ -597,6 +645,10 @@ class MapWeatherService extends ChangeNotifier {
           at('wind_direction_10m', index),
           min: 0,
           max: 360,
+        ),
+        uvIndex: _finiteDouble(at('uv_index', index), min: 0, max: 30),
+        shortwaveRadiationWm2: _finiteDouble(
+          at('shortwave_radiation', index), min: 0, max: 1600,
         ),
       );
       if (item.hasValues) result.add(item);

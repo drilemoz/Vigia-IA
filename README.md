@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.334+334`
+**Versão atual:** `1.0.335+335`
+
+## Atualização 1.0.335+335 · Integração de APIs e mapa
+
+Geoapify é consultado após a confirmação de destino quando houver chave; Nominatim/OSM permanece como alternativa, e Geoapify Places pode buscar POIs quando o Overpass retorna vazio. OpenRouteService oferece rotas para bicicleta, com geometria, manobras e elevação fornecidas pelo provedor; Valhalla permanece como alternativa automática. Open-Meteo amplia a previsão para 48 horas e adiciona índice UV e radiação solar, além de previsão em três locais da rota por toque. Pontos próximos permitem consultar a região de um local selecionado sem alterar alertas baseados no GPS. O menu do mapa oferece escolha de até dois atalhos rápidos, sem duplicar botões automáticos. Tudo opcional, sem chave obrigatória, preservando MBTiles/OSM offline. Integridade e testes estáticos não substituem Flutter analyze, APK ou chamadas reais com credenciais.
+
+**Versão anterior:** `1.0.334+334`
+
+
 
 ## Atualização 1.0.334+334 · Backup de APIs e ajustes na busca/mapa
 

@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../models/map_cycling_route.dart';
 import '../models/map_travel_mode.dart';
 import 'data_usage_service.dart';
+import 'partner_api_key_service.dart';
 
 /// Busca rotas viárias para o perfil de deslocamento escolhido. A tela mantém
 /// direção direta como fallback quando a rede ou o serviço de roteamento não
@@ -36,6 +37,23 @@ class MapCyclingRouteService {
     int alternativeCount = 2,
     MapTravelMode travelMode = MapTravelMode.bicycle,
   }) async {
+    // ORS é opcional e só é usado para bicicletas; Valhalla continua como
+    // fallback, inclusive quando a credencial foi revogada ou está sem cota.
+    if (travelMode == MapTravelMode.bicycle) {
+      try {
+        final key = await PartnerApiKeyService.instance.reveal(
+          PartnerApiProvider.openrouteservice,
+        );
+        if (key != null && key.isNotEmpty) {
+          final route = await _fetchOrs(
+            origin: origin, destination: destination, key: key,
+          ).timeout(const Duration(seconds: 12));
+          return <MapCyclingRoute>[route];
+        }
+      } catch (_) {
+        // Não impedir a navegação por falha na API opcional.
+      }
+    }
     final safeAlternativeCount = alternativeCount.clamp(0, 2).toInt();
     final payload = jsonEncode(<String, Object>{
       'locations': <Map<String, double>>[
@@ -53,7 +71,7 @@ class MapCyclingRouteService {
       <String, String>{'json': payload},
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.334');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335');
     request.headers.set('X-Client-Id', 'com.vigiaia.app');
     final response = await request.close().timeout(const Duration(seconds: 12));
     final body = await utf8.decoder.bind(response).join();
@@ -66,6 +84,118 @@ class MapCyclingRouteService {
       throw HttpException('Roteamento indisponível (${response.statusCode})');
     }
     return parseRoutes(body);
+  }
+
+  Future<MapCyclingRoute> _fetchOrs({
+    required LatLng origin,
+    required LatLng destination,
+    required String key,
+  }) async {
+    final payload = jsonEncode(<String, Object>{
+      'coordinates': <List<double>>[
+        <double>[origin.longitude, origin.latitude],
+        <double>[destination.longitude, destination.latitude],
+      ],
+      'elevation': true,
+      'instructions': true,
+    });
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
+    try {
+      final request = await client.postUrl(Uri.https(
+        'api.openrouteservice.org',
+        '/v2/directions/cycling-regular/geojson',
+      )).timeout(const Duration(seconds: 5));
+      request.followRedirects = false;
+      request.headers.set(HttpHeaders.authorizationHeader, key);
+      request.headers.set(HttpHeaders.acceptHeader, 'application/geo+json, application/json');
+      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.335');
+      request.add(utf8.encode(payload));
+      final response = await request.close().timeout(const Duration(seconds: 9));
+      final body = await response.transform(utf8.decoder).join()
+          .timeout(const Duration(seconds: 9));
+      DataUsageService.instance.record(
+        DataUsageModule.maps,
+        received: utf8.encode(body).length,
+        sent: utf8.encode(payload).length,
+      );
+      if (response.statusCode != HttpStatus.ok) {
+        throw HttpException('ORS HTTP ${response.statusCode}');
+      }
+      return parseOrsGeoJson(body);
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  /// GeoJSON ORS: coordenadas em [longitude, latitude, altitude?].
+  /// Nunca interpreta altitude como latitude e mantém índices de manobras.
+  MapCyclingRoute parseOrsGeoJson(String body) {
+    final data = jsonDecode(body);
+    if (data is! Map || data['features'] is! List ||
+        (data['features'] as List).isEmpty) {
+      throw const FormatException('GeoJSON ORS sem rota');
+    }
+    final feature = (data['features'] as List).first;
+    if (feature is! Map) throw const FormatException('Rota ORS inválida');
+    final geometry = feature['geometry'];
+    if (geometry is! Map || geometry['coordinates'] is! List) {
+      throw const FormatException('Geometria ORS inválida');
+    }
+    final points = <LatLng>[];
+    for (final raw in (geometry['coordinates'] as List)) {
+      if (raw is! List || raw.length < 2 ||
+          raw[0] is! num || raw[1] is! num) continue;
+      final lat = (raw[1] as num).toDouble();
+      final lon = (raw[0] as num).toDouble();
+      if (lat.isFinite && lon.isFinite && lat.abs() <= 90 && lon.abs() <= 180) {
+        points.add(LatLng(lat, lon));
+      }
+    }
+    if (points.length < 2) throw const FormatException('Rota ORS sem pontos');
+    final properties = feature['properties'];
+    if (properties is! Map || properties['summary'] is! Map) {
+      throw const FormatException('Rota ORS sem resumo');
+    }
+    final summary = properties['summary'] as Map;
+    final distance = (summary['distance'] as num?)?.toDouble() ?? 0;
+    final duration = (summary['duration'] as num?)?.toDouble() ?? 0;
+    if (!distance.isFinite || distance <= 0 || !duration.isFinite || duration < 0) {
+      throw const FormatException('Métricas ORS inválidas');
+    }
+    final maneuvers = <MapCyclingManeuver>[];
+    final segments = properties['segments'];
+    if (segments is List) {
+      for (final segment in segments.whereType<Map>()) {
+        final steps = segment['steps'];
+        if (steps is! List) continue;
+        for (final step in steps.whereType<Map>()) {
+          final waypoints = step['way_points'];
+          if (waypoints is! List || waypoints.length < 2) continue;
+          final begin = (waypoints[0] as num?)?.toInt();
+          final end = (waypoints[1] as num?)?.toInt();
+          if (begin == null || end == null || begin < 0 ||
+              end < begin || end >= points.length) continue;
+          maneuvers.add(MapCyclingManeuver(
+            instruction: step['instruction']?.toString() ?? 'Continuar',
+            beginShapeIndex: begin,
+            endShapeIndex: end,
+            distanceMeters: (step['distance'] as num?)?.toDouble() ?? 0,
+            durationSeconds: (step['duration'] as num?)?.toDouble() ?? 0,
+            type: (step['type'] as num?)?.toInt(),
+            streetName: step['name']?.toString(),
+          ));
+        }
+      }
+    }
+    return MapCyclingRoute(
+      points: List<LatLng>.unmodifiable(points),
+      distanceMeters: distance,
+      durationSeconds: duration,
+      maneuvers: List<MapCyclingManeuver>.unmodifiable(maneuvers),
+      ascentMeters: (summary['ascent'] as num?)?.toDouble(),
+      descentMeters: (summary['descent'] as num?)?.toDouble(),
+    );
   }
 
   List<MapCyclingRoute> parseRoutes(String body) {

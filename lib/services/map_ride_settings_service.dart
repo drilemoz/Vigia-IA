@@ -24,6 +24,8 @@ class MapRideSettingsService extends ChangeNotifier {
   int radioBitrateKbps = 0;
   List<Map<String, String>> stations = <Map<String, String>>[];
   bool roadOverlayEnabled = false;
+  /// Até dois atalhos escolhidos pelo usuário; evita sobrecarregar o mapa.
+  List<String> mapQuickShortcuts = <String>[];
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -64,6 +66,11 @@ class MapRideSettingsService extends ChangeNotifier {
               .where((entry) => entry['url']!.isNotEmpty)
               .toList();
           roadOverlayEnabled = raw['roadOverlayEnabled'] as bool? ?? false;
+          mapQuickShortcuts = ((raw['mapQuickShortcuts'] as List?) ?? const <Object>[])
+              .whereType<String>()
+              .where((item) => const <String>{'offline', 'radio', 'bike', 'speed'}
+                  .contains(item))
+              .toSet().take(2).toList(growable: true);
         }
       }
     } catch (_) {
@@ -77,7 +84,7 @@ class MapRideSettingsService extends ChangeNotifier {
       bool? voice, bool? vibration, List<int>? limits,
       String? stationName, String? stationUrl, bool? roads,
       double? radioVolume, int? radioBitrateKbps,
-      List<Map<String, String>>? savedStations}) async {
+      List<Map<String, String>>? savedStations, List<String>? shortcuts}) async {
     if (focus != null) focusLevel = focus.clamp(0, 2).toInt();
     if (fullscreen != null) immersive = fullscreen;
     if (alerts != null) speedAlertsEnabled = alerts;
@@ -94,6 +101,11 @@ class MapRideSettingsService extends ChangeNotifier {
     }
     if (savedStations != null) stations = savedStations;
     if (roads != null) roadOverlayEnabled = roads;
+    if (shortcuts != null) {
+      mapQuickShortcuts = shortcuts
+          .where((item) => const <String>{'offline', 'radio', 'bike', 'speed'}.contains(item))
+          .toSet().take(2).toList(growable: true);
+    }
     notifyListeners();
     final file = _file;
     if (file == null) return;
@@ -111,6 +123,7 @@ class MapRideSettingsService extends ChangeNotifier {
       'radioBitrateKbps': this.radioBitrateKbps,
       'stations': stations,
       'roadOverlayEnabled': roadOverlayEnabled,
+      'mapQuickShortcuts': mapQuickShortcuts,
     });
     _writeTail = _writeTail.catchError((Object _) {}).then((_) async {
       final temp = File('${file.path}.tmp');

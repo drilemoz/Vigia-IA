@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.334',
+          version: '1.0.335',
           current: true,
+          changes: [
+            'Geoapify nas pesquisas e POIs; OpenRouteService para rotas de bicicleta com alternativa Valhalla.',
+            'Open-Meteo com até 48 h, radiação solar, UV e clima sob demanda na rota.',
+            'Pontos próximos também na cidade selecionada e até dois atalhos configuráveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.334',
+          current: false,
           changes: [
             'Exportar e importar chaves de APIs em backup criptografado por senha.',
             'Busca e pontos próximos com limite de espera e resposta de erro visível.',
@@ -2864,8 +2874,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.334',
+          version: '1.0.335',
           current: true,
+          changes: [
+            'Geoapify nas pesquisas e POIs; OpenRouteService para rotas de bicicleta com alternativa Valhalla.',
+            'Open-Meteo com até 48 h, radiação solar, UV e clima sob demanda na rota.',
+            'Pontos próximos também na cidade selecionada e até dois atalhos configuráveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.334',
+          current: false,
           changes: [
             'Exportar e importar chaves de APIs em backup criptografado por senha.',
             'Busca e pontos próximos com limite de espera e resposta de erro visível.',
