@@ -1,3 +1,10 @@
+## 1.0.343+343 (2026-11-04)
+- Corrigidos os dois únicos diagnósticos do `flutter analyze --fatal-infos --fatal-warnings` no workflow APK 288, após a verificação preventiva ter sido aprovada.
+- `map_monitoring_screen.dart`: `if` da rota inicial salva recebe bloco explícito de chaves (`curly_braces_in_flow_control_structures`).
+- Lista fallback de rotas da cicloviagem usa elemento anulável `?_cyclingRoute` no lugar de `if` com `!` (`use_null_aware_elements`).
+- Contratos Python novos para proteger a sintaxe; metadados, Novidades, Sobre, User-Agents, documentação e versionamento sincronizados.
+- Nenhuma alteração intencional na geometria da rota, cálculos, persistência, MBTiles, MapLibre ou navegação. Compilação Android ainda depende de nova execução do CI.
+
 ## 1.0.342+342 (2026-11-04)
 - Corrigida a falha do workflow Android APK 287 na verificação preventiva: `test/app_metadata_test.dart` ainda esperava `1.0.340+340` e foi modernizado para comparar `AppMetadata` com `pubspec.yaml` em tempo de teste.
 - `check_version_sync.py` e regressões Python exigem a leitura dinâmica do pubspec, prevenindo novas expectativas de versão obsoletas; verificadores e dependências atuais sincronizados para 1.0.342+342.

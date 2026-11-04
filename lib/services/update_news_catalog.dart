@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.342', build: 342);
+      AppBuildVersion(version: '1.0.343', build: 343);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.342', build: 342),
+      version: AppBuildVersion(version: '1.0.343', build: 343),
       changes: <String>[
-        'Corrigido o bloqueio do workflow APK 287 causado por um teste de metadados com versão antiga.',
-        'Teste de versão agora compara automaticamente os valores do aplicativo com o pubspec.yaml.',
-        'Planejamento unificado de cicloviagem, biblioteca offline e melhorias do mapa preservados.',
+        'Corrigidos dois avisos de lint do Flutter que impediam o APK 288 de avançar à compilação.',
+        'A abertura inicial de rota salva agora utiliza bloco if explícito, sem alterar seu comportamento.',
+        'Rota de bicicleta opcional agora usa elemento anulável; planejamento unificado e mapas offline preservados.',
       ],
     ),
   ]);

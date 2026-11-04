@@ -38,7 +38,7 @@ class GeoapifyMapSearchService {
       ).timeout(const Duration(seconds: 5));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.342');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.343');
       final response = await request.close().timeout(const Duration(seconds: 6));
       final body = await response.transform(utf8.decoder).join()
           .timeout(const Duration(seconds: 6));

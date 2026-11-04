@@ -74,9 +74,9 @@ class UiDiagnostics319(unittest.TestCase):
         self.assertNotIn('recordUiAction(', source('lib/utils/diagnostic_redactor.dart'))
 
     def test_version_and_notes(self):
-        self.assertIn('version: 1.0.342+342', source('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.342.md').is_file())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.342.md').is_file())
+        self.assertIn('version: 1.0.343+343', source('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.343.md').is_file())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.343.md').is_file())
 
 
 if __name__ == '__main__':

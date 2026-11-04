@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.343+343
+
+- APK 288: verificação preventiva passou; o Flutter Analyzer apontou dois avisos `info` fatais em `lib/screens/map_monitoring_screen.dart` (linhas 2168 e 3028 na versão 1.0.342).
+- Correções pontuais e testes preventivos em `tool/test_build288_flutter_analyze_343.py`. Resultado e limitações em `VALIDATION-1.0.343.md`.
+- Flutter analyze/test/compilação Android devem ser reconfirmados no próximo workflow; Python local não substitui compilação Dart.
+
 # Validação Vigia IA 1.0.342+342
 
 - APK 287: falha antes da compilação em `test/app_metadata_test.dart` (esperava 1.0.340+340 sobre pubspec 1.0.341+341). Solução e verificações em `VALIDATION-1.0.342.md`.

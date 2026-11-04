@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.342+342`
+**Versão atual:** `1.0.343+343`
+
+## APK 288 — correção do Flutter Analyzer (1.0.343)
+
+O workflow passou pela validação preventiva, mas `flutter analyze --fatal-infos --fatal-warnings` retornou dois diagnósticos `info` fatais em `map_monitoring_screen.dart`. Na linha da abertura de rota salva, o `if` agora possui chaves; no fallback de uma rota Bike opcional, a lista usa elemento anulável `?_cyclingRoute` (Dart moderno). Os contratos de regressão verificam ambos antes do analyzer. Funcionalidade do planejamento unificado de 1.0.341 preservada. Ver `RELEASE-1.0.343.md` e `VALIDATION-1.0.343.md`.
 
 ## Correção preventiva do workflow APK 287 — 1.0.342
 

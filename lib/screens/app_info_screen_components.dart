@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.342',
+          version: '1.0.343',
           current: true,
+          changes: [
+            'Corrigidos dois diagnósticos fatais de flutter analyze no workflow APK 288.',
+            'Mapa: guarda da rota salva usa bloco if com chaves.',
+            'Planejamento Bike: lista de rota usa elemento anulável do Dart.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.342',
+          current: false,
           changes: [
             'Corrigida a verificação de metadados que bloqueava o workflow APK 287.',
             'Teste de versão sincronizado automaticamente com pubspec.yaml.',
@@ -2943,8 +2953,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.342',
+          version: '1.0.343',
           current: true,
+          changes: [
+            'Corrigidos dois diagnósticos fatais de flutter analyze no workflow APK 288.',
+            'Mapa: guarda da rota salva usa bloco if com chaves.',
+            'Planejamento Bike: lista de rota usa elemento anulável do Dart.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.342',
+          current: false,
           changes: [
             'Corrigida a verificação de metadados que bloqueava o workflow APK 287.',
             'Teste de versão sincronizado automaticamente com pubspec.yaml.',

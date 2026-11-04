@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.343+343
+
+## Correção pontual de lint no fluxo de mapas
+
+- `MapMonitoringScreen._tryOpenInitialSavedRoute` preserva o guard de rota inicial e usa bloco obrigatório para `return`, em conformidade com `curly_braces_in_flow_control_structures`.
+- `_showBikeTripPlan` cria a lista de fallback via `<MapCyclingRoute>[?_cyclingRoute]` (elemento anulável em coleção Dart), sem alterar a lista quando a rota é nula nem a lógica da rota selecionada.
+- Novas regressões estruturais em `tool/test_build288_flutter_analyze_343.py`, executadas por `tool/verify_project.sh`. São testes de fonte; o analyzer real precisa executar no CI.
+- Editor e biblioteca únicos permanecem conforme a versão 1.0.341, assim como persistência offline e mapas MapLibre/MBTiles.
+
 # Arquitetura — Vigia IA 1.0.342+342
 
 ## Versão como fonte única de verdade

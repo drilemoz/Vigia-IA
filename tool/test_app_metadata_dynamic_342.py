@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class DynamicMetadata342(unittest.TestCase):
+class DynamicMetadata343(unittest.TestCase):
     def test_current_release_manifest_is_consistent(self):
         manifest = (ROOT / 'pubspec.yaml').read_text('utf-8')
         version = re.search(r'(?m)^version: (\d+\.\d+\.\d+)\+(\d+)$', manifest)

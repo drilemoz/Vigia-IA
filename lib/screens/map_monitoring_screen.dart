@@ -2165,7 +2165,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   void _tryOpenInitialSavedRoute() {
     if (_initialSavedRouteDisplayed || !_mapReady ||
-        widget.initialSavedRoute == null) return;
+        widget.initialSavedRoute == null) {
+      return;
+    }
     _initialSavedRouteDisplayed = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -3025,7 +3027,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         ? _previewRoutes
         : _cyclingRouteAlternatives.isNotEmpty
             ? _cyclingRouteAlternatives
-            : <MapCyclingRoute>[if (_cyclingRoute != null) _cyclingRoute!];
+            : <MapCyclingRoute>[?_cyclingRoute];
     if (routes.isEmpty) return;
     final selected = preview ? _previewIndex : _selectedCyclingRouteIndex;
     if (selected < 0 || selected >= routes.length) return;
