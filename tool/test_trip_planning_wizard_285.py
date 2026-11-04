@@ -49,7 +49,7 @@ class Wizard285(unittest.TestCase):
   self.assertIn('maximumTrips = 40',persistence)
   self.assertIn('vigia_planned_trips.json',persistence)
  def test_metadata(self):
-  self.assertIn('version: 1.0.345+345',read('pubspec.yaml'))
-  self.assertIn('AppBuildVersion(version: \'1.0.345\', build: 345)',read('lib/services/update_news_catalog.dart'))
-  self.assertTrue((ROOT/'RELEASE-1.0.345.md').is_file())
+  self.assertIn('version: 1.0.346+346',read('pubspec.yaml'))
+  self.assertIn('AppBuildVersion(version: \'1.0.346\', build: 346)',read('lib/services/update_news_catalog.dart'))
+  self.assertTrue((ROOT/'RELEASE-1.0.346.md').is_file())
 if __name__=='__main__': unittest.main()

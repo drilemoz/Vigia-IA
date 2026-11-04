@@ -1,4 +1,10 @@
-# Arquitetura — Vigia IA 1.0.345+345
+# Arquitetura — Vigia IA 1.0.346+346
+
+- O `DiagnosticRecoveryHost` mantém a distinção entre encerramento em memória, falha de versão anterior e falha da versão atual.
+- APK 291: contratos de `test/diagnostic_recovery_host_test.dart` refletem o título contextual por versão; adicionado cenário de versão instalada.
+- Nenhuma alteração funcional de mapas, câmeras, navegação ou diagnósticos nessa revisão.
+
+# Arquitetura — Vigia IA 1.0.346+346
 
 - O `VigiaApplication` instala o registrador antes do Flutter. O `AppDiagnostics` salva uma sessão com PID, versão, amostras limitadas e breadcrumb local. Na próxima inicialização, usa `ApplicationExitInfo` (Android 11+) com PID e intervalo do último checkpoint para associar a morte ao processo correto.
 - `DiagnosticPolicy` classifica encerramentos relevantes como erro/aviso/informação, sem inferir crash de um SIGKILL, uso de memória em cache ou ausência de marcador de fechamento. Encerramentos solicitados pelo usuário permanecem fora dos alertas.

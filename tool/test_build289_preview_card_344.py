@@ -31,9 +31,9 @@ class PreviewBikePlan344Test(unittest.TestCase):
         self.assertIn('onPlan: mode == MapTravelMode.bicycle && !loading &&', test)
 
     def test_version_incremented(self):
-        self.assertIn('version: 1.0.345+345', (ROOT/'pubspec.yaml').read_text('utf-8'))
-        self.assertTrue((ROOT/'RELEASE-1.0.345.md').exists())
-        self.assertTrue((ROOT/'VALIDATION-1.0.345.md').exists())
+        self.assertIn('version: 1.0.346+346', (ROOT/'pubspec.yaml').read_text('utf-8'))
+        self.assertTrue((ROOT/'RELEASE-1.0.346.md').exists())
+        self.assertTrue((ROOT/'VALIDATION-1.0.346.md').exists())
 
 if __name__ == '__main__':
     unittest.main()

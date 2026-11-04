@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.345',
+          version: '1.0.346',
           current: true,
+          changes: [
+            'APK 291: testes do diálogo de recuperação atualizados para o título correto de incidentes antigos.',
+            'Proteção de regressão verifica separadamente falhas da versão instalada.',
+            'Recuperação e classificação de encerramentos do Android preservadas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.345',
+          current: false,
           changes: [
             'Recuperação de diagnósticos melhorada após encerramentos inesperados e reabertura.',
             'Encerramento em cache por pressão de memória é informativo e diferente de falhas graves.',
@@ -2973,8 +2983,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.345',
+          version: '1.0.346',
           current: true,
+          changes: [
+            'APK 291: testes do diálogo de recuperação atualizados para o título correto de incidentes antigos.',
+            'Proteção de regressão verifica separadamente falhas da versão instalada.',
+            'Recuperação e classificação de encerramentos do Android preservadas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.345',
+          current: false,
           changes: [
             'Recuperação de diagnósticos melhorada após encerramentos inesperados e reabertura.',
             'Encerramento em cache por pressão de memória é informativo e diferente de falhas graves.',

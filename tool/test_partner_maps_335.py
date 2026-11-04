@@ -73,9 +73,9 @@ class PartnerMaps335(unittest.TestCase):
         self.assertIn('!hud.showBikeShortcut', screen)
 
     def test_release_current(self):
-        self.assertIn('version: 1.0.345+345', source('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.345.md').is_file())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.345.md').is_file())
+        self.assertIn('version: 1.0.346+346', source('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.346.md').is_file())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.346.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

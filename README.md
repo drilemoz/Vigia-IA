@@ -1,8 +1,14 @@
-**Versão atual:** `1.0.345+345`
+**Versão atual:** `1.0.346+346`
 
-## Recuperação de encerramentos Android — 1.0.345
+## APK 291 — testes de recuperação de incidentes (1.0.346)
+- Corrigidas três expectativas antigas de título no teste Flutter da recuperação: eventos de outra versão mostram "Falha recuperada de versão anterior".
+- Adicionado teste que confirma "Erro detectado no último uso" para incidentes da versão atual.
+- O comportamento funcional do diagnóstico introduzido em 1.0.345 foi preservado.
 
-O Vigia IA agora correlaciona informações do Android ao processo anterior (PID e horários), distingue encerramento em cache por memória de crashes e ANRs, mostra a versão da sessão original no aviso e tenta consultar novamente o diagnóstico caso a API nativa não esteja pronta na inicialização. Ao voltar do segundo plano, incidentes ainda não exibidos podem ser recuperados. O app não trata como falha um encerramento normal ou solicitado pelo usuário; Android pode não disponibilizar motivo para todos os encerramentos. Sem telemetria externa ou rastreamento persistente em segundo plano. Ver `RELEASE-1.0.345.md` e `VALIDATION-1.0.345.md`.
+
+## Recuperação de encerramentos Android — 1.0.346
+
+O Vigia IA agora correlaciona informações do Android ao processo anterior (PID e horários), distingue encerramento em cache por memória de crashes e ANRs, mostra a versão da sessão original no aviso e tenta consultar novamente o diagnóstico caso a API nativa não esteja pronta na inicialização. Ao voltar do segundo plano, incidentes ainda não exibidos podem ser recuperados. O app não trata como falha um encerramento normal ou solicitado pelo usuário; Android pode não disponibilizar motivo para todos os encerramentos. Sem telemetria externa ou rastreamento persistente em segundo plano. Ver `RELEASE-1.0.346.md` e `VALIDATION-1.0.346.md`.
 
 
 ## APK 289 — teste da prévia Bike e planejamento unificado (1.0.344)

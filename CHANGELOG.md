@@ -1,4 +1,10 @@
-## 1.0.345+345 (2026-11-04)
+## 1.0.346+346 (2026-11-04)
+
+- APK 291: sincronizada a expectativa dos testes Flutter do diálogo de recuperação de incidentes de versões anteriores.
+- Incluído teste de regressão para diferenciar erro da versão instalada de falha recuperada antiga.
+- Mantidas as melhorias de detecção/reabertura da 1.0.345; release e identidade sincronizadas.
+
+## 1.0.346+346 (2026-11-04)
 
 - Corrigido diagnóstico de encerramento ao reiniciar: correlação do histórico Android com PID e janela temporal da sessão anterior; preserva sessões legadas sem PID.
 - Falhas reais Java/nativas, ANR e pressão de memória agora têm níveis distintos; encerramento em cache por memória é informativo, não chamado de crash.
