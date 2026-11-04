@@ -1,4 +1,4 @@
-"""Regressoes estruturais do ciclo de vida MBTiles e MapLibre 3D (1.0.341).
+"""Regressoes estruturais do ciclo de vida MBTiles e MapLibre 3D (1.0.342).
 
 Testes estaticos nao comprovam comportamento Flutter/Android em dispositivo.
 """
@@ -63,9 +63,9 @@ class MapLifecycle339(unittest.TestCase):
         self.assertIn('if (previous.isOffline != current.isOffline)', network)
 
     def test_release_and_version_are_sequential(self):
-        self.assertIn('version: 1.0.341+341', read('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.341.md').is_file())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.341.md').is_file())
+        self.assertIn('version: 1.0.342+342', read('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.342.md').is_file())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.342.md').is_file())
 
 
 if __name__ == '__main__':

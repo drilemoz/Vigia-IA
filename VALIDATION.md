@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.342+342
+
+- APK 287: falha antes da compilação em `test/app_metadata_test.dart` (esperava 1.0.340+340 sobre pubspec 1.0.341+341). Solução e verificações em `VALIDATION-1.0.342.md`.
+- Flutter analyze/test, geração do APK e teste físico ainda precisam ser executados no CI.
+
 ## 1.0.341+341 — Planejamento unificado
 
 Duas entradas para o mesmo editor, biblioteca e preferências compartilhadas. Ver `VALIDATION-1.0.341.md` para testes e limites. A execução de Flutter/Android continua pendente de CI.

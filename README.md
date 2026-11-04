@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.341+341`
+**Versão atual:** `1.0.342+342`
+
+## Correção preventiva do workflow APK 287 — 1.0.342
+
+`test/app_metadata_test.dart` não contém mais versões fixas de releases passados. Compara a versão e o build declarados em `AppMetadata` com os valores reais de `pubspec.yaml` durante `flutter test`; o verificador Python também exige esse contrato. Foi corrigido o bloqueio preventivo do APK 287 sem modificar a lógica do planejador unificado. Ver `RELEASE-1.0.342.md` e `VALIDATION-1.0.342.md`.
+
+**Versão anterior:** `1.0.341+341`
+
+**Versão histórica:** `1.0.341+341`
 
 ## Planejamento único de cicloviagem 1.0.341
 

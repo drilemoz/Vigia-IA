@@ -1,3 +1,11 @@
+# Arquitetura — Vigia IA 1.0.342+342
+
+## Versão como fonte única de verdade
+
+- `pubspec.yaml` é a fonte da versão pública e do build. `AppMetadata`, os manifestos, o catálogo Novidades, a tela Sobre e os User-Agents acompanham a mesma release.
+- `test/app_metadata_test.dart` agora lê a linha `version:` do pubspec durante o Flutter test, em vez de manter números fixos; o `tool/check_version_sync.py` garante que o teste preserva esta verificação dinâmica.
+- `tool/verify_project.sh` executa tanto as regressões Python quanto o verificador de sincronização antes das etapas Flutter no CI. Não altera persistência, lógica de Mapas nem planejador único da release 341.
+
 ## 1.0.341 — Editor único de cicloviagem
 
 - `TripPlanningScreen` é a interface compartilhada. Menu Início a abre vazia; `MapMonitoringScreen._showBikeTripPlan` a abre com `initialTrip` produzido por `BikeTripEditorBridge.fromMapRoute` usando uma rota já calculada.

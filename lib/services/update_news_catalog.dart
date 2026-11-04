@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.341', build: 341);
+      AppBuildVersion(version: '1.0.342', build: 342);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.341', build: 341),
+      version: AppBuildVersion(version: '1.0.342', build: 342),
       changes: <String>[
-        'Planejamento de cicloviagem unificado entre Início e Mapas, com o mesmo editor e biblioteca.',
-        'Rota já calculada no mapa abre no planejador sem refazer consultas, com horários e pausas compartilhados.',
-        'Rotas anteriores continuam disponíveis; salvar em Mapas alimenta a biblioteca de viagens.',
+        'Corrigido o bloqueio do workflow APK 287 causado por um teste de metadados com versão antiga.',
+        'Teste de versão agora compara automaticamente os valores do aplicativo com o pubspec.yaml.',
+        'Planejamento unificado de cicloviagem, biblioteca offline e melhorias do mapa preservados.',
       ],
     ),
   ]);

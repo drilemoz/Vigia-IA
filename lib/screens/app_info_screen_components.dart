@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.341',
+          version: '1.0.342',
           current: true,
+          changes: [
+            'Corrigida a verificação de metadados que bloqueava o workflow APK 287.',
+            'Teste de versão sincronizado automaticamente com pubspec.yaml.',
+            'Planejamento único e biblioteca compartilhada de cicloviagem preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.341',
+          current: false,
           changes: [
             'Planejamento de cicloviagem unificado entre Início e Mapas.',
             'Uma biblioteca de viagens e preferências de pedal, etapas, horários e pausas compartilhadas.',
@@ -2933,8 +2943,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.341',
+          version: '1.0.342',
           current: true,
+          changes: [
+            'Corrigida a verificação de metadados que bloqueava o workflow APK 287.',
+            'Teste de versão sincronizado automaticamente com pubspec.yaml.',
+            'Planejamento único e biblioteca compartilhada de cicloviagem preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.341',
+          current: false,
           changes: [
             'Planejamento de cicloviagem unificado entre Início e Mapas.',
             'Uma biblioteca de viagens e preferências de pedal, etapas, horários e pausas compartilhadas.',

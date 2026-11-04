@@ -1,3 +1,10 @@
+## 1.0.342+342 (2026-11-04)
+- Corrigida a falha do workflow Android APK 287 na verificação preventiva: `test/app_metadata_test.dart` ainda esperava `1.0.340+340` e foi modernizado para comparar `AppMetadata` com `pubspec.yaml` em tempo de teste.
+- `check_version_sync.py` e regressões Python exigem a leitura dinâmica do pubspec, prevenindo novas expectativas de versão obsoletas; verificadores e dependências atuais sincronizados para 1.0.342+342.
+- Sobre/Novidades, README, arquitetura, validação e arquivos de release atualizados. Editor unificado, rotas offline, MBTiles/MapLibre, IA e câmeras não tiveram lógica funcional alterada.
+- Contratos herdados de UX/almoço e avisos de acesso migrados para o editor único, e os dois históricos de Mudanças/Sobre sincronizados; sem reverter a unificação.
+- Verificações locais, limitações e instruções de CI documentadas em `VALIDATION-1.0.342.md`.
+
 ## 1.0.341+341 (2026-11-04)
 - Unificados os fluxos do menu Planejamento e de Mapas: um único editor `TripPlanningScreen`, aberto a partir do botão Plano do mapa com geometria/alternativas já calculadas, sem rede ou novo GPS.
 - Mesma biblioteca para o botão Salvar do Planejamento e Salvar offline em Mapas, preservando o arquivo legado da última prévia e importando-o uma única vez, quando necessário.
