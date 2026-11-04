@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.339', build: 339);
+      AppBuildVersion(version: '1.0.340', build: 340);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.339', build: 339),
+      version: AppBuildVersion(version: '1.0.340', build: 340),
       changes: <String>[
-        'Mapas MBTiles com fechamento protegido durante troca de pacotes e navegação.',
-        'Exclusão de pacotes aguarda liberação do SQLite para evitar erros na interface.',
-        'Renderizador 3D Android ajustado para evitar inicializações sobrepostas.',
+        'Verificação preventiva de Novidades corrigida para aceitar textos atualizados da versão.',
+        'Mensagens vazias e provisórias são rejeitadas nos testes de validação do catálogo.',
+        'Mantidas as melhorias de mapas offline e do mapa 3D da versão anterior.',
       ],
     ),
   ]);

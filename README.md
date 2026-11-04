@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.339+339`
+**Versão atual:** `1.0.340+340`
+
+## Correção do workflow APK 285 — política de Novidades
+
+Corrigido o teste da política de Novidades que procurava uma frase já removida da versão anterior e, por isso, não injetava uma mensagem inválida. O teste passa a localizar uma mensagem existente no catálogo atual antes de simular `TODO` ou uma mensagem vazia; o validador também rejeita entradas vazias, sem proibir mensagens legítimas de correção de erros. A validação anterior falhou antes de `flutter analyze` ou da compilação Android. Três verificações preventivas legadas do MapLibre agora reconhecem o modo TLHC/TextureView e dispensam a antiga montagem por `AnimatedOpacity`. As melhorias de MBTiles/MapLibre da versão 1.0.339 foram preservadas. `tool/verify_project.sh` passou (435/436 testes Python aprovados, 1 ignorado); ainda é necessário testar em APK real. Ver `RELEASE-1.0.340.md` e `VALIDATION-1.0.340.md`.
+
+**Versão anterior:** `1.0.339+339`
 
 ## Estabilidade de mapas 1.0.339 — MBTiles e PlatformView Android
 

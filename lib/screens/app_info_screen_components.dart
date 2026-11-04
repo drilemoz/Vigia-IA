@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.339',
+          version: '1.0.340',
           current: true,
+          changes: [
+            'Verificação preventiva do APK corrigida para acompanhar as mensagens atuais de Novidades.',
+            'Catálogo de Novidades rejeita mensagens vazias e textos provisórios.',
+            'Preservadas as correções de mapas offline e MapLibre 3D da versão anterior.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.339',
+          current: false,
           changes: [
             'Mapas MBTiles permanecem legíveis enquanto os tiles antigos terminam de carregar.',
             'Exclusão de pacotes adiada até liberar as conexões SQLite abertas.',
@@ -2913,8 +2923,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.339',
+          version: '1.0.340',
           current: true,
+          changes: [
+            'Verificação preventiva do APK corrigida para acompanhar as mensagens atuais de Novidades.',
+            'Catálogo de Novidades rejeita mensagens vazias e textos provisórios.',
+            'Preservadas as correções de mapas offline e MapLibre 3D da versão anterior.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.339',
+          current: false,
           changes: [
             'Mapas MBTiles permanecem legíveis enquanto os tiles antigos terminam de carregar.',
             'Exclusão de pacotes adiada até liberar as conexões SQLite abertas.',

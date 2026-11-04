@@ -28,7 +28,7 @@ def validate(root=ROOT):
     match = re.search(r'changes:\s*<String>\s*\[(.*?)\]', catalog, flags=re.S)
     if not match:
         raise ValueError('mensagens de mudanças ausentes')
-    messages = re.findall(r"(?m)^\s*'([^'\n]+)',?\s*$", match.group(1))
+    messages = re.findall(r"(?m)^\s*'([^'\n]*)',?\s*$", match.group(1))
     if not messages or any(len(message.strip()) < 12 for message in messages):
         raise ValueError('Novidades precisam conter mensagens descritivas')
     if any(re.search(r'(?i)\b(todo|placeholder|lorem ipsum)\b', msg) for msg in messages):

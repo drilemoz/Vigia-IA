@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.340+340
+
+- Correção preventiva do workflow APK 285: teste resiliente à atualização de textos de Novidades, validador rejeita mensagens vazias; `tool/verify_project.sh` aprovado (exit 0), com 436 testes Python agregados (435 aprovados, 1 ignorado). Detalhes em `VALIDATION-1.0.340.md`.
+- Flutter analyze/test, compilação Android e testes físicos permanecem pendentes.
+
 # Validação Vigia IA 1.0.339+339
 
 - Correções de ciclo de vida MBTiles, exclusão diferida de arquivos, modo de composição MapLibre Android e reinicialização do renderer. Testes locais e resultados específicos em `VALIDATION-1.0.339.md`.

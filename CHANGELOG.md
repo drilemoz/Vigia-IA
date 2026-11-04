@@ -1,3 +1,11 @@
+## 1.0.340+340 (2026-11-03)
+- Corrigida a falha do workflow Android APK 285 na etapa `Verificação preventiva`: `test_news_catalog_policy_301.py` tentava alterar uma mensagem antiga da versão 1.0.338, ausente no catálogo 1.0.339. Agora usa a primeira mensagem efetiva do release corrente.
+- Atualizadas três verificações preventivas antigas do MapLibre 3D: duas verificavam HC puro e uma exigia `AnimatedOpacity`, incompatíveis com o TLHC/TextureView adotado na versão 1.0.339.
+- Reforçado `check_news_catalog_policy.py` para rejeitar textos vazios (`''`) em vez de ignorá-los ao analisar as mensagens.
+- Testadas rejeições de versão incorreta, `TODO` e mensagem vazia; textos legítimos de correções seguem permitidos.
+- Atualizados `pubspec.yaml`, metadados, tela Sobre/Novidades, scripts/testes, documentação e código de versão. Recursos de mapas MBTiles/MapLibre da 1.0.339 mantidos.
+- `tool/verify_project.sh` aprovado (exit 0; 435/436 testes Python aprovados, 1 ignorado). `flutter analyze`, `flutter test` e compilação Android continuam pendentes de confirmação no GitHub Actions.
+
 ## 1.0.339+339 (2026-11-03)
 - Corrigido o ciclo de vida de `TileLayer`/MBTiles: o `dispose()` do widget não fecha a conexão SQLite antes de os ImageProviders concluírem leituras; provedores antigos são drenados por 45 s após a tela liberar sua referência.
 - Exclusão de pacote torna-se lógica antes da física; arquivos MBTiles usados aguardam a saída de todos os leitores e arquivos órfãos são tratados na inicialização seguinte.

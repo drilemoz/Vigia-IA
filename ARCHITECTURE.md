@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.340+340
+
+## Política de Novidades e build preventivo
+
+- `tool/test_news_catalog_policy_301.py` monta a fixture a partir da versão e das mensagens efetivas de `pubspec.yaml` e `UpdateNewsCatalog`. Não depende de uma frase específica de release anterior.
+- `tool/check_news_catalog_policy.py` captura entradas vazias em `changes` para que o catálogo não passe se contiver textos incompletos. Rejeita versões antigas, mensagens curtas e `TODO`; permite descrições legítimas de correções.
+- `tool/verify_project.sh` aceita a implementação atual de `tlhc_hc` e `androidTextureMode: true` e proíbe o antigo padrão `opacity: navigation3dActive ? 1 : 0`, em vez de exigir HC puro ou `AnimatedOpacity`.
+- `tool/verify_project.sh` continua a executar a política antes do analyzer e do build. Nenhum componente de mapa/IA/câmeras foi modificado funcionalmente nesta versão.
+
 # Arquitetura — Vigia IA 1.0.339+339
 
 ## Ciclo de vida de MBTiles e renderizador 3D

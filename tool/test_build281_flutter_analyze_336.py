@@ -51,12 +51,12 @@ class Build281FlutterAnalyze336Test(unittest.TestCase):
         self.assertIn('return _valhalla', body) if 'return _valhalla' in body else self.assertIn('valhalla', body.lower())
 
     def test_public_release_is_sequential_and_history_preserved(self):
-        self.assertIn('version: 1.0.339+339', src('pubspec.yaml'))
-        self.assertIn('static const int build = 339;', src('lib/core/app_metadata.dart'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.339.md').exists())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.339.md').exists())
+        self.assertIn('version: 1.0.340+340', src('pubspec.yaml'))
+        self.assertIn('static const int build = 340;', src('lib/core/app_metadata.dart'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.340.md').exists())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.340.md').exists())
         about = src('lib/screens/app_info_screen_components.dart')
-        self.assertEqual(about.count("version: '1.0.339',\n          current: true"), 2)
+        self.assertEqual(about.count("version: '1.0.340',\n          current: true"), 2)
         self.assertIn("version: '1.0.335',\n          current: false", about)
 
 
