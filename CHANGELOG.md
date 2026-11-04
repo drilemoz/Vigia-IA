@@ -1,3 +1,11 @@
+## 1.0.345+345 (2026-11-04)
+
+- Corrigido diagnóstico de encerramento ao reiniciar: correlação do histórico Android com PID e janela temporal da sessão anterior; preserva sessões legadas sem PID.
+- Falhas reais Java/nativas, ANR e pressão de memória agora têm níveis distintos; encerramento em cache por memória é informativo, não chamado de crash.
+- SIGKILL sem motivo confirmado é reportado como informação inconclusiva; encerramentos normais, atualização e solicitação do usuário não geram falsos avisos.
+- Recuperação de falha temporária na consulta nativa com três tentativas curtas e nova verificação ao retomar a atividade; aviso único por incidente por sessão, mantendo exportação local e dados da versão original.
+- Testes de classificação Kotlin/JVM, novos widget tests Flutter e contratos Python. Nenhuma alteração em câmera, mapas, transmissão ou IA.
+
 ## 1.0.344+344 (2026-11-04)
 
 - APK 289: corrigido `test/map_route_preview_card_test.dart`, que exigia o rótulo antigo "Carregando plano" mesmo com a prévia já disponível e sem plano pré-calculado.

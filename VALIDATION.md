@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.345+345
+
+- Diagnóstico de encerramentos Android aprimorado, com PID/tempo, severidade, versões distintas e reconsulta ao retomar o app. Testes Kotlin/JVM, regressão Python e widget tests Flutter adicionados. Ver `VALIDATION-1.0.345.md`.
+- SDK Flutter e Android devem confirmar em GitHub Actions (`flutter analyze`, `flutter test`, `assembleRelease`); testes locais de código não substituem APK em dispositivo.
+
 # Validação Vigia IA 1.0.344+344
 
 ## APK 289 — teste Flutter da prévia de cicloviagem

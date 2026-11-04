@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.344',
+          version: '1.0.345',
           current: true,
+          changes: [
+            'Recuperação de diagnósticos melhorada após encerramentos inesperados e reabertura.',
+            'Encerramento em cache por pressão de memória é informativo e diferente de falhas graves.',
+            'Registro mantém a versão que sofreu o incidente e identifica o processo Android.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.344',
+          current: false,
           changes: [
             'APK 289: corrigida expectativa do teste Flutter da prévia de bicicleta após a unificação.',
             'Planejar viagem permanece disponível antes de as etapas estarem calculadas.',
@@ -2963,8 +2973,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.344',
+          version: '1.0.345',
           current: true,
+          changes: [
+            'Recuperação de diagnósticos melhorada após encerramentos inesperados e reabertura.',
+            'Encerramento em cache por pressão de memória é informativo e diferente de falhas graves.',
+            'Registro mantém a versão que sofreu o incidente e identifica o processo Android.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.344',
+          current: false,
           changes: [
             'APK 289: corrigida expectativa do teste Flutter da prévia de bicicleta após a unificação.',
             'Planejar viagem permanece disponível antes de as etapas estarem calculadas.',

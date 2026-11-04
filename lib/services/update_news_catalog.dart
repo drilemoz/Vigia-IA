@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.344', build: 344);
+      AppBuildVersion(version: '1.0.345', build: 345);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.344', build: 344),
+      version: AppBuildVersion(version: '1.0.345', build: 345),
       changes: <String>[
-        'Corrigido o teste da prévia de bicicleta que bloqueava o APK 289 após a unificação do planejamento.',
-        'O planejamento pode ser aberto antes de calcular as etapas; teste verifica o botão e a ação.',
-        'Mantidos mapas, navegação, biblioteca e preferências compartilhadas de cicloviagem.',
+        'Diagnósticos de encerramento agora distinguem falhas graves de limpeza de memória em segundo plano.',
+        'Relatórios identificam a versão original e correlacionam o encerramento ao processo Android correto.',
+        'Uma falha temporária na leitura do diagnóstico pode ser recuperada ao voltar para o aplicativo.',
       ],
     ),
   ]);

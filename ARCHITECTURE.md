@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.345+345
+
+- O `VigiaApplication` instala o registrador antes do Flutter. O `AppDiagnostics` salva uma sessão com PID, versão, amostras limitadas e breadcrumb local. Na próxima inicialização, usa `ApplicationExitInfo` (Android 11+) com PID e intervalo do último checkpoint para associar a morte ao processo correto.
+- `DiagnosticPolicy` classifica encerramentos relevantes como erro/aviso/informação, sem inferir crash de um SIGKILL, uso de memória em cache ou ausência de marcador de fechamento. Encerramentos solicitados pelo usuário permanecem fora dos alertas.
+- `AutomaticDiagnosticsService.capture` tolera indisponibilidade temporária do canal nativo, e `DiagnosticRecoveryHost` consulta novamente no `resumed` se necessário, sem alertar repetidamente o mesmo incidente na mesma sessão. Os arquivos antigos continuam legíveis e a exportação permanece local, sob ação do usuário.
+
 # Arquitetura — Vigia IA 1.0.344+344
 
 ## Correção pontual de lint no fluxo de mapas
