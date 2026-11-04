@@ -534,8 +534,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     if (!_appActive) return;
     try {
       final telemetry = await _native.readDeviceTelemetry();
-      if (!mounted || !_appActive ||
-          telemetry.batteryPercent == _phoneBattery) return;
+      if (!mounted ||
+          !_appActive ||
+          telemetry.batteryPercent == _phoneBattery) {
+        return;
+      }
       setState(() => _phoneBattery = telemetry.batteryPercent);
     } catch (_) {
       // Telemetria opcional: ausência de leitura não derruba o mapa.

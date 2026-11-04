@@ -47,7 +47,7 @@ class MapsSdkBuildKey333Tests(unittest.TestCase):
         self.assertIn('MAPS_API_KEY', config)
         self.assertIn('não é injetada no SDK', config)
     def test_version(self):
-        self.assertIn('version: 1.0.349+349', src('pubspec.yaml'))
+        self.assertIn('version: 1.0.350+350', src('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

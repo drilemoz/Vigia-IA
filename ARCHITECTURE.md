@@ -1,4 +1,8 @@
-# Arquitetura — Vigia IA 1.0.349+349
+# Arquitetura — Vigia IA 1.0.350+350
+
+### 1.0.350 — análise estática e retorno de telemetria
+
+A guarda de `_refreshBattery` recebeu chaves explícitas, mantendo as verificações `mounted`, atividade em primeiro plano e valor invariável. Esse ajuste de lint não cria sensores, streams ou timers. Um teste Python preventivo reproduz a estrutura exigida, além do `flutter analyze` em CI.
 
 ### 1.0.349 — ciclo de vida e serviços testáveis do mapa
 

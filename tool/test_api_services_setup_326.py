@@ -56,7 +56,7 @@ class ApiServicesSetup326Tests(unittest.TestCase):
         self.assertNotIn('gemini_api_key=', setup)
 
     def test_version_and_documentation(self):
-        self.assertIn('version: 1.0.349+349',src('pubspec.yaml'))
+        self.assertIn('version: 1.0.350+350',src('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

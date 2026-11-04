@@ -1,5 +1,6 @@
-# Validação Vigia IA 1.0.349+349
+# Validação Vigia IA 1.0.350+350
 
+- 1.0.350: correção de lint do APK 294 e novo teste estrutural; verificação preventiva completa aprovada (471 testes Python, 1 ignorado, 0 falhas). Ver `VALIDATION-1.0.350.md`.
 - 1.0.349: temporizador e sensor de bússola suspensos em background; políticas testáveis em `lib/services/map_hud_refresh_policy.dart` e `lib/services/map_camera_source_policy.dart`. Verificação preventiva exit 0; 469 testes Python (1 ignorado, 0 falhas). Resultados e limites em `VALIDATION-1.0.349.md`.
 - Flutter/Dart indisponível na validação local: `flutter analyze`, `flutter test` e APK devem ser confirmados no GitHub Actions.
 

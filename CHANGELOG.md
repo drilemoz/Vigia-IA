@@ -1,3 +1,9 @@
+## 1.0.350+350 (2026-11-04)
+- APK 294: corrigida regra `curly_braces_in_flow_control_structures` na guarda de `_refreshBattery` (linha 538 da versão 1.0.349).
+- Protegida a mesma condição com novo teste preventivo antes de `flutter analyze`; o setState e os filtros de telemetria permanecem inalterados.
+- Metadados de versão, cabeçalhos HTTP, Novidades, históricos e documentação sincronizados; navegação, câmera e mapas não foram modificados funcionalmente.
+- CI Flutter/análise/testes e APK devem ser reexecutados na versão 1.0.350.
+
 ## 1.0.349+349 (2026-11-04)
 - Timer do HUD é suspenso ao ocultar a aba Mapas e ao sair do primeiro plano; retoma sem criar timers duplicados.
 - Stream de bússola é suspenso no background e retomado apenas com mapa visível, sem interromper navegação ativa.

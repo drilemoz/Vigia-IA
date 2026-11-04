@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.349',
+          version: '1.0.350',
           current: true,
+          changes: [
+            'APK 294: corrigido aviso fatal do Flutter Analyzer no retorno condicional de bateria do mapa.',
+            'Leitura da telemetria preservada, com validação de bloco explícito no código.',
+            'Mapas offline, GPS, gravação, bússola e câmeras permanecem com o mesmo comportamento.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.349',
+          current: false,
           changes: [
             'Mapas interrompe o temporizador do HUD e a bússola quando não está visível ou o app sai do primeiro plano.',
             'Leituras de bateria e rádio não redesenham a tela quando os valores permanecem iguais.',
@@ -3014,8 +3024,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.349',
+          version: '1.0.350',
           current: true,
+          changes: [
+            'APK 294: corrigido aviso fatal do Flutter Analyzer no retorno condicional de bateria do mapa.',
+            'Leitura da telemetria preservada, com validação de bloco explícito no código.',
+            'Mapas offline, GPS, gravação, bússola e câmeras permanecem com o mesmo comportamento.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.349',
+          current: false,
           changes: [
             'Mapas interrompe o temporizador do HUD e a bússola quando não está visível ou o app sai do primeiro plano.',
             'Leituras de bateria e rádio não redesenham a tela quando os valores permanecem iguais.',

@@ -35,8 +35,8 @@ class ApiCentralization328Tests(unittest.TestCase):
         self.assertNotIn('const GeminiMapSettingsScreen()',assistant)
 
     def test_release_increment(self):
-        self.assertIn('version: 1.0.349+349',read('pubspec.yaml'))
-        self.assertIn("static const int build = 349;",read('lib/core/app_metadata.dart'))
+        self.assertIn('version: 1.0.350+350',read('pubspec.yaml'))
+        self.assertIn("static const int build = 350;",read('lib/core/app_metadata.dart'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.349+349`
+**Versão atual:** `1.0.350+350`
+
+## Correção do APK 294 — 1.0.350
+
+`flutter analyze --fatal-infos --fatal-warnings` sinalizou um retorno condicional sem chaves em `MapMonitoringScreen._refreshBattery`. O bloco foi explicitado sem alterar o comportamento do GPS, câmera, rotas ou telemetria; contrato de regressão incorporado à verificação preventiva. Consulte `RELEASE-1.0.350.md` e `VALIDATION-1.0.350.md`. Compilação Flutter e APK dependem de GitHub Actions.
 
 ## Economia de energia e modularização dos mapas — 1.0.349
 

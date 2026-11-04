@@ -7,16 +7,16 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.349', build: 349);
+      AppBuildVersion(version: '1.0.350', build: 350);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.349', build: 349),
+      version: AppBuildVersion(version: '1.0.350', build: 350),
       changes: <String>[
-        'Temporizador do HUD e sensor de bússola agora param quando o mapa fica oculto ou o aplicativo sai do primeiro plano.',
-        'Leituras iguais de bateria e rádio não provocam reconstruções desnecessárias da interface.',
-        'Identificação de fontes de câmera e decisões do HUD isoladas em políticas com testes de regressão.',
-        'Rotas, gravação e monitoramento preservados sem ativar câmeras ou IA em segundo plano.',
+        'Corrigido o aviso da análise estática do APK 294 na leitura de bateria do mapa.',
+        'Verificação de telemetria conserva a condição anterior e evita redesenhos desnecessários.',
+        'Novo teste preventivo detecta a ausência de chaves no retorno condicional.',
+        'Mapas, GPS, câmera, gravação e rotas permanecem sem alterações funcionais.',
       ],
     ),
   ]);

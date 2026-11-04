@@ -90,7 +90,7 @@ Responda SOMENTE JSON com as chaves search_query e explanation. search_query dev
       final request = await client.postUrl(uri).timeout(const Duration(seconds: 12));
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
       request.headers.set('x-goog-api-key', apiKey);
-      request.headers.set('x-goog-api-client', 'vigiaia-android/1.0.349');
+      request.headers.set('x-goog-api-client', 'vigiaia-android/1.0.350');
       final payload = <String, Object?>{
         if (instruction != null) 'systemInstruction': <String, Object?>{
           'parts': <Object>[<String, String>{'text': instruction}],
