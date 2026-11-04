@@ -69,6 +69,8 @@ import '../services/map_weather_service.dart';
 import '../services/map_voice_service.dart';
 import '../services/map_ux_policy.dart';
 import '../services/map_hud_presentation.dart';
+import '../services/map_hud_refresh_policy.dart';
+import '../services/map_camera_source_policy.dart';
 import '../services/map_view_policy.dart';
 import '../services/google_maps_key_service.dart';
 import '../services/map_view_settings_service.dart';
@@ -292,6 +294,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   MapCameraSlotLayout _secondaryCameraLayout = const MapCameraSlotLayout(
     yFraction: 0.78,
   );
+  bool _appLifecycleResumed = true;
   bool _appActive = true;
 
   RetainedMbTilesTileProvider? _offlineTileProvider;
@@ -357,21 +360,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     widget.navigationSearchRequests?.addListener(_onWorkspaceNavigationRequest);
     _selectedPoiId = widget.initialPointOfInterest?.id;
     unawaited(SystemUiService.edgeToEdge());
-    _hudTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      if (!mounted || !widget.workspaceVisible) return;
-      if (_routeState.navigationTarget != null &&
-          !MapTelemetryPolicy.isFresh(_routeState.current)) {
-        _navigationProgress = null; // Nunca manter manobra antiga como atual.
-      }
-      setState(() {}); // Revê a idade de GPS, bússola e clima sem rede.
-      _telemetryPanelTick.value += 1;
-      _hudFreshnessTicks += 1;
-      if (_hudFreshnessTicks % 3 == 0) {
-        unawaited(_refreshBattery());
-        unawaited(_refreshRadioStatus());
-      }
-    });
-    unawaited(_refreshBattery());
+    _appLifecycleResumed = WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    _appActive = _appLifecycleResumed && widget.workspaceVisible;
+    _startHudTimer();
+    if (_appActive) unawaited(_refreshBattery());
     unawaited(_initializeOfflineMaps());
     unawaited(_initializeGoogleMapsKey());
     unawaited(_initializeCameraOverlays());
@@ -380,6 +373,42 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     unawaited(_bikePressureSafety.initialize());
     _startCompassListener();
     unawaited(_initialize());
+  }
+
+  // Timer ativo apenas enquanto o mapa está visível e o Android em primeiro plano.
+  // Sem polling escondido em outras abas ou enquanto o usuário usa outro app.
+  void _startHudTimer() {
+    if (!_appActive || _hudTimer != null) return;
+    _hudTimer = Timer.periodic(
+      MapHudRefreshPolicy.tickInterval,
+      (_) => _onHudTick(),
+    );
+  }
+
+  void _stopHudTimer() {
+    _hudTimer?.cancel();
+    _hudTimer = null;
+  }
+
+  void _onHudTick() {
+    if (!mounted || !_appActive) return;
+    final decision = MapHudRefreshPolicy.evaluate(
+      tick: ++_hudFreshnessTicks,
+      gpsFresh: MapTelemetryPolicy.isFresh(_routeState.current),
+      navigating: _routeState.navigating,
+      recording: _routeState.recording,
+      hasTarget: _routeState.navigationTarget != null,
+      hasNavigationProgress: _navigationProgress != null,
+    );
+    if (decision.clearStaleProgress) {
+      _navigationProgress = null; // Nunca manter manobra antiga como atual.
+    }
+    if (decision.rebuildMap) setState(() {});
+    _telemetryPanelTick.value += 1;
+    if (decision.refreshDevice) {
+      unawaited(_refreshBattery());
+      unawaited(_refreshRadioStatus());
+    }
   }
 
   void _onWorkspaceNavigationRequest() {
@@ -394,6 +423,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   void _startCompassListener() {
+    if (!_appActive) return;
     _compassSubscription ??= _compass.readings().listen(
       _onCompassReading,
       onError: _onCompassError,
@@ -408,17 +438,19 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       widget.navigationSearchRequests?.addListener(_onWorkspaceNavigationRequest);
     }
     if (oldWidget.workspaceVisible == widget.workspaceVisible) return;
-    if (!widget.workspaceVisible) {
+    _appActive = _appLifecycleResumed && widget.workspaceVisible;
+    if (!_appActive) {
+      _stopHudTimer();
       _routeState.releaseLocationConsumer(this);
-      _appActive = false;
       final oldCompass = _compassSubscription;
       _compassSubscription = null;
       if (oldCompass != null) unawaited(oldCompass.cancel());
       unawaited(_primaryMapCamera?.suspend());
       unawaited(_secondaryMapCamera?.suspend());
     } else {
-      _appActive = true;
+      _startHudTimer();
       _startCompassListener();
+      unawaited(_refreshBattery());
       if (_routeState.initialized) {
         unawaited(_routeState.acquireLocationConsumer(this));
       }
@@ -442,7 +474,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     _bikePressureSafety.removeListener(_onBikeSensorChanged);
     _rideSettings.removeListener(_onRideSettingsChanged);
     widget.navigationSearchRequests?.removeListener(_onWorkspaceNavigationRequest);
-    _hudTimer?.cancel();
+    _stopHudTimer();
     _roadOverlay.dispose();
     if (_rideSettings.immersive) unawaited(SystemUiService.edgeToEdge());
     unawaited(BackgroundMonitorService.release('mapNavigation'));
@@ -499,14 +531,23 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _refreshBattery() async {
-    final telemetry = await _native.readDeviceTelemetry();
-    if (mounted) setState(() => _phoneBattery = telemetry.batteryPercent);
+    if (!_appActive) return;
+    try {
+      final telemetry = await _native.readDeviceTelemetry();
+      if (!mounted || !_appActive ||
+          telemetry.batteryPercent == _phoneBattery) return;
+      setState(() => _phoneBattery = telemetry.batteryPercent);
+    } catch (_) {
+      // Telemetria opcional: ausência de leitura não derruba o mapa.
+    }
   }
 
   Future<void> _refreshRadioStatus() async {
+    if (!_appActive) return;
     try {
       final state = await MapRadioService.status();
-      if (mounted) setState(() => _radioState = state);
+      if (!mounted || !_appActive || state == _radioState) return;
+      setState(() => _radioState = state);
     } catch (_) {}
   }
 
@@ -568,14 +609,26 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final active = state == AppLifecycleState.resumed;
-    _appActive = active && widget.workspaceVisible;
+    _appLifecycleResumed = state == AppLifecycleState.resumed;
+    _appActive = _appLifecycleResumed && widget.workspaceVisible;
     if (_appActive) {
+      _startHudTimer();
+      _startCompassListener();
+      // Retorno após pausa: o mapa pode ter liberado a assinatura GPS passiva.
+      // O Set de consumidores no serviço torna a reaquisição idempotente.
+      if (_routeState.initialized) {
+        unawaited(_routeState.acquireLocationConsumer(this));
+      }
       unawaited(_resumeVisibleInternalCameras());
+      unawaited(_refreshBattery());
       unawaited(_refreshRadioStatus());
       unawaited(_connectivity.checkNow(force: true));
       return;
     }
+    _stopHudTimer();
+    final oldCompass = _compassSubscription;
+    _compassSubscription = null;
+    if (oldCompass != null) unawaited(oldCompass.cancel());
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
@@ -610,35 +663,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   VideoSourceConfig _sourceForEndpoint(CameraEndpoint camera) =>
-      switch (camera.type) {
-        CameraEndpointType.local => VideoSourceConfig(
-            type: VideoSourceType.localCamera,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-        CameraEndpointType.rtsp => VideoSourceConfig(
-            type: VideoSourceType.rtsp,
-            rtspUrl: camera.address,
-            rtspSoftwareDecoding: camera.rtspSoftwareDecoding,
-            rtspForceTcp: camera.rtspForceTcp,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-        CameraEndpointType.remotePhone => VideoSourceConfig(
-            type: VideoSourceType.remotePhone,
-            remoteBaseUrl: camera.address,
-            remoteAccessKey: camera.accessKey,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-        CameraEndpointType.esp32 => VideoSourceConfig(
-            type: VideoSourceType.esp32,
-            remoteBaseUrl: camera.address,
-            remoteAccessKey: camera.accessKey,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-      };
+      MapCameraSourcePolicy.fromEndpoint(camera);
 
   VideoSourceConfig get _localBackSource => const VideoSourceConfig(
         type: VideoSourceType.localCamera,
@@ -654,26 +679,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         analysisInterval: Duration(milliseconds: 800),
       );
 
-  bool _sameCameraSource(VideoSourceConfig? first, VideoSourceConfig? second) {
-    if (first == null || second == null || first.type != second.type) {
-      return false;
-    }
-    if (first.type == VideoSourceType.localCamera) {
-      if (first.isFrontCameraTest || second.isFrontCameraTest) {
-        return first.isFrontCameraTest && second.isFrontCameraTest;
-      }
-      return true;
-    }
-    if (first.cameraId != null && second.cameraId != null) {
-      return first.cameraId == second.cameraId;
-    }
-    return switch (first.type) {
-      VideoSourceType.localCamera => true,
-      VideoSourceType.rtsp => first.rtspUrl == second.rtspUrl,
-      VideoSourceType.remotePhone => first.remoteBaseUrl == second.remoteBaseUrl,
-      VideoSourceType.esp32 => first.remoteBaseUrl == second.remoteBaseUrl,
-    };
-  }
+  bool _sameCameraSource(VideoSourceConfig? first, VideoSourceConfig? second) =>
+      MapCameraSourcePolicy.representsSameSource(first, second);
 
   VideoSourceConfig? _activeCameraConfig(bool secondary) {
     if (secondary) {

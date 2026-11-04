@@ -9,8 +9,8 @@ def read(name): return (R/name).read_text('utf-8')
 
 class ApiBackupAndMapUi335(unittest.TestCase):
     def test_version(self):
-        self.assertIn('version: 1.0.347+347', read('pubspec.yaml'))
-        self.assertTrue((R/'RELEASE-1.0.347.md').is_file())
+        self.assertIn('version: 1.0.349+349', read('pubspec.yaml'))
+        self.assertTrue((R/'RELEASE-1.0.348.md').is_file())
     def test_api_central_has_two_real_actions(self):
         s=read('lib/screens/api_services_setup_screen.dart')
         for item in ('Exportar APIs','Importar APIs','_transferApiKeys','_askBackupPassword',

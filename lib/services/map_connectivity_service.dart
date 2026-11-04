@@ -98,23 +98,47 @@ class MapConnectivityService extends ChangeNotifier {
     }
   }
 
+  /// HTTPS validado (TLS e status esperado), não apenas resolução DNS.
+  /// Uma página de login de Wi-Fi não deve ser considerada internet funcional.
+  static final List<Uri> connectivityEndpoints = <Uri>[
+    Uri.https('connectivitycheck.gstatic.com', '/generate_204'),
+    Uri.https('www.google.com', '/generate_204'),
+  ];
+
+  static bool validProbeResponse(Uri endpoint, int statusCode) =>
+      endpoint.scheme == 'https' &&
+      endpoint.path == '/generate_204' &&
+      (endpoint.host == 'connectivitycheck.gstatic.com' ||
+          endpoint.host == 'www.google.com') &&
+      statusCode == HttpStatus.noContent;
+
   static Future<bool> _defaultProbe() async {
-    final hosts = <String>[
-      'valhalla1.openstreetmap.de',
-      'overpass-api.de',
-    ];
-    for (final host in hosts) {
-      try {
-        final addresses = await InternetAddress.lookup(host)
-            .timeout(const Duration(seconds: 4));
-        if (addresses.isNotEmpty &&
-            addresses.any((item) => item.rawAddress.isNotEmpty)) {
-          return true;
+    // Um cliente por rodada, fechado mesmo em timeout/erro de certificado.
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 3)
+      ..idleTimeout = const Duration(seconds: 2);
+    try {
+      for (final endpoint in connectivityEndpoints) {
+        try {
+          final request = await client.getUrl(endpoint)
+              .timeout(const Duration(seconds: 4));
+          request.followRedirects = false;
+          request.persistentConnection = false;
+          request.headers.set(HttpHeaders.cacheControlHeader, 'no-cache');
+          final response = await request.close()
+              .timeout(const Duration(seconds: 4));
+          final valid = validProbeResponse(endpoint, response.statusCode);
+          // Não baixamos conteúdo de páginas de login, erro ou redirecionamento.
+          await response.drain<void>()
+              .timeout(const Duration(seconds: 2));
+          if (valid) return true;
+        } catch (_) {
+          // HTTPS indisponível; tenta o segundo endereço, sem bloquear mapa local.
         }
-      } catch (_) {
-        // Tenta a segunda origem usada pelo mapa antes de concluir offline.
       }
+      return false;
+    } finally {
+      client.close(force: true);
     }
-    return false;
   }
 }

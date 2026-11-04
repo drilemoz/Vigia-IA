@@ -77,8 +77,30 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.347',
+          version: '1.0.349',
           current: true,
+          changes: [
+            'Mapas interrompe o temporizador do HUD e a bússola quando não está visível ou o app sai do primeiro plano.',
+            'Leituras de bateria e rádio não redesenham a tela quando os valores permanecem iguais.',
+            'Políticas do HUD e identificação das câmeras separadas em serviços testáveis.',
+            'Navegação, gravação, mapas offline e fontes de câmera preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.348',
+          current: false,
+          changes: [
+            'Conexão de internet validada por HTTPS real, sem aceitar somente DNS.',
+            'GPS passivo mais econômico; gravação e navegação preservam alta precisão.',
+            'Recuperação de monitoramento protegida contra broadcasts externos.',
+            'HUD ocioso mais leve e GitHub Actions sem compilações automáticas redundantes.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.347',
+          current: false,
           changes: [
             'Seleção do visual do mapa organizada em três abas compactas: Aparência, Provedor e Base.',
             'As opções são conferidas antes de aplicar, com resumo e botão OK.',
@@ -2992,8 +3014,30 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.347',
+          version: '1.0.349',
           current: true,
+          changes: [
+            'Mapas interrompe o temporizador do HUD e a bússola quando não está visível ou o app sai do primeiro plano.',
+            'Leituras de bateria e rádio não redesenham a tela quando os valores permanecem iguais.',
+            'Políticas do HUD e identificação das câmeras separadas em serviços testáveis.',
+            'Navegação, gravação, mapas offline e fontes de câmera preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.348',
+          current: false,
+          changes: [
+            'Conexão de internet validada por HTTPS real, sem aceitar somente DNS.',
+            'GPS passivo mais econômico; gravação e navegação preservam alta precisão.',
+            'Recuperação de monitoramento protegida contra broadcasts externos.',
+            'HUD ocioso mais leve e GitHub Actions sem compilações automáticas redundantes.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.347',
+          current: false,
           changes: [
             'Seleção do visual do mapa organizada em três abas compactas: Aparência, Provedor e Base.',
             'As opções são conferidas antes de aplicar, com resumo e botão OK.',

@@ -27,9 +27,9 @@ class Build288FlutterAnalyze343Tests(unittest.TestCase):
         self.assertNotIn('if (_cyclingRoute != null) _cyclingRoute!', body)
 
     def test_version(self):
-        self.assertIn('version: 1.0.347+347', (ROOT/'pubspec.yaml').read_text(encoding='utf8'))
-        self.assertTrue((ROOT/'RELEASE-1.0.347.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.347.md').is_file())
+        self.assertIn('version: 1.0.349+349', (ROOT/'pubspec.yaml').read_text(encoding='utf8'))
+        self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

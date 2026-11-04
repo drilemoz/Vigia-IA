@@ -1,3 +1,18 @@
+## 1.0.349+349 (2026-11-04)
+- Timer do HUD é suspenso ao ocultar a aba Mapas e ao sair do primeiro plano; retoma sem criar timers duplicados.
+- Stream de bússola é suspenso no background e retomado apenas com mapa visível, sem interromper navegação ativa.
+- Leituras de bateria e rádio com estado inalterado deixam de chamar setState; falhas de telemetria opcional não derrubam a interface.
+- MapHudRefreshPolicy e MapCameraSourcePolicy isoladas da tela principal, mantendo as condições de frescor GPS e os protocolos de câmera.
+- Testes Dart e Python de regressão, documentação e versionamento sincronizados; validação Android/Flutter pendente no CI.
+
+## 1.0.348+348 (2026-11-04)
+- Probes HTTPS reais (204 esperado; sem aceitar DNS, 200 ou redirecionamentos) para o estado de conectividade de mapas.
+- GPS passivo em precisão moderada/35m; precisão alta/8m preservada na gravação e navegação, com um único stream.
+- Broadcast de recuperação interno protegido por receiver não exportado; receptor de boot separado valida ação.
+- Atualizações ociosas do HUD menos frequentes sem retirar verificações críticas de navegação.
+- GitHub Actions cancela pushes anteriores da mesma branch, sem cancelar builds manuais.
+- Testes de regressão para conectividade, demanda GPS, segurança e CI; rota offline de novos trajetos permanece pendente.
+
 ## 1.0.347+347 (2026-11-04)
 
 - Simplificado o seletor de aparência do mapa com três abas, listas compactas e resumo da escolha.

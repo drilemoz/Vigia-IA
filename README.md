@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.347+347`
+**Versão atual:** `1.0.349+349`
+
+## Economia de energia e modularização dos mapas — 1.0.349
+
+O temporizador do HUD e a leitura contínua da bússola são suspensos quando a aba Mapas fica oculta ou o aplicativo sai do primeiro plano, voltando ao retornar. A política do HUD e a identificação das fontes de câmera foram extraídas para serviços testáveis. As atualizações de bateria e rádio evitam reconstruir a tela quando o valor não mudou. A navegação ativa segue usando o serviço de primeiro plano já existente, sem perder a rota. Isto não implementa roteamento viário totalmente offline nem altera os protocolos de câmera. Consulte `RELEASE-1.0.349.md` e `VALIDATION-1.0.349.md`.
+
+## Estabilidade, conectividade e autonomia — 1.0.348
+
+O status online do mapa valida uma resposta HTTPS 204 (não apenas DNS), com prazo curto e repetição adaptativa. Consulta passiva ao GPS usa precisão moderada/35 m, enquanto navegação e gravação mantêm precisão alta/8 m. O receiver de recuperação interno não é exportado; eventos protegidos de boot/atualização usam receiver próprio. O HUD evita rebuilds globais ociosos frequentes, e pushes sucessivos cancelam builds automáticos antigos sem cancelar execução manual. O tráfego HTTP em rede local continua permitido para câmeras/radio; isso não equivale a criptografia. O motor de roteamento viário totalmente offline ainda não está implementado: exige dados rodoviários e um motor compatíveis, testados em Android.
 
 ## Visual do mapa simplificado — 1.0.347
 

@@ -1,4 +1,17 @@
-# Arquitetura — Vigia IA 1.0.347+347
+# Arquitetura — Vigia IA 1.0.349+349
+
+### 1.0.349 — ciclo de vida e serviços testáveis do mapa
+
+`MapMonitoringScreen` permanece dono do estado visual, mas delega decisões temporais do HUD a `MapHudRefreshPolicy` e conversão/deduplicação de câmeras a `MapCameraSourcePolicy`. Timer e assinatura da bússola param quando a aba oculta ou o Android pausa o app e são retomados sem duplicação no retorno. A rota e o foreground de navegação pertencem aos serviços já existentes e não são encerrados por esse ajuste visual. Telemetria de bateria/rádio usa atualização somente quando os dados mudam, com exceções nativas tratadas. Sem migração de preferências ou mudanças de protocolo.
+
+### 1.0.348 — endurecimento incremental
+
+- Estado online do mapa usa probes HTTPS 204 (TLS e status esperado); não depende apenas de DNS. Falsos negativos ainda podem ocorrer se Google estiver bloqueado.
+- Mapa passivo usa LocationAccuracy.medium/35m, com mudança do stream único quando navegação/gravação exige LocationAccuracy.high/8m; não há stream paralelo de GPS.
+- Recuperação interna de serviço usa receiver não exportado, enquanto boot/package-replace usa receiver exportado só com ações do Android.
+- Concurrency do CI separa push/manual; builds automáticos antigos da mesma ref são cancelados, builds manuais não.
+- HUD ocioso evita reconstrução total em todos os ticks de 10s; atualizações de telemetria dedicadas continuam.
+- Roteamento viário 100% offline requer motor e base de estradas próprios; dados MBTiles são apenas de visualização.
 
 - `MapLayerPickerPanel` (`lib/widgets/map_layer_picker_panel.dart`) separa aparência, provedor e base em três listas dentro do mesmo diálogo, sem duplicar a central de APIs.
 - `MapLayerPickerSelection` mantém escolhas temporárias; `MapMonitoringScreen._showLayerPicker` grava preferências somente após OK, e Cancelar descarta o rascunho.

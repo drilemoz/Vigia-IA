@@ -1,7 +1,10 @@
-# Validação Vigia IA 1.0.347+347
+# Validação Vigia IA 1.0.349+349
+
+- 1.0.349: temporizador e sensor de bússola suspensos em background; políticas testáveis em `lib/services/map_hud_refresh_policy.dart` e `lib/services/map_camera_source_policy.dart`. Verificação preventiva exit 0; 469 testes Python (1 ignorado, 0 falhas). Resultados e limites em `VALIDATION-1.0.349.md`.
+- Flutter/Dart indisponível na validação local: `flutter analyze`, `flutter test` e APK devem ser confirmados no GitHub Actions.
 
 - Painel de aparência do mapa reorganizado e confirmado por OK. Testes preventivos e Flutter de seleção estão em `tool/test_map_layer_picker_347.py` e `test/map_layer_picker_panel_test.dart`.
-- Evidências da verificação local e limites em `VALIDATION-1.0.347.md`.
+- Evidências da verificação local e limites em `VALIDATION-1.0.348.md`.
 - Flutter analyze/test e build Android devem ser confirmados no GitHub Actions se SDK não estiver disponível localmente.
 
 # Validação Vigia IA 1.0.346+346
