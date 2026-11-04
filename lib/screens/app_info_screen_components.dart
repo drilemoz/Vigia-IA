@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.340',
+          version: '1.0.341',
           current: true,
+          changes: [
+            'Planejamento de cicloviagem unificado entre Início e Mapas.',
+            'Uma biblioteca de viagens e preferências de pedal, etapas, horários e pausas compartilhadas.',
+            'Prévia abre direto no mapa; rotas antigas e exportação permanecem disponíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.340',
+          current: false,
           changes: [
             'Verificação preventiva do APK corrigida para acompanhar as mensagens atuais de Novidades.',
             'Catálogo de Novidades rejeita mensagens vazias e textos provisórios.',
@@ -2923,8 +2933,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.340',
+          version: '1.0.341',
           current: true,
+          changes: [
+            'Planejamento de cicloviagem unificado entre Início e Mapas.',
+            'Uma biblioteca de viagens e preferências de pedal, etapas, horários e pausas compartilhadas.',
+            'Prévia abre direto no mapa; rotas antigas e exportação permanecem disponíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.340',
+          current: false,
           changes: [
             'Verificação preventiva do APK corrigida para acompanhar as mensagens atuais de Novidades.',
             'Catálogo de Novidades rejeita mensagens vazias e textos provisórios.',

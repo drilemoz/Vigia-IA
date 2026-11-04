@@ -1,3 +1,11 @@
+**Versão atual:** `1.0.341+341`
+
+## Planejamento único de cicloviagem 1.0.341
+
+O menu **Planejamento** e o botão **Plano** de **Mapas** agora abrem o mesmo editor de viagem. Quando a rota vem do mapa, o traçado, as alternativas e o destino são recebidos sem uma segunda consulta de roteamento. Velocidade, horas por dia e equilíbrio usam as preferências da aba Mapas; horários, intervalos e almoço persistem em preferências compartilhadas. A biblioteca de viagens (`vigia_planned_trips.json`) recebe tanto o botão **Salvar** do editor quanto o botão **Salvar offline** de Mapas. Rotas salvas anteriormente em `vigia_saved_route.json` são preservadas e importadas conservadoramente quando a biblioteca é aberta. O botão de prévia do Planejamento abre a rota diretamente no mapa, sem exigir que se procure manualmente por “Rota salva”. Alterar uma prévia não inicia navegação, e novos roteamentos ainda exigem internet. O mapa offline MBTiles continua independente da geometria da rota. Ver `RELEASE-1.0.341.md` e `VALIDATION-1.0.341.md`.
+
+**Versão anterior:** `1.0.340+340`
+
 **Versão atual:** `1.0.340+340`
 
 ## Correção do workflow APK 285 — política de Novidades

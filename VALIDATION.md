@@ -1,3 +1,7 @@
+## 1.0.341+341 — Planejamento unificado
+
+Duas entradas para o mesmo editor, biblioteca e preferências compartilhadas. Ver `VALIDATION-1.0.341.md` para testes e limites. A execução de Flutter/Android continua pendente de CI.
+
 # Validação Vigia IA 1.0.340+340
 
 - Correção preventiva do workflow APK 285: teste resiliente à atualização de textos de Novidades, validador rejeita mensagens vazias; `tool/verify_project.sh` aprovado (exit 0), com 436 testes Python agregados (435 aprovados, 1 ignorado). Detalhes em `VALIDATION-1.0.340.md`.

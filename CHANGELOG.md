@@ -1,3 +1,11 @@
+## 1.0.341+341 (2026-11-04)
+- Unificados os fluxos do menu Planejamento e de Mapas: um único editor `TripPlanningScreen`, aberto a partir do botão Plano do mapa com geometria/alternativas já calculadas, sem rede ou novo GPS.
+- Mesma biblioteca para o botão Salvar do Planejamento e Salvar offline em Mapas, preservando o arquivo legado da última prévia e importando-o uma única vez, quando necessário.
+- Preferências compartilhadas de ritmo e equilíbrio de dias (`MapViewSettingsService`) e de saída, pausas e almoço (`BikeTripScheduleSettingsService`), com restauração dos campos antigos e novos na viagem salva.
+- Planejamento pode abrir a prévia diretamente nos Mapas; retorno do editor atualiza a prévia sem interromper a navegação ativa nem trocar sua geometria automaticamente.
+- Corrigida a diferença de tempo estimado entre a duração de roteadores e a duração baseada na velocidade configurada; a estimativa usa `BikeTripPlanner` nos dois acessos.
+- Novos contratos Python e testes Flutter para migração, serialização, horários e alternância das entradas. Flutter analyze/test e build APK ainda dependem do CI.
+
 ## 1.0.340+340 (2026-11-03)
 - Corrigida a falha do workflow Android APK 285 na etapa `Verificação preventiva`: `test_news_catalog_policy_301.py` tentava alterar uma mensagem antiga da versão 1.0.338, ausente no catálogo 1.0.339. Agora usa a primeira mensagem efetiva do release corrente.
 - Atualizadas três verificações preventivas antigas do MapLibre 3D: duas verificavam HC puro e uma exigia `AnimatedOpacity`, incompatíveis com o TLHC/TextureView adotado na versão 1.0.339.

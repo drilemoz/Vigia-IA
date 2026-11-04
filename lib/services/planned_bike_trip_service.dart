@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/planned_bike_trip.dart';
 
-/// Biblioteca independente da última prévia salva no mapa, sem permissões/GPS.
+/// Biblioteca compartilhada por Planejamento e Mapas, sem permissões/GPS.
 class PlannedBikeTripService {
   const PlannedBikeTripService();
 
@@ -33,6 +34,22 @@ class PlannedBikeTripService {
       result.add(PlannedBikeTrip.fromJson(Map<String, dynamic>.from(item)));
     }
     return List<PlannedBikeTrip>.unmodifiable(result);
+  }
+
+  // Ações de Mapas e do editor podem ocorrer em sequência: nunca usar uma
+  // lista antiga para sobrescrever silenciosamente rotas de outra entrada.
+  static Future<void> _upsertQueue = Future<void>.value();
+
+  Future<void> upsert(PlannedBikeTrip trip) {
+    final operation = _upsertQueue.catchError((Object _) {}).then((_) async {
+      final existing = await load(); // Se a biblioteca falhar, não sobrescreve.
+      await saveAll(<PlannedBikeTrip>[
+        trip,
+        ...existing.where((item) => item.id != trip.id),
+      ]);
+    });
+    _upsertQueue = operation.catchError((Object _) {});
+    return operation;
   }
 
   Future<void> saveAll(List<PlannedBikeTrip> trips) async {

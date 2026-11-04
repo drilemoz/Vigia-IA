@@ -1,3 +1,11 @@
+## 1.0.341 — Editor único de cicloviagem
+
+- `TripPlanningScreen` é a interface compartilhada. Menu Início a abre vazia; `MapMonitoringScreen._showBikeTripPlan` a abre com `initialTrip` produzido por `BikeTripEditorBridge.fromMapRoute` usando uma rota já calculada.
+- `MapWorkspaceShell.initialSavedRoute` e `MapMonitoringScreen.initialSavedRoute` permitem abrir diretamente a geometria salva na origem do Planejamento; a prévia não solicita novo roteamento ou inicia gravação.
+- `PlannedBikeTripService` é a biblioteca compartilhada para Mapas e Planejamento (`upsert` serializado), com o armazenamento legado `SavedBikeRouteService` mantido para rotas antigas. Quando há uma rota Bike antiga não migrada, o editor a importa com ID determinístico, sem sobrescrever viagens existentes.
+- `MapViewSettingsService.bikeTravelPreferences`: velocidade, horas por dia e equilíbrio. `BikeTripScheduleSettingsService`: saída diária, frequência/duração das pausas, almoço automático/manual. `PlannedBikeTrip` serializa ambos, com defaults para versão anterior.
+- `BikeTripPlanner` e `BikeTripSchedule` continuam responsáveis por dividir os dias e estimar horários com base na geometria e nos parâmetros explícitos, não na duração do roteador. Mapa prévio e navegação ativa possuem estados separados; retorno do editor não redireciona navegação em andamento.
+
 # Arquitetura — Vigia IA 1.0.340+340
 
 ## Política de Novidades e build preventivo
