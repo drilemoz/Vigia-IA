@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.343+343`
+**Versão atual:** `1.0.344+344`
+
+## APK 289 — teste da prévia Bike e planejamento unificado (1.0.344)
+
+`flutter analyze` e a verificação preventiva passaram no APK 289. `flutter test` falhou em `test/map_route_preview_card_test.dart:76`, pois o teste procurava "Carregando plano" mesmo sem existir plano pré-calculado. A UI correta exibe "Planejar viagem" e permite abrir o editor unificado desde que exista uma rota selecionada. O teste agora acompanha esse comportamento e cobre a ação do botão antes e depois de existir o plano. Ver `RELEASE-1.0.344.md` e `VALIDATION-1.0.344.md`.
 
 ## APK 288 — correção do Flutter Analyzer (1.0.343)
 

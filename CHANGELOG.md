@@ -1,3 +1,10 @@
+## 1.0.344+344 (2026-11-04)
+
+- APK 289: corrigido `test/map_route_preview_card_test.dart`, que exigia o rótulo antigo "Carregando plano" mesmo com a prévia já disponível e sem plano pré-calculado.
+- Testes de widget agora verificam "Planejar viagem" habilitado sem plano e "Plano 2d" quando os dias já foram calculados, inclusive callbacks de abertura do editor.
+- Contrato preventivo integrado ao `tool/verify_project.sh` para antecipar regressões de teste da prévia Bike.
+- Preservados o editor e a biblioteca unificados, navegação, armazenamento offline e APIs; metadados de release atualizados para `1.0.344+344`.
+
 ## 1.0.343+343 (2026-11-04)
 - Corrigidos os dois únicos diagnósticos do `flutter analyze --fatal-infos --fatal-warnings` no workflow APK 288, após a verificação preventiva ter sido aprovada.
 - `map_monitoring_screen.dart`: `if` da rota inicial salva recebe bloco explícito de chaves (`curly_braces_in_flow_control_structures`).

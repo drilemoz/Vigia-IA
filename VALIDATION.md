@@ -1,4 +1,9 @@
-# Validação Vigia IA 1.0.343+343
+# Validação Vigia IA 1.0.344+344
+
+## APK 289 — teste Flutter da prévia de cicloviagem
+
+A verificação preventiva e `flutter analyze` passaram no APK 289, mas o `flutter test` falhou em `test/map_route_preview_card_test.dart:76` ao esperar o texto obsoleto "Carregando plano". O teste atualizado verifica "Planejar viagem" sem etapas calculadas, "Plano 2d" com etapas e callback de abertura do editor. Contrato Python integrado ao `tool/verify_project.sh`. Consulte `VALIDATION-1.0.344.md` para as evidências e limites.
+
 
 - APK 288: verificação preventiva passou; o Flutter Analyzer apontou dois avisos `info` fatais em `lib/screens/map_monitoring_screen.dart` (linhas 2168 e 3028 na versão 1.0.342).
 - Correções pontuais e testes preventivos em `tool/test_build288_flutter_analyze_343.py`. Resultado e limitações em `VALIDATION-1.0.343.md`.
@@ -205,6 +210,10 @@ Veja `VALIDATION-1.0.327.md`. Testes preventivos aprovados (368 casos, 1 ignorad
 - O workflow APK 258 usou fonte 1.0.306, passou nos testes preventivos e falhou na etapa `flutter analyze --fatal-infos --fatal-warnings` com 8 problemas: Histórico (`BuildContext` e `setState` de extension), Galeria (3 `if` sem chaves), guard de captura (2 `if` sem chaves) e OCR (1 import redundante).
 - A correção foi aplicada sobre 1.0.307 para preservar REC do A3 e fotos locais. `tool/test_build258_flutter_analyze_308.py` identifica os 8 casos e verifica a correção textual.
 - Executar no GitHub Actions: `flutter analyze`, `flutter test`, APK. Flutter SDK não instalado no ambiente local; testes estruturais não provam aprovação do analisador.
+
+## APK 289 — regressão de teste Flutter na prévia Bike
+
+O projeto mantém a prévia de rota com o botão `Planejar viagem` antes do plano de dias estar pronto. O teste de widget foi adaptado para refletir a interface real e para verificar o callback. Os testes preventivos novos verificam o contrato antes do `flutter test`; consultar `VALIDATION-1.0.344.md` para resultados e limites.
 
 ## Verificações da versão 1.0.307+307
 

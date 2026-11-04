@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.343', build: 343);
+      AppBuildVersion(version: '1.0.344', build: 344);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.343', build: 343),
+      version: AppBuildVersion(version: '1.0.344', build: 344),
       changes: <String>[
-        'Corrigidos dois avisos de lint do Flutter que impediam o APK 288 de avançar à compilação.',
-        'A abertura inicial de rota salva agora utiliza bloco if explícito, sem alterar seu comportamento.',
-        'Rota de bicicleta opcional agora usa elemento anulável; planejamento unificado e mapas offline preservados.',
+        'Corrigido o teste da prévia de bicicleta que bloqueava o APK 289 após a unificação do planejamento.',
+        'O planejamento pode ser aberto antes de calcular as etapas; teste verifica o botão e a ação.',
+        'Mantidos mapas, navegação, biblioteca e preferências compartilhadas de cicloviagem.',
       ],
     ),
   ]);

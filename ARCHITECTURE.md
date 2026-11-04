@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.343+343
+# Arquitetura — Vigia IA 1.0.344+344
 
 ## Correção pontual de lint no fluxo de mapas
 

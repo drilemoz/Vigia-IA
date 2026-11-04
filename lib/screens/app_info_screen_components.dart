@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.343',
+          version: '1.0.344',
           current: true,
+          changes: [
+            'APK 289: corrigida expectativa do teste Flutter da prévia de bicicleta após a unificação.',
+            'Planejar viagem permanece disponível antes de as etapas estarem calculadas.',
+            'Contratos preventivos verificam a ação de abrir o editor unificado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.343',
+          current: false,
           changes: [
             'Corrigidos dois diagnósticos fatais de flutter analyze no workflow APK 288.',
             'Mapa: guarda da rota salva usa bloco if com chaves.',
@@ -2953,8 +2963,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.343',
+          version: '1.0.344',
           current: true,
+          changes: [
+            'APK 289: corrigida expectativa do teste Flutter da prévia de bicicleta após a unificação.',
+            'Planejar viagem permanece disponível antes de as etapas estarem calculadas.',
+            'Contratos preventivos verificam a ação de abrir o editor unificado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.343',
+          current: false,
           changes: [
             'Corrigidos dois diagnósticos fatais de flutter analyze no workflow APK 288.',
             'Mapa: guarda da rota salva usa bloco if com chaves.',
