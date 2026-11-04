@@ -77,12 +77,21 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.346',
+          version: '1.0.347',
           current: true,
           changes: [
-            'APK 291: testes do diálogo de recuperação atualizados para o título correto de incidentes antigos.',
-            'Proteção de regressão verifica separadamente falhas da versão instalada.',
-            'Recuperação e classificação de encerramentos do Android preservadas.',
+            'Seleção do visual do mapa organizada em três abas compactas: Aparência, Provedor e Base.',
+            'As opções são conferidas antes de aplicar, com resumo e botão OK.',
+            'A gestão de chaves e APIs permanece em Configurações, fora do seletor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.346',
+          current: false,
+          changes: [
+            'APK 291: testes de recuperação de incidentes atualizados para identificar a versão correta.',
+            'Classificação de falhas atuais e históricas preservada.',
           ],
         ),
         SizedBox(height: 10),
@@ -2983,12 +2992,21 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.346',
+          version: '1.0.347',
           current: true,
           changes: [
-            'APK 291: testes do diálogo de recuperação atualizados para o título correto de incidentes antigos.',
-            'Proteção de regressão verifica separadamente falhas da versão instalada.',
-            'Recuperação e classificação de encerramentos do Android preservadas.',
+            'Seleção do visual do mapa organizada em três abas compactas: Aparência, Provedor e Base.',
+            'As opções são conferidas antes de aplicar, com resumo e botão OK.',
+            'A gestão de chaves e APIs permanece em Configurações, fora do seletor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.346',
+          current: false,
+          changes: [
+            'APK 291: testes de recuperação de incidentes atualizados para identificar a versão correta.',
+            'Classificação de falhas atuais e históricas preservada.',
           ],
         ),
         SizedBox(height: 10),

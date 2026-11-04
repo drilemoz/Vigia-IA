@@ -1,3 +1,10 @@
+# Arquitetura — Vigia IA 1.0.347+347
+
+- `MapLayerPickerPanel` (`lib/widgets/map_layer_picker_panel.dart`) separa aparência, provedor e base em três listas dentro do mesmo diálogo, sem duplicar a central de APIs.
+- `MapLayerPickerSelection` mantém escolhas temporárias; `MapMonitoringScreen._showLayerPicker` grava preferências somente após OK, e Cancelar descarta o rascunho.
+- Estilos Stadia e Google Maps são apresentados conforme a disponibilidade de credenciais/SDK no APK; mapa offline e persistência de configurações não foram reestruturados.
+- `test/map_layer_picker_panel_test.dart` e `tool/test_map_layer_picker_347.py` protegem o fluxo. Nenhum componente de câmera/IA/roteamento foi alterado.
+
 # Arquitetura — Vigia IA 1.0.346+346
 
 - O `DiagnosticRecoveryHost` mantém a distinção entre encerramento em memória, falha de versão anterior e falha da versão atual.

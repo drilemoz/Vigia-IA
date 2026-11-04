@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.346', build: 346);
+      AppBuildVersion(version: '1.0.347', build: 347);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.346', build: 346),
+      version: AppBuildVersion(version: '1.0.347', build: 347),
       changes: <String>[
-        'Diagnósticos de encerramento agora distinguem falhas graves de limpeza de memória em segundo plano.',
-        'Relatórios identificam a versão original e correlacionam o encerramento ao processo Android correto.',
-        'Uma falha temporária na leitura do diagnóstico pode ser recuperada ao voltar para o aplicativo.',
+        'Visual do mapa com listas compactas para Aparência, Provedor e Base.',
+        'Escolhas são confirmadas no botão OK; Cancelar mantém o mapa anterior.',
+        'A configuração de Serviços e APIs fica apenas na central de Configurações.',
       ],
     ),
   ]);

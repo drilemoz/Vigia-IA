@@ -1,3 +1,11 @@
+## 1.0.347+347 (2026-11-04)
+
+- Simplificado o seletor de aparência do mapa com três abas, listas compactas e resumo da escolha.
+- Botões OK e Cancelar evitam mudar tema/provedor/base antes da confirmação.
+- Os quatro temas, dois modos automáticos, dois provedores e cinco estilos continuam disponíveis conforme chaves instaladas.
+- Removido o atalho Serviços e APIs do painel; a central única permanece em Configurações.
+- Novos testes Flutter e Python de seleção, bloqueios por chave e confirmação; versão e documentação sincronizadas.
+
 ## 1.0.346+346 (2026-11-04)
 
 - APK 291: sincronizada a expectativa dos testes Flutter do diálogo de recuperação de incidentes de versões anteriores.

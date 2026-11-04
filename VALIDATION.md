@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.347+347
+
+- Painel de aparência do mapa reorganizado e confirmado por OK. Testes preventivos e Flutter de seleção estão em `tool/test_map_layer_picker_347.py` e `test/map_layer_picker_panel_test.dart`.
+- Evidências da verificação local e limites em `VALIDATION-1.0.347.md`.
+- Flutter analyze/test e build Android devem ser confirmados no GitHub Actions se SDK não estiver disponível localmente.
+
 # Validação Vigia IA 1.0.346+346
 
 - APK 291: três expectativas de teste de recuperação de incidentes corrigidas; novo caso para versão instalada.

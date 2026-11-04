@@ -32,11 +32,11 @@ checks = {
     'prévia de rota pode ser recolhida':
         'bool _previewCollapsed = false;' in mapui and
         'onToggleCollapsed:' in mapui and 'onPressed: onToggleCollapsed' in preview and 'Ver trajeto' in preview and 'Salvar offline' in preview,
-    'configuração de camadas por grupos':
-        "ValueKey('map-appearance-section')" in mapui and
-        "ValueKey('map-provider-section')" in mapui and
-        "ValueKey('map-base-section')" in mapui and
-        'class _MapStyleThumbnailPainter' in mapui,
+    'seletor único por abas e com confirmação':
+        'MapLayerPickerPanel(' in mapui and
+        'showMapCenteredDialog<MapLayerPickerSelection>' in mapui and
+        'class _MapStyleThumbnailPainter' in mapui and
+        "ValueKey('layer-tab-" in read('lib/widgets/map_layer_picker_panel.dart'),
 }
 for label, passed in checks.items():
     if not passed:

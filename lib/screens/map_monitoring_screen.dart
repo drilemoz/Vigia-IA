@@ -90,6 +90,7 @@ import '../widgets/map_poi_details_sheet.dart';
 import '../widgets/map_bike_approach_overlay.dart';
 import '../widgets/map_ai_status_overlay.dart';
 import '../widgets/map_centered_dialog.dart';
+import '../widgets/map_layer_picker_panel.dart';
 import '../widgets/map_radio_panel.dart';
 import '../widgets/map_telemetry_panel.dart';
 import '../widgets/map_hud_context_pill.dart';
@@ -4580,31 +4581,6 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
   }
 
-  IconData _mapAppearanceIcon(MapAppearancePreset preset) => switch (preset) {
-        MapAppearancePreset.standard => Icons.light_mode_outlined,
-        MapAppearancePreset.dark => Icons.dark_mode_outlined,
-        MapAppearancePreset.highContrast => Icons.contrast_rounded,
-        MapAppearancePreset.bikeTravel => Icons.directions_bike_rounded,
-      };
-
-  Future<void> _selectMapAppearance(MapAppearancePreset preset) async {
-    await _mapViewSettings.setAppearancePreset(preset);
-    if (!mounted) return;
-    setState(() {
-      _navigation3dRendererReady = false;
-      _navigation3dRendererFailed = false;
-    });
-  }
-
-  Future<void> _selectMapAppearanceMode(MapAppearanceMode mode) async {
-    await _mapViewSettings.setAppearanceMode(mode);
-    if (!mounted) return;
-    setState(() {
-      _navigation3dRendererReady = false;
-      _navigation3dRendererFailed = false;
-    });
-  }
-
   _OnlineMapLayerSpec get _onlineMapLayerSpec {
     final selected = _mapViewSettings.stylePreset;
     switch (selected) {
@@ -4675,273 +4651,67 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   Future<void> _showLayerPicker() async {
     await _offlineMaps.initialize();
     if (!mounted) return;
-    await showMapCenteredDialog<void>(
+    final selected = await showMapCenteredDialog<MapLayerPickerSelection>(
       context: context,
-      maxWidth: 560,
-      maxHeightFactor: 0.86,
-      barrierLabel: 'Fechar aparência e camadas',
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetContext, setSheetState) {
-          final selectedLayer = _mapViewSettings.stylePreset;
-          final resolvedAppearance = _resolvedMapAppearance(
-            Theme.of(sheetContext).brightness,
-          );
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'Aparência e camadas',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: 'Fechar',
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          icon: const Icon(Icons.close_rounded),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
-                    child: Text(
-                      'Tema ativo: ${resolvedAppearance.label}',
-                      style: Theme.of(sheetContext).textTheme.bodySmall,
-                    ),
-                  ),
-                  ExpansionTile(
-                    key: const ValueKey('map-appearance-section'),
-                    initiallyExpanded: true,
-                    leading: const Icon(Icons.palette_outlined),
-                    title: const Text('Aparência',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text('Tema: ${resolvedAppearance.label}'),
-                    children: [
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      for (final preset in MapAppearancePreset.values)
-                        ChoiceChip(
-                          avatar: Icon(_mapAppearanceIcon(preset), size: 17),
-                          label: Text(preset.label),
-                          selected: _mapViewSettings.appearanceMode ==
-                                  MapAppearanceMode.manual &&
-                              _mapViewSettings.appearancePreset == preset,
-                          showCheckmark: false,
-                          visualDensity: VisualDensity.compact,
-                          onSelected: (_) => unawaited(
-                            _selectMapAppearance(preset).then((_) {
-                              if (sheetContext.mounted) setSheetState(() {});
-                            }),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      'Modo automático',
-                      style: TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SegmentedButton<MapAppearanceMode>(
-                    segments: const [
-                      ButtonSegment(
-                        value: MapAppearanceMode.manual,
-                        icon: Icon(Icons.tune_rounded, size: 16),
-                        label: Text('Manual'),
-                      ),
-                      ButtonSegment(
-                        value: MapAppearanceMode.followSystem,
-                        icon: Icon(Icons.phone_android_rounded, size: 16),
-                        label: Text('Sistema'),
-                      ),
-                      ButtonSegment(
-                        value: MapAppearanceMode.dayNight,
-                        icon: Icon(Icons.brightness_6_outlined, size: 16),
-                        label: Text('Dia/noite'),
-                      ),
-                    ],
-                    selected: <MapAppearanceMode>{
-                      _mapViewSettings.appearanceMode,
-                    },
-                    showSelectedIcon: false,
-                    onSelectionChanged: (selection) => unawaited(
-                      _selectMapAppearanceMode(selection.first).then((_) {
-                        if (sheetContext.mounted) setSheetState(() {});
-                      }),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 6, 8, 2),
-                    child: Text(
-                      _mapViewSettings.appearanceMode == MapAppearanceMode.dayNight
-                          ? 'Dia/noite usa somente o horário local do aparelho; não depende da internet.'
-                          : _mapViewSettings.appearanceMode == MapAppearanceMode.followSystem
-                              ? 'Segue o tema claro/escuro configurado no Android.'
-                              : _mapViewSettings.appearancePreset.description,
-                      style: Theme.of(sheetContext).textTheme.bodySmall,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 3, 8, 0),
-                    child: Text(
-                      'No 3D, o tema troca o style vetorial de fundo, água, parques, vias, prédios, nomes e limites. No 2D, adapta os tiles e mantém rota e posição com contraste próprio.',
-                      style: Theme.of(sheetContext).textTheme.bodySmall,
-                    ),
-                  ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    key: const ValueKey('map-provider-section'),
-                    leading: const Icon(Icons.cloud_outlined),
-                    title: const Text('Provedor do mapa',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text(_mapViewSettings.provider.label),
-                    children: [
-                  const SizedBox(height: 2),
-                  RadioGroup<MapProvider>(
-                    groupValue: _mapViewSettings.provider,
-                    onChanged: (value) {
-                      if (value == null) return;
-                      Navigator.of(sheetContext).pop();
-                      if (value == MapProvider.google &&
-                          !GoogleMapsKeyService.instance.hasKey) {
-                        unawaited(_promptGoogleMapsKey());
-                        return;
-                      }
-                      unawaited(_mapViewSettings.setProvider(value).then((_) {
-                        if (mounted) setState(() {});
-                      }));
-                    },
-                    child: Column(
-                      children: [
-                        for (final provider in MapProvider.values)
-                          RadioListTile<MapProvider>(
-                            dense: true,
-                            value: provider,
-                            title: Text(provider.label),
-                            subtitle: Text(provider == MapProvider.google
-                                ? 'Google Maps: normal, satélite, híbrido e terreno.'
-                                : 'Mantém o renderer atual, incluindo mapas offline.'),
-                          ),
-                      ],
-                    ),
-                  ),
-                  ListTile(
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    leading: const Icon(Icons.key_rounded),
-                    title: const Text('Serviços e APIs'),
-                    subtitle: const Text('Configure Gemini, Google Maps e demais serviços na central.'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      unawaited(Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const ApiServicesSetupScreen(),
-                        ),
-                      ).then((_) async {
-                        await GoogleMapsKeyService.instance.refresh();
-                        if (mounted) setState(() {});
-                      }));
-                    },
-                  ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    key: const ValueKey('map-base-section'),
-                    leading: const Icon(Icons.layers_outlined),
-                    title: const Text('Base do mapa',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text(selectedLayer.label),
-                    children: [
-                  const SizedBox(height: 2),
-                  for (final style in MapStylePreset.values)
-                    ListTile(
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      leading: Semantics(
-                        label: 'Amostra ilustrativa do estilo ${style.label}',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(7),
-                          child: CustomPaint(
-                            size: const Size(58, 42),
-                            painter: _MapStyleThumbnailPainter(style),
-                          ),
-                        ),
-                      ),
-                      title: Text(style.label),
-                      subtitle: Text(
-                        style == MapStylePreset.bikeTravel &&
-                                !_offlineMaps.hasStadiaApiKey
-                            ? '${style.description} Usando OSM até configurar Stadia.'
-                            : style.description,
-                      ),
-                      trailing: style.needsStadiaKey &&
-                              !_usingGoogleMap &&
-                              !_offlineMaps.hasStadiaApiKey
-                          ? const Icon(Icons.lock_outline_rounded)
-                          : selectedLayer == style
-                              ? const Icon(Icons.check_circle_rounded)
-                              : null,
-                      selected: selectedLayer == style,
-                      enabled: !style.needsStadiaKey ||
-                          _usingGoogleMap ||
-                          _offlineMaps.hasStadiaApiKey,
-                      onTap: !style.needsStadiaKey ||
-                              _usingGoogleMap ||
-                              _offlineMaps.hasStadiaApiKey
-                          ? () {
-                              Navigator.of(sheetContext).pop();
-                              unawaited(_selectMapStyle(style));
-                            }
-                          : null,
-                    ),
-                  if (!_offlineMaps.hasStadiaApiKey)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                          unawaited(_openOfflineMaps());
-                        },
-                        icon: const Icon(Icons.key_rounded),
-                        label: const Text('Configurar Stadia para Terreno/Satélite'),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(12, 3, 12, 12),
-                      child: Text('Amostras ilustrativas, não imagens reais do provedor. '
-                          'Alguns estilos dependem de internet e de API key. '
-                          'Para uso offline, baixe ou importe o pacote de mapa compatível.',
-                          style: TextStyle(fontSize: 11)),
-                    ),
-                    ],
-                  ),
-                ],
-              ),
+      maxWidth: 460,
+      maxHeightFactor: 0.79,
+      barrierLabel: 'Fechar visual do mapa',
+      builder: (dialogContext) => MapLayerPickerPanel(
+        initial: MapLayerPickerSelection(
+          appearancePreset: _mapViewSettings.appearancePreset,
+          appearanceMode: _mapViewSettings.appearanceMode,
+          provider: _mapViewSettings.provider,
+          stylePreset: _mapViewSettings.stylePreset,
+        ),
+        googleSdkConfigured: GoogleMapsKeyService.instance.hasKey,
+        googleOnlineAvailable: GoogleMapsKeyService.instance.hasKey &&
+            !_connectivity.isOffline && _offlineMaps.mode != OfflineMapMode.offline,
+        stadiaConfigured: _offlineMaps.hasStadiaApiKey,
+        styleThumbnailBuilder: (style) => Semantics(
+          label: 'Amostra ilustrativa do estilo ${style.label}',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: CustomPaint(
+              size: const Size(52, 38),
+              painter: _MapStyleThumbnailPainter(style),
             ),
-          );
-        },
+          ),
+        ),
+        onConfirm: (choice) => Navigator.of(dialogContext).pop(choice),
+        onCancel: () => Navigator.of(dialogContext).pop(),
       ),
     );
+    if (selected == null || !mounted) return;
+
+    // A base do mapa só pode exigir Stadia no renderer atual.
+    final googleCanRender = selected.provider == MapProvider.google &&
+        GoogleMapsKeyService.instance.hasKey &&
+        !_connectivity.isOffline && _offlineMaps.mode != OfflineMapMode.offline;
+    if (selected.stylePreset.needsStadiaKey &&
+        !googleCanRender && !_offlineMaps.hasStadiaApiKey) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Esta base exige chave Stadia Maps em Configurações > Serviços e APIs.'),
+      ));
+      return;
+    }
+    if (selected.provider == MapProvider.google &&
+        !GoogleMapsKeyService.instance.hasKey) {
+      await _promptGoogleMapsKey();
+      return;
+    }
+
+    await _mapViewSettings.setProvider(selected.provider);
+    if (selected.appearanceMode == MapAppearanceMode.manual) {
+      await _mapViewSettings.setAppearancePreset(selected.appearancePreset);
+    } else {
+      await _mapViewSettings.setAppearanceMode(selected.appearanceMode);
+    }
+    await _mapViewSettings.setStylePreset(selected.stylePreset);
+    if (!mounted) return;
+    setState(() {
+      _navigation3dRendererReady = false;
+      _navigation3dRendererFailed = false;
+    });
   }
 
   Future<void> _selectMapStyle(MapStylePreset style) async {
@@ -5108,7 +4878,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.map_rounded),
-                title: const Text('Provedor do mapa'),
+                title: const Text('Visual do mapa'),
                 subtitle: Text(_mapViewSettings.provider == MapProvider.google
                     ? 'Google Maps · ${_mapViewSettings.stylePreset.label}'
                     : 'Mapa atual · ${_mapViewSettings.stylePreset.label}'),

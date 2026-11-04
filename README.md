@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.346+346`
+**Versão atual:** `1.0.347+347`
+
+## Visual do mapa simplificado — 1.0.347
+
+O botão de camadas agora abre um painel compacto em três abas: Aparência (quatro temas e Sistema/Dia-noite), Provedor (mapa atual ou Google Maps, quando compilado com chave) e Base (cinco estilos). As escolhas são provisórias até tocar em OK; Cancelar descarta. O painel mostra uma explicação curta da opção selecionada, bloqueia opções indisponíveis e não contém atalhos de Serviços e APIs. A central única de chaves continua em Configurações. Os mapas offline e seus dados não foram alterados. Ver `RELEASE-1.0.347.md` e `VALIDATION-1.0.347.md`.
 
 ## APK 291 — testes de recuperação de incidentes (1.0.346)
 - Corrigidas três expectativas antigas de título no teste Flutter da recuperação: eventos de outra versão mostram "Falha recuperada de versão anterior".
