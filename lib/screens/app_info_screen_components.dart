@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.337',
+          version: '1.0.338',
           current: true,
+          changes: [
+            'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
+            'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',
+            'Downloads com cancelamento e validação; atualização sem apagar o mapa existente antes da conclusão.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.337',
+          current: false,
           changes: [
             'Orientações e voz em português brasileiro, inclusive quando a API retornar inglês.',
             'Painel de navegação compacto por padrão, com expansão manual e pontos úteis opcionais.',
@@ -2893,8 +2903,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.337',
+          version: '1.0.338',
           current: true,
+          changes: [
+            'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
+            'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',
+            'Downloads com cancelamento e validação; atualização sem apagar o mapa existente antes da conclusão.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.337',
+          current: false,
           changes: [
             'Orientações e voz em português brasileiro, inclusive quando a API retornar inglês.',
             'Painel de navegação compacto por padrão, com expansão manual e pontos úteis opcionais.',

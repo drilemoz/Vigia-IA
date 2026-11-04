@@ -33,7 +33,8 @@ class MapsSdkBuildKey333Tests(unittest.TestCase):
         screen = src('lib/screens/map_monitoring_screen.dart')
         self.assertIn('bool get hasKey => _status.sdkReady;', service)
         self.assertIn('sdkReady: data[\'sdkReady\'] == true', service)
-        self.assertIn('GoogleMapsKeyService.instance.hasKey;', screen)
+        self.assertIn('sdkConfigured: GoogleMapsKeyService.instance.hasKey,', screen)
+        self.assertIn('OfflineMapRenderPolicy.useGoogleRenderer(', screen)
         self.assertIn('!GoogleMapsKeyService.instance.hasKey', screen)
     def test_central_distinguishes_six_integrations(self):
         central = src('lib/screens/api_services_setup_screen.dart')
@@ -46,9 +47,9 @@ class MapsSdkBuildKey333Tests(unittest.TestCase):
         self.assertIn('MAPS_API_KEY', config)
         self.assertIn('não é injetada no SDK', config)
     def test_version(self):
-        self.assertIn('version: 1.0.337+337', src('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.337.md').is_file())
-        self.assertTrue((ROOT/'VALIDATION-1.0.337.md').is_file())
+        self.assertIn('version: 1.0.338+338', src('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.338.md').is_file())
+        self.assertTrue((ROOT/'VALIDATION-1.0.338.md').is_file())
 
 if __name__ == '__main__':
     unittest.main()

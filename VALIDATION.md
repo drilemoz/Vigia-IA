@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.338+338
+
+- Política Offline/Google/MBTiles, avisos de cobertura e downloads protegidos. `tool/verify_project.sh`: aprovado (exit 0); Python: **430 testes (429 aprovados, 1 ignorado)**, testes direcionados offline: **9 aprovados**. Ver `VALIDATION-1.0.338.md` para os limites da validação.
+- Sem Flutter/Android SDK no ambiente local; `flutter analyze`, testes Dart, APK e verificações em dispositivo devem ser executados no CI.
+
 # Validação Vigia IA 1.0.337+337
 
 - Alterações: localizador pt-BR, painel compacto, posição GPS recente para orientações, polylines e atalho sem duplicação. Novo teste Dart de tradução e regressão Python de interface/contratos.

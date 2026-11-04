@@ -1,3 +1,11 @@
+## 1.0.338+338 (2026-11-03)
+- Modo Offline força FlutterMap/MBTiles mesmo que o SDK Google Maps esteja habilitado; seleção do renderizador centralizada em `OfflineMapRenderPolicy`.
+- Alerta de ausência de MBTiles e de área/zoom não coberto usando o centro do mapa; distingue corredor de rota e região com limite conhecido; status exposto na gestão de mapas.
+- Mantém o modo Offline mesmo se o último pacote for excluído, sem ligar a rede automaticamente; mantém o modo escolhido após downloads/importações, com opção de voltar ao online pelo usuário; mapa visual permanece no local consultado ao alternar renderizadores.
+- Download Stadia com retentativas limitadas para falhas transitórias, timeout de abertura/stream, verificação de conteúdo PNG e cancelamento de conexões ativas; arquivos incompletos removidos.
+- Download de MBTiles por link avalia reserva de espaço, limita espera/stream e valida presença de raster; atualização segura mantém o original até que o novo esteja validado, sob limite de cache de 100 MB.
+- Novos testes de política de renderizador, cobertura e segurança de downloads. A compilação Flutter/Android ainda precisa ser confirmada em CI.
+
 ## 1.0.337+337 (2026-11-03)
 - ORS com instruções `pt` e Valhalla `pt-BR`; normalização local pt-BR para respostas em inglês de rotas/cache antigos, compartilhada pela navegação e voz.
 - Navegação abre com painel compacto; expansão manual permanece, com detalhes em menor altura e cartões de POIs somente quando existem dados.

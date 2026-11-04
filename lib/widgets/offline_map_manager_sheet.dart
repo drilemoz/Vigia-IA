@@ -1333,7 +1333,7 @@ class _OfflineMapManagerSheetState extends State<_OfflineMapManagerSheet> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Atualizar mapa offline?'),
         content: const Text(
-          'Para respeitar o limite total do cache, a cópia atual será removida antes do novo download. Se a rede falhar, será necessário baixar o mapa novamente.',
+          'O mapa antigo será preservado até o novo download ser validado. A atualização exige espaço temporário para os dois dentro do limite de 100 MB; se não houver, nada será apagado.',
         ),
         actions: [
           TextButton(
@@ -1488,7 +1488,7 @@ class _OfflineMapManagerSheetState extends State<_OfflineMapManagerSheet> {
                                   OfflineMapMode.online => Icons.cloud_outlined,
                                   OfflineMapMode.offline => Icons.offline_pin_outlined,
                                 }),
-                          enabled: mode != OfflineMapMode.offline || active != null,
+                          enabled: mode != OfflineMapMode.offline || active != null || _service.mode == OfflineMapMode.offline,
                         ),
                       )
                       .toList(growable: false),
@@ -1657,11 +1657,12 @@ class _OfflineMapManagerSheetState extends State<_OfflineMapManagerSheet> {
                           icon: Icon(_service.downloadPaused ? Icons.play_arrow_rounded : Icons.pause_rounded),
                           label: Text(_service.downloadPaused ? 'Continuar' : 'Pausar'),
                         ),
-                      TextButton.icon(
-                        onPressed: _service.cancelDownload,
-                        icon: const Icon(Icons.close_rounded),
-                        label: const Text('Cancelar'),
-                      ),
+                      if (_service.canCancelDownload)
+                        TextButton.icon(
+                          onPressed: _service.cancelDownload,
+                          icon: const Icon(Icons.close_rounded),
+                          label: const Text('Cancelar'),
+                        ),
                     ],
                   ),
                 ],
@@ -1755,10 +1756,12 @@ class _OfflineMapManagerSheetState extends State<_OfflineMapManagerSheet> {
             padding: const EdgeInsets.fromLTRB(18, 4, 18, 10),
             child: Text(
               _service.mode == OfflineMapMode.automatic
-                  ? 'Automático: mapa local como base e internet por cima quando disponível.'
+                  ? active == null
+                      ? 'Automático: mapa online disponível; baixe um MBTiles para não ficar sem mapa quando perder a conexão.'
+                      : 'Automático: internet quando disponível, com MBTiles ativo como alternativa sem rede.'
                   : _service.mode == OfflineMapMode.offline
-                      ? 'Offline: somente o pacote MBTiles ativo é usado.'
-                      : 'Online: usa somente o mapa da internet.',
+                      ? 'Offline: usa apenas “${active?.name ?? 'nenhum pacote'}”. Google Maps e tiles online ficam desativados. Cobertura por região/zoom não é garantida.'
+                      : 'Online: precisa de internet; se a conexão cair, usa o MBTiles ativo quando disponível.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),

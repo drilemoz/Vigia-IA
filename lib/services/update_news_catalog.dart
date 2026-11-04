@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.337', build: 337);
+      AppBuildVersion(version: '1.0.338', build: 338);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.337', build: 337),
+      version: AppBuildVersion(version: '1.0.338', build: 338),
       changes: <String>[
-        'Navegação com instruções e avisos em português brasileiro.',
-        'Painel compacto como padrão, com detalhes expandidos quando necessário.',
-        'GPS desatualizado pausa as orientações; traçado mais fino e menos controles repetidos.',
+        'Modo Offline agora usa apenas MBTiles, mesmo com Google Maps configurado.',
+        'Cobertura offline verificada na área visualizada e avisos quando faltam mapas.',
+        'Downloads mais resistentes, cancelamento de rede e atualização sem apagar a cópia anterior.',
       ],
     ),
   ]);

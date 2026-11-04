@@ -1,4 +1,4 @@
-"""Contratos locais do backup de APIs e UX de mapas da 1.0.337.
+"""Contratos locais do backup de APIs e UX de mapas da 1.0.338.
 Não equivalem a teste Android/SAF ou flutter analyze.
 """
 import unittest
@@ -9,8 +9,8 @@ def read(name): return (R/name).read_text('utf-8')
 
 class ApiBackupAndMapUi335(unittest.TestCase):
     def test_version(self):
-        self.assertIn('version: 1.0.337+337', read('pubspec.yaml'))
-        self.assertTrue((R/'RELEASE-1.0.337.md').is_file())
+        self.assertIn('version: 1.0.338+338', read('pubspec.yaml'))
+        self.assertTrue((R/'RELEASE-1.0.338.md').is_file())
     def test_api_central_has_two_real_actions(self):
         s=read('lib/screens/api_services_setup_screen.dart')
         for item in ('Exportar APIs','Importar APIs','_transferApiKeys','_askBackupPassword',

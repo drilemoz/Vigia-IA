@@ -38,11 +38,15 @@ class OfflineMapCoveragePolicy {
   }
 
   static bool needsWarning(OfflineMapCoverageState state) =>
+      state == OfflineMapCoverageState.noPackage ||
       state == OfflineMapCoverageState.unknown ||
       state == OfflineMapCoverageState.outsideBounds ||
-      state == OfflineMapCoverageState.outsideZoom;
+      state == OfflineMapCoverageState.outsideZoom ||
+      state == OfflineMapCoverageState.corridorUnverified;
 
   static String warningLabel(OfflineMapCoverageState state) => switch (state) {
+        OfflineMapCoverageState.noPackage => 'Sem mapa offline disponível',
+        OfflineMapCoverageState.corridorUnverified => 'Corredor offline não verificado',
         OfflineMapCoverageState.unknown => 'Cobertura offline não verificada',
         OfflineMapCoverageState.outsideZoom => 'Zoom fora do detalhe offline',
         OfflineMapCoverageState.outsideBounds => 'Fora da área offline',

@@ -6,6 +6,18 @@ extension _MapMonitoringOfflineSupport on _MapMonitoringScreenState {
     final previous = _lastConnectivityState;
     final current = _connectivity.state;
     _lastConnectivityState = current;
+    final wasGoogle = _mapViewSettings.provider == MapProvider.google &&
+        GoogleMapsKeyService.instance.hasKey &&
+        !previous.isOffline && _offlineMaps.mode != OfflineMapMode.offline;
+    if (wasGoogle != _usingGoogleMap) {
+      final camera = _googleCameraPosition;
+      if (wasGoogle && camera != null) {
+        _mapViewportCenter = LatLng(camera.target.latitude, camera.target.longitude);
+        _visibleMapZoom = camera.zoom;
+      }
+      _mapReady = false;
+      _googleMapController = null;
+    }
     _applyOfflineUiState(() {
       if (previous != current) {
         _navigation3dRendererReady = false;

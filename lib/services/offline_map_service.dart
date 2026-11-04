@@ -84,6 +84,8 @@ class OfflineMapService extends ChangeNotifier {
   int _downloadTilesTotal = 0;
   bool _downloadPaused = false;
   bool _cancelRequested = false;
+  bool _networkDownloadActive = false;
+  HttpClient? _activeDownloadClient;
   Completer<void>? _resumeCompleter;
   String _stadiaCreditMonth = _creditMonthKey(DateTime.now());
   int _stadiaCreditsUsedThisMonth = 0;
@@ -100,7 +102,8 @@ class OfflineMapService extends ChangeNotifier {
   int get downloadTilesCompleted => _downloadTilesCompleted;
   int get downloadTilesTotal => _downloadTilesTotal;
   bool get downloadPaused => _downloadPaused;
-  bool get canPauseDownload => _busy && _downloadTilesTotal > 0;
+  bool get canPauseDownload => _busy && _networkDownloadActive && _downloadTilesTotal > 0;
+  bool get canCancelDownload => _busy && _networkDownloadActive;
   bool get hasStadiaApiKey => _stadiaApiKey?.trim().isNotEmpty ?? false;
 
   String? stadiaRasterTileTemplate(
@@ -217,9 +220,8 @@ class OfflineMapService extends ChangeNotifier {
     if (_activeId != null && activePackage == null) {
       _activeId = _packages.isEmpty ? null : _packages.first.id;
     }
-    if (_mode == OfflineMapMode.offline && activePackage == null) {
-      _mode = OfflineMapMode.automatic;
-    }
+    // Nunca ligar rede automaticamente se o último pacote sumir/for apagado.
+    // O modo Offline permanece escolhido e o mapa mostra falta de cobertura.
     _packages.sort((a, b) => b.addedAt.compareTo(a.addedAt));
     _initialized = true;
     await _persist();
@@ -276,7 +278,7 @@ class OfflineMapService extends ChangeNotifier {
         'https://tiles.stadiamaps.com/tiles/alidade_smooth/0/0/0.png',
       );
       final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.337 key-test');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.338 key-test');
       request.headers.set(HttpHeaders.authorizationHeader, 'Stadia-Auth $key');
       final response = await request.close().timeout(const Duration(seconds: 12));
       final status = response.statusCode;
@@ -469,11 +471,12 @@ class OfflineMapService extends ChangeNotifier {
     _downloadTilesTotal = tiles.length;
     _downloadPaused = false;
     _cancelRequested = false;
-    _setOperation('Baixando $name', progress: 0);
-
+    _networkDownloadActive = true;
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15)
       ..idleTimeout = const Duration(seconds: 30);
+    _activeDownloadClient = client;
+    _setOperation('Baixando $name', progress: 0);
     Database? db;
     PreparedStatement? insertTile;
     DateTime? earliestExpiry;
@@ -529,8 +532,9 @@ class OfflineMapService extends ChangeNotifier {
         final end = math.min(offset + batchSize, tiles.length);
         final batch = tiles.sublist(offset, end);
         final downloaded = await Future.wait(
-          batch.map((tile) => _fetchStadiaTile(client, apiKey, tile)),
+          batch.map((tile) => _fetchStadiaTileWithRetry(client, apiKey, tile)),
         );
+        await _waitIfPausedOrCancelled();
         DataUsageService.instance.record(
           DataUsageModule.downloads,
           received: downloaded.fold<int>(
@@ -607,22 +611,54 @@ class OfflineMapService extends ChangeNotifier {
       );
       _packages.insert(0, item);
       _activeId = item.id;
-      _mode = OfflineMapMode.automatic;
+      // Nunca substitua silenciosamente o modo Offline escolhido pelo usuário.
       await _persist();
       unawaited(
         MapDestinationSearchService.instance.indexOfflineMapPackage(item),
       );
       return item;
     } catch (_) {
-      if (await temporary.exists()) await temporary.delete();
+      if (_cancelRequested) {
+          throw StateError('Download cancelado.');
+        }
       rethrow;
     } finally {
       insertTile?.dispose();
       db?.dispose();
       client.close(force: true);
+      _activeDownloadClient = null;
+      if (await temporary.exists()) await temporary.delete();
       await _persist();
       _clearOperation();
     }
+  }
+
+  // Repetição limitada para falhas transitórias; nunca insistir com chave
+  // inválida, nem manter uma operação presa esperando indefinidamente.
+  Future<_DownloadedTile> _fetchStadiaTileWithRetry(
+    HttpClient client,
+    String apiKey,
+    _TileCoordinate tile,
+  ) async {
+    for (var attempt = 0; attempt < 3; attempt++) {
+      await _waitIfPausedOrCancelled();
+      try {
+        return await _fetchStadiaTile(client, apiKey, tile);
+      } catch (error) {
+        if (_cancelRequested) {
+          throw StateError('Download cancelado.');
+        }
+        final transient = error is TimeoutException ||
+            error is SocketException ||
+            (error is HttpException &&
+                RegExp(r'HTTP (429|500|502|503|504)').hasMatch(error.message));
+        if (!transient || attempt == 2) {
+          rethrow;
+        }
+        await Future<void>.delayed(Duration(seconds: attempt + 1));
+      }
+    }
+    throw StateError('Tile indisponível.');
   }
 
   Future<_DownloadedTile> _fetchStadiaTile(
@@ -634,8 +670,9 @@ class OfflineMapService extends ChangeNotifier {
       'https://tiles.stadiamaps.com/tiles/alidade_smooth/'
       '${tile.z}/${tile.x}/${tile.y}.png',
     );
-    final request = await client.getUrl(uri);
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.337 offline-map');
+    final request = await client.getUrl(uri).timeout(const Duration(seconds: 20));
+    request.followRedirects = false; // Nunca redirecionar a credencial da Stadia.
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.338 offline-map');
     request.headers.set(HttpHeaders.authorizationHeader, 'Stadia-Auth $apiKey');
     final response = await request.close().timeout(const Duration(seconds: 30));
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -646,12 +683,15 @@ class OfflineMapService extends ChangeNotifier {
       );
     }
     final builder = BytesBuilder(copy: false);
-    await for (final chunk in response) {
+    await for (final chunk in response.timeout(const Duration(seconds: 30))) {
       builder.add(chunk);
+      if (builder.length > 4 * 1024 * 1024) {
+        throw HttpException('Tile excedeu o tamanho seguro.', uri: uri);
+      }
     }
     final bytes = builder.takeBytes();
-    if (bytes.isEmpty) {
-      throw HttpException('Tile vazio recebido.', uri: uri);
+    if (!_isRasterBytes(bytes, 'png')) {
+      throw HttpException('Servidor não retornou um tile PNG válido.', uri: uri);
     }
     return _DownloadedTile(
       bytes: bytes,
@@ -676,6 +716,23 @@ class OfflineMapService extends ChangeNotifier {
     return null;
   }
 
+  static bool _isRasterBytes(List<int> bytes, String format) {
+    if (format == 'png') {
+      return bytes.length >= 8 && bytes[0] == 0x89 && bytes[1] == 0x50 &&
+          bytes[2] == 0x4e && bytes[3] == 0x47 && bytes[4] == 0x0d &&
+          bytes[5] == 0x0a && bytes[6] == 0x1a && bytes[7] == 0x0a;
+    }
+    if (format == 'jpg' || format == 'jpeg') {
+      return bytes.length >= 3 && bytes[0] == 0xff && bytes[1] == 0xd8 &&
+          bytes[2] == 0xff;
+    }
+    if (format == 'webp') {
+      return bytes.length >= 12 && String.fromCharCodes(bytes.sublist(0, 4)) == 'RIFF' &&
+          String.fromCharCodes(bytes.sublist(8, 12)) == 'WEBP';
+    }
+    return false;
+  }
+
   Future<void> pauseDownload() async {
     if (!canPauseDownload || _downloadPaused) return;
     _downloadPaused = true;
@@ -693,19 +750,27 @@ class OfflineMapService extends ChangeNotifier {
   }
 
   void cancelDownload() {
-    if (!_busy) return;
+    if (!canCancelDownload) {
+      return;
+    }
     _cancelRequested = true;
+    // Interrompe inclusive uma resposta de rede que esteja travada.
+    _activeDownloadClient?.close(force: true);
     resumeDownload();
     notifyListeners();
   }
 
   Future<void> _waitIfPausedOrCancelled() async {
-    if (_cancelRequested) throw StateError('Download cancelado.');
+    if (_cancelRequested) {
+          throw StateError('Download cancelado.');
+        }
     if (_downloadPaused) {
       _resumeCompleter ??= Completer<void>();
       await _resumeCompleter!.future;
     }
-    if (_cancelRequested) throw StateError('Download cancelado.');
+    if (_cancelRequested) {
+          throw StateError('Download cancelado.');
+        }
   }
 
   Future<OfflineMapPackage> downloadPackage({
@@ -736,13 +801,15 @@ class OfflineMapService extends ChangeNotifier {
     _downloadTilesCompleted = 0;
     _downloadTilesTotal = 0;
     _cancelRequested = false;
-    _setOperation('Baixando $name', progress: 0);
+    _networkDownloadActive = true;
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15)
       ..idleTimeout = const Duration(seconds: 30);
+    _activeDownloadClient = client;
+    _setOperation('Baixando $name', progress: 0);
     try {
-      final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.337 offline-map');
+      final request = await client.getUrl(uri).timeout(const Duration(seconds: 20));
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.338 offline-map');
       final response = await request.close().timeout(const Duration(seconds: 30));
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw HttpException(
@@ -752,13 +819,34 @@ class OfflineMapService extends ChangeNotifier {
       }
 
       final total = response.contentLength > 0 ? response.contentLength : null;
+      // Reserve espaço no armazenamento para o Android continuar funcionando.
+      const reserveBytes = 64 * 1024 * 1024;
+      int? availableBytes;
+      try {
+        final telemetry = await _native.readDeviceTelemetry();
+        final free = telemetry.freeStorageBytes;
+        if (free != null && free > 0) {
+          availableBytes = free - reserveBytes;
+        }
+      } catch (_) {
+        // A telemetria pode estar indisponível em certos Androids.
+      }
+      if (availableBytes != null &&
+          (availableBytes <= 0 || (total != null && total > availableBytes))) {
+        throw StateError('Sem espaço seguro para baixar o arquivo MBTiles.');
+      }
       var received = 0;
       final sink = temporary.openWrite();
       try {
-        await for (final chunk in response) {
-          if (_cancelRequested) throw StateError('Download cancelado.');
-          sink.add(chunk);
+        await for (final chunk in response.timeout(const Duration(seconds: 30))) {
+          if (_cancelRequested) {
+          throw StateError('Download cancelado.');
+        }
           received += chunk.length;
+          if (availableBytes != null && received > availableBytes) {
+            throw StateError('Espaço livre insuficiente para concluir o MBTiles.');
+          }
+          sink.add(chunk);
           _downloadBytes = received;
           _progress = total == null
               ? null
@@ -795,7 +883,7 @@ class OfflineMapService extends ChangeNotifier {
       );
       _packages.insert(0, item);
       _activeId = item.id;
-      _mode = OfflineMapMode.automatic;
+      // Nunca substitua silenciosamente o modo Offline escolhido pelo usuário.
       await _persist();
       unawaited(
         MapDestinationSearchService.instance.indexOfflineMapPackage(item),
@@ -803,9 +891,13 @@ class OfflineMapService extends ChangeNotifier {
       return item;
     } catch (_) {
       if (await temporary.exists()) await temporary.delete();
+      if (_cancelRequested) {
+          throw StateError('Download cancelado.');
+        }
       rethrow;
     } finally {
       client.close(force: true);
+      _activeDownloadClient = null;
       _clearOperation();
     }
   }
@@ -857,7 +949,7 @@ class OfflineMapService extends ChangeNotifier {
       );
       _packages.insert(0, item);
       _activeId = item.id;
-      _mode = OfflineMapMode.automatic;
+      // Nunca substitua silenciosamente o modo Offline escolhido pelo usuário.
       await _persist();
       return item;
     } finally {
@@ -889,16 +981,26 @@ class OfflineMapService extends ChangeNotifier {
     final minZoom = item.minZoom ?? 8;
     final maxZoom = item.maxZoom ?? 16;
 
-    // O limite do provedor vale para o total armazenado por aparelho.
-    // Removemos a cópia vencida antes de baixar a substituta para não duplicar
-    // temporariamente o cache durante a atualização.
-    await deletePackage(item.id);
-    return downloadStadiaRegion(
+    // Nunca apague o MBTiles antigo antes de validar o substituto.
+    // A cópia simultânea precisa respeitar o limite de 100 MB da Stadia.
+    final estimatedBytes = estimateBounds(
+      bounds: bounds, minZoom: minZoom, maxZoom: maxZoom,
+    ).bytes;
+    if (estimatedBytes > stadiaSafeAvailableCacheBytes) {
+      throw StateError(
+        'Atualização segura requer espaço para o mapa antigo e o novo '
+        'dentro dos 100 MB permitidos. Reduza a região ou faça uma nova '
+        'seleção antes de excluir o mapa anterior.',
+      );
+    }
+    final replacement = await downloadStadiaRegion(
       displayName: name,
       bounds: bounds,
       minZoom: minZoom,
       maxZoom: maxZoom,
     );
+    await deletePackage(item.id);
+    return replacement;
   }
 
   Future<void> setActive(String id) async {
@@ -911,8 +1013,11 @@ class OfflineMapService extends ChangeNotifier {
 
   Future<void> setMode(OfflineMapMode value) async {
     await initialize();
-    if (value == OfflineMapMode.offline && activePackage == null) {
-      throw StateError('Baixe um pacote MBTiles antes de ativar o modo offline.');
+    if (value == OfflineMapMode.offline) {
+      final active = activePackage;
+      if (active == null || !await File(active.path).exists()) {
+        throw StateError('Baixe ou selecione um pacote MBTiles válido antes de usar o modo offline.');
+      }
     }
     _mode = value;
     await _persist();
@@ -933,9 +1038,8 @@ class OfflineMapService extends ChangeNotifier {
     if (_activeId == id) {
       _activeId = _packages.isEmpty ? null : _packages.first.id;
     }
-    if (_mode == OfflineMapMode.offline && activePackage == null) {
-      _mode = OfflineMapMode.automatic;
-    }
+    // Nunca ligar rede automaticamente se o último pacote sumir/for apagado.
+    // O modo Offline permanece escolhido e o mapa mostra falta de cobertura.
     await _persist();
     notifyListeners();
   }
@@ -970,6 +1074,16 @@ class OfflineMapService extends ChangeNotifier {
           'Este pacote usa formato “${metadata.format}”. '
           'Nesta versão, use MBTiles raster PNG/JPG/WebP.',
         );
+      }
+      final check = sqlite3.open(file.path, mode: OpenMode.readOnly);
+      try {
+        final rows = check.select('SELECT tile_data FROM tiles LIMIT 1');
+        if (rows.isEmpty || rows.first['tile_data'] is! Uint8List ||
+            !_isRasterBytes(rows.first['tile_data'] as Uint8List, format)) {
+          throw const FormatException('MBTiles sem imagens raster válidas.');
+        }
+      } finally {
+        check.dispose();
       }
       final raw = _readMetadata(file.path);
       final bounds = _parseBounds(raw['bounds']);
@@ -1171,6 +1285,8 @@ class OfflineMapService extends ChangeNotifier {
     _downloadTilesTotal = 0;
     _downloadPaused = false;
     _cancelRequested = false;
+    _networkDownloadActive = false;
+    _activeDownloadClient = null;
     final completer = _resumeCompleter;
     _resumeCompleter = null;
     if (completer != null && !completer.isCompleted) completer.complete();

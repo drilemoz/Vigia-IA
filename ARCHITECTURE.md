@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.338+338
+
+## Renderização e downloads offline
+
+- `OfflineMapRenderPolicy` escolhe o renderizador Google Maps apenas no modo Auto/Online com conexão e chave do SDK incorporada ao APK. O modo Offline força FlutterMap com MBTiles, mesmo com conexão. O modo Auto preserva dados locais para fallback, enquanto o modo Online usa fallback local apenas se a rede cair.
+- `MapMonitoringScreen` avalia cobertura MBTiles no centro visível quando o usuário move o mapa, ou no GPS se a câmera estiver seguindo a posição; verifica zoom e limites declarados, sem afirmar que os tiles individuais existem. Sinaliza pacote ausente, arquivo inválido ou corredor não verificado. O estado da câmera é conservado na transição Google→FlutterMap.
+- `OfflineMapService` preserva o modo de conectividade em importação/download, exige arquivo legível ao entrar em Offline e confirma uma amostra raster na tabela `tiles`. Stadia: 100 MB por dispositivo (95 MB de margem local), limitação de requisições e cache sujeito às regras/validade do provedor. Retentativas curtas e cancelamento ativo evitam download travado; atualização antiga só é removida depois de validar o novo pacote, se ambos couberem no limite.
+- MBTiles é base cartográfica, não motor de roteamento. As funções de navegação offline com rota previamente salva permanecem separadas de eventual recálculo local futuro. Google Maps não gera arquivos MBTiles deste app.
+
 # Arquitetura — Vigia IA 1.0.337+337
 
 ## Navegação com localização recente e tradução

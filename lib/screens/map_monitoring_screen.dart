@@ -73,6 +73,7 @@ import 'api_services_setup_screen.dart';
 import '../services/gemini_map_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/offline_map_service.dart';
+import '../services/offline_map_render_policy.dart';
 import '../services/route_explorer_service.dart';
 import '../services/route_explorer_poi_provenance.dart';
 import '../services/system_ui_service.dart';
@@ -321,6 +322,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       <MapDestinationSearchResult>[];
   int _mapTapLookupSerial = 0;
   double _visibleMapZoom = MapViewPolicy.nearZoom;
+  LatLng? _mapViewportCenter; // Posição que o usuário está visualizando.
   bool _navigation3dEnabled = true;
   bool _navigation3dRendererReady = false;
   bool _navigation3dRendererFailed = false;
@@ -1196,10 +1198,24 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     if (!mounted) return;
     _navigation3dRendererReady = false;
     _navigation3dRendererFailed = false;
-    final resumedOnline =
-        _lastObservedOfflineMode == OfflineMapMode.offline &&
+    final oldMode = _lastObservedOfflineMode;
+    final resumedOnline = oldMode == OfflineMapMode.offline &&
         _offlineMaps.mode != OfflineMapMode.offline;
+    final rendererChanged =
+        (oldMode == OfflineMapMode.offline) !=
+        (_offlineMaps.mode == OfflineMapMode.offline) &&
+        _mapViewSettings.provider == MapProvider.google &&
+        GoogleMapsKeyService.instance.hasKey && !_connectivity.isOffline;
     _lastObservedOfflineMode = _offlineMaps.mode;
+    if (rendererChanged) {
+      final camera = _googleCameraPosition;
+      if (oldMode != OfflineMapMode.offline && camera != null) {
+        _mapViewportCenter = LatLng(camera.target.latitude, camera.target.longitude);
+        _visibleMapZoom = camera.zoom;
+      }
+      _mapReady = false;
+      _googleMapController = null;
+    }
     _syncOfflineTileProvider();
     if (resumedOnline &&
         _routeFallback != null && _routeState.navigationTarget != null &&
@@ -1532,10 +1548,12 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   // Usa Google Maps apenas se o APK contém chave no AndroidManifest.
   // Uma chave salva em tempo de execução não ativa o SDK neste APK.
-  bool get _usingGoogleMap =>
-      _mapViewSettings.provider == MapProvider.google &&
-      !_connectivity.isOffline &&
-      GoogleMapsKeyService.instance.hasKey;
+  bool get _usingGoogleMap => OfflineMapRenderPolicy.useGoogleRenderer(
+        googleSelected: _mapViewSettings.provider == MapProvider.google,
+        sdkConfigured: GoogleMapsKeyService.instance.hasKey,
+        networkOffline: _connectivity.isOffline,
+        mode: _offlineMaps.mode,
+      );
 
   Future<void> _initializeGoogleMapsKey() async {
     await GoogleMapsKeyService.instance.initialize();
@@ -6856,16 +6874,18 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
     final onlineLayer = _onlineMapLayerSpec;
     final activeOffline = _offlineMaps.activePackage;
-    final offlineCoverage = activeOffline == null || current == null
+    final offlineProvider = _offlineTileProvider;
+    final displayedCenter = _followPosition
+        ? center
+        : (_mapViewportCenter ?? center);
+    final offlineCoverage = activeOffline == null || offlineProvider == null
         ? OfflineMapCoverageState.noPackage
         : OfflineMapCoveragePolicy.assess(
             package: activeOffline,
-            latitude: current.latitude,
-            longitude: current.longitude,
+            latitude: displayedCenter.latitude,
+            longitude: displayedCenter.longitude,
             zoom: _visibleMapZoom,
           );
-    final outsideOfflineArea =
-        OfflineMapCoveragePolicy.needsWarning(offlineCoverage);
     final navigationMatchesSelectedPoi =
         _navigationMatchesSelectedPoi(selectedPoi, navigationTarget);
     final showSelectedPoiCard = selectedPoi != null && !navigationMatchesSelectedPoi;
@@ -6873,12 +6893,21 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     final showSelectedMapLocationCard = selectedMapLocation != null &&
         navigationTarget?.sourceId != selectedMapLocation.id;
 
-    final offlineProvider = _offlineTileProvider;
     final mode = _offlineMaps.mode;
     final networkOffline = _connectivity.isOffline;
-    final useOnline = mode != OfflineMapMode.offline && !networkOffline;
-    final useOfflineLayer = offlineProvider != null &&
-        (mode != OfflineMapMode.online || networkOffline);
+    final useOnline = OfflineMapRenderPolicy.useOnlineRaster(
+      mode: mode, networkOffline: networkOffline,
+    );
+    final useOfflineLayer = OfflineMapRenderPolicy.useLocalRaster(
+      mode: mode,
+      networkOffline: networkOffline,
+      packageOpened: offlineProvider != null,
+    );
+    final outsideOfflineArea = OfflineMapRenderPolicy.warnForCoverage(
+      mode: mode,
+      networkOffline: networkOffline,
+      coverage: offlineCoverage,
+    );
     final canRenderNavigation3d = navigationTarget != null &&
         _cyclingRoute != null &&
         useOnline;
@@ -7007,8 +7036,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
               if (_usingGoogleMap)
                 GoogleMapView(
                   key: const ValueKey<String>('google-map-renderer'),
-                  initialCenter: center,
-                  initialZoom: current == null ? 12.5 : _followZoom,
+                  initialCenter: _followPosition ? center : (_mapViewportCenter ?? center),
+                  initialZoom: current == null ? 12.5 :
+                      (_followPosition ? _followZoom : _visibleMapZoom),
                   mapType: _googleMapType,
                   markers: _googleMarkers(
                     poiClusters,
@@ -7036,7 +7066,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       ));
                     } else {
                       final point = _routeState.current;
-                      if (point != null) _applyFollowCamera(point, forceRotation: true);
+                      if (point != null && _followPosition) {
+                        _applyFollowCamera(point, forceRotation: true);
+                      }
                     }
                   },
                   onCameraMoveStarted: () {
@@ -7053,10 +7085,16 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     if (!mounted) return;
                     final zoomChanged =
                         (_visibleMapZoom - camera.zoom).abs() >= 0.20;
-                    final shouldReleaseFollow = _followPosition;
-                    if (zoomChanged || shouldReleaseFollow) {
+                    final nextCenter = LatLng(camera.target.latitude, camera.target.longitude);
+                    final centerChanged = _mapViewportCenter == null ||
+                        (nextCenter.latitude - _mapViewportCenter!.latitude).abs() >= 0.003 ||
+                        (nextCenter.longitude - _mapViewportCenter!.longitude).abs() >= 0.003;
+                    if (zoomChanged || centerChanged) {
                       setState(() {
                         if (zoomChanged) _visibleMapZoom = camera.zoom;
+                        if (centerChanged) {
+                          _mapViewportCenter = nextCenter;
+                        }
                       });
                     }
                     if (_rideSettings.roadOverlayEnabled && camera.zoom >= 12) {
@@ -7074,8 +7112,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 FlutterMap(
                   mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: center,
-                  initialZoom: current == null ? 12.5 : _followZoom,
+                  initialCenter: _followPosition ? center : (_mapViewportCenter ?? center),
+                  initialZoom: _followPosition ? _followZoom : _visibleMapZoom,
                   minZoom: 3,
                   maxZoom: 19,
                   interactionOptions: InteractionOptions(
@@ -7095,7 +7133,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                       );
                     } else {
                       final point = _routeState.current;
-                      if (point != null) {
+                      if (point != null && _followPosition) {
                         _applyFollowCamera(point, forceRotation: true);
                       }
                     }
@@ -7107,10 +7145,18 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     }
                     final zoomChanged =
                         (_visibleMapZoom - camera.zoom).abs() >= 0.20;
+                    final centerChanged = _mapViewportCenter == null ||
+                        (camera.center.latitude - _mapViewportCenter!.latitude).abs() >= 0.003 ||
+                        (camera.center.longitude - _mapViewportCenter!.longitude).abs() >= 0.003;
                     final shouldReleaseFollow = hasGesture && _followPosition;
-                    if (!zoomChanged && !shouldReleaseFollow) return;
+                    if (!zoomChanged && !shouldReleaseFollow && !centerChanged) {
+                      return;
+                    }
                     setState(() {
                       if (zoomChanged) _visibleMapZoom = camera.zoom;
+                      if (centerChanged) {
+                        _mapViewportCenter = camera.center;
+                      }
                       if (shouldReleaseFollow) {
                         _followPosition = false;
                         _quickView = null;
@@ -7666,7 +7712,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     onTap: () => unawaited(_showSpeedDetails()),
                   ),
                 ),
-              if (outsideOfflineArea && mode != OfflineMapMode.online)
+              if (outsideOfflineArea)
                 Positioned(
                   top: cameraButtonTop + MapUxPolicy.controlSize + 6,
                   left: MapUxPolicy.controlEdge,

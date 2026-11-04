@@ -8,7 +8,7 @@ def violations(coverage: str, screen: str, network: str, recovery: str, manager:
         'cobertura desconhecida': 'OfflineMapCoverageState.unknown' in coverage,
         'corredor sem garantia': "package.downloadKind == 'route'" in coverage,
         'zoom com detalhe limitado': 'OfflineMapCoverageState.outsideZoom' in coverage,
-        'avisos vinculados ao HUD': 'OfflineMapCoveragePolicy.needsWarning(offlineCoverage)' in screen and 'status: offlineCoverage' in screen,
+        'avisos vinculados ao HUD': 'OfflineMapRenderPolicy.warnForCoverage(' in screen and 'coverage: offlineCoverage' in screen and 'status: offlineCoverage' in screen,
         'gerenciador explica corredor': 'somente o corredor baixado' in manager,
         'legado sem limites': 'Área desconhecida: confira o mapa' in manager,
         'rede usa intervalo offline maior': 'offlineProbeInterval = const Duration(seconds: 60)' in network and 'currentPollingInterval' in network,

@@ -62,9 +62,9 @@ class Navigation337(unittest.TestCase):
         self.assertIn('positionFresh ? \'restantes\' : \'planejados\'', text)
 
     def test_version_and_release(self):
-        self.assertIn('version: 1.0.337+337', src('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.337.md').is_file())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.337.md').is_file())
+        self.assertIn('version: 1.0.338+338', src('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.338.md').is_file())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.338.md').is_file())
 
 
 if __name__ == '__main__':

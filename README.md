@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.337+337`
+**Versão atual:** `1.0.338+338`
+
+## Mapas offline 1.0.338 — MBTiles, seleção correta e downloads seguros
+
+O modo **Offline** força o uso do MBTiles raster ativo, mesmo quando o Google Maps SDK estiver configurado e o celular tiver internet. **Automático** usa o mapa online com conexão e o pacote local como fallback sem rede; **Online** mantém o provedor online como preferência, usando o pacote local se a rede cair. A cobertura é avaliada no centro visualizado e no zoom; a faixa mostra quando falta pacote, há limite de região/zoom ou o corredor não está verificado. Os metadados do pacote não comprovam a presença de todos os tiles: teste a região antes de viajar.
+
+Downloads Stadia em lote têm repetição limitada para falhas transitórias, limite por resposta, timeout e cancelamento de conexões; os downloads de MBTiles por URL verificam espaço livre e conteúdo válido. A atualização mantém a cópia antiga até que a nova seja validada, recusando-a quando não houver espaço para ambos dentro do limite de cache. Importação/download não troca silenciosamente o modo escolhido. Mapas do Google não são exportados para uso offline. **MBTiles raster não traz um motor de recálculo de rotas offline**. Consulte `RELEASE-1.0.338.md` e `VALIDATION-1.0.338.md`.
+
+**Versão anterior:** `1.0.337+337`
 
 ## Navegação 1.0.337+337 — português brasileiro, segurança GPS e painel compacto
 
