@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.339+339
+
+## Ciclo de vida de MBTiles e renderizador 3D
+
+- `RetainedMbTilesTileProvider` faz a ponte entre o `TileLayer` (que pode chamar `dispose` durante desmontagem) e o proprietário do mapa (`release`). O SQLite não fecha sincronicamente na desmontagem: a janela de drenagem de 45 s protege leituras de imagens iniciadas anteriormente. O período é uma mitigação conservadora, não uma confirmação de que todas as leituras concluíram.
+- `OfflineMapService.deletePackage` retira o pacote do catálogo e notifica as telas antes de solicitar a exclusão do arquivo; arquivos ainda abertos aguardam o fechamento dos respectivos provedores. Limpeza na inicialização remove MBTiles não registrados após encerramento abrupto, sem afetar `.part`/arquivos temporários.
+- O MapLibre 3D adota `AndroidPlatformViewMode.tlhc_hc` e `androidTextureMode: true`, e não começa sob `AnimatedOpacity(0)`. A composição pode recorrer a HC em caso de indisponibilidade de TextureView. Notificações de operação/download e estado de rede não invalidam um controlador 3D já montado; ativação de modo e escolha de estilo preservam seus caminhos específicos.
+- ANR e `NullPointerException` nativa continuam a exigir validação com APK instalado; nenhuma correção está declarada como comprovada sem execução no dispositivo.
+
 # Arquitetura — Vigia IA 1.0.338+338
 
 ## Renderização e downloads offline

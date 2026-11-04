@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.338',
+          version: '1.0.339',
           current: true,
+          changes: [
+            'Mapas MBTiles permanecem legíveis enquanto os tiles antigos terminam de carregar.',
+            'Exclusão de pacotes adiada até liberar as conexões SQLite abertas.',
+            'Mapa 3D: montagem Android revisada e reinicializações desnecessárias evitadas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.338',
+          current: false,
           changes: [
             'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
             'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',
@@ -2903,8 +2913,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.338',
+          version: '1.0.339',
           current: true,
+          changes: [
+            'Mapas MBTiles permanecem legíveis enquanto os tiles antigos terminam de carregar.',
+            'Exclusão de pacotes adiada até liberar as conexões SQLite abertas.',
+            'Mapa 3D: montagem Android revisada e reinicializações desnecessárias evitadas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.338',
+          current: false,
           changes: [
             'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
             'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',

@@ -33,6 +33,6 @@ class UnifiedMap327(unittest.TestCase):
   self.assertNotIn('height: 50',shell)
   self.assertIn('_MapWorkspaceModeShortcut',s)
  def test_version_sync(self):
-  self.assertIn('version: 1.0.338+338',file('pubspec.yaml'))
-  self.assertTrue((R/'RELEASE-1.0.338.md').exists())
+  self.assertIn('version: 1.0.339+339',file('pubspec.yaml'))
+  self.assertTrue((R/'RELEASE-1.0.339.md').exists())
 if __name__=='__main__': unittest.main()

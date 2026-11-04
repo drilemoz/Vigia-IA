@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.338', build: 338);
+      AppBuildVersion(version: '1.0.339', build: 339);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.338', build: 338),
+      version: AppBuildVersion(version: '1.0.339', build: 339),
       changes: <String>[
-        'Modo Offline agora usa apenas MBTiles, mesmo com Google Maps configurado.',
-        'Cobertura offline verificada na área visualizada e avisos quando faltam mapas.',
-        'Downloads mais resistentes, cancelamento de rede e atualização sem apagar a cópia anterior.',
+        'Mapas MBTiles com fechamento protegido durante troca de pacotes e navegação.',
+        'Exclusão de pacotes aguarda liberação do SQLite para evitar erros na interface.',
+        'Renderizador 3D Android ajustado para evitar inicializações sobrepostas.',
       ],
     ),
   ]);

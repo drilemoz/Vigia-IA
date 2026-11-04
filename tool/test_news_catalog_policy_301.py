@@ -17,7 +17,7 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.338+338\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.339+339\n', 'utf8')
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
             source = source.replace('Modo Offline agora usa apenas MBTiles, mesmo com Google Maps configurado.',
                                     'Corrigido erro nas verificações de atualização')
@@ -28,10 +28,10 @@ class NewsCatalogPolicy301Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'lib/services').mkdir(parents=True)
-            (root / 'pubspec.yaml').write_text('version: 1.0.338+338\n', 'utf8')
+            (root / 'pubspec.yaml').write_text('version: 1.0.339+339\n', 'utf8')
             path = root / 'lib/services/update_news_catalog.dart'
             source = (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8')
-            path.write_text(source.replace('build: 338', 'build: 300', 1), 'utf8')
+            path.write_text(source.replace('build: 339', 'build: 300', 1), 'utf8')
             with self.assertRaisesRegex(ValueError, 'versão atual'):
                 policy.validate(root)
             path.write_text(source.replace('Modo Offline agora usa apenas MBTiles, mesmo com Google Maps configurado.',

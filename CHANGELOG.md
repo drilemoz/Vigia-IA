@@ -1,3 +1,10 @@
+## 1.0.339+339 (2026-11-03)
+- Corrigido o ciclo de vida de `TileLayer`/MBTiles: o `dispose()` do widget não fecha a conexão SQLite antes de os ImageProviders concluírem leituras; provedores antigos são drenados por 45 s após a tela liberar sua referência.
+- Exclusão de pacote torna-se lógica antes da física; arquivos MBTiles usados aguardam a saída de todos os leitores e arquivos órfãos são tratados na inicialização seguinte.
+- MapLibre 3D Android usa TextureView/TLHC com fallback HC e deixa de ser criado sob `AnimatedOpacity(opacity: 0)`, reduzindo a chance de falhas na criação nativa.
+- Removidas reinicializações das flags 3D por notificações de progresso do serviço offline e mudanças de rede que não remontam o renderer.
+- Regressões novas em `tool/test_map_lifecycle_339.py`. Ainda pendentes: Flutter analyze/test, build Android, reprodução no Xiaomi Android 13 e confirmação da correção do ANR.
+
 ## 1.0.338+338 (2026-11-03)
 - Modo Offline força FlutterMap/MBTiles mesmo que o SDK Google Maps esteja habilitado; seleção do renderizador centralizada em `OfflineMapRenderPolicy`.
 - Alerta de ausência de MBTiles e de área/zoom não coberto usando o centro do mapa; distingue corredor de rota e região com limite conhecido; status exposto na gestão de mapas.

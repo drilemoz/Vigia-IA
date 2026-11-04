@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.338+338`
+**Versão atual:** `1.0.339+339`
+
+## Estabilidade de mapas 1.0.339 — MBTiles e PlatformView Android
+
+Provedores MBTiles usados por `TileLayer` deixam de fechar o banco no mesmo frame da troca de mapas; a tela libera a referência e o SQLite recebe uma janela de drenagem de 45 s para leituras assíncronas. A exclusão lógica do pacote é imediata, mas seu arquivo só é removido quando não existem leitores do aplicativo; arquivos órfãos são limpos na próxima inicialização. O MapLibre 3D passa a usar TextureView/TLHC (com fallback HC), sem `AnimatedOpacity(0)` na montagem; mudanças de estado do serviço offline e da conectividade não reinicializam o 3D sem necessidade. `flutter analyze`, `flutter test` e APK ainda precisam de validação no CI e no aparelho. Consulte `RELEASE-1.0.339.md` e `VALIDATION-1.0.339.md`.
 
 ## Mapas offline 1.0.338 — MBTiles, seleção correta e downloads seguros
 

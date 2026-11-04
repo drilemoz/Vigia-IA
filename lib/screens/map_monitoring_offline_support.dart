@@ -18,8 +18,11 @@ extension _MapMonitoringOfflineSupport on _MapMonitoringScreenState {
       _mapReady = false;
       _googleMapController = null;
     }
+    // Apenas entrar/sair da condicao offline desmonta/remonta o renderer.
+    // Oscilacoes de qualidade e atualizacoes do monitor de conectividade nao
+    // devem apagar o estado do MapLibre durante sua criacao nativa.
     _applyOfflineUiState(() {
-      if (previous != current) {
+      if (previous.isOffline != current.isOffline) {
         _navigation3dRendererReady = false;
         _navigation3dRendererFailed = false;
       }

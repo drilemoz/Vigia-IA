@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
+import '../services/retained_mbtiles_tile_provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 
@@ -286,7 +286,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   );
   bool _appActive = true;
 
-  MbTilesTileProvider? _offlineTileProvider;
+  RetainedMbTilesTileProvider? _offlineTileProvider;
   String? _offlineTilePackageId;
   int _offlineMinNativeZoom = 0;
   int _offlineMaxNativeZoom = 19;
@@ -442,7 +442,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     unawaited(_compassSubscription?.cancel());
     _compassPanelTick.dispose();
     _telemetryPanelTick.dispose();
-    _offlineTileProvider?.dispose();
+    _offlineTileProvider?.release();
     _navigationVoice.resetRoute();
     _mapController.dispose();
     _googleMapController = null;
@@ -1196,9 +1196,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   void _onOfflineMapsChanged() {
     if (!mounted) return;
-    _navigation3dRendererReady = false;
-    _navigation3dRendererFailed = false;
     final oldMode = _lastObservedOfflineMode;
+    // Apenas uma troca real de modo invalida a montagem 3D. Progresso de
+    // download, mudança de pacote e créditos Stadia também notificam listeners.
+    if (oldMode != _offlineMaps.mode) {
+      _navigation3dRendererReady = false;
+      _navigation3dRendererFailed = false;
+    }
     final resumedOnline = oldMode == OfflineMapMode.offline &&
         _offlineMaps.mode != OfflineMapMode.offline;
     final rendererChanged =
@@ -1230,21 +1234,23 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       setState(() {});
       return;
     }
-    _offlineTileProvider?.dispose();
+    _offlineTileProvider?.release();
     _offlineTileProvider = null;
     _offlineTilePackageId = active?.id;
     _offlineMinNativeZoom = 0;
     _offlineMaxNativeZoom = 19;
     if (active != null) {
+      RetainedMbTilesTileProvider? provider;
       try {
-        final provider = MbTilesTileProvider.fromPath(path: active.path);
-        final metadata = provider.mbtiles.getMetadata();
+        provider = RetainedMbTilesTileProvider.fromPath(path: active.path);
+        final metadata = provider.delegate.mbtiles.getMetadata();
         final minZoom = (metadata.minZoom ?? 0).floor().clamp(0, 22);
         final maxZoom = (metadata.maxZoom ?? 19).ceil().clamp(minZoom, 22);
         _offlineMinNativeZoom = minZoom.toInt();
         _offlineMaxNativeZoom = maxZoom.toInt();
         _offlineTileProvider = provider;
       } catch (error) {
+        provider?.release();
         MapDiagnosticsService.instance.recordOfflineOpenFailure();
         debugPrint('Falha ao abrir MBTiles (${error.runtimeType}).');
       }
@@ -7461,31 +7467,46 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 Positioned.fill(
                   child: IgnorePointer(
                     ignoring: !navigation3dActive,
-                    child: AnimatedOpacity(
-                      opacity: navigation3dActive ? 1 : 0,
-                      duration: const Duration(milliseconds: 320),
-                      curve: Curves.easeOutCubic,
-                      child: MapNavigation3DView(
-                        key: ValueKey<String>(
-                          'nav3d-${navigationTarget.sourceId ?? navigationTarget.label}-${navigationTarget.travelMode.storageValue}-${mapAppearance.name}-${stadiaVectorStyle != null ? 'stadia' : 'openfreemap'}',
+                    // Nao iniciar uma PlatformView dentro de Opacity(0):
+                    // alguns dispositivos atrasam a criacao/renderizacao.
+                    // O mapa 2D permanece montado para o fallback imediato.
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: MapNavigation3DView(
+                            key: ValueKey<String>(
+                              'nav3d-${navigationTarget.sourceId ?? navigationTarget.label}-${navigationTarget.travelMode.storageValue}-${mapAppearance.name}-${stadiaVectorStyle != null ? 'stadia' : 'openfreemap'}',
+                            ),
+                            target: navigationTarget,
+                            route: _cyclingRoute!,
+                            current: current,
+                            orientationMode: _mapViewSettings.orientationMode,
+                            sensorHeadingDegrees: _sensorHeadingDegrees,
+                            distanceToNextManeuverMeters:
+                                _navigationProgress?.distanceToNextManeuverMeters,
+                            vectorStyleUrl: navigation3dStyleUrl,
+                            fallbackVectorStyleUrl: navigation3dFallbackStyleUrl,
+                            appearancePreset: mapAppearance,
+                            vectorAttribution: navigation3dAttribution,
+                            recenterRequest: _navigation3dRecenterRequest,
+                            onReady: _handleNavigation3dReady,
+                            onFallback: _handleNavigation3dFallback,
+                            onFollowStateChanged:
+                                _handleNavigation3dFollowChanged,
+                          ),
                         ),
-                        target: navigationTarget,
-                        route: _cyclingRoute!,
-                        current: current,
-                        orientationMode: _mapViewSettings.orientationMode,
-                        sensorHeadingDegrees: _sensorHeadingDegrees,
-                        distanceToNextManeuverMeters:
-                            _navigationProgress?.distanceToNextManeuverMeters,
-                        vectorStyleUrl: navigation3dStyleUrl,
-                        fallbackVectorStyleUrl: navigation3dFallbackStyleUrl,
-                        appearancePreset: mapAppearance,
-                        vectorAttribution: navigation3dAttribution,
-                        recenterRequest: _navigation3dRecenterRequest,
-                        onReady: _handleNavigation3dReady,
-                        onFallback: _handleNavigation3dFallback,
-                        onFollowStateChanged:
-                            _handleNavigation3dFollowChanged,
-                      ),
+                        if (!navigation3dActive)
+                          const Positioned.fill(
+                            child: IgnorePointer(
+                              child: ColoredBox(
+                                color: Color(0xB00B1F30),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

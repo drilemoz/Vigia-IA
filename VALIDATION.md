@@ -1,3 +1,8 @@
+# Validação Vigia IA 1.0.339+339
+
+- Correções de ciclo de vida MBTiles, exclusão diferida de arquivos, modo de composição MapLibre Android e reinicialização do renderer. Testes locais e resultados específicos em `VALIDATION-1.0.339.md`.
+- Confirmação final de `flutter analyze`, `flutter test`, APK CI e testes no Xiaomi Android 13 ainda necessária.
+
 # Validação Vigia IA 1.0.338+338
 
 - Política Offline/Google/MBTiles, avisos de cobertura e downloads protegidos. `tool/verify_project.sh`: aprovado (exit 0); Python: **430 testes (429 aprovados, 1 ignorado)**, testes direcionados offline: **9 aprovados**. Ver `VALIDATION-1.0.338.md` para os limites da validação.
