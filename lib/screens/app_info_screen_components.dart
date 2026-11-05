@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.352',
+          version: '1.0.353',
           current: true,
+          changes: [
+            'APK 300: corrigidos contratos preventivos de versão que impediam a compilação.',
+            'Checagem dinâmica da versão atual nos validadores do projeto.',
+            'Central de APIs, exportação .env, RTSP e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.352',
+          current: false,
           changes: [
             'Central de APIs lista credenciais cadastradas com ações Mostrar/Ocultar e Copiar.',
             'Exportação e importação de chaves em .env legível, sem senha obrigatória.',
@@ -3044,8 +3054,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.352',
+          version: '1.0.353',
           current: true,
+          changes: [
+            'APK 300: corrigidos contratos preventivos de versão que impediam a compilação.',
+            'Checagem dinâmica da versão atual nos validadores do projeto.',
+            'Central de APIs, exportação .env, RTSP e mapas preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.352',
+          current: false,
           changes: [
             'Central de APIs lista credenciais cadastradas com ações Mostrar/Ocultar e Copiar.',
             'Exportação e importação de chaves em .env legível, sem senha obrigatória.',

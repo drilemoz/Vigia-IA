@@ -1,3 +1,9 @@
+## 1.0.353+353 (2026-11-05)
+
+- APK #300: corrigida falha da verificação preventiva que exigia `1.0.351+351` em um release 1.0.352.
+- Checagens do `tool/verify_project.sh` agora usam a versão atual extraída do `pubspec.yaml` para metadados e User-Agent.
+- Atualizados os testes de regressão de versionamento e acrescentado teste preventivo do guard; sem alterações no comportamento de APIs, RTSP e mapas.
+
 ## 1.0.352+352 (2026-11-05)
 
 - Google Maps: Colar, Copiar e Verificar configuração lado a lado na mesma linha.

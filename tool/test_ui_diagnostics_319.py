@@ -74,7 +74,7 @@ class UiDiagnostics319(unittest.TestCase):
         self.assertNotIn('recordUiAction(', source('lib/utils/diagnostic_redactor.dart'))
 
     def test_version_and_notes(self):
-        self.assertIn('version: 1.0.352+352', source('pubspec.yaml'))
+        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').is_file())
 

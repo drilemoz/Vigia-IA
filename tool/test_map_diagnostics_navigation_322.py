@@ -46,7 +46,7 @@ class RouteAndDiagnostics322(unittest.TestCase):
         self.assertIn('isRtspExitClose',s)
         self.assertIn('pode ser registro anterior',s)
     def test_release(self):
-        self.assertIn('version: 1.0.352+352',read('pubspec.yaml'))
+        self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

@@ -14,7 +14,7 @@ def source(path):
 
 class Media3Rtsp317Tests(unittest.TestCase):
     def test_version(self):
-        self.assertIn('version: 1.0.352+352', source('pubspec.yaml'))
+        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
 
     def test_dependencies_consistent_with_radio(self):

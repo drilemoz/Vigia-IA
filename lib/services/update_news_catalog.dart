@@ -7,16 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.352', build: 352);
+      AppBuildVersion(version: '1.0.353', build: 353);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.352', build: 352),
+      version: AppBuildVersion(version: '1.0.353', build: 353),
       changes: <String>[
-        'Serviços e APIs agora permite consultar as chaves cadastradas com Mostrar/Ocultar e Copiar.',
-        'Chaves de APIs podem ser exportadas e importadas em arquivo .env legível, sem senha.',
-        'Colar, Copiar e Verificar configuração do Google Maps ficam na mesma linha.',
-        'Backups antigos protegidos continuam importáveis; RTSP e mapas preservados.',
+        'APK 300: corrigidos verificadores preventivos que ainda exigiam a versão 1.0.351.',
+        'Contratos de release passam a ler a versão atual, evitando bloqueios após atualizações.',
+        'Central de APIs, exportação .env, RTSP automático e mapas preservados.',
       ],
     ),
   ]);

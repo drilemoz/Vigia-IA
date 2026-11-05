@@ -1,4 +1,9 @@
-**Versão atual:** `1.0.352+352`
+**Versão atual:** `1.0.353+353`
+
+## 1.0.353 — Correção do workflow APK 300
+
+Corrigidas as expectativas fixas de versão no verificador preventivo, agora dependentes do `pubspec.yaml`. Mantidas a central de APIs, exportação `.env`, transporte RTSP e mapas da 1.0.352.
+
 
 ## 1.0.352 — Central de APIs e exportação em texto
 

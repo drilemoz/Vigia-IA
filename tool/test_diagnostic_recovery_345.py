@@ -33,7 +33,7 @@ class Recovery345Tests(unittest.TestCase):
         self.assertIn('else -> null', policy)
 
     def test_version(self):
-        self.assertIn('version: 1.0.352+352', (ROOT/'pubspec.yaml').read_text())
+        self.assertIn('version: 1.0.353+353', (ROOT/'pubspec.yaml').read_text())
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').exists())
 
 if __name__ == '__main__': unittest.main()

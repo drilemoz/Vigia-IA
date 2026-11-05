@@ -33,7 +33,7 @@ class MapLayerPicker347(unittest.TestCase):
         self.assertEqual(widget_test.count('testWidgets('),4)
 
     def test_version(self):
-        self.assertIn('version: 1.0.352+352',read('pubspec.yaml'))
+        self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
         self.assertTrue((R/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((R/'VALIDATION-1.0.348.md').is_file())
 

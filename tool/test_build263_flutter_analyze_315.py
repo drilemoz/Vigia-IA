@@ -25,7 +25,7 @@ class Build263AnalyzerRegression(unittest.TestCase):
         self.assertIn('DiagnosticRedactor.field(', source)
 
     def test_version_bumped_and_release_documented(self):
-        self.assertIn('version: 1.0.352+352', (ROOT / 'pubspec.yaml').read_text('utf-8'))
+        self.assertIn('version: 1.0.353+353', (ROOT / 'pubspec.yaml').read_text('utf-8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').exists())
 
 

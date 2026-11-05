@@ -8,9 +8,9 @@ def src(p): return (ROOT/p).read_text('utf8')
 
 class Plaintext352Tests(unittest.TestCase):
     def test_version_is_next_after_verified_base(self):
-        self.assertIn('version: 1.0.352+352',src('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.352.md').exists())
-        self.assertIn('1.0.351+351',src('tool/version_baseline.json'))
+        self.assertIn('version: 1.0.353+353',src('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.353.md').exists())
+        self.assertIn('1.0.352+352',src('tool/version_baseline.json'))
     def test_google_action_row(self):
         a=src('lib/screens/google_maps_key_screen.dart')
         self.assertIn('Row(children: [',a)

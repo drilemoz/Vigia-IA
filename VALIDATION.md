@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.353+353
+
+Correção da verificação preventiva do workflow APK #300. Detalhes e limites em `VALIDATION-1.0.353.md`.
+
 # Validação Vigia IA 1.0.352+352
 
 Consulte `VALIDATION-1.0.352.md` para testes de central de APIs e .env.
