@@ -37,12 +37,18 @@ class LocationTrackingService {
     return LocationTrackingAvailability.ready;
   }
 
-  Stream<MapRoutePoint> positionStream() {
-    const settings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: MapPerformancePolicy.gpsDistanceFilterMeters,
+  /// O mapa em consulta usa precisão moderada; gravar e navegar não.
+  Stream<MapRoutePoint> positionStream({bool highAccuracy = true}) {
+    final settings = LocationSettings(
+      accuracy: highAccuracy
+          ? LocationAccuracy.high
+          : LocationAccuracy.medium,
+      distanceFilter: highAccuracy
+          ? MapPerformancePolicy.gpsDistanceFilterMeters
+          : MapPerformancePolicy.passiveGpsDistanceFilterMeters,
     );
-    return Geolocator.getPositionStream(locationSettings: settings).map(_toPoint);
+    return Geolocator.getPositionStream(locationSettings: settings)
+        .map(_toPoint);
   }
 
   Future<MapRoutePoint> currentPosition() async {

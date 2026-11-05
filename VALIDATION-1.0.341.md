@@ -1,20 +1,15 @@
-# Validação do Vigia IA 1.0.341+341 — APK 297
+# Validação — Vigia IA 1.0.341+341
 
-## Diagnóstico
+## Escopo
 
-Arquivo recebido: `Vigia-IA-Android-APK-297-logs.zip`. Verificação preventiva aprovada com 434 testes Python; a etapa `flutter analyze --fatal-infos --fatal-warnings` falhou por `undefined_named_parameter` na tela `multi_camera_screen.dart:440` (`transport:` na invocação de `Media3RtspTestScreen`) e por `deprecated_member_use` em `rtsp_camera_editor_dialog.dart:476` (`DropdownButtonFormField.value`).
+Unificação da tela Planejamento e do plano Bike em Mapas; biblioteca offline compartilhada, migração conservadora de última rota, preferências persistidas e testes de regressão, preservando navegação e MBTiles.
 
-## Correção
+## Execução
 
-- Retirado somente `transport:` da prévia Media3, que aceita `forceTcp` e continua independente da lógica LibVLC de fallback TCP/UDP.
-- `DropdownButtonFormField.initialValue` substitui o membro obsoleto.
-- Novo teste estrutural cobre assinatura do construtor Media3 e chamada RTSP. Versionamento e metadados sincronizados.
+- Testes direcionados: **32 aprovados, 0 falhas**, executando `test_unified_bike_planning_341.py` e contratos de Planejamento 284/285, edição de ritmo ativo 323, política de Novidades 301, release 296 e ciclo MBTiles/MapLibre 339.
+- `tool/verify_project.sh`: **executado parcialmente; excedeu o limite de 200 s**. As etapas que concluíram no registro estavam aprovadas, mas o script não chegou ao fim (interrompido antes da finalização dos testes de exportação YOLO). A suíte completa **não** está aprovada neste ambiente.
+- `tool/check_release_consistency.py`, `tool/check_news_catalog_policy.py` e `bash -n tool/verify_project.sh`: aprovados.
+- `flutter analyze --fatal-infos --fatal-warnings`, `flutter test` (incluindo `bike_trip_unified_flow_test.dart`), build Android e teste em aparelho: pendentes (SDK indisponível no ambiente de geração).
+- Teste manual recomendado: abrir rota de Mapas, Plano, alterar ritmo, salvar, voltar e conferir biblioteca; abrir Plano da tela inicial, consultar offline, exportar, abrir prévia diretamente em Mapas, testar navegação; instalar sobre a versão anterior sem perder viagens.
 
-## Resultados e pendências
-
-- `bash tool/verify_project.sh`: **aprovado (exit 0)**.
-- Suíte Python integrada ao verificador: **437 testes executados, 436 aprovados e 1 ignorado** (Dart SDK ausente).
-- Testes direcionados para compatibilidade Media3/RTSP, política de transporte, Novidades e versão: **15 aprovados**, e execução adicional do teste de planejamento/versionamento: 13 aprovados.
-- `python3 tool/check_version_sync.py` e `python3 tool/check_release_consistency.py`: aprovados para `1.0.341+341`.
-- Na comparação com a 1.0.340: 0 arquivos removidos, 3 adicionados e 63 arquivos atualizados (principalmente versão e contratos).
-- Flutter SDK indisponível no ambiente: `flutter analyze`, `flutter test`, `flutter build apk` e teste físico pendentes.
+**Atenção:** validar resultados reais antes de considerar regressões de Android/GPS/PlatformView resolvidas.

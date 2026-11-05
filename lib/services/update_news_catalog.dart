@@ -7,15 +7,16 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.341', build: 341);
+      AppBuildVersion(version: '1.0.351', build: 351);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.341', build: 341),
+      version: AppBuildVersion(version: '1.0.351', build: 351),
       changes: <String>[
-        'APK 297: corrigido o parâmetro incompatível na prévia RTSP Media3.',
-        'Atualizado seletor de transporte para Flutter 3.44 sem aviso fatal.',
-        'RTSP automático UDP/TCP, mapas e demais recursos preservados.',
+        'Base 1.0.350 restaurada: preservados mapas, GPS, cicloviagem e diagnósticos.',
+        'Câmeras RTSP agora escolhem UDP ou TCP automaticamente quando não chega vídeo.',
+        'Transporte funcional memorizado por câmera; opções manuais UDP e TCP disponíveis.',
+        'Prévia Media3 permanece separada; corrigido o seletor para Flutter atual.',
       ],
     ),
   ]);

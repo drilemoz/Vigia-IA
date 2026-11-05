@@ -1,24 +1,57 @@
-# Validação Vigia IA 1.0.341+341
+# Validação Vigia IA 1.0.351+351
 
-- APK 297 (1.0.340): `tool/verify_project.sh` e 434 testes Python passaram no GitHub Actions; a etapa `flutter analyze --fatal-infos --fatal-warnings` retornou dois diagnósticos em `multi_camera_screen.dart` e `rtsp_camera_editor_dialog.dart`, impedindo o build APK.
-- Corrigidos: parâmetro `transport` não aceito pela prévia Media3; membro de formulário `value` depreciado em Flutter 3.44.
-- `bash tool/verify_project.sh` aprovado (exit 0); 437 testes Python executados (436 aprovados, 1 ignorado). Consulte `VALIDATION-1.0.341.md` para os detalhes. Flutter analyze/test e compilação Android precisam de nova execução no CI.
+Recuperação da base oficial 1.0.350 com integração RTSP automático UDP/TCP. A política `AGENTS.md` agora exige consultar o diretório ou Google Drive para localizar a última fonte antes de modificar. O relatório de testes e ressalvas da nova versão está em `VALIDATION-1.0.351.md`.
+
+# Validação Vigia IA 1.0.350+350
+
+- 1.0.350: correção de lint do APK 294 e novo teste estrutural; verificação preventiva completa aprovada (471 testes Python, 1 ignorado, 0 falhas). Ver `VALIDATION-1.0.350.md`.
+- 1.0.349: temporizador e sensor de bússola suspensos em background; políticas testáveis em `lib/services/map_hud_refresh_policy.dart` e `lib/services/map_camera_source_policy.dart`. Verificação preventiva exit 0; 469 testes Python (1 ignorado, 0 falhas). Resultados e limites em `VALIDATION-1.0.349.md`.
+- Flutter/Dart indisponível na validação local: `flutter analyze`, `flutter test` e APK devem ser confirmados no GitHub Actions.
+
+- Painel de aparência do mapa reorganizado e confirmado por OK. Testes preventivos e Flutter de seleção estão em `tool/test_map_layer_picker_347.py` e `test/map_layer_picker_panel_test.dart`.
+- Evidências da verificação local e limites em `VALIDATION-1.0.348.md`.
+- Flutter analyze/test e build Android devem ser confirmados no GitHub Actions se SDK não estiver disponível localmente.
+
+# Validação Vigia IA 1.0.346+346
+
+- APK 291: três expectativas de teste de recuperação de incidentes corrigidas; novo caso para versão instalada.
+- `tool/verify_project.sh` aprovado com saída 0; 456 testes Python consolidados (1 ignorado, 0 falhas).
+- SDK Flutter indisponível localmente: `flutter analyze`, `flutter test` e build Android precisam ser confirmados pelo GitHub Actions.
+
+# Validação Vigia IA 1.0.346+346
+
+- Diagnóstico de encerramentos Android aprimorado, com PID/tempo, severidade, versões distintas e reconsulta ao retomar o app. Testes Kotlin/JVM, regressão Python e widget tests Flutter adicionados. Ver `VALIDATION-1.0.346.md`.
+- SDK Flutter e Android devem confirmar em GitHub Actions (`flutter analyze`, `flutter test`, `assembleRelease`); testes locais de código não substituem APK em dispositivo.
+
+# Validação Vigia IA 1.0.344+344
+
+## APK 289 — teste Flutter da prévia de cicloviagem
+
+A verificação preventiva e `flutter analyze` passaram no APK 289, mas o `flutter test` falhou em `test/map_route_preview_card_test.dart:76` ao esperar o texto obsoleto "Carregando plano". O teste atualizado verifica "Planejar viagem" sem etapas calculadas, "Plano 2d" com etapas e callback de abertura do editor. Contrato Python integrado ao `tool/verify_project.sh`. Consulte `VALIDATION-1.0.344.md` para as evidências e limites.
+
+
+- APK 288: verificação preventiva passou; o Flutter Analyzer apontou dois avisos `info` fatais em `lib/screens/map_monitoring_screen.dart` (linhas 2168 e 3028 na versão 1.0.342).
+- Correções pontuais e testes preventivos em `tool/test_build288_flutter_analyze_343.py`. Resultado e limitações em `VALIDATION-1.0.343.md`.
+- Flutter analyze/test/compilação Android devem ser reconfirmados no próximo workflow; Python local não substitui compilação Dart.
+
+# Validação Vigia IA 1.0.342+342
+
+- APK 287: falha antes da compilação em `test/app_metadata_test.dart` (esperava 1.0.340+340 sobre pubspec 1.0.341+341). Solução e verificações em `VALIDATION-1.0.342.md`.
+- Flutter analyze/test, geração do APK e teste físico ainda precisam ser executados no CI.
+
+## 1.0.341+341 — Planejamento unificado
+
+Duas entradas para o mesmo editor, biblioteca e preferências compartilhadas. Ver `VALIDATION-1.0.341.md` para testes e limites. A execução de Flutter/Android continua pendente de CI.
 
 # Validação Vigia IA 1.0.340+340
 
-- APK 296 (1.0.339): interrupção no `test_reject_old_release_or_empty_news` durante verificação preventiva; nenhum `flutter analyze`, `flutter test` ou build APK chegou a ser executado nessa tentativa.
-- Correção: teste de Novidades independente de mensagem obsoleta; três casos negativos cobertos. Versão e documentação sincronizadas.
-- `tool/verify_project.sh` aprovado (exit 0), suíte Python com 434 testes (433 aprovados, 1 ignorado); detalhes em `VALIDATION-1.0.340.md`. Flutter/Android e teste no aparelho permanecem pendentes.
+- Correção preventiva do workflow APK 285: teste resiliente à atualização de textos de Novidades, validador rejeita mensagens vazias; `tool/verify_project.sh` aprovado (exit 0), com 436 testes Python agregados (435 aprovados, 1 ignorado). Detalhes em `VALIDATION-1.0.340.md`.
+- Flutter analyze/test, compilação Android e testes físicos permanecem pendentes.
 
 # Validação Vigia IA 1.0.339+339
 
-## Vigia IA 1.0.339+339 — RTSP UDP/TCP automático
-
-- Cadastro RTSP: Automático, Preferir UDP ou Forçar TCP.
-- Automático tenta o último transporte que confirmou quadro, ou UDP inicialmente; troca para o alternativo quando não recebe quadro.
-- Preferência armazenada em arquivo local identificado por hash SHA-256 da URL; o arquivo contém apenas tcp/udp, sem credenciais.
-- MJPEG e HTTP H.264 continuam separados do transporte RTSP.
-- Compilação Flutter/Android e testes físicos pendentes.
+- Correções de ciclo de vida MBTiles, exclusão diferida de arquivos, modo de composição MapLibre Android e reinicialização do renderer. Testes locais e resultados específicos em `VALIDATION-1.0.339.md`.
+- Confirmação final de `flutter analyze`, `flutter test`, APK CI e testes no Xiaomi Android 13 ainda necessária.
 
 # Validação Vigia IA 1.0.338+338
 
@@ -202,6 +235,10 @@ Veja `VALIDATION-1.0.327.md`. Testes preventivos aprovados (368 casos, 1 ignorad
 - O workflow APK 258 usou fonte 1.0.306, passou nos testes preventivos e falhou na etapa `flutter analyze --fatal-infos --fatal-warnings` com 8 problemas: Histórico (`BuildContext` e `setState` de extension), Galeria (3 `if` sem chaves), guard de captura (2 `if` sem chaves) e OCR (1 import redundante).
 - A correção foi aplicada sobre 1.0.307 para preservar REC do A3 e fotos locais. `tool/test_build258_flutter_analyze_308.py` identifica os 8 casos e verifica a correção textual.
 - Executar no GitHub Actions: `flutter analyze`, `flutter test`, APK. Flutter SDK não instalado no ambiente local; testes estruturais não provam aprovação do analisador.
+
+## APK 289 — regressão de teste Flutter na prévia Bike
+
+O projeto mantém a prévia de rota com o botão `Planejar viagem` antes do plano de dias estar pronto. O teste de widget foi adaptado para refletir a interface real e para verificar o callback. Os testes preventivos novos verificam o contrato antes do `flutter test`; consultar `VALIDATION-1.0.344.md` para resultados e limites.
 
 ## Verificações da versão 1.0.307+307
 

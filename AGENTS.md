@@ -2,6 +2,14 @@
 
 Estas regras valem para qualquer correção, melhoria, refatoração, buildfix ou entrega.
 
+## Obrigação anterior a qualquer edição: verificar a versão mais recente
+
+- **Antes de desenvolver, corrigir ou empacotar**, verificar os ZIPs de código-fonte no diretório de trabalho **e** a pasta do Vigia IA no Google Drive conectado, quando acessível; conferir também os metadados reais do repositório quando disponíveis.
+- Usar como base a **versão mais recente** de fonte confirmada, nunca a última versão vista numa conversa ou apenas o maior nome de arquivo sem inspecionar o `pubspec.yaml`.
+- Caso existam linhas divergentes, comparar arquivos e trazer apenas as funcionalidades ausentes à base mais nova; **não substituir** os módulos novos pelos antigos. Checar que nenhum arquivo da base mais nova foi eliminado inadvertidamente.
+- Incrementar `version` e `versionCode` em relação à maior versão encontrada; em caso de conflito ou dúvida, documentar a evidência e preservar ambas antes de integrar.
+- Esta regra foi solicitada após a regressão que gerou 1.0.339–341 a partir da 1.0.338, apesar de a 1.0.350 já existir. Origem confirmada nesta recuperação: `Meu Drive/Projetos/Vigia IA/Vigia-IA-v1.0.350-APK294-Flutter-Analyze-Corrigido.zip`.
+
 ## Versionamento obrigatório
 
 - Nunca entregar uma nova modificação usando a mesma versão da entrega anterior.

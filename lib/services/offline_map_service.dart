@@ -13,6 +13,7 @@ import 'package:sqlite3/sqlite3.dart';
 import '../models/offline_map_package.dart';
 import 'map_destination_search_service.dart';
 import 'native_platform_service.dart';
+import 'retained_mbtiles_tile_provider.dart';
 import 'data_usage_service.dart';
 
 class OfflineMapDownloadEstimate {
@@ -223,6 +224,7 @@ class OfflineMapService extends ChangeNotifier {
     // Nunca ligar rede automaticamente se o último pacote sumir/for apagado.
     // O modo Offline permanece escolhido e o mapa mostra falta de cobertura.
     _packages.sort((a, b) => b.addedAt.compareTo(a.addedAt));
+    await _cleanupOrphanedMbTiles();
     _initialized = true;
     await _persist();
     notifyListeners();
@@ -278,7 +280,7 @@ class OfflineMapService extends ChangeNotifier {
         'https://tiles.stadiamaps.com/tiles/alidade_smooth/0/0/0.png',
       );
       final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.341 key-test');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.351 key-test');
       request.headers.set(HttpHeaders.authorizationHeader, 'Stadia-Auth $key');
       final response = await request.close().timeout(const Duration(seconds: 12));
       final status = response.statusCode;
@@ -672,7 +674,7 @@ class OfflineMapService extends ChangeNotifier {
     );
     final request = await client.getUrl(uri).timeout(const Duration(seconds: 20));
     request.followRedirects = false; // Nunca redirecionar a credencial da Stadia.
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.341 offline-map');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.351 offline-map');
     request.headers.set(HttpHeaders.authorizationHeader, 'Stadia-Auth $apiKey');
     final response = await request.close().timeout(const Duration(seconds: 30));
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -809,7 +811,7 @@ class OfflineMapService extends ChangeNotifier {
     _setOperation('Baixando $name', progress: 0);
     try {
       final request = await client.getUrl(uri).timeout(const Duration(seconds: 20));
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.341 offline-map');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.351 offline-map');
       final response = await request.close().timeout(const Duration(seconds: 30));
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw HttpException(
@@ -1029,19 +1031,29 @@ class OfflineMapService extends ChangeNotifier {
     final index = _packages.indexWhere((item) => item.id == id);
     if (index < 0) return;
     final item = _packages.removeAt(index);
-    try {
-      final file = File(item.path);
-      if (await file.exists()) await file.delete();
-    } catch (_) {
-      // O registro ainda deve ser removido mesmo se o SO já tiver apagado o arquivo.
-    }
     if (_activeId == id) {
       _activeId = _packages.isEmpty ? null : _packages.first.id;
     }
-    // Nunca ligar rede automaticamente se o último pacote sumir/for apagado.
-    // O modo Offline permanece escolhido e o mapa mostra falta de cobertura.
+    // Primeiro remover do catalogo e notificar: as telas liberam os leitores.
+    // Nao excluir o SQLite enquanto um ImageProvider ainda pode carregar tiles.
+    // O modo Offline permanece escolhido, sem troca automatica para Auto/Online.
     await _persist();
     notifyListeners();
+    await RetainedMbTilesTileProvider.deleteWhenUnused(item.path);
+  }
+
+  Future<void> _cleanupOrphanedMbTiles() async {
+    final directory = _directory;
+    if (directory == null) return;
+    final registered = _packages.map((item) => item.path).toSet();
+    await for (final entry in directory.list(followLinks: false)) {
+      if (entry is! File ||
+          !entry.path.endsWith('.mbtiles') ||
+          registered.contains(entry.path)) {
+        continue;
+      }
+      await RetainedMbTilesTileProvider.deleteWhenUnused(entry.path);
+    }
   }
 
   Future<_MbTilesInfo> _validateMbTiles(File file) async {

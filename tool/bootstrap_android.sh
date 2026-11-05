@@ -47,6 +47,7 @@ cp "$ROOT/tool/android/MonitoringForegroundService.kt" "$KOTLIN_DIR/MonitoringFo
 cp "$ROOT/tool/android/TransmitterExclusiveMode.kt" "$KOTLIN_DIR/TransmitterExclusiveMode.kt"
 cp "$ROOT/tool/android/RadioPlaybackService.kt" "$KOTLIN_DIR/RadioPlaybackService.kt"
 cp "$ROOT/tool/android/MonitorRecoveryReceiver.kt" "$KOTLIN_DIR/MonitorRecoveryReceiver.kt"
+cp "$ROOT/tool/android/MonitorBootRecoveryReceiver.kt" "$KOTLIN_DIR/MonitorBootRecoveryReceiver.kt"
 # Portabilidade do transmissor MCRP Android independente do Flutter.
 NATIVE_DIR="android/app/src/main/kotlin/com/minhacamera"
 mkdir -p "$NATIVE_DIR"

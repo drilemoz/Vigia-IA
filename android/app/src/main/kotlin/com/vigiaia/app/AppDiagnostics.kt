@@ -37,6 +37,8 @@ internal object AppDiagnostics {
     private var unhandled = false
     private var recoveryNeedsSaving = false
     private var persistenceOk = true
+    private var recoveryReady = false
+    private var recoveryError: String? = null
     private var flutter = ""
     private var flutterAt = 0L
     private var lastPersistAt = 0L
@@ -95,7 +97,11 @@ internal object AppDiagnostics {
             override fun onActivitySaveInstanceState(activity: Activity, state: Bundle) = Unit
             override fun onActivityDestroyed(activity: Activity) = Unit
         })
-        worker.execute { runCatching { recoverAndStart() } }
+        worker.execute {
+            try { recoverAndStart() }
+            catch (error: Exception) { recoveryError = DiagnosticPolicy.safe(error.javaClass.simpleName, 100) }
+            finally { recoveryReady = true }
+        }
         worker.scheduleWithFixedDelay({ runCatching {
             val active = visible > 0 || PhoneCameraBackgroundService.running || MonitoringForegroundService.isRunning
             // Coleta reduzida de 30 s em cache, nao mantem servico ou wake lock.
@@ -125,45 +131,64 @@ internal object AppDiagnostics {
             previous.put("lastUiActionBeforeExit", lastUi)
         }
         val oldStart = previous.optLong("startedAt")
-        if (Build.VERSION.SDK_INT >= 30) runCatching {
-            val manager = app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            val exit = manager.getHistoricalProcessExitReasons(app.packageName, 0, 12)
-                .filter { it.processName == app.packageName && it.timestamp >= oldStart && oldStart > 0 }
-                .maxByOrNull { it.timestamp }
-            if (exit != null) lastExit = JSONObject().put("at", exit.timestamp).put("reason", exit.reason)
-                .put("status", exit.status).put("importance", exit.importance)
-                .put("pssKiB", exit.pss).put("rssKiB", exit.rss)
-                .put("processState", when (exit.importance) {
-                    100 -> "foreground"; 125 -> "foreground_service"; 200 -> "visible"
-                    300 -> "service"; 400 -> "cached"; else -> "other"
-                })
-                .put("details", DiagnosticPolicy.safe(exit.description.orEmpty(), 500))
-                .put("classification", DiagnosticPolicy.exitProblem(exit.reason) ?: "Sem evidência de falha")
-            // ANR trace is text; native crash tombstones may be binary protobuf, so do not decode those.
-            if (exit?.reason == 6) runCatching {
-                exit.traceInputStream?.use { stream ->
-                    val bytes = ByteArray(32768)
-                    var length = 0
-                    while (length < bytes.size) {
-                        val count = stream.read(bytes, length, bytes.size - length)
-                        if (count <= 0) break
-                        length += count
+        val oldUpdated = previous.optLong("updatedAt")
+        val oldPid = previous.optInt("pid", -1)
+        if (Build.VERSION.SDK_INT >= 30 && oldStart > 0) {
+            runCatching {
+                val manager = app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                val now = System.currentTimeMillis()
+                val exit = manager.getHistoricalProcessExitReasons(app.packageName, 0, 20)
+                    .filter { it.processName == app.packageName && DiagnosticPolicy.belongsToSession(
+                        oldStart, oldUpdated, oldPid, it.timestamp, it.pid, now
+                    ) }
+                    .maxByOrNull { it.timestamp }
+                if (exit != null) lastExit = JSONObject().put("at", exit.timestamp).put("reason", exit.reason)
+                    .put("pid", exit.pid).put("status", exit.status).put("importance", exit.importance)
+                    .put("pssKiB", exit.pss).put("rssKiB", exit.rss)
+                    .put("processState", when (exit.importance) {
+                        100 -> "foreground"; 125 -> "foreground_service"; 200 -> "visible"
+                        300 -> "service"; 400 -> "cached"; else -> "other"
+                    })
+                    .put("details", DiagnosticPolicy.safe(exit.description.orEmpty(), 500))
+                    .put("classification", DiagnosticPolicy.assessExit(exit.reason, exit.status, exit.importance)?.reason
+                        ?: "Sem evidência de falha")
+                // ANR trace is text; native tombstones may be binary protobuf.
+                if (exit?.reason == 6) runCatching {
+                    exit.traceInputStream?.use { stream ->
+                        val bytes = ByteArray(32768)
+                        var length = 0
+                        while (length < bytes.size) {
+                            val count = stream.read(bytes, length, bytes.size - length)
+                            if (count <= 0) break
+                            length += count
+                        }
+                        lastExit.put("anrMethodsPartial", DiagnosticPolicy.anrMethods(String(bytes, 0, length, Charsets.UTF_8)))
                     }
-                    lastExit.put("anrMethodsPartial", DiagnosticPolicy.anrMethods(String(bytes, 0, length, Charsets.UTF_8)))
                 }
-            }
+            }.onFailure { recoveryError = "historical_exit_unavailable" }
         }
+        val assessed = if (lastExit.has("reason")) DiagnosticPolicy.assessExit(
+            lastExit.optInt("reason"), lastExit.optInt("status"), lastExit.optInt("importance")
+        ) else null
         val reason = when {
             fatal.has("at") -> "Falha Java/Kotlin não tratada"
-            lastExit.has("reason") && DiagnosticPolicy.exitProblem(lastExit.optInt("reason")) != null -> DiagnosticPolicy.exitProblem(lastExit.optInt("reason"))
-            previous.optBoolean("unhandled") -> "Erro Flutter/Dart não tratado no último uso"
+            assessed != null -> assessed.reason
+            previous.optBoolean("unhandled") && !lastExit.has("reason") ->
+                "Erro Flutter/Dart registrado antes do encerramento (causa da saída não confirmada)"
             else -> null
+        }
+        val severity = when {
+            fatal.has("at") -> "error"
+            assessed != null -> assessed.severity
+            else -> "warning"
         }
         if (reason != null) {
             val id = previous.optString("session").ifEmpty { "fatal-${fatal.optLong("at")}" }
             val alreadySaved = (0 until incidents.length()).any { incidents.optJSONObject(it)?.optString("id") == id }
             if (!alreadySaved && incidentPrefs.getString("acknowledged", "") != id) {
                 val item = JSONObject().put("id", id).put("reason", reason)
+                    .put("severity", severity).put("sourceVersion", previous.optString("version", "desconhecida"))
+                    .put("sourceBuild", previous.optInt("build", -1))
                     .put("detectedAt", System.currentTimeMillis()).put("lastExit", lastExit)
                     .put("session", previous).put("fatal", fatal)
                 if (incidents.length() >= 3) incidents.remove(0)
@@ -211,6 +236,7 @@ internal object AppDiagnostics {
     fun report(callback: (String) -> Unit) {
         worker.execute {
             val result = runCatching { JSONObject().put("automatic", true).put("sampleIntervalSeconds", 10).put("backgroundSampleIntervalSeconds", 30)
+                .put("recoveryReady", recoveryReady).put("recoveryError", recoveryError)
                 .put("retainedSamples", 60).put("retainedEvents", 120).put("uiActionsImmediate", true).put("persistenceOk", persistenceOk)
                 .put("pendingIncidents", incidents)
                 .put("lastExit", lastExit).put("lastUiAction", json(uiPrefs.getString("last", null)))
@@ -285,6 +311,7 @@ internal object AppDiagnostics {
         lastPersistAt = SystemClock.uptimeMillis()
         val info = app.packageManager.getPackageInfo(app.packageName, 0)
         cachedSession = JSONObject().put("session", session).put("startedAt", startedAt)
+            .put("pid", android.os.Process.myPid())
             .put("updatedAt", System.currentTimeMillis()).put("version", info.versionName)
             .put("build", info.longVersionCode).put("model", Build.MODEL).put("manufacturer", Build.MANUFACTURER)
             .put("android", Build.VERSION.RELEASE).put("sdk", Build.VERSION.SDK_INT)

@@ -1,22 +1,72 @@
-**Versão atual:** `1.0.341+341`
+**Versão atual:** `1.0.351+351`
 
-## APK 297 — Correção Flutter Analyze RTSP/Media3 (1.0.341)
+## 1.0.351 — Recuperação da base 1.0.350 e RTSP automático
 
-O workflow Android APK 297 passou pela verificação preventiva, mas o `flutter analyze --fatal-infos --fatal-warnings` encontrou `undefined_named_parameter` na prévia Media3 (a tela passou `transport` a um widget cujo construtor recebe somente `forceTcp`) e `deprecated_member_use` no seletor RTSP. A prévia Media3 continua independente do monitoramento LibVLC: removido apenas o argumento incompatível, preservando `forceTcp`; `DropdownButtonFormField` agora usa `initialValue`. O fallback UDP/TCP por câmera permanece no player LibVLC, com mapas e demais módulos inalterados. Consulte `RELEASE-1.0.341.md` e `VALIDATION-1.0.341.md`.
+A base oficial volta a ser a 1.0.350 (confirmada no Google Drive e nos ZIPs locais), com **todos os arquivos preservados**. Integra o monitor RTSP automático UDP/TCP e sua configuração por câmera, sem substituir otimizações posteriores de mapas, cicloviagem e diagnóstico por código da linha paralela 1.0.341. `AGENTS.md` agora exige checagem da última versão antes de alterar. Consulte `RELEASE-1.0.351.md` e `VALIDATION-1.0.351.md`.
+
+**Versão anterior:** `1.0.350+350`
+
+
+## Correção do APK 294 — 1.0.350
+
+`flutter analyze --fatal-infos --fatal-warnings` sinalizou um retorno condicional sem chaves em `MapMonitoringScreen._refreshBattery`. O bloco foi explicitado sem alterar o comportamento do GPS, câmera, rotas ou telemetria; contrato de regressão incorporado à verificação preventiva. Consulte `RELEASE-1.0.350.md` e `VALIDATION-1.0.350.md`. Compilação Flutter e APK dependem de GitHub Actions.
+
+## Economia de energia e modularização dos mapas — 1.0.349
+
+O temporizador do HUD e a leitura contínua da bússola são suspensos quando a aba Mapas fica oculta ou o aplicativo sai do primeiro plano, voltando ao retornar. A política do HUD e a identificação das fontes de câmera foram extraídas para serviços testáveis. As atualizações de bateria e rádio evitam reconstruir a tela quando o valor não mudou. A navegação ativa segue usando o serviço de primeiro plano já existente, sem perder a rota. Isto não implementa roteamento viário totalmente offline nem altera os protocolos de câmera. Consulte `RELEASE-1.0.349.md` e `VALIDATION-1.0.349.md`.
+
+## Estabilidade, conectividade e autonomia — 1.0.348
+
+O status online do mapa valida uma resposta HTTPS 204 (não apenas DNS), com prazo curto e repetição adaptativa. Consulta passiva ao GPS usa precisão moderada/35 m, enquanto navegação e gravação mantêm precisão alta/8 m. O receiver de recuperação interno não é exportado; eventos protegidos de boot/atualização usam receiver próprio. O HUD evita rebuilds globais ociosos frequentes, e pushes sucessivos cancelam builds automáticos antigos sem cancelar execução manual. O tráfego HTTP em rede local continua permitido para câmeras/radio; isso não equivale a criptografia. O motor de roteamento viário totalmente offline ainda não está implementado: exige dados rodoviários e um motor compatíveis, testados em Android.
+
+## Visual do mapa simplificado — 1.0.347
+
+O botão de camadas agora abre um painel compacto em três abas: Aparência (quatro temas e Sistema/Dia-noite), Provedor (mapa atual ou Google Maps, quando compilado com chave) e Base (cinco estilos). As escolhas são provisórias até tocar em OK; Cancelar descarta. O painel mostra uma explicação curta da opção selecionada, bloqueia opções indisponíveis e não contém atalhos de Serviços e APIs. A central única de chaves continua em Configurações. Os mapas offline e seus dados não foram alterados. Ver `RELEASE-1.0.347.md` e `VALIDATION-1.0.347.md`.
+
+## APK 291 — testes de recuperação de incidentes (1.0.346)
+- Corrigidas três expectativas antigas de título no teste Flutter da recuperação: eventos de outra versão mostram "Falha recuperada de versão anterior".
+- Adicionado teste que confirma "Erro detectado no último uso" para incidentes da versão atual.
+- O comportamento funcional do diagnóstico introduzido em 1.0.345 foi preservado.
+
+
+## Recuperação de encerramentos Android — 1.0.346
+
+O Vigia IA agora correlaciona informações do Android ao processo anterior (PID e horários), distingue encerramento em cache por memória de crashes e ANRs, mostra a versão da sessão original no aviso e tenta consultar novamente o diagnóstico caso a API nativa não esteja pronta na inicialização. Ao voltar do segundo plano, incidentes ainda não exibidos podem ser recuperados. O app não trata como falha um encerramento normal ou solicitado pelo usuário; Android pode não disponibilizar motivo para todos os encerramentos. Sem telemetria externa ou rastreamento persistente em segundo plano. Ver `RELEASE-1.0.346.md` e `VALIDATION-1.0.346.md`.
+
+
+## APK 289 — teste da prévia Bike e planejamento unificado (1.0.344)
+
+`flutter analyze` e a verificação preventiva passaram no APK 289. `flutter test` falhou em `test/map_route_preview_card_test.dart:76`, pois o teste procurava "Carregando plano" mesmo sem existir plano pré-calculado. A UI correta exibe "Planejar viagem" e permite abrir o editor unificado desde que exista uma rota selecionada. O teste agora acompanha esse comportamento e cobre a ação do botão antes e depois de existir o plano. Ver `RELEASE-1.0.344.md` e `VALIDATION-1.0.344.md`.
+
+## APK 288 — correção do Flutter Analyzer (1.0.343)
+
+O workflow passou pela validação preventiva, mas `flutter analyze --fatal-infos --fatal-warnings` retornou dois diagnósticos `info` fatais em `map_monitoring_screen.dart`. Na linha da abertura de rota salva, o `if` agora possui chaves; no fallback de uma rota Bike opcional, a lista usa elemento anulável `?_cyclingRoute` (Dart moderno). Os contratos de regressão verificam ambos antes do analyzer. Funcionalidade do planejamento unificado de 1.0.341 preservada. Ver `RELEASE-1.0.343.md` e `VALIDATION-1.0.343.md`.
+
+## Correção preventiva do workflow APK 287 — 1.0.342
+
+`test/app_metadata_test.dart` não contém mais versões fixas de releases passados. Compara a versão e o build declarados em `AppMetadata` com os valores reais de `pubspec.yaml` durante `flutter test`; o verificador Python também exige esse contrato. Foi corrigido o bloqueio preventivo do APK 287 sem modificar a lógica do planejador unificado. Ver `RELEASE-1.0.342.md` e `VALIDATION-1.0.342.md`.
+
+**Versão anterior:** `1.0.341+341`
+
+**Versão histórica:** `1.0.341+341`
+
+## Planejamento único de cicloviagem 1.0.341
+
+O menu **Planejamento** e o botão **Plano** de **Mapas** agora abrem o mesmo editor de viagem. Quando a rota vem do mapa, o traçado, as alternativas e o destino são recebidos sem uma segunda consulta de roteamento. Velocidade, horas por dia e equilíbrio usam as preferências da aba Mapas; horários, intervalos e almoço persistem em preferências compartilhadas. A biblioteca de viagens (`vigia_planned_trips.json`) recebe tanto o botão **Salvar** do editor quanto o botão **Salvar offline** de Mapas. Rotas salvas anteriormente em `vigia_saved_route.json` são preservadas e importadas conservadoramente quando a biblioteca é aberta. O botão de prévia do Planejamento abre a rota diretamente no mapa, sem exigir que se procure manualmente por “Rota salva”. Alterar uma prévia não inicia navegação, e novos roteamentos ainda exigem internet. O mapa offline MBTiles continua independente da geometria da rota. Ver `RELEASE-1.0.341.md` e `VALIDATION-1.0.341.md`.
 
 **Versão anterior:** `1.0.340+340`
 
-## Correção APK 296 — Novidades e versionamento (1.0.340)
+**Versão em 1.0.340:** `1.0.340+340`
 
-O workflow Android APK 296 parou na verificação preventiva, antes do `flutter analyze` e da compilação APK. Um teste de regressão procurava uma frase da versão 1.0.338 que já não existia no catálogo 1.0.339; o teste foi ajustado para modificar uma mensagem realmente presente, sem depender de textos de versões passadas. Preservados RTSP automático UDP/TCP, MBTiles offline, mapas, câmeras e IA. Consulte `RELEASE-1.0.340.md` e `VALIDATION-1.0.340.md`.
+## Correção do workflow APK 285 — política de Novidades
+
+Corrigido o teste da política de Novidades que procurava uma frase já removida da versão anterior e, por isso, não injetava uma mensagem inválida. O teste passa a localizar uma mensagem existente no catálogo atual antes de simular `TODO` ou uma mensagem vazia; o validador também rejeita entradas vazias, sem proibir mensagens legítimas de correção de erros. A validação anterior falhou antes de `flutter analyze` ou da compilação Android. Três verificações preventivas legadas do MapLibre agora reconhecem o modo TLHC/TextureView e dispensam a antiga montagem por `AnimatedOpacity`. As melhorias de MBTiles/MapLibre da versão 1.0.339 foram preservadas. `tool/verify_project.sh` passou (435/436 testes Python aprovados, 1 ignorado); ainda é necessário testar em APK real. Ver `RELEASE-1.0.340.md` e `VALIDATION-1.0.340.md`.
 
 **Versão anterior:** `1.0.339+339`
 
-## RTSP automático UDP/TCP (1.0.339)
+## Estabilidade de mapas 1.0.339 — MBTiles e PlatformView Android
 
-Por câmera: Automático, Preferir UDP ou Forçar TCP. O modo Automático tenta o último transporte que confirmou quadro (ou UDP inicialmente), e pode alternar para o outro quando necessário; preferência local memorizada por câmera. O registro usa hash SHA-256 da URL como identificador e contém apenas a escolha TCP/UDP, sem credenciais. Não inclui gravação RTSP nova nem mudanças nos protocolos MJPEG/H.264 HTTP. Consulte `RELEASE-1.0.339.md`.
-
-**Versão anterior:** `1.0.338+338`
+Provedores MBTiles usados por `TileLayer` deixam de fechar o banco no mesmo frame da troca de mapas; a tela libera a referência e o SQLite recebe uma janela de drenagem de 45 s para leituras assíncronas. A exclusão lógica do pacote é imediata, mas seu arquivo só é removido quando não existem leitores do aplicativo; arquivos órfãos são limpos na próxima inicialização. O MapLibre 3D passa a usar TextureView/TLHC (com fallback HC), sem `AnimatedOpacity(0)` na montagem; mudanças de estado do serviço offline e da conectividade não reinicializam o 3D sem necessidade. `flutter analyze`, `flutter test` e APK ainda precisam de validação no CI e no aparelho. Consulte `RELEASE-1.0.339.md` e `VALIDATION-1.0.339.md`.
 
 ## Mapas offline 1.0.338 — MBTiles, seleção correta e downloads seguros
 

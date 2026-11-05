@@ -77,12 +77,113 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.341',
+          version: '1.0.351',
           current: true,
           changes: [
-            'APK 297: corrigido o erro do argumento transport na prévia Media3.',
-            'Dropdown de RTSP atualizado para initialValue no Flutter 3.44.',
-            'RTSP automático do VLC e outras funções preservados.',
+            'Integração correta sobre 1.0.350: todos os módulos posteriores preservados.',
+            'RTSP automático TCP/UDP com fallback por primeiro quadro e preferência local por câmera.',
+            'Cadastro com modo Automático/UDP/TCP; prévia Media3 mantém o contrato próprio.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.350',
+          current: false,
+          changes: [
+            'APK 294: corrigido aviso fatal do Flutter Analyzer no retorno condicional de bateria do mapa.',
+            'Leitura da telemetria preservada, com validação de bloco explícito no código.',
+            'Mapas offline, GPS, gravação, bússola e câmeras permanecem com o mesmo comportamento.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.349',
+          current: false,
+          changes: [
+            'Mapas interrompe o temporizador do HUD e a bússola quando não está visível ou o app sai do primeiro plano.',
+            'Leituras de bateria e rádio não redesenham a tela quando os valores permanecem iguais.',
+            'Políticas do HUD e identificação das câmeras separadas em serviços testáveis.',
+            'Navegação, gravação, mapas offline e fontes de câmera preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.348',
+          current: false,
+          changes: [
+            'Conexão de internet validada por HTTPS real, sem aceitar somente DNS.',
+            'GPS passivo mais econômico; gravação e navegação preservam alta precisão.',
+            'Recuperação de monitoramento protegida contra broadcasts externos.',
+            'HUD ocioso mais leve e GitHub Actions sem compilações automáticas redundantes.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.347',
+          current: false,
+          changes: [
+            'Seleção do visual do mapa organizada em três abas compactas: Aparência, Provedor e Base.',
+            'As opções são conferidas antes de aplicar, com resumo e botão OK.',
+            'A gestão de chaves e APIs permanece em Configurações, fora do seletor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.346',
+          current: false,
+          changes: [
+            'APK 291: testes de recuperação de incidentes atualizados para identificar a versão correta.',
+            'Classificação de falhas atuais e históricas preservada.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.345',
+          current: false,
+          changes: [
+            'Recuperação de diagnósticos melhorada após encerramentos inesperados e reabertura.',
+            'Encerramento em cache por pressão de memória é informativo e diferente de falhas graves.',
+            'Registro mantém a versão que sofreu o incidente e identifica o processo Android.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.344',
+          current: false,
+          changes: [
+            'APK 289: corrigida expectativa do teste Flutter da prévia de bicicleta após a unificação.',
+            'Planejar viagem permanece disponível antes de as etapas estarem calculadas.',
+            'Contratos preventivos verificam a ação de abrir o editor unificado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.343',
+          current: false,
+          changes: [
+            'Corrigidos dois diagnósticos fatais de flutter analyze no workflow APK 288.',
+            'Mapa: guarda da rota salva usa bloco if com chaves.',
+            'Planejamento Bike: lista de rota usa elemento anulável do Dart.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.342',
+          current: false,
+          changes: [
+            'Corrigida a verificação de metadados que bloqueava o workflow APK 287.',
+            'Teste de versão sincronizado automaticamente com pubspec.yaml.',
+            'Planejamento único e biblioteca compartilhada de cicloviagem preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.341',
+          current: false,
+          changes: [
+            'Planejamento de cicloviagem unificado entre Início e Mapas.',
+            'Uma biblioteca de viagens e preferências de pedal, etapas, horários e pausas compartilhadas.',
+            'Prévia abre direto no mapa; rotas antigas e exportação permanecem disponíveis.',
           ],
         ),
         SizedBox(height: 10),
@@ -90,9 +191,9 @@ class AllChangesPanel extends StatelessWidget {
           version: '1.0.340',
           current: false,
           changes: [
-            'APK 296: corrigido o teste de Novidades que impedia o build.',
-            'RTSP automático UDP/TCP e preferência por câmera preservados.',
-            'Histórico e metadados da versão sincronizados.',
+            'Verificação preventiva do APK corrigida para acompanhar as mensagens atuais de Novidades.',
+            'Catálogo de Novidades rejeita mensagens vazias e textos provisórios.',
+            'Preservadas as correções de mapas offline e MapLibre 3D da versão anterior.',
           ],
         ),
         SizedBox(height: 10),
@@ -100,15 +201,20 @@ class AllChangesPanel extends StatelessWidget {
           version: '1.0.339',
           current: false,
           changes: [
-            'RTSP automático alterna UDP/TCP quando não recebe o primeiro quadro.',
-            'Escolha de transporte e preferência memorizada por câmera.',
+            'Mapas MBTiles permanecem legíveis enquanto os tiles antigos terminam de carregar.',
+            'Exclusão de pacotes adiada até liberar as conexões SQLite abertas.',
+            'Mapa 3D: montagem Android revisada e reinicializações desnecessárias evitadas.',
           ],
         ),
         SizedBox(height: 10),
         _ReleaseCard(
           version: '1.0.338',
           current: false,
-          changes: ['Mapas offline e downloads mais confiáveis.'],
+          changes: [
+            'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
+            'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',
+            'Downloads com cancelamento e validação; atualização sem apagar o mapa existente antes da conclusão.',
+          ],
         ),
         SizedBox(height: 10),
         _ReleaseCard(
@@ -2928,12 +3034,113 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.341',
+          version: '1.0.351',
           current: true,
           changes: [
-            'APK 297: corrigido o erro do argumento transport na prévia Media3.',
-            'Dropdown de RTSP atualizado para initialValue no Flutter 3.44.',
-            'RTSP automático do VLC e outras funções preservados.',
+            'Integração correta sobre 1.0.350: todos os módulos posteriores preservados.',
+            'RTSP automático TCP/UDP com fallback por primeiro quadro e preferência local por câmera.',
+            'Cadastro com modo Automático/UDP/TCP; prévia Media3 mantém o contrato próprio.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.350',
+          current: false,
+          changes: [
+            'APK 294: corrigido aviso fatal do Flutter Analyzer no retorno condicional de bateria do mapa.',
+            'Leitura da telemetria preservada, com validação de bloco explícito no código.',
+            'Mapas offline, GPS, gravação, bússola e câmeras permanecem com o mesmo comportamento.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.349',
+          current: false,
+          changes: [
+            'Mapas interrompe o temporizador do HUD e a bússola quando não está visível ou o app sai do primeiro plano.',
+            'Leituras de bateria e rádio não redesenham a tela quando os valores permanecem iguais.',
+            'Políticas do HUD e identificação das câmeras separadas em serviços testáveis.',
+            'Navegação, gravação, mapas offline e fontes de câmera preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.348',
+          current: false,
+          changes: [
+            'Conexão de internet validada por HTTPS real, sem aceitar somente DNS.',
+            'GPS passivo mais econômico; gravação e navegação preservam alta precisão.',
+            'Recuperação de monitoramento protegida contra broadcasts externos.',
+            'HUD ocioso mais leve e GitHub Actions sem compilações automáticas redundantes.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.347',
+          current: false,
+          changes: [
+            'Seleção do visual do mapa organizada em três abas compactas: Aparência, Provedor e Base.',
+            'As opções são conferidas antes de aplicar, com resumo e botão OK.',
+            'A gestão de chaves e APIs permanece em Configurações, fora do seletor.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.346',
+          current: false,
+          changes: [
+            'APK 291: testes de recuperação de incidentes atualizados para identificar a versão correta.',
+            'Classificação de falhas atuais e históricas preservada.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.345',
+          current: false,
+          changes: [
+            'Recuperação de diagnósticos melhorada após encerramentos inesperados e reabertura.',
+            'Encerramento em cache por pressão de memória é informativo e diferente de falhas graves.',
+            'Registro mantém a versão que sofreu o incidente e identifica o processo Android.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.344',
+          current: false,
+          changes: [
+            'APK 289: corrigida expectativa do teste Flutter da prévia de bicicleta após a unificação.',
+            'Planejar viagem permanece disponível antes de as etapas estarem calculadas.',
+            'Contratos preventivos verificam a ação de abrir o editor unificado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.343',
+          current: false,
+          changes: [
+            'Corrigidos dois diagnósticos fatais de flutter analyze no workflow APK 288.',
+            'Mapa: guarda da rota salva usa bloco if com chaves.',
+            'Planejamento Bike: lista de rota usa elemento anulável do Dart.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.342',
+          current: false,
+          changes: [
+            'Corrigida a verificação de metadados que bloqueava o workflow APK 287.',
+            'Teste de versão sincronizado automaticamente com pubspec.yaml.',
+            'Planejamento único e biblioteca compartilhada de cicloviagem preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.341',
+          current: false,
+          changes: [
+            'Planejamento de cicloviagem unificado entre Início e Mapas.',
+            'Uma biblioteca de viagens e preferências de pedal, etapas, horários e pausas compartilhadas.',
+            'Prévia abre direto no mapa; rotas antigas e exportação permanecem disponíveis.',
           ],
         ),
         SizedBox(height: 10),
@@ -2941,9 +3148,9 @@ class _ChangesPanel extends StatelessWidget {
           version: '1.0.340',
           current: false,
           changes: [
-            'Corrigido o teste de Novidades que interrompia o workflow APK 296.',
-            'Transporte RTSP automático UDP/TCP preservado.',
-            'Metadados e histórico de mudanças sincronizados.',
+            'Verificação preventiva do APK corrigida para acompanhar as mensagens atuais de Novidades.',
+            'Catálogo de Novidades rejeita mensagens vazias e textos provisórios.',
+            'Preservadas as correções de mapas offline e MapLibre 3D da versão anterior.',
           ],
         ),
         SizedBox(height: 10),
@@ -2951,8 +3158,9 @@ class _ChangesPanel extends StatelessWidget {
           version: '1.0.339',
           current: false,
           changes: [
-            'Seleção de transporte RTSP automática, UDP ou TCP por câmera.',
-            'Fallback e memorização do transporte com vídeo confirmado.',
+            'Mapas MBTiles permanecem legíveis enquanto os tiles antigos terminam de carregar.',
+            'Exclusão de pacotes adiada até liberar as conexões SQLite abertas.',
+            'Mapa 3D: montagem Android revisada e reinicializações desnecessárias evitadas.',
           ],
         ),
         SizedBox(height: 10),
@@ -2960,8 +3168,9 @@ class _ChangesPanel extends StatelessWidget {
           version: '1.0.338',
           current: false,
           changes: [
-            'Modo Offline utiliza MBTiles mesmo com Google Maps configurado.',
-            'Cobertura offline e downloads mais seguros.',
+            'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
+            'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',
+            'Downloads com cancelamento e validação; atualização sem apagar o mapa existente antes da conclusão.',
           ],
         ),
         SizedBox(height: 10),

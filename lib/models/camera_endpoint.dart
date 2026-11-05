@@ -35,7 +35,7 @@ class CameraEndpoint {
   final bool countingEnabled;
   /// Modo de compatibilidade VLC para RTSP H.264/H.265 (mais CPU/bateria).
   final bool rtspSoftwareDecoding;
-  /// TCP intercalado por padrão; desmarcado permite o transporte VLC padrão (UDP).
+  /// Compatibilidade legada de TCP e configuração separada da prévia Media3.
   final bool rtspForceTcp;
   /// auto, tcp ou udp; configuracoes legadas preservam TCP.
   final String rtspTransport;

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
+import '../services/retained_mbtiles_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import '../core/adaptive_camera_layout.dart';
 import '../controllers/monitor_controller.dart';
@@ -85,7 +85,7 @@ class _MonitorScreenState extends State<MonitorScreen>
   final OfflineMapService _offlineMaps = OfflineMapService.instance;
   final RouteExplorerService _routeExplorer = RouteExplorerService.instance;
   final MapController _miniMapController = MapController();
-  MbTilesTileProvider? _miniOfflineTileProvider;
+  RetainedMbTilesTileProvider? _miniOfflineTileProvider;
   String? _miniOfflinePackageId;
   int _miniOfflineMinZoom = 0;
   int _miniOfflineMaxZoom = 19;
@@ -199,7 +199,7 @@ class _MonitorScreenState extends State<MonitorScreen>
     _mapRoute.removeListener(_onMapRouteChanged); _mapRoute.releaseLocationConsumer(this);
     _offlineMaps.removeListener(_onOfflineMapsChanged);
     _routeExplorer.removeListener(_refresh);
-    _miniOfflineTileProvider?.dispose();
+    _miniOfflineTileProvider?.release();
     _miniMapController.dispose();
     _controller.dispose();
     unawaited(SystemUiService.edgeToEdge());

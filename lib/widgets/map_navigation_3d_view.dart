@@ -978,7 +978,7 @@ class _MapNavigation3DViewState extends State<MapNavigation3DView> {
     try {
       final uri = Uri.parse(styleUrl);
       final request = await client.getUrl(uri).timeout(_stylePreflightTimeout);
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.341 map-3d-style');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.351 map-3d-style');
       final response = await request.close().timeout(_stylePreflightTimeout);
       if (styleUrl != _activeVectorStyleUrl) return;
       _styleHttpStatus = response.statusCode;
@@ -1170,10 +1170,12 @@ class _MapNavigation3DViewState extends State<MapNavigation3DView> {
         minPitch: 0,
         maxPitch: 60,
         gestures: ml.MapGestures.all(),
-        // Hybrid Composition evita depender do caminho Texture/ImageReader no
-        // renderer 3D e torna a falha de PlatformView distinguivel no diagnostico.
-        androidTextureMode: false,
-        androidMode: ml.AndroidPlatformViewMode.hc,
+        // Usar TextureView + TLHC evita a criacao pelo controlador
+        // ExpensiveAndroidViewController (HC puro), que falhou no Android 13
+        // durante a montagem/desmontagem das PlatformViews. TLHC tem fallback
+        // HC quando TextureView nao esta disponivel.
+        androidTextureMode: true,
+        androidMode: ml.AndroidPlatformViewMode.tlhc_hc,
         androidTranslucentTextureSurface: false,
         androidForegroundLoadColor: Colors.transparent,
       ),

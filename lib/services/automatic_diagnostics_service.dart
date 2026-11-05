@@ -160,17 +160,26 @@ class AutomaticDiagnosticsService with WidgetsBindingObserver {
     }
   }
 
+  /// A native worker may still be recovering the previous process at startup.
+  /// Retry a failed/empty read without holding the user on the splash screen.
   Future<Map<String, Object?>> capture() async {
-    try {
-      final raw = await _channel
-          .invokeMethod<String>('automaticDiagnostics')
-          .timeout(const Duration(seconds: 5));
-      final decoded = jsonDecode(raw ?? '{}');
-      if (decoded is Map) {
-        return decoded.map((key, value) => MapEntry(key.toString(), value));
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        final raw = await _channel
+            .invokeMethod<String>('automaticDiagnostics')
+            .timeout(const Duration(seconds: 3));
+        final decoded = jsonDecode(raw ?? '{}');
+        if (decoded is Map &&
+            decoded['pendingIncidents'] is List &&
+            decoded['recoveryReady'] != false) {
+          return decoded.map((key, value) => MapEntry(key.toString(), value));
+        }
+      } catch (_) {
+        // A startup timeout is not evidence that there were no incidents.
       }
-    } catch (_) {
-      /* Older native build / unsupported platform. */
+      if (attempt < 2) {
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+      }
     }
     return <String, Object?>{'available': false};
   }

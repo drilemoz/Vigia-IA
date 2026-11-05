@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
+import '../services/retained_mbtiles_tile_provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 
@@ -37,7 +37,10 @@ import '../services/bike_pressure_safety_service.dart';
 import '../services/bike_sensor_service.dart';
 import '../services/bike_ride_history_service.dart';
 import '../services/bike_trip_planner.dart';
-import '../services/bike_trip_schedule.dart';
+import '../services/bike_trip_editor_bridge.dart';
+import '../services/bike_trip_schedule_settings_service.dart';
+import '../services/planned_bike_trip_service.dart';
+import '../models/planned_bike_trip.dart';
 import '../services/saved_bike_route_service.dart';
 import '../services/camera_registry_service.dart';
 import '../services/location_tracking_service.dart';
@@ -66,10 +69,13 @@ import '../services/map_weather_service.dart';
 import '../services/map_voice_service.dart';
 import '../services/map_ux_policy.dart';
 import '../services/map_hud_presentation.dart';
+import '../services/map_hud_refresh_policy.dart';
+import '../services/map_camera_source_policy.dart';
 import '../services/map_view_policy.dart';
 import '../services/google_maps_key_service.dart';
 import '../services/map_view_settings_service.dart';
 import 'api_services_setup_screen.dart';
+import 'trip_planning_screen.dart';
 import '../services/gemini_map_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/offline_map_service.dart';
@@ -86,6 +92,7 @@ import '../widgets/map_poi_details_sheet.dart';
 import '../widgets/map_bike_approach_overlay.dart';
 import '../widgets/map_ai_status_overlay.dart';
 import '../widgets/map_centered_dialog.dart';
+import '../widgets/map_layer_picker_panel.dart';
 import '../widgets/map_radio_panel.dart';
 import '../widgets/map_telemetry_panel.dart';
 import '../widgets/map_hud_context_pill.dart';
@@ -133,6 +140,8 @@ class MapMonitoringScreen extends StatefulWidget {
     this.aiVoiceEnabledProvider,
     this.onAiVoiceChanged,
     this.initialPointOfInterest,
+    this.initialSavedRoute,
+    this.initialFocusPoint,
     this.workspaceVisible = true,
     this.workspaceHeaderHeight = 0,
     this.navigationSearchRequests,
@@ -156,6 +165,8 @@ class MapMonitoringScreen extends StatefulWidget {
   final bool Function()? aiVoiceEnabledProvider;
   final ValueChanged<bool>? onAiVoiceChanged;
   final RouteExplorerResult? initialPointOfInterest;
+  final SavedBikeRoute? initialSavedRoute;
+  final LatLng? initialFocusPoint;
   final bool workspaceVisible;
   /// Espaço reservado aos controles do cabeçalho sobre o mapa integrado.
   final double workspaceHeaderHeight;
@@ -227,19 +238,18 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   // Prévia independente: não inicia GPS contínuo, instruções ou gravação.
   MapNavigationTarget? _previewTarget;
   bool _previewCollapsed = false;
-  bool _tripLunchExplicit = false;
   List<MapCyclingRoute> _previewRoutes = const <MapCyclingRoute>[];
   int _previewIndex = 0;
   bool _previewLoading = false;
   int _previewSerial = 0;
   BikeTripPlan? _previewPlan;
-  TimeOfDay _tripDeparture = const TimeOfDay(hour: 7, minute: 0);
-  int _tripBreakEveryKm = 20;
-  int _tripBreakMinutes = 10;
-  int _tripLunchMinutes = 40;
+  List<MapDestinationSearchResult> _previewCandidates = const [];
+  PlannedBikeTrip? _sharedTripDraft;
+  String? _sharedTripRouteKey;
   MapNavigationProgress? _navigationProgress;
   BikeTripEstimate? _bikeTripEstimate;
   BikeTripPlan? _bikeTripPlan;
+  List<MapDestinationSearchResult> _bikeTripCandidates = const [];
   bool _bikeTripPlanLoading = false;
   bool _cyclingRouteLoading = false;
   int _cyclingRouteRequestSerial = 0;
@@ -284,9 +294,10 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   MapCameraSlotLayout _secondaryCameraLayout = const MapCameraSlotLayout(
     yFraction: 0.78,
   );
+  bool _appLifecycleResumed = true;
   bool _appActive = true;
 
-  MbTilesTileProvider? _offlineTileProvider;
+  RetainedMbTilesTileProvider? _offlineTileProvider;
   String? _offlineTilePackageId;
   int _offlineMinNativeZoom = 0;
   int _offlineMaxNativeZoom = 19;
@@ -301,6 +312,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   bool _followPosition = true;
   bool _mapReady = false;
+  bool _initialSavedRouteDisplayed = false;
   Size _mapViewportSize = Size.zero;
   bool _compactLandscape = false;
   MapConnectivityState _lastConnectivityState = MapConnectivityState.unknown;
@@ -348,21 +360,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     widget.navigationSearchRequests?.addListener(_onWorkspaceNavigationRequest);
     _selectedPoiId = widget.initialPointOfInterest?.id;
     unawaited(SystemUiService.edgeToEdge());
-    _hudTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      if (!mounted || !widget.workspaceVisible) return;
-      if (_routeState.navigationTarget != null &&
-          !MapTelemetryPolicy.isFresh(_routeState.current)) {
-        _navigationProgress = null; // Nunca manter manobra antiga como atual.
-      }
-      setState(() {}); // Revê a idade de GPS, bússola e clima sem rede.
-      _telemetryPanelTick.value += 1;
-      _hudFreshnessTicks += 1;
-      if (_hudFreshnessTicks % 3 == 0) {
-        unawaited(_refreshBattery());
-        unawaited(_refreshRadioStatus());
-      }
-    });
-    unawaited(_refreshBattery());
+    _appLifecycleResumed = WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    _appActive = _appLifecycleResumed && widget.workspaceVisible;
+    _startHudTimer();
+    if (_appActive) unawaited(_refreshBattery());
     unawaited(_initializeOfflineMaps());
     unawaited(_initializeGoogleMapsKey());
     unawaited(_initializeCameraOverlays());
@@ -371,6 +373,42 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     unawaited(_bikePressureSafety.initialize());
     _startCompassListener();
     unawaited(_initialize());
+  }
+
+  // Timer ativo apenas enquanto o mapa está visível e o Android em primeiro plano.
+  // Sem polling escondido em outras abas ou enquanto o usuário usa outro app.
+  void _startHudTimer() {
+    if (!_appActive || _hudTimer != null) return;
+    _hudTimer = Timer.periodic(
+      MapHudRefreshPolicy.tickInterval,
+      (_) => _onHudTick(),
+    );
+  }
+
+  void _stopHudTimer() {
+    _hudTimer?.cancel();
+    _hudTimer = null;
+  }
+
+  void _onHudTick() {
+    if (!mounted || !_appActive) return;
+    final decision = MapHudRefreshPolicy.evaluate(
+      tick: ++_hudFreshnessTicks,
+      gpsFresh: MapTelemetryPolicy.isFresh(_routeState.current),
+      navigating: _routeState.navigating,
+      recording: _routeState.recording,
+      hasTarget: _routeState.navigationTarget != null,
+      hasNavigationProgress: _navigationProgress != null,
+    );
+    if (decision.clearStaleProgress) {
+      _navigationProgress = null; // Nunca manter manobra antiga como atual.
+    }
+    if (decision.rebuildMap) setState(() {});
+    _telemetryPanelTick.value += 1;
+    if (decision.refreshDevice) {
+      unawaited(_refreshBattery());
+      unawaited(_refreshRadioStatus());
+    }
   }
 
   void _onWorkspaceNavigationRequest() {
@@ -385,6 +423,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   void _startCompassListener() {
+    if (!_appActive) return;
     _compassSubscription ??= _compass.readings().listen(
       _onCompassReading,
       onError: _onCompassError,
@@ -399,17 +438,19 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       widget.navigationSearchRequests?.addListener(_onWorkspaceNavigationRequest);
     }
     if (oldWidget.workspaceVisible == widget.workspaceVisible) return;
-    if (!widget.workspaceVisible) {
+    _appActive = _appLifecycleResumed && widget.workspaceVisible;
+    if (!_appActive) {
+      _stopHudTimer();
       _routeState.releaseLocationConsumer(this);
-      _appActive = false;
       final oldCompass = _compassSubscription;
       _compassSubscription = null;
       if (oldCompass != null) unawaited(oldCompass.cancel());
       unawaited(_primaryMapCamera?.suspend());
       unawaited(_secondaryMapCamera?.suspend());
     } else {
-      _appActive = true;
+      _startHudTimer();
       _startCompassListener();
+      unawaited(_refreshBattery());
       if (_routeState.initialized) {
         unawaited(_routeState.acquireLocationConsumer(this));
       }
@@ -433,7 +474,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     _bikePressureSafety.removeListener(_onBikeSensorChanged);
     _rideSettings.removeListener(_onRideSettingsChanged);
     widget.navigationSearchRequests?.removeListener(_onWorkspaceNavigationRequest);
-    _hudTimer?.cancel();
+    _stopHudTimer();
     _roadOverlay.dispose();
     if (_rideSettings.immersive) unawaited(SystemUiService.edgeToEdge());
     unawaited(BackgroundMonitorService.release('mapNavigation'));
@@ -442,7 +483,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     unawaited(_compassSubscription?.cancel());
     _compassPanelTick.dispose();
     _telemetryPanelTick.dispose();
-    _offlineTileProvider?.dispose();
+    _offlineTileProvider?.release();
     _navigationVoice.resetRoute();
     _mapController.dispose();
     _googleMapController = null;
@@ -490,14 +531,26 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   Future<void> _refreshBattery() async {
-    final telemetry = await _native.readDeviceTelemetry();
-    if (mounted) setState(() => _phoneBattery = telemetry.batteryPercent);
+    if (!_appActive) return;
+    try {
+      final telemetry = await _native.readDeviceTelemetry();
+      if (!mounted ||
+          !_appActive ||
+          telemetry.batteryPercent == _phoneBattery) {
+        return;
+      }
+      setState(() => _phoneBattery = telemetry.batteryPercent);
+    } catch (_) {
+      // Telemetria opcional: ausência de leitura não derruba o mapa.
+    }
   }
 
   Future<void> _refreshRadioStatus() async {
+    if (!_appActive) return;
     try {
       final state = await MapRadioService.status();
-      if (mounted) setState(() => _radioState = state);
+      if (!mounted || !_appActive || state == _radioState) return;
+      setState(() => _radioState = state);
     } catch (_) {}
   }
 
@@ -559,14 +612,26 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final active = state == AppLifecycleState.resumed;
-    _appActive = active && widget.workspaceVisible;
+    _appLifecycleResumed = state == AppLifecycleState.resumed;
+    _appActive = _appLifecycleResumed && widget.workspaceVisible;
     if (_appActive) {
+      _startHudTimer();
+      _startCompassListener();
+      // Retorno após pausa: o mapa pode ter liberado a assinatura GPS passiva.
+      // O Set de consumidores no serviço torna a reaquisição idempotente.
+      if (_routeState.initialized) {
+        unawaited(_routeState.acquireLocationConsumer(this));
+      }
       unawaited(_resumeVisibleInternalCameras());
+      unawaited(_refreshBattery());
       unawaited(_refreshRadioStatus());
       unawaited(_connectivity.checkNow(force: true));
       return;
     }
+    _stopHudTimer();
+    final oldCompass = _compassSubscription;
+    _compassSubscription = null;
+    if (oldCompass != null) unawaited(oldCompass.cancel());
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
@@ -601,36 +666,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   }
 
   VideoSourceConfig _sourceForEndpoint(CameraEndpoint camera) =>
-      switch (camera.type) {
-        CameraEndpointType.local => VideoSourceConfig(
-            type: VideoSourceType.localCamera,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-        CameraEndpointType.rtsp => VideoSourceConfig(
-            type: VideoSourceType.rtsp,
-            rtspUrl: camera.address,
-            rtspSoftwareDecoding: camera.rtspSoftwareDecoding,
-            rtspForceTcp: camera.rtspForceTcp,
-          rtspTransport: camera.rtspTransport,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-        CameraEndpointType.remotePhone => VideoSourceConfig(
-            type: VideoSourceType.remotePhone,
-            remoteBaseUrl: camera.address,
-            remoteAccessKey: camera.accessKey,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-        CameraEndpointType.esp32 => VideoSourceConfig(
-            type: VideoSourceType.esp32,
-            remoteBaseUrl: camera.address,
-            remoteAccessKey: camera.accessKey,
-            displayName: camera.name,
-            cameraId: camera.id,
-          ),
-      };
+      MapCameraSourcePolicy.fromEndpoint(camera);
 
   VideoSourceConfig get _localBackSource => const VideoSourceConfig(
         type: VideoSourceType.localCamera,
@@ -646,26 +682,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         analysisInterval: Duration(milliseconds: 800),
       );
 
-  bool _sameCameraSource(VideoSourceConfig? first, VideoSourceConfig? second) {
-    if (first == null || second == null || first.type != second.type) {
-      return false;
-    }
-    if (first.type == VideoSourceType.localCamera) {
-      if (first.isFrontCameraTest || second.isFrontCameraTest) {
-        return first.isFrontCameraTest && second.isFrontCameraTest;
-      }
-      return true;
-    }
-    if (first.cameraId != null && second.cameraId != null) {
-      return first.cameraId == second.cameraId;
-    }
-    return switch (first.type) {
-      VideoSourceType.localCamera => true,
-      VideoSourceType.rtsp => first.rtspUrl == second.rtspUrl,
-      VideoSourceType.remotePhone => first.remoteBaseUrl == second.remoteBaseUrl,
-      VideoSourceType.esp32 => first.remoteBaseUrl == second.remoteBaseUrl,
-    };
-  }
+  bool _sameCameraSource(VideoSourceConfig? first, VideoSourceConfig? second) =>
+      MapCameraSourcePolicy.representsSameSource(first, second);
 
   VideoSourceConfig? _activeCameraConfig(bool secondary) {
     if (secondary) {
@@ -1197,9 +1215,13 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
 
   void _onOfflineMapsChanged() {
     if (!mounted) return;
-    _navigation3dRendererReady = false;
-    _navigation3dRendererFailed = false;
     final oldMode = _lastObservedOfflineMode;
+    // Apenas uma troca real de modo invalida a montagem 3D. Progresso de
+    // download, mudança de pacote e créditos Stadia também notificam listeners.
+    if (oldMode != _offlineMaps.mode) {
+      _navigation3dRendererReady = false;
+      _navigation3dRendererFailed = false;
+    }
     final resumedOnline = oldMode == OfflineMapMode.offline &&
         _offlineMaps.mode != OfflineMapMode.offline;
     final rendererChanged =
@@ -1231,21 +1253,23 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       setState(() {});
       return;
     }
-    _offlineTileProvider?.dispose();
+    _offlineTileProvider?.release();
     _offlineTileProvider = null;
     _offlineTilePackageId = active?.id;
     _offlineMinNativeZoom = 0;
     _offlineMaxNativeZoom = 19;
     if (active != null) {
+      RetainedMbTilesTileProvider? provider;
       try {
-        final provider = MbTilesTileProvider.fromPath(path: active.path);
-        final metadata = provider.mbtiles.getMetadata();
+        provider = RetainedMbTilesTileProvider.fromPath(path: active.path);
+        final metadata = provider.delegate.mbtiles.getMetadata();
         final minZoom = (metadata.minZoom ?? 0).floor().clamp(0, 22);
         final maxZoom = (metadata.maxZoom ?? 19).ceil().clamp(minZoom, 22);
         _offlineMinNativeZoom = minZoom.toInt();
         _offlineMaxNativeZoom = maxZoom.toInt();
         _offlineTileProvider = provider;
       } catch (error) {
+        provider?.release();
         MapDiagnosticsService.instance.recordOfflineOpenFailure();
         debugPrint('Falha ao abrir MBTiles (${error.runtimeType}).');
       }
@@ -2046,14 +2070,40 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     final target = _previewTarget;
     if (target == null || _previewRoutes.isEmpty) return;
     try {
-      await _savedBikeRoutes.save(SavedBikeRoute(
+      final snapshot = SavedBikeRoute(
         target: target,
         routes: List<MapCyclingRoute>.of(_previewRoutes),
         selectedIndex: _previewIndex,
-      ));
+      );
+      // Mantém a última prévia antiga para migração e abertura em Mapas.
+      await _savedBikeRoutes.save(snapshot);
+      if (target.travelMode == MapTravelMode.bicycle) {
+        await BikeTripScheduleSettingsService.instance.initialize();
+        final schedule = BikeTripScheduleSettingsService.instance.value;
+        final routeKey = _tripRouteKey(target, snapshot.routes);
+        final old = _sharedTripRouteKey == routeKey ? _sharedTripDraft : null;
+        final trip = BikeTripEditorBridge.fromMapRoute(
+          saved: snapshot,
+          preferences: _effectiveBikeTravelPreferences,
+          departureMinute: old?.departureMinute ?? schedule.departureMinute,
+          breakEveryKm: old?.breakEveryKm ?? schedule.breakEveryKm,
+          breakMinutes: old?.breakMinutes ?? schedule.breakMinutes,
+          lunchMinutes: old?.lunchMinutes ?? schedule.lunchMinutes,
+          forceLunch: old?.forceLunch ?? schedule.forceLunch,
+          id: old?.id,
+        );
+        final stored = trip.copyWith(
+          places: (old != null && old.places.isNotEmpty) ? old.places : _previewCandidates,
+        );
+        await const PlannedBikeTripService().upsert(stored);
+        _sharedTripRouteKey = routeKey;
+        _sharedTripDraft = stored;
+      }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
-        'Prévia salva neste aparelho. Abra-a em Vigia IA > Rota salva.',
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
+        target.travelMode == MapTravelMode.bicycle
+          ? 'Trajeto salvo na biblioteca de Planejamento e em Rota salva.'
+          : 'Prévia salva neste aparelho, em Rota salva.',
       )));
     } catch (_) {
       if (!mounted) return;
@@ -2078,6 +2128,12 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       )));
       return;
     }
+    _displaySavedRoute(saved);
+  }
+
+  /// Abre a mesma prévia sem roteamento online e sem iniciar a navegação.
+  void _displaySavedRoute(SavedBikeRoute saved) {
+    if (!mounted || _routeState.navigationTarget != null) return;
     final serial = ++_previewSerial;
     setState(() {
       _previewTarget = saved.target;
@@ -2085,16 +2141,49 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _previewRoutes = saved.routes;
       _previewIndex = saved.selectedIndex;
       _previewPlan = null;
+      _previewCandidates = const [];
       _previewLoading = false;
       _selectedMapLocation = null;
       _selectedPoiId = null;
       _followPosition = false;
     });
-    _fitCyclingRoute(saved.routes[saved.selectedIndex].points);
+    final focus = widget.initialFocusPoint;
+    if (focus == null) {
+      _fitCyclingRoute(saved.routes[saved.selectedIndex].points);
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_mapReady) return;
+        _focusTripStop(focus);
+      });
+    }
     if (saved.target.travelMode == MapTravelMode.bicycle) {
       unawaited(_refreshPreviewPlan(
         saved.target, saved.routes[saved.selectedIndex], serial));
     }
+  }
+
+  void _focusTripStop(LatLng point) {
+    if (!mounted || !_mapReady) return;
+    setState(() => _followPosition = false);
+    if (_usingGoogleMap) {
+      unawaited(_focusGooglePoint(point, zoom: 14));
+    } else {
+      try {
+        _mapController.move(point, math.max(_visibleMapZoom, 13.5));
+      } catch (_) { /* Mapa foi desmontado durante a navegação. */ }
+    }
+  }
+
+  void _tryOpenInitialSavedRoute() {
+    if (_initialSavedRouteDisplayed || !_mapReady ||
+        widget.initialSavedRoute == null) {
+      return;
+    }
+    _initialSavedRouteDisplayed = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _displaySavedRoute(widget.initialSavedRoute!);
+    });
   }
 
   Future<void> _previewRouteToSearchResult(MapDestinationSearchResult item) async {
@@ -2139,6 +2228,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _previewLoading = true;
       _previewRoutes = const <MapCyclingRoute>[];
       _previewPlan = null;
+      _previewCandidates = const [];
       _selectedMapLocation = null;
       _selectedPoiId = null;
       _followPosition = false;
@@ -2197,7 +2287,10 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
         destinationLabel: target.label,
         candidates: available,
       );
-      setState(() => _previewPlan = plan);
+      setState(() {
+        _previewPlan = plan;
+        _previewCandidates = available;
+      });
     }
     apply(candidates);
     if (estimate.dayCount <= 1) return;
@@ -2226,6 +2319,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     setState(() {
       _previewIndex = index;
       _previewPlan = null;
+      _previewCandidates = const [];
     });
     _fitCyclingRoute(route.points);
     final target = _previewTarget;
@@ -2297,6 +2391,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _previewTarget = null;
       _previewRoutes = const <MapCyclingRoute>[];
       _previewPlan = null;
+      _previewCandidates = const [];
       _previewLoading = false;
       _previewIndex = 0;
     });
@@ -2317,6 +2412,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       _previewTarget = null;
       _previewRoutes = const <MapCyclingRoute>[];
       _previewPlan = null;
+      _previewCandidates = const [];
       _previewLoading = false;
       _lastTravelMode = target.travelMode;
       _cyclingRouteAlternatives = routes;
@@ -2784,6 +2880,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     setState(() {
       _bikeTripEstimate = plan.estimate;
       _bikeTripPlan = plan;
+      _bikeTripCandidates = candidates;
       _bikeTripPlanLoading = false;
     });
   }
@@ -2930,196 +3027,132 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
   }
 
+  /// Uma única tela e uma única biblioteca para o planejamento Bike.
+  /// Em Mapas o editor recebe a rota já calculada e devolve a seleção sem
+  /// iniciar outra navegação nem consultar a rede.
   Future<void> _showBikeTripPlan() async {
-    final plan = _previewTarget != null ? _previewPlan : _bikeTripPlan;
-    if (plan == null || plan.days.isEmpty || !mounted) return;
-    await showMapCenteredDialog<void>(
-      context: context,
-      maxWidth: 620,
-      maxHeightFactor: 0.83,
-      barrierLabel: 'Fechar plano da cicloviagem',
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetContext, setDialogState) {
-          final departureMinute = _tripDeparture.hour * 60 + _tripDeparture.minute;
-          final scheme = Theme.of(sheetContext).colorScheme;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(children: [
-                  const Expanded(child: Text('Plano da cicloviagem',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
-                  IconButton(tooltip: 'Fechar',
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    icon: const Icon(Icons.close_rounded)),
-                ]),
-                Text(
-                  '${plan.estimate.distanceKm.toStringAsFixed(1)} km · '
-                  '${_formatTripDuration(plan.estimate.ridingDuration)} pedalando · '
-                  '${plan.estimate.dayCount} dia(s) · '
-                  '${plan.estimate.preferences.averageSpeedKmh.toStringAsFixed(1)} km/h',
-                  style: TextStyle(color: scheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: 12),
-                Row(children: [
-                  const Icon(Icons.schedule_rounded, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text('Saída diária: ${_tripDeparture.format(sheetContext)}',
-                      style: const TextStyle(fontWeight: FontWeight.w700))),
-                  TextButton.icon(
-                    onPressed: () async {
-                      final selected = await showTimePicker(
-                        context: sheetContext, initialTime: _tripDeparture);
-                      if (selected != null && sheetContext.mounted) {
-                        setDialogState(() => _tripDeparture = selected);
-                      }
-                    },
-                    icon: const Icon(Icons.edit_calendar_rounded, size: 17),
-                    label: const Text('Alterar'),
-                  ),
-                ]),
-                ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(horizontal: 10),
-                  childrenPadding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-                  backgroundColor: Colors.transparent,
-                  collapsedBackgroundColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(color: scheme.outlineVariant)),
-                  collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(color: scheme.outlineVariant)),
-                  initiallyExpanded: false,
-                  title: const Text('Ajustar pausas e refeições',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                  subtitle: Text('A cada $_tripBreakEveryKm km · '
-                      '$_tripBreakMinutes min · '
-                      '${_tripLunchExplicit ? 'Almoço $_tripLunchMinutes min' : 'Almoço automático'}',
-                      style: Theme.of(sheetContext).textTheme.bodySmall),
-                  children: [
-                    const Align(alignment: Alignment.centerLeft,
-                        child: Text('Intervalo das pausas',
-                            style: TextStyle(fontWeight: FontWeight.w700))),
-                    Wrap(spacing: 7, runSpacing: 3, children: [
-                      for (final km in [15, 20, 30])
-                        ChoiceChip(label: Text('$km km'),
-                            selected: _tripBreakEveryKm == km,
-                            onSelected: (_) => setDialogState(() => _tripBreakEveryKm = km)),
-                    ]),
-                    const SizedBox(height: 6),
-                    const Align(alignment: Alignment.centerLeft,
-                        child: Text('Duração de cada pausa',
-                            style: TextStyle(fontWeight: FontWeight.w700))),
-                    Wrap(spacing: 7, runSpacing: 3, children: [
-                      for (final minutes in [5, 10, 15, 20])
-                        ChoiceChip(label: Text('$minutes min'),
-                            selected: _tripBreakMinutes == minutes,
-                            onSelected: (_) => setDialogState(() => _tripBreakMinutes = minutes)),
-                    ]),
-                    const SizedBox(height: 6),
-                    const Align(alignment: Alignment.centerLeft,
-                        child: Text('Almoço',
-                            style: TextStyle(fontWeight: FontWeight.w700))),
-                    Wrap(spacing: 7, runSpacing: 3, children: [
-                      ChoiceChip(label: const Text('Automático'),
-                        selected: !_tripLunchExplicit,
-                        onSelected: (_) => setDialogState(() => _tripLunchExplicit = false)),
-                      for (final minutes in [0, 30, 40, 60])
-                        ChoiceChip(label: Text(minutes == 0 ? 'Sem almoço' : '$minutes min'),
-                            selected: _tripLunchExplicit && _tripLunchMinutes == minutes,
-                            onSelected: (_) => setDialogState(() {
-                              _tripLunchMinutes = minutes;
-                              _tripLunchExplicit = true;
-                            })),
-                    ]),
-                    const SizedBox(height: 5),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                for (final day in plan.days) ...[
-                  Builder(builder: (context) {
-                    final schedule = BikeTripSchedule.forDay(
-                      day: day,
-                      departureMinute: departureMinute,
-                      breakEveryKm: _tripBreakEveryKm,
-                      breakDurationMinutes: _tripBreakMinutes,
-                      lunchDurationMinutes: _tripLunchMinutes,
-                      forceLunch: _tripLunchExplicit,
-                    );
-                    final km = day.distanceMeters / 1000;
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 7),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Row(children: [
-                            CircleAvatar(radius: 18, child: Text('${day.day}')),
-                            const SizedBox(width: 10),
-                            Expanded(child: Text(
-                              'Dia ${day.day} · ${km.toStringAsFixed(1)} km · '
-                              '${_formatTripDuration(day.ridingDuration)} pedalando',
-                              style: const TextStyle(fontWeight: FontWeight.w900),
-                            )),
-                            IconButton(
-                              tooltip: 'Ver parada no mapa',
-                              icon: const Icon(Icons.map_outlined),
-                              onPressed: () {
-                                Navigator.of(sheetContext).pop();
-                                final point = LatLng(day.stopLatitude, day.stopLongitude);
-                                if (_usingGoogleMap) {
-                                  unawaited(_focusGooglePoint(point, zoom: 14));
-                                } else {
-                                  try {
-                                    _mapController.move(
-                                      point, math.max(_visibleMapZoom, 12.5));
-                                  } catch (_) {}
-                                }
-                                setState(() => _followPosition = false);
-                              },
-                            ),
-                          ]),
-                          const SizedBox(height: 5),
-                          Text('${day.stopLabel} · ${day.stopKind}'),
-                          const SizedBox(height: 5),
-                          Text(
-                            'Saída ${BikeTripDaySchedule.formatMinute(schedule.departureMinute)}  ·  '
-                            'Chegada ${BikeTripDaySchedule.formatMinute(schedule.arrivalMinute)}',
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                          Text(
-                            '${schedule.breakCount} pausa(s) (${schedule.breakMinutes} min)'
-                            '${schedule.lunchMinutes > 0 ? ' · almoço ${schedule.lunchMinutes} min' : ''}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          Text(
-                            day.usesKnownPlace && day.routeProximityMeters != null
-                                ? 'Localidade a ${day.routeProximityMeters!.round()} m em linha reta do traçado; acesso por vias e serviços não verificados.'
-                                : day.usesKnownPlace
-                                    ? 'Localidade identificada; serviços e acesso não verificados.'
-                                    : 'Ponto aproximado sobre a rota; sem serviços confirmados.',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ]),
-                      ),
-                    );
-                  }),
-                ],
-                const SizedBox(height: 4),
-                Text(
-                  'Horários estimados para cada dia, com a mesma hora de saída. '
-                  'Pausas são hipóteses, não reservas. Não inclui vento, subidas, desvios '
-                  'até serviços, tráfego ou tempo de montagem do acampamento. '
-                  'Confirme água, alimentação, hospedagem e segurança antes de partir.',
-                  style: Theme.of(sheetContext).textTheme.bodySmall,
-                ),
-              ],
+    final preview = _previewTarget != null && _previewRoutes.isNotEmpty;
+    final target = preview ? _previewTarget : _routeState.navigationTarget;
+    if (target == null || target.travelMode != MapTravelMode.bicycle) return;
+    final routes = preview
+        ? _previewRoutes
+        : _cyclingRouteAlternatives.isNotEmpty
+            ? _cyclingRouteAlternatives
+            : <MapCyclingRoute>[?_cyclingRoute];
+    if (routes.isEmpty) return;
+    final selected = preview ? _previewIndex : _selectedCyclingRouteIndex;
+    if (selected < 0 || selected >= routes.length) return;
+    final serial = _previewSerial;
+    final routeKey = _tripRouteKey(target, routes);
+    try {
+      await BikeTripScheduleSettingsService.instance.initialize();
+      if (!mounted) return;
+      final schedule = BikeTripScheduleSettingsService.instance.value;
+      final existing = _sharedTripRouteKey == routeKey
+          ? _sharedTripDraft : null;
+      final draft = BikeTripEditorBridge.fromMapRoute(
+        saved: SavedBikeRoute(target: target, routes: routes,
+          selectedIndex: selected),
+        preferences: _effectiveBikeTravelPreferences,
+        departureMinute: existing?.departureMinute ?? schedule.departureMinute,
+        breakEveryKm: existing?.breakEveryKm ?? schedule.breakEveryKm,
+        breakMinutes: existing?.breakMinutes ?? schedule.breakMinutes,
+        lunchMinutes: existing?.lunchMinutes ?? schedule.lunchMinutes,
+        forceLunch: existing?.forceLunch ?? schedule.forceLunch,
+        id: existing?.id,
+      );
+      final routeCandidates = preview ? _previewCandidates : _bikeTripCandidates;
+      final result = await Navigator.of(context).push<BikeTripEditorResult>(
+        MaterialPageRoute<BikeTripEditorResult>(
+          builder: (_) => TripPlanningScreen(
+            initialTrip: draft.copyWith(places:
+              (existing != null && existing.places.isNotEmpty)
+                  ? existing.places : routeCandidates),
+            returnToMap: true,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      final edited = result?.trip;
+      _sharedTripRouteKey = routeKey;
+      _sharedTripDraft = edited ?? draft;
+      if (edited == null) {
+        // Salvar e voltar com o Android também deve preservar o que foi salvo.
+        try {
+          final stored = await const PlannedBikeTripService().load();
+          for (final item in stored) {
+            if (item.id == draft.id) {
+              _sharedTripDraft = item;
+              break;
+            }
+          }
+        } catch (_) { /* A biblioteca anterior permanece intocada. */ }
+        return;
+      }
+      await _mapViewSettings.setBikeUseHistoricalSpeed(false);
+      await _mapViewSettings.setBikeTravelPreferences(BikeTravelPreferences(
+        averageSpeedKmh: edited.averageSpeedKmh,
+        ridingHoursPerDay: edited.ridingHoursPerDay,
+        balanceDays: edited.balanceDays,
+      ));
+      if (!mounted) return;
+      if (preview && _previewSerial == serial &&
+          _sameNavigationTarget(_previewTarget, target)) {
+        // O usuário pode trocar origem/destino no editor. A prévia deve usar
+        // o novo destino em vez de manter um pino de outra viagem.
+        final editedTarget = MapNavigationTarget(
+          latitude: edited.destination.latitude,
+          longitude: edited.destination.longitude,
+          label: edited.destination.title,
+          startedAt: DateTime.now(),
+          travelMode: MapTravelMode.bicycle,
+        );
+        ++_previewSerial; // Rejeita buscas antigas de POIs/etapas.
+        setState(() {
+          _previewTarget = editedTarget;
+          _previewRoutes = edited.routes;
+          _previewIndex = edited.selectedIndex;
+          _previewPlan = _bikeTripPlanner.buildPlan(
+            routePoints: edited.selectedRoute.points,
+            routeDistanceMeters: edited.selectedRoute.distanceMeters,
+            preferences: BikeTravelPreferences(
+              averageSpeedKmh: edited.averageSpeedKmh,
+              ridingHoursPerDay: edited.ridingHoursPerDay,
+              balanceDays: edited.balanceDays,
             ),
+            destinationLabel: edited.destination.title,
+            candidates: edited.places,
           );
-        },
-      ),
-    );
+        });
+        _sharedTripRouteKey = _tripRouteKey(editedTarget, edited.routes);
+        _fitCyclingRoute(edited.selectedRoute.points);
+        final focus = result?.focusPoint;
+        if (focus != null) _focusTripStop(focus);
+      } else if (!preview &&
+          _sameNavigationTarget(_routeState.navigationTarget, target)) {
+        // Não alterar automaticamente a geometria da navegação em andamento.
+        final active = _cyclingRoute;
+        if (active != null) {
+          unawaited(_refreshBikeTripPlan(route: active, target: target));
+        }
+        final focus = result?.focusPoint;
+        if (focus != null) _focusTripStop(focus);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Não foi possível abrir o planejamento. A rota atual foi preservada.'),
+      ));
+    }
+  }
+
+  String _tripRouteKey(MapNavigationTarget target, List<MapCyclingRoute> routes) {
+    final first = routes.first.points.first;
+    return '${target.latitude.toStringAsFixed(5)}:'
+        '${target.longitude.toStringAsFixed(5)}:'
+        '${first.latitude.toStringAsFixed(5)}:'
+        '${first.longitude.toStringAsFixed(5)}:'
+        '${routes.length}:${routes.first.distanceMeters.round()}';
   }
 
   void _fitCyclingRoutes(List<MapCyclingRoute> routes) {
@@ -4558,31 +4591,6 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     );
   }
 
-  IconData _mapAppearanceIcon(MapAppearancePreset preset) => switch (preset) {
-        MapAppearancePreset.standard => Icons.light_mode_outlined,
-        MapAppearancePreset.dark => Icons.dark_mode_outlined,
-        MapAppearancePreset.highContrast => Icons.contrast_rounded,
-        MapAppearancePreset.bikeTravel => Icons.directions_bike_rounded,
-      };
-
-  Future<void> _selectMapAppearance(MapAppearancePreset preset) async {
-    await _mapViewSettings.setAppearancePreset(preset);
-    if (!mounted) return;
-    setState(() {
-      _navigation3dRendererReady = false;
-      _navigation3dRendererFailed = false;
-    });
-  }
-
-  Future<void> _selectMapAppearanceMode(MapAppearanceMode mode) async {
-    await _mapViewSettings.setAppearanceMode(mode);
-    if (!mounted) return;
-    setState(() {
-      _navigation3dRendererReady = false;
-      _navigation3dRendererFailed = false;
-    });
-  }
-
   _OnlineMapLayerSpec get _onlineMapLayerSpec {
     final selected = _mapViewSettings.stylePreset;
     switch (selected) {
@@ -4653,273 +4661,67 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
   Future<void> _showLayerPicker() async {
     await _offlineMaps.initialize();
     if (!mounted) return;
-    await showMapCenteredDialog<void>(
+    final selected = await showMapCenteredDialog<MapLayerPickerSelection>(
       context: context,
-      maxWidth: 560,
-      maxHeightFactor: 0.86,
-      barrierLabel: 'Fechar aparência e camadas',
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetContext, setSheetState) {
-          final selectedLayer = _mapViewSettings.stylePreset;
-          final resolvedAppearance = _resolvedMapAppearance(
-            Theme.of(sheetContext).brightness,
-          );
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'Aparência e camadas',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: 'Fechar',
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          icon: const Icon(Icons.close_rounded),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
-                    child: Text(
-                      'Tema ativo: ${resolvedAppearance.label}',
-                      style: Theme.of(sheetContext).textTheme.bodySmall,
-                    ),
-                  ),
-                  ExpansionTile(
-                    key: const ValueKey('map-appearance-section'),
-                    initiallyExpanded: true,
-                    leading: const Icon(Icons.palette_outlined),
-                    title: const Text('Aparência',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text('Tema: ${resolvedAppearance.label}'),
-                    children: [
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      for (final preset in MapAppearancePreset.values)
-                        ChoiceChip(
-                          avatar: Icon(_mapAppearanceIcon(preset), size: 17),
-                          label: Text(preset.label),
-                          selected: _mapViewSettings.appearanceMode ==
-                                  MapAppearanceMode.manual &&
-                              _mapViewSettings.appearancePreset == preset,
-                          showCheckmark: false,
-                          visualDensity: VisualDensity.compact,
-                          onSelected: (_) => unawaited(
-                            _selectMapAppearance(preset).then((_) {
-                              if (sheetContext.mounted) setSheetState(() {});
-                            }),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      'Modo automático',
-                      style: TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SegmentedButton<MapAppearanceMode>(
-                    segments: const [
-                      ButtonSegment(
-                        value: MapAppearanceMode.manual,
-                        icon: Icon(Icons.tune_rounded, size: 16),
-                        label: Text('Manual'),
-                      ),
-                      ButtonSegment(
-                        value: MapAppearanceMode.followSystem,
-                        icon: Icon(Icons.phone_android_rounded, size: 16),
-                        label: Text('Sistema'),
-                      ),
-                      ButtonSegment(
-                        value: MapAppearanceMode.dayNight,
-                        icon: Icon(Icons.brightness_6_outlined, size: 16),
-                        label: Text('Dia/noite'),
-                      ),
-                    ],
-                    selected: <MapAppearanceMode>{
-                      _mapViewSettings.appearanceMode,
-                    },
-                    showSelectedIcon: false,
-                    onSelectionChanged: (selection) => unawaited(
-                      _selectMapAppearanceMode(selection.first).then((_) {
-                        if (sheetContext.mounted) setSheetState(() {});
-                      }),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 6, 8, 2),
-                    child: Text(
-                      _mapViewSettings.appearanceMode == MapAppearanceMode.dayNight
-                          ? 'Dia/noite usa somente o horário local do aparelho; não depende da internet.'
-                          : _mapViewSettings.appearanceMode == MapAppearanceMode.followSystem
-                              ? 'Segue o tema claro/escuro configurado no Android.'
-                              : _mapViewSettings.appearancePreset.description,
-                      style: Theme.of(sheetContext).textTheme.bodySmall,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 3, 8, 0),
-                    child: Text(
-                      'No 3D, o tema troca o style vetorial de fundo, água, parques, vias, prédios, nomes e limites. No 2D, adapta os tiles e mantém rota e posição com contraste próprio.',
-                      style: Theme.of(sheetContext).textTheme.bodySmall,
-                    ),
-                  ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    key: const ValueKey('map-provider-section'),
-                    leading: const Icon(Icons.cloud_outlined),
-                    title: const Text('Provedor do mapa',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text(_mapViewSettings.provider.label),
-                    children: [
-                  const SizedBox(height: 2),
-                  RadioGroup<MapProvider>(
-                    groupValue: _mapViewSettings.provider,
-                    onChanged: (value) {
-                      if (value == null) return;
-                      Navigator.of(sheetContext).pop();
-                      if (value == MapProvider.google &&
-                          !GoogleMapsKeyService.instance.hasKey) {
-                        unawaited(_promptGoogleMapsKey());
-                        return;
-                      }
-                      unawaited(_mapViewSettings.setProvider(value).then((_) {
-                        if (mounted) setState(() {});
-                      }));
-                    },
-                    child: Column(
-                      children: [
-                        for (final provider in MapProvider.values)
-                          RadioListTile<MapProvider>(
-                            dense: true,
-                            value: provider,
-                            title: Text(provider.label),
-                            subtitle: Text(provider == MapProvider.google
-                                ? 'Google Maps: normal, satélite, híbrido e terreno.'
-                                : 'Mantém o renderer atual, incluindo mapas offline.'),
-                          ),
-                      ],
-                    ),
-                  ),
-                  ListTile(
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    leading: const Icon(Icons.key_rounded),
-                    title: const Text('Serviços e APIs'),
-                    subtitle: const Text('Configure Gemini, Google Maps e demais serviços na central.'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      unawaited(Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const ApiServicesSetupScreen(),
-                        ),
-                      ).then((_) async {
-                        await GoogleMapsKeyService.instance.refresh();
-                        if (mounted) setState(() {});
-                      }));
-                    },
-                  ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    key: const ValueKey('map-base-section'),
-                    leading: const Icon(Icons.layers_outlined),
-                    title: const Text('Base do mapa',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text(selectedLayer.label),
-                    children: [
-                  const SizedBox(height: 2),
-                  for (final style in MapStylePreset.values)
-                    ListTile(
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      leading: Semantics(
-                        label: 'Amostra ilustrativa do estilo ${style.label}',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(7),
-                          child: CustomPaint(
-                            size: const Size(58, 42),
-                            painter: _MapStyleThumbnailPainter(style),
-                          ),
-                        ),
-                      ),
-                      title: Text(style.label),
-                      subtitle: Text(
-                        style == MapStylePreset.bikeTravel &&
-                                !_offlineMaps.hasStadiaApiKey
-                            ? '${style.description} Usando OSM até configurar Stadia.'
-                            : style.description,
-                      ),
-                      trailing: style.needsStadiaKey &&
-                              !_usingGoogleMap &&
-                              !_offlineMaps.hasStadiaApiKey
-                          ? const Icon(Icons.lock_outline_rounded)
-                          : selectedLayer == style
-                              ? const Icon(Icons.check_circle_rounded)
-                              : null,
-                      selected: selectedLayer == style,
-                      enabled: !style.needsStadiaKey ||
-                          _usingGoogleMap ||
-                          _offlineMaps.hasStadiaApiKey,
-                      onTap: !style.needsStadiaKey ||
-                              _usingGoogleMap ||
-                              _offlineMaps.hasStadiaApiKey
-                          ? () {
-                              Navigator.of(sheetContext).pop();
-                              unawaited(_selectMapStyle(style));
-                            }
-                          : null,
-                    ),
-                  if (!_offlineMaps.hasStadiaApiKey)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                          unawaited(_openOfflineMaps());
-                        },
-                        icon: const Icon(Icons.key_rounded),
-                        label: const Text('Configurar Stadia para Terreno/Satélite'),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(12, 3, 12, 12),
-                      child: Text('Amostras ilustrativas, não imagens reais do provedor. '
-                          'Alguns estilos dependem de internet e de API key. '
-                          'Para uso offline, baixe ou importe o pacote de mapa compatível.',
-                          style: TextStyle(fontSize: 11)),
-                    ),
-                    ],
-                  ),
-                ],
-              ),
+      maxWidth: 460,
+      maxHeightFactor: 0.79,
+      barrierLabel: 'Fechar visual do mapa',
+      builder: (dialogContext) => MapLayerPickerPanel(
+        initial: MapLayerPickerSelection(
+          appearancePreset: _mapViewSettings.appearancePreset,
+          appearanceMode: _mapViewSettings.appearanceMode,
+          provider: _mapViewSettings.provider,
+          stylePreset: _mapViewSettings.stylePreset,
+        ),
+        googleSdkConfigured: GoogleMapsKeyService.instance.hasKey,
+        googleOnlineAvailable: GoogleMapsKeyService.instance.hasKey &&
+            !_connectivity.isOffline && _offlineMaps.mode != OfflineMapMode.offline,
+        stadiaConfigured: _offlineMaps.hasStadiaApiKey,
+        styleThumbnailBuilder: (style) => Semantics(
+          label: 'Amostra ilustrativa do estilo ${style.label}',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: CustomPaint(
+              size: const Size(52, 38),
+              painter: _MapStyleThumbnailPainter(style),
             ),
-          );
-        },
+          ),
+        ),
+        onConfirm: (choice) => Navigator.of(dialogContext).pop(choice),
+        onCancel: () => Navigator.of(dialogContext).pop(),
       ),
     );
+    if (selected == null || !mounted) return;
+
+    // A base do mapa só pode exigir Stadia no renderer atual.
+    final googleCanRender = selected.provider == MapProvider.google &&
+        GoogleMapsKeyService.instance.hasKey &&
+        !_connectivity.isOffline && _offlineMaps.mode != OfflineMapMode.offline;
+    if (selected.stylePreset.needsStadiaKey &&
+        !googleCanRender && !_offlineMaps.hasStadiaApiKey) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Esta base exige chave Stadia Maps em Configurações > Serviços e APIs.'),
+      ));
+      return;
+    }
+    if (selected.provider == MapProvider.google &&
+        !GoogleMapsKeyService.instance.hasKey) {
+      await _promptGoogleMapsKey();
+      return;
+    }
+
+    await _mapViewSettings.setProvider(selected.provider);
+    if (selected.appearanceMode == MapAppearanceMode.manual) {
+      await _mapViewSettings.setAppearancePreset(selected.appearancePreset);
+    } else {
+      await _mapViewSettings.setAppearanceMode(selected.appearanceMode);
+    }
+    await _mapViewSettings.setStylePreset(selected.stylePreset);
+    if (!mounted) return;
+    setState(() {
+      _navigation3dRendererReady = false;
+      _navigation3dRendererFailed = false;
+    });
   }
 
   Future<void> _selectMapStyle(MapStylePreset style) async {
@@ -5086,7 +4888,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.map_rounded),
-                title: const Text('Provedor do mapa'),
+                title: const Text('Visual do mapa'),
                 subtitle: Text(_mapViewSettings.provider == MapProvider.google
                     ? 'Google Maps · ${_mapViewSettings.stylePreset.label}'
                     : 'Mapa atual · ${_mapViewSettings.stylePreset.label}'),
@@ -7071,6 +6873,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         _applyFollowCamera(point, forceRotation: true);
                       }
                     }
+                    _tryOpenInitialSavedRoute();
                   },
                   onCameraMoveStarted: () {
                     if (!_googleProgrammaticCameraMove && _followPosition) {
@@ -7138,6 +6941,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         _applyFollowCamera(point, forceRotation: true);
                       }
                     }
+                    _tryOpenInitialSavedRoute();
                   },
                   onPositionChanged: (camera, hasGesture) {
                     if (!mounted) return;
@@ -7462,31 +7266,46 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                 Positioned.fill(
                   child: IgnorePointer(
                     ignoring: !navigation3dActive,
-                    child: AnimatedOpacity(
-                      opacity: navigation3dActive ? 1 : 0,
-                      duration: const Duration(milliseconds: 320),
-                      curve: Curves.easeOutCubic,
-                      child: MapNavigation3DView(
-                        key: ValueKey<String>(
-                          'nav3d-${navigationTarget.sourceId ?? navigationTarget.label}-${navigationTarget.travelMode.storageValue}-${mapAppearance.name}-${stadiaVectorStyle != null ? 'stadia' : 'openfreemap'}',
+                    // Nao iniciar uma PlatformView dentro de Opacity(0):
+                    // alguns dispositivos atrasam a criacao/renderizacao.
+                    // O mapa 2D permanece montado para o fallback imediato.
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: MapNavigation3DView(
+                            key: ValueKey<String>(
+                              'nav3d-${navigationTarget.sourceId ?? navigationTarget.label}-${navigationTarget.travelMode.storageValue}-${mapAppearance.name}-${stadiaVectorStyle != null ? 'stadia' : 'openfreemap'}',
+                            ),
+                            target: navigationTarget,
+                            route: _cyclingRoute!,
+                            current: current,
+                            orientationMode: _mapViewSettings.orientationMode,
+                            sensorHeadingDegrees: _sensorHeadingDegrees,
+                            distanceToNextManeuverMeters:
+                                _navigationProgress?.distanceToNextManeuverMeters,
+                            vectorStyleUrl: navigation3dStyleUrl,
+                            fallbackVectorStyleUrl: navigation3dFallbackStyleUrl,
+                            appearancePreset: mapAppearance,
+                            vectorAttribution: navigation3dAttribution,
+                            recenterRequest: _navigation3dRecenterRequest,
+                            onReady: _handleNavigation3dReady,
+                            onFallback: _handleNavigation3dFallback,
+                            onFollowStateChanged:
+                                _handleNavigation3dFollowChanged,
+                          ),
                         ),
-                        target: navigationTarget,
-                        route: _cyclingRoute!,
-                        current: current,
-                        orientationMode: _mapViewSettings.orientationMode,
-                        sensorHeadingDegrees: _sensorHeadingDegrees,
-                        distanceToNextManeuverMeters:
-                            _navigationProgress?.distanceToNextManeuverMeters,
-                        vectorStyleUrl: navigation3dStyleUrl,
-                        fallbackVectorStyleUrl: navigation3dFallbackStyleUrl,
-                        appearancePreset: mapAppearance,
-                        vectorAttribution: navigation3dAttribution,
-                        recenterRequest: _navigation3dRecenterRequest,
-                        onReady: _handleNavigation3dReady,
-                        onFallback: _handleNavigation3dFallback,
-                        onFollowStateChanged:
-                            _handleNavigation3dFollowChanged,
-                      ),
+                        if (!navigation3dActive)
+                          const Positioned.fill(
+                            child: IgnorePointer(
+                              child: ColoredBox(
+                                color: Color(0xB00B1F30),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -7993,7 +7812,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     onShowRoute: () => _fitCyclingRoutes(_previewRoutes),
                     onClose: _dismissRoutePreview,
                     onChoose: _choosePreviewAlternative,
-                    onPlan: _previewPlan == null
+                    onPlan: _previewRoutes.isEmpty || _previewLoading
                         ? null : () => unawaited(_showBikeTripPlan()),
                     onStart: _startPreviewNavigation,
                     onSave: _savePreviewRoute,
@@ -8054,7 +7873,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                               _toggleFollow();
                             }
                           },
-                    onTripPlan: _bikeTripPlan == null
+                    onTripPlan: _cyclingRoute == null
                         ? null
                         : () => unawaited(_showBikeTripPlan()),
                     onEditBikePace: navigationTarget.travelMode == MapTravelMode.bicycle
@@ -8117,7 +7936,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         _toggleFollow();
                       }
                     },
-                    onTripPlan: _bikeTripPlan == null
+                    onTripPlan: _cyclingRoute == null
                         ? null : () => unawaited(_showBikeTripPlan()),
                     onEditBikePace: navigationTarget.travelMode == MapTravelMode.bicycle
                         ? () => unawaited(_editActiveBikePace())
