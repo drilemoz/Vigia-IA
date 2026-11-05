@@ -4,7 +4,6 @@ from pathlib import Path
 r=Path(__file__).resolve().parents[1]
 screen=(r/'lib/screens/map_monitoring_screen.dart').read_text(encoding='utf-8')
 preview=(r/'lib/widgets/map_route_preview_card.dart').read_text(encoding='utf-8')
-editor=(r/'lib/screens/trip_planning_screen.dart').read_text(encoding='utf-8')
 metrics=(r/'lib/services/map_route_preview_metrics.dart').read_text(encoding='utf-8')
 planner=(r/'lib/services/bike_trip_planner.dart').read_text(encoding='utf-8')
 tests=(r/'test/map_route_preview_metrics_test.dart').read_text(encoding='utf-8')
@@ -18,10 +17,7 @@ checks={
  'tempo de bicicleta configurado': 'bikePreferences.averageSpeedKmh' in metrics,
  'tempo ausente não inventado': 'tempo indisponível' in metrics,
  'proximidade projetada no segmento': 'final squared = dx * dx + dy * dy;' in planner,
- 'sem status de acesso por estrada': (
-     'Proximidade em linha reta não confirma passagem pela via, acesso seguro, água ou hospedagem.' in editor
-     and 'TripPlanningScreen(' in screen
- ),
+ 'sem status de acesso por estrada': 'acesso por vias e serviços não verificados' in screen,
  'cobertura de ETA': 'ritmo salvo' in tests,
  'cobertura de parada em segmento longo': 'Trecho longo sem vértice no meio' in proximity,
 }

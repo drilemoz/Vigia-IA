@@ -8,13 +8,6 @@ class MapPerformancePolicy {
   const MapPerformancePolicy._();
 
   static const int gpsDistanceFilterMeters = 8;
-  /// Apenas visualização passiva do mapa: economiza leituras quando não há rota.
-  static const int passiveGpsDistanceFilterMeters = 35;
-  static bool needsPreciseGps({
-    required bool recording,
-    required bool navigating,
-  }) => recording || navigating;
-
   static const Duration poiUiMinimumInterval = Duration(seconds: 4);
   static const double poiUiMinimumDistanceMeters = 20;
   static const Duration automaticPoiRequestMinimumInterval =

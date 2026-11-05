@@ -11,7 +11,6 @@ import 'location_tracking_service.dart';
 import 'map_gps_filter.dart';
 import 'map_bike_consolidation_policy.dart';
 import 'map_location_subscription_policy.dart';
-import 'map_performance_policy.dart';
 
 enum MonitorMapVisibilityMode { automatic, always, hidden }
 
@@ -40,7 +39,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   StreamSubscription<MapRoutePoint>? _positionSubscription;
-  bool? _streamHighAccuracy;
   Timer? _persistDebounce;
   Future<void>? _initializing;
   File? _file;
@@ -178,7 +176,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     if (_needsContinuousLocation) return;
     final subscription = _positionSubscription;
     _positionSubscription = null;
-    _streamHighAccuracy = null;
     if (subscription != null) unawaited(subscription.cancel());
   }
 
@@ -201,7 +198,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
         _passiveLocationSuspended = true;
         final subscription = _positionSubscription;
         _positionSubscription = null;
-        _streamHighAccuracy = null;
         if (subscription != null) unawaited(subscription.cancel());
       }
     }
@@ -247,7 +243,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     if (availability != LocationTrackingAvailability.ready) {
       await _positionSubscription?.cancel();
       _positionSubscription = null;
-      _streamHighAccuracy = null;
       return availability;
     }
     // Para o mapa/gravação/navegação basta um único stream. Uma busca
@@ -265,37 +260,14 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     }
     // Verifica demanda após o await: a tela pode ter sido fechada nesse meio.
     if (_needsContinuousLocation) {
-      await _configureLocationStream();
+      if (!gpsStreamActive) _gpsStreamStarts++;
+      _positionSubscription ??= _location.positionStream().listen(
+        _acceptPosition,
+        onError: (_) { _gpsStreamErrors++; },
+      );
     }
     _passiveLocationSuspended = !_needsContinuousLocation && !_appForeground;
     return availability;
-  }
-
-  /// Substitui o stream somente quando a demanda muda. Navegação e gravação
-  /// mantêm o filtro de 8 m; consulta passiva do mapa usa filtro de 35 m.
-  Future<void> _configureLocationStream() async {
-    if (!_needsContinuousLocation) return;
-    final highAccuracy = MapPerformancePolicy.needsPreciseGps(
-      recording: _tracking,
-      navigating: navigating,
-    );
-    if (_positionSubscription != null &&
-        _streamHighAccuracy == highAccuracy) {
-      return;
-    }
-    final previous = _positionSubscription;
-    _positionSubscription = null;
-    _streamHighAccuracy = null;
-    if (previous != null) await previous.cancel();
-    if (!_needsContinuousLocation) return;
-    _gpsStreamStarts++;
-    _streamHighAccuracy = highAccuracy;
-    _positionSubscription = _location.positionStream(
-      highAccuracy: highAccuracy,
-    ).listen(
-      _acceptPosition,
-      onError: (_) { _gpsStreamErrors++; },
-    );
   }
 
   Future<void> setMonitorVisibility(MonitorMapVisibilityMode value) async {
@@ -310,24 +282,8 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<bool> startRecording() async {
     await initialize(requestPermission: true);
-    var currentPoint = _current;
-    // Mapa passivo usa precisão moderada. Ao iniciar gravação, uma leitura
-    // pontual de alta precisão evita rejeitar um percurso só por esse modo.
-    if (currentPoint == null ||
-        !MapGpsFilter.isSuitableForRecording(currentPoint) ||
-        DateTime.now().difference(currentPoint.recordedAt) >
-            const Duration(seconds: 20)) {
-      try {
-        _acceptPosition(await _location.currentPosition());
-        currentPoint = _current;
-      } catch (_) {
-        // A recusa continua explícita se o Android não entregar GPS adequado.
-      }
-    }
-    if (currentPoint == null ||
-        !MapGpsFilter.isSuitableForRecording(currentPoint) ||
-        DateTime.now().difference(currentPoint.recordedAt) >
-            const Duration(seconds: 20)) {
+    final currentPoint = _current;
+    if (currentPoint == null || !MapGpsFilter.isSuitableForRecording(currentPoint)) {
       return false;
     }
     _route
@@ -348,9 +304,8 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     _startNewSegmentOnNextPoint = false;
     _tracking = true;
     // O início da gravação deve manter o único stream mesmo sem tela consumidora.
-    await ensureLocation(requestPermission: false);
-    if (_availability == LocationTrackingAvailability.ready) {
-      await _configureLocationStream();
+    if (!gpsStreamActive) {
+      await ensureLocation(requestPermission: false);
     }
     notifyListeners();
     await _persistNow();
@@ -392,7 +347,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
     await _persistNow();
     releaseLocationIfIdle();
-    if (_needsContinuousLocation) await _configureLocationStream();
   }
 
   /// Compatibilidade com chamadas antigas. Novas telas devem usar a
@@ -410,9 +364,8 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> navigateTo(MapNavigationTarget target) async {
     await initialize(requestPermission: true);
     _navigationTarget = target;
-    await ensureLocation(requestPermission: false);
-    if (_availability == LocationTrackingAvailability.ready) {
-      await _configureLocationStream();
+    if (!gpsStreamActive) {
+      await ensureLocation(requestPermission: false);
     }
     notifyListeners();
     await _persistNow();
@@ -424,7 +377,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
     await _persistNow();
     releaseLocationIfIdle();
-    if (_needsContinuousLocation) await _configureLocationStream();
   }
 
   double? get navigationDistanceMeters {
@@ -475,8 +427,6 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     _startNewSegmentOnNextPoint = false;
     notifyListeners();
     await _persistNow();
-    releaseLocationIfIdle();
-    if (_needsContinuousLocation) await _configureLocationStream();
   }
 
   String buildGpx({String name = 'Percurso Vigia IA'}) {

@@ -1,89 +1,10 @@
-## 1.0.350+350 (2026-11-04)
-- APK 294: corrigida regra `curly_braces_in_flow_control_structures` na guarda de `_refreshBattery` (linha 538 da versão 1.0.349).
-- Protegida a mesma condição com novo teste preventivo antes de `flutter analyze`; o setState e os filtros de telemetria permanecem inalterados.
-- Metadados de versão, cabeçalhos HTTP, Novidades, históricos e documentação sincronizados; navegação, câmera e mapas não foram modificados funcionalmente.
-- CI Flutter/análise/testes e APK devem ser reexecutados na versão 1.0.350.
+## 1.0.339+339 (2026-11-04)
 
-## 1.0.349+349 (2026-11-04)
-- Timer do HUD é suspenso ao ocultar a aba Mapas e ao sair do primeiro plano; retoma sem criar timers duplicados.
-- Stream de bússola é suspenso no background e retomado apenas com mapa visível, sem interromper navegação ativa.
-- Leituras de bateria e rádio com estado inalterado deixam de chamar setState; falhas de telemetria opcional não derrubam a interface.
-- MapHudRefreshPolicy e MapCameraSourcePolicy isoladas da tela principal, mantendo as condições de frescor GPS e os protocolos de câmera.
-- Testes Dart e Python de regressão, documentação e versionamento sincronizados; validação Android/Flutter pendente no CI.
-
-## 1.0.348+348 (2026-11-04)
-- Probes HTTPS reais (204 esperado; sem aceitar DNS, 200 ou redirecionamentos) para o estado de conectividade de mapas.
-- GPS passivo em precisão moderada/35m; precisão alta/8m preservada na gravação e navegação, com um único stream.
-- Broadcast de recuperação interno protegido por receiver não exportado; receptor de boot separado valida ação.
-- Atualizações ociosas do HUD menos frequentes sem retirar verificações críticas de navegação.
-- GitHub Actions cancela pushes anteriores da mesma branch, sem cancelar builds manuais.
-- Testes de regressão para conectividade, demanda GPS, segurança e CI; rota offline de novos trajetos permanece pendente.
-
-## 1.0.347+347 (2026-11-04)
-
-- Simplificado o seletor de aparência do mapa com três abas, listas compactas e resumo da escolha.
-- Botões OK e Cancelar evitam mudar tema/provedor/base antes da confirmação.
-- Os quatro temas, dois modos automáticos, dois provedores e cinco estilos continuam disponíveis conforme chaves instaladas.
-- Removido o atalho Serviços e APIs do painel; a central única permanece em Configurações.
-- Novos testes Flutter e Python de seleção, bloqueios por chave e confirmação; versão e documentação sincronizadas.
-
-## 1.0.346+346 (2026-11-04)
-
-- APK 291: sincronizada a expectativa dos testes Flutter do diálogo de recuperação de incidentes de versões anteriores.
-- Incluído teste de regressão para diferenciar erro da versão instalada de falha recuperada antiga.
-- Mantidas as melhorias de detecção/reabertura da 1.0.345; release e identidade sincronizadas.
-
-## 1.0.346+346 (2026-11-04)
-
-- Corrigido diagnóstico de encerramento ao reiniciar: correlação do histórico Android com PID e janela temporal da sessão anterior; preserva sessões legadas sem PID.
-- Falhas reais Java/nativas, ANR e pressão de memória agora têm níveis distintos; encerramento em cache por memória é informativo, não chamado de crash.
-- SIGKILL sem motivo confirmado é reportado como informação inconclusiva; encerramentos normais, atualização e solicitação do usuário não geram falsos avisos.
-- Recuperação de falha temporária na consulta nativa com três tentativas curtas e nova verificação ao retomar a atividade; aviso único por incidente por sessão, mantendo exportação local e dados da versão original.
-- Testes de classificação Kotlin/JVM, novos widget tests Flutter e contratos Python. Nenhuma alteração em câmera, mapas, transmissão ou IA.
-
-## 1.0.344+344 (2026-11-04)
-
-- APK 289: corrigido `test/map_route_preview_card_test.dart`, que exigia o rótulo antigo "Carregando plano" mesmo com a prévia já disponível e sem plano pré-calculado.
-- Testes de widget agora verificam "Planejar viagem" habilitado sem plano e "Plano 2d" quando os dias já foram calculados, inclusive callbacks de abertura do editor.
-- Contrato preventivo integrado ao `tool/verify_project.sh` para antecipar regressões de teste da prévia Bike.
-- Preservados o editor e a biblioteca unificados, navegação, armazenamento offline e APIs; metadados de release atualizados para `1.0.344+344`.
-
-## 1.0.343+343 (2026-11-04)
-- Corrigidos os dois únicos diagnósticos do `flutter analyze --fatal-infos --fatal-warnings` no workflow APK 288, após a verificação preventiva ter sido aprovada.
-- `map_monitoring_screen.dart`: `if` da rota inicial salva recebe bloco explícito de chaves (`curly_braces_in_flow_control_structures`).
-- Lista fallback de rotas da cicloviagem usa elemento anulável `?_cyclingRoute` no lugar de `if` com `!` (`use_null_aware_elements`).
-- Contratos Python novos para proteger a sintaxe; metadados, Novidades, Sobre, User-Agents, documentação e versionamento sincronizados.
-- Nenhuma alteração intencional na geometria da rota, cálculos, persistência, MBTiles, MapLibre ou navegação. Compilação Android ainda depende de nova execução do CI.
-
-## 1.0.342+342 (2026-11-04)
-- Corrigida a falha do workflow Android APK 287 na verificação preventiva: `test/app_metadata_test.dart` ainda esperava `1.0.340+340` e foi modernizado para comparar `AppMetadata` com `pubspec.yaml` em tempo de teste.
-- `check_version_sync.py` e regressões Python exigem a leitura dinâmica do pubspec, prevenindo novas expectativas de versão obsoletas; verificadores e dependências atuais sincronizados para 1.0.342+342.
-- Sobre/Novidades, README, arquitetura, validação e arquivos de release atualizados. Editor unificado, rotas offline, MBTiles/MapLibre, IA e câmeras não tiveram lógica funcional alterada.
-- Contratos herdados de UX/almoço e avisos de acesso migrados para o editor único, e os dois históricos de Mudanças/Sobre sincronizados; sem reverter a unificação.
-- Verificações locais, limitações e instruções de CI documentadas em `VALIDATION-1.0.342.md`.
-
-## 1.0.341+341 (2026-11-04)
-- Unificados os fluxos do menu Planejamento e de Mapas: um único editor `TripPlanningScreen`, aberto a partir do botão Plano do mapa com geometria/alternativas já calculadas, sem rede ou novo GPS.
-- Mesma biblioteca para o botão Salvar do Planejamento e Salvar offline em Mapas, preservando o arquivo legado da última prévia e importando-o uma única vez, quando necessário.
-- Preferências compartilhadas de ritmo e equilíbrio de dias (`MapViewSettingsService`) e de saída, pausas e almoço (`BikeTripScheduleSettingsService`), com restauração dos campos antigos e novos na viagem salva.
-- Planejamento pode abrir a prévia diretamente nos Mapas; retorno do editor atualiza a prévia sem interromper a navegação ativa nem trocar sua geometria automaticamente.
-- Corrigida a diferença de tempo estimado entre a duração de roteadores e a duração baseada na velocidade configurada; a estimativa usa `BikeTripPlanner` nos dois acessos.
-- Novos contratos Python e testes Flutter para migração, serialização, horários e alternância das entradas. Flutter analyze/test e build APK ainda dependem do CI.
-
-## 1.0.340+340 (2026-11-03)
-- Corrigida a falha do workflow Android APK 285 na etapa `Verificação preventiva`: `test_news_catalog_policy_301.py` tentava alterar uma mensagem antiga da versão 1.0.338, ausente no catálogo 1.0.339. Agora usa a primeira mensagem efetiva do release corrente.
-- Atualizadas três verificações preventivas antigas do MapLibre 3D: duas verificavam HC puro e uma exigia `AnimatedOpacity`, incompatíveis com o TLHC/TextureView adotado na versão 1.0.339.
-- Reforçado `check_news_catalog_policy.py` para rejeitar textos vazios (`''`) em vez de ignorá-los ao analisar as mensagens.
-- Testadas rejeições de versão incorreta, `TODO` e mensagem vazia; textos legítimos de correções seguem permitidos.
-- Atualizados `pubspec.yaml`, metadados, tela Sobre/Novidades, scripts/testes, documentação e código de versão. Recursos de mapas MBTiles/MapLibre da 1.0.339 mantidos.
-- `tool/verify_project.sh` aprovado (exit 0; 435/436 testes Python aprovados, 1 ignorado). `flutter analyze`, `flutter test` e compilação Android continuam pendentes de confirmação no GitHub Actions.
-
-## 1.0.339+339 (2026-11-03)
-- Corrigido o ciclo de vida de `TileLayer`/MBTiles: o `dispose()` do widget não fecha a conexão SQLite antes de os ImageProviders concluírem leituras; provedores antigos são drenados por 45 s após a tela liberar sua referência.
-- Exclusão de pacote torna-se lógica antes da física; arquivos MBTiles usados aguardam a saída de todos os leitores e arquivos órfãos são tratados na inicialização seguinte.
-- MapLibre 3D Android usa TextureView/TLHC com fallback HC e deixa de ser criado sob `AnimatedOpacity(opacity: 0)`, reduzindo a chance de falhas na criação nativa.
-- Removidas reinicializações das flags 3D por notificações de progresso do serviço offline e mudanças de rede que não remontam o renderer.
-- Regressões novas em `tool/test_map_lifecycle_339.py`. Ainda pendentes: Flutter analyze/test, build Android, reprodução no Xiaomi Android 13 e confirmação da correção do ANR.
+- Cadastro RTSP: Automático, Preferir UDP ou Forçar TCP.
+- Automático tenta o último transporte que confirmou quadro, ou UDP inicialmente; troca para o alternativo quando não recebe quadro.
+- Preferência armazenada em arquivo local identificado por hash SHA-256 da URL; o arquivo contém apenas tcp/udp, sem credenciais.
+- MJPEG e HTTP H.264 continuam separados do transporte RTSP.
+- Compilação Flutter/Android e testes físicos pendentes.
 
 ## 1.0.338+338 (2026-11-03)
 - Modo Offline força FlutterMap/MBTiles mesmo que o SDK Google Maps esteja habilitado; seleção do renderizador centralizada em `OfflineMapRenderPolicy`.

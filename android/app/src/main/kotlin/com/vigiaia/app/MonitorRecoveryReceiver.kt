@@ -13,24 +13,12 @@ import java.util.Calendar
 
 class MonitorRecoveryReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        // Apenas broadcast explícito do próprio aplicativo (receiver não exportado).
-        if (intent?.action != ACTION_RECOVER_MONITOR) return
-        notifyIfEnabled(context)
-    }
-
-    companion object {
-        const val ACTION_RECOVER_MONITOR = "com.vigiaia.app.RECOVER_MONITOR"
-
-        // Reaproveitado pelo receiver exportado somente para broadcasts protegidos
-        // do sistema; nenhuma intenção externa pode pedir recuperação arbitrária.
-        fun notifyIfEnabled(context: Context) {
-            if (TransmitterExclusiveMode.enabled(context)) return
-            val prefs = context.getSharedPreferences("monitor_recovery", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("enabled", false)) return
-            val receiver = MonitorRecoveryReceiver()
-            if (!receiver.scheduleIsActive(prefs.getString("schedule", "") ?: "")) return
-            receiver.showRecoveryNotification(context)
-        }
+        // O modo camera isolado nao pode disparar alertas para abrir monitoramento.
+        if (TransmitterExclusiveMode.enabled(context)) return
+        val prefs = context.getSharedPreferences("monitor_recovery", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("enabled", false)) return
+        if (!scheduleIsActive(prefs.getString("schedule", "") ?: "")) return
+        showRecoveryNotification(context)
     }
 
     private fun showRecoveryNotification(context: Context) {

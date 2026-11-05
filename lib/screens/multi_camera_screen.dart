@@ -437,6 +437,7 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                                   cameraName: camera.name,
                                   url: rtspTestUrl,
                                   forceTcp: camera.rtspForceTcp,
+                                  transport: camera.rtspTransport,
                                 ),
                               ),
                             )

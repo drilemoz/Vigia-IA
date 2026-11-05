@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../core/app_metadata.dart';
-
 import '../services/automatic_diagnostics_service.dart';
 
 /// Runs before startup/news/permission dialogs, in every launch mode.
@@ -24,37 +22,16 @@ class DiagnosticRecoveryHost extends StatefulWidget {
   State<DiagnosticRecoveryHost> createState() => _DiagnosticRecoveryHostState();
 }
 
-class _DiagnosticRecoveryHostState extends State<DiagnosticRecoveryHost>
-    with WidgetsBindingObserver {
+class _DiagnosticRecoveryHostState extends State<DiagnosticRecoveryHost> {
   bool _ready = false;
-  bool _checking = false;
-  final Set<String> _shownIncidentIds = <String>{};
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_check()));
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // If native diagnostics were unavailable during startup, a later resume
-    // can recover the incident without restarting or keeping the UI blocked.
-    if (state == AppLifecycleState.resumed && _ready && !_checking) {
-      unawaited(_check());
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
   Future<void> _check() async {
-    if (_checking) return;
-    _checking = true;
     try {
       final diagnostics = AutomaticDiagnosticsService.instance;
       final report = await (widget.capture ?? diagnostics.capture)();
@@ -64,28 +41,6 @@ class _DiagnosticRecoveryHostState extends State<DiagnosticRecoveryHost>
         final incident = (pending.last as Map).map(
           (key, value) => MapEntry(key.toString(), value),
         );
-        final incidentId = incident['id']?.toString() ?? '';
-        if (incidentId.isNotEmpty && !_shownIncidentIds.add(incidentId)) return;
-        // Incidents written by older builds have no severity. Respect the
-        // Android exit reason/importance instead of presenting a cached
-        // low-memory kill from an older version as a new app crash.
-        final legacyExit = incident['lastExit'];
-        final cachedMemoryExit = legacyExit is Map &&
-            legacyExit['reason'] == 3 &&
-            legacyExit['importance'] is num &&
-            (legacyExit['importance'] as num) >= 400;
-        final severity = incident['severity']?.toString() ??
-            (cachedMemoryExit ? 'info' : 'error');
-        final isInformational = severity == 'info';
-        final sourceVersion = incident['sourceVersion']?.toString() ??
-            ((incident['session'] is Map)
-                ? (incident['session'] as Map)['version']?.toString()
-                : null);
-        final previousVersion = sourceVersion != null &&
-            sourceVersion.isNotEmpty && sourceVersion != AppMetadata.version;
-        final subtitle = previousVersion
-            ? 'Registro da versão $sourceVersion, recuperado pela ${AppMetadata.version}.\n\n'
-            : 'Registro da sessão anterior.\n\n';
         bool exporting = false;
         String? resultMessage;
         await showDialog<void>(
@@ -95,14 +50,10 @@ class _DiagnosticRecoveryHostState extends State<DiagnosticRecoveryHost>
             builder: (context, update) => PopScope(
               canPop: !exporting,
               child: AlertDialog(
-                title: Text(isInformational
-                    ? 'Encerramento anterior do Android'
-                    : previousVersion
-                        ? 'Falha recuperada de versão anterior'
-                        : 'Erro detectado no último uso'),
+                title: const Text('Erro detectado no último uso'),
                 content: Text(
                   resultMessage ??
-                      '$subtitle${incident['reason'] ?? 'Foi registrado um evento no aplicativo.'}\n\n'
+                      '${incident['reason'] ?? 'Foi registrado um problema no aplicativo.'}\n\n'
                           'O diagnóstico foi salvo automaticamente. Deseja exportar o relatório para Downloads? '
                           'Nenhum relatório é enviado automaticamente.',
                 ),
@@ -164,8 +115,7 @@ class _DiagnosticRecoveryHostState extends State<DiagnosticRecoveryHost>
         );
       }
     } finally {
-      _checking = false;
-      if (mounted && !_ready) setState(() => _ready = true);
+      if (mounted) setState(() => _ready = true);
     }
   }
 

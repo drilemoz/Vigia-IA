@@ -15,22 +15,6 @@ void main() {
     expect(MapPerformancePolicy.gpsDistanceFilterMeters, 8);
   });
 
-  test('GPS passivo usa filtro maior sem alterar precisao da navegacao', () {
-    expect(MapPerformancePolicy.passiveGpsDistanceFilterMeters, 35);
-    expect(MapPerformancePolicy.needsPreciseGps(
-      recording: false,
-      navigating: false,
-    ), isFalse);
-    expect(MapPerformancePolicy.needsPreciseGps(
-      recording: true,
-      navigating: false,
-    ), isTrue);
-    expect(MapPerformancePolicy.needsPreciseGps(
-      recording: false,
-      navigating: true,
-    ), isTrue);
-  });
-
   test('POIs nao forcam rebuild para deslocamento minimo em poucos segundos', () {
     final now = DateTime(2026, 9, 25, 20);
     final previous = point(-20, now);

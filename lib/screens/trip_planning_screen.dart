@@ -14,9 +14,7 @@ import '../models/map_navigation_target.dart';
 import '../models/map_travel_mode.dart';
 import '../models/planned_bike_trip.dart';
 import '../services/bike_trip_planner.dart';
-import '../services/bike_trip_editor_bridge.dart';
 import '../services/bike_trip_schedule.dart';
-import '../services/bike_trip_schedule_settings_service.dart';
 import '../services/location_tracking_service.dart';
 import '../services/native_platform_service.dart';
 import '../services/planned_trip_export_service.dart';
@@ -34,16 +32,7 @@ import 'map_workspace_shell.dart';
 /// Planejamento voluntário: não inicia localização, vídeo, IA ou serviço em
 /// primeiro plano. Busca remota somente ao enviar pesquisa/cálculo/apoios.
 class TripPlanningScreen extends StatefulWidget {
-  const TripPlanningScreen({
-    super.key,
-    this.initialTrip,
-    this.returnToMap = false,
-  });
-
-  /// Abre o mesmo editor com a geometria já calculada no mapa, sem rede.
-  final PlannedBikeTrip? initialTrip;
-  /// Em Mapas, devolve a seleção editada em vez de abrir uma segunda tela de mapa.
-  final bool returnToMap;
+  const TripPlanningScreen({super.key});
 
   @override
   State<TripPlanningScreen> createState() => _TripPlanningScreenState();
@@ -57,7 +46,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   final _offlineMaps = OfflineMapService.instance;
   final _routeProvider = MapCyclingRouteService();
   final _library = const PlannedBikeTripService();
-  final _scheduleSettings = BikeTripScheduleSettingsService.instance;
   final _lastMapPreview = const SavedBikeRouteService();
   final _planner = const BikeTripPlanner();
 
@@ -76,8 +64,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   String? _message;
   double _speedKmh = 15;
   double _hoursPerDay = 5;
-  bool _balanceDays = true;
-  bool _forceLunch = false;
   int _breakEveryKm = 20;
   int _breakMinutes = 10;
   int _lunchMinutes = 40;
@@ -96,66 +82,14 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _citySearch.initialize(),
         _offlineMaps.initialize(),
         MapViewSettingsService.instance.initialize(),
-        _scheduleSettings.initialize(),
       ]);
-      var trips = await _library.load();
-      // Migração conservadora da última rota Bike das versões antigas.
-      // Não apaga o arquivo de compatibilidade nem duplica a mesma importação.
-      final legacy = await _lastMapPreview.load();
-      if (legacy != null && legacy.target.travelMode == MapTravelMode.bicycle &&
-          legacy.routes.isNotEmpty) {
-        final route = legacy.routes[legacy.selectedIndex];
-        final start = route.points.first;
-        final legacyId = 'legacy-map-${start.latitude.toStringAsFixed(5)}-'
-            '${start.longitude.toStringAsFixed(5)}-'
-            '${legacy.target.latitude.toStringAsFixed(5)}-'
-            '${legacy.target.longitude.toStringAsFixed(5)}-'
-            '${route.distanceMeters.round()}';
-        final exists = trips.any((item) => item.id == legacyId ||
-            (item.destination.latitude - legacy.target.latitude).abs() < 0.00001 &&
-            (item.destination.longitude - legacy.target.longitude).abs() < 0.00001 &&
-            (item.selectedRoute.distanceMeters - route.distanceMeters).abs() < 1);
-        if (!exists) {
-          final prefs = MapViewSettingsService.instance.bikeTravelPreferences;
-          final schedule = _scheduleSettings.value;
-          final imported = BikeTripEditorBridge.fromMapRoute(
-            saved: legacy,
-            preferences: prefs,
-            departureMinute: schedule.departureMinute,
-            breakEveryKm: schedule.breakEveryKm,
-            breakMinutes: schedule.breakMinutes,
-            lunchMinutes: schedule.lunchMinutes,
-            forceLunch: schedule.forceLunch,
-            id: legacyId,
-          );
-          await _library.upsert(imported);
-          trips = await _library.load();
-        }
-      }
+      final trips = await _library.load();
       if (!mounted) return;
       final preferences = MapViewSettingsService.instance.bikeTravelPreferences;
-      final schedule = _scheduleSettings.value;
-      final initial = widget.initialTrip;
       setState(() {
         _saved = trips;
-        _speedKmh = initial?.averageSpeedKmh ?? preferences.averageSpeedKmh;
-        _hoursPerDay = initial?.ridingHoursPerDay ?? preferences.ridingHoursPerDay;
-        _balanceDays = initial?.balanceDays ?? preferences.balanceDays;
-        _departure = TimeOfDay(
-          hour: (initial?.departureMinute ?? schedule.departureMinute) ~/ 60,
-          minute: (initial?.departureMinute ?? schedule.departureMinute) % 60,
-        );
-        _breakEveryKm = initial?.breakEveryKm ?? schedule.breakEveryKm;
-        _breakMinutes = initial?.breakMinutes ?? schedule.breakMinutes;
-        _lunchMinutes = initial?.lunchMinutes ?? schedule.lunchMinutes;
-        _forceLunch = initial?.forceLunch ?? schedule.forceLunch;
-        if (initial != null) {
-          _draft = initial;
-          _origin = initial.origin;
-          _destination = initial.destination;
-          _originField.text = initial.origin.title;
-          _destinationField.text = initial.destination.title;
-        }
+        _speedKmh = preferences.averageSpeedKmh.clamp(5, 40).toDouble();
+        _hoursPerDay = preferences.ridingHoursPerDay.clamp(1, 12).toDouble();
         _loadingLibrary = false;
       });
     } catch (_) {
@@ -326,27 +260,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     }
   }
 
-  Future<void> _persistDefaults() async {
-    try {
-      await MapViewSettingsService.instance.setBikeTravelPreferences(
-        BikeTravelPreferences(
-          averageSpeedKmh: _speedKmh,
-          ridingHoursPerDay: _hoursPerDay,
-          balanceDays: _balanceDays,
-        ),
-      );
-      await _scheduleSettings.save(BikeTripScheduleSettings(
-        departureMinute: _departure.hour * 60 + _departure.minute,
-        breakEveryKm: _breakEveryKm,
-        breakMinutes: _breakMinutes,
-        lunchMinutes: _lunchMinutes,
-        forceLunch: _forceLunch,
-      ));
-    } catch (_) {
-      _notify('Não foi possível salvar as preferências do planejamento.');
-    }
-  }
-
   Future<void> _newRouteWizard() async {
     if (_busy || _loadingLibrary) return;
     _originField.clear();
@@ -457,10 +370,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _wizardRefresh = null;
       FocusManager.instance.primaryFocus?.unfocus();
     }
-    if (shouldCalculate && mounted) {
-      await _persistDefaults();
-      if (mounted) await _calculate();
-    }
+    if (shouldCalculate && mounted) await _calculate();
   }
 
   Future<void> _exportTrip(PlannedBikeTrip trip, String format) async {
@@ -583,8 +493,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         breakEveryKm: _breakEveryKm,
         breakMinutes: _breakMinutes,
         lunchMinutes: _lunchMinutes,
-        balanceDays: _balanceDays,
-        forceLunch: _forceLunch,
       );
       setState(() => _draft = trip);
     } catch (_) {
@@ -601,7 +509,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     preferences: BikeTravelPreferences(
       averageSpeedKmh: trip.averageSpeedKmh,
       ridingHoursPerDay: trip.ridingHoursPerDay,
-      balanceDays: trip.balanceDays,
     ),
     destinationLabel: trip.destination.title,
     candidates: trip.places,
@@ -617,8 +524,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         breakEveryKm: _breakEveryKm,
         breakMinutes: _breakMinutes,
         lunchMinutes: _lunchMinutes,
-        balanceDays: _balanceDays,
-        forceLunch: _forceLunch,
       ));
     }
     _refreshWizard();
@@ -657,10 +562,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final draft = _draft;
     if (draft == null) return;
     try {
-      await _library.upsert(draft);
-      final latest = await _library.load();
+      final ordered = <PlannedBikeTrip>[
+        draft,
+        ..._saved.where((item) => item.id != draft.id),
+      ].take(PlannedBikeTripService.maximumTrips).toList(growable: false);
+      await _library.saveAll(ordered);
       if (!mounted) return;
-      setState(() => _saved = latest);
+      setState(() => _saved = ordered);
       _notify('Viagem salva, incluindo o traçado para consulta offline.');
     } catch (_) {
       _notify('Não foi possível salvar; viagens anteriores não foram apagadas.');
@@ -706,8 +614,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _destinationField.text = trip.destination.title;
       _speedKmh = trip.averageSpeedKmh;
       _hoursPerDay = trip.ridingHoursPerDay;
-      _balanceDays = trip.balanceDays;
-      _forceLunch = trip.forceLunch;
       _departure = TimeOfDay(hour: trip.departureMinute ~/ 60,
           minute: trip.departureMinute % 60);
       _breakEveryKm = trip.breakEveryKm;
@@ -724,7 +630,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     });
   }
 
-  Future<void> _openMap(PlannedBikeTrip trip, {LatLng? focusPoint}) async {
+  Future<void> _openMap(PlannedBikeTrip trip) async {
     try {
       // Mesmo contrato de Rota salva já utilizado pela navegação. Não
       // substitui outras viagens da biblioteca, apenas a prévia única do mapa.
@@ -737,27 +643,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         routes: trip.routes, selectedIndex: trip.selectedIndex,
       ));
       if (!mounted) return;
-      if (widget.returnToMap) {
-        Navigator.of(context).pop<BikeTripEditorResult>(
-          BikeTripEditorResult(trip: trip, focusPoint: focusPoint));
-        return;
-      }
       _notify('Prévia preparada. No mapa, abra “Rota salva” para visualizar.');
       await Navigator.push<void>(context,
-        MaterialPageRoute<void>(builder: (_) => MapWorkspaceShell(
-          initialFocusPoint: focusPoint,
-          initialSavedRoute: SavedBikeRoute(
-            target: MapNavigationTarget(
-              latitude: trip.destination.latitude,
-              longitude: trip.destination.longitude,
-              label: trip.destination.title,
-              startedAt: DateTime.now(),
-              travelMode: MapTravelMode.bicycle,
-            ),
-            routes: trip.routes,
-            selectedIndex: trip.selectedIndex,
-          ),
-        )));
+        MaterialPageRoute<void>(builder: (_) => const MapWorkspaceShell()));
     } catch (_) {
       _notify('Não foi possível preparar a prévia no mapa.');
     }
@@ -848,24 +736,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       Text('Velocidade média: ${_speedKmh.toStringAsFixed(0)} km/h'),
       Slider(value: _speedKmh, min: 5, max: 40, divisions: 35,
           label: '${_speedKmh.toStringAsFixed(0)} km/h',
-          onChanged: (v) { setState(() => _speedKmh = v); _refreshDraftPreferences(); },
-          onChangeEnd: (_) => unawaited(_persistDefaults())),
+          onChanged: (v) { setState(() => _speedKmh = v); _refreshDraftPreferences(); }),
       Text('Pedal por dia: ${_hoursPerDay.toStringAsFixed(0)} h'),
       Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
           label: '${_hoursPerDay.toStringAsFixed(0)} h',
-          onChanged: (v) { setState(() => _hoursPerDay = v); _refreshDraftPreferences(); },
-          onChangeEnd: (_) => unawaited(_persistDefaults())),
-      SwitchListTile.adaptive(
-        dense: true, contentPadding: EdgeInsets.zero,
-        title: const Text('Equilibrar os dias'),
-        subtitle: const Text('Distribui distâncias parecidas por dia'),
-        value: _balanceDays,
-        onChanged: (value) {
-          setState(() => _balanceDays = value);
-          _refreshDraftPreferences();
-          unawaited(_persistDefaults());
-        },
-      ),
+          onChanged: (v) { setState(() => _hoursPerDay = v); _refreshDraftPreferences(); }),
       const SizedBox(height: 6),
       Row(children: [
         Expanded(child: OutlinedButton.icon(
@@ -874,7 +749,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             if (value == null || !mounted) return;
             setState(() => _departure = value);
             _refreshDraftPreferences();
-            unawaited(_persistDefaults());
           },
           icon: const Icon(Icons.schedule_rounded, size: 18),
           label: FittedBox(fit: BoxFit.scaleDown,
@@ -883,31 +757,21 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         const SizedBox(width: 8),
         Expanded(child: _choice('A cada', _breakEveryKm,
           const [15, 20, 30], 'km', (v) {
-            setState(() => _breakEveryKm = v); _refreshDraftPreferences(); unawaited(_persistDefaults());
+            setState(() => _breakEveryKm = v); _refreshDraftPreferences();
           })),
       ]),
       const SizedBox(height: 8),
       Row(children: [
         Expanded(child: _choice('Pausa', _breakMinutes,
           const [5, 10, 15, 20], 'min', (v) {
-            setState(() => _breakMinutes = v); _refreshDraftPreferences(); unawaited(_persistDefaults());
+            setState(() => _breakMinutes = v); _refreshDraftPreferences();
           })),
         const SizedBox(width: 8),
         Expanded(child: _choice('Almoço', _lunchMinutes,
           const [0, 30, 40, 60], 'min', (v) {
-            setState(() { _lunchMinutes = v; _forceLunch = true; }); _refreshDraftPreferences(); unawaited(_persistDefaults());
+            setState(() => _lunchMinutes = v); _refreshDraftPreferences();
           })),
       ]),
-      CheckboxListTile(
-        dense: true, contentPadding: EdgeInsets.zero,
-        title: const Text('Almoço automático'),
-        value: !_forceLunch,
-        onChanged: (value) {
-          setState(() => _forceLunch = !(value ?? true));
-          _refreshDraftPreferences();
-          unawaited(_persistDefaults());
-        },
-      ),
     ]),
   );
 
@@ -1035,7 +899,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       OutlinedButton.icon(
         onPressed: () => unawaited(_openMap(trip)),
         icon: const Icon(Icons.map_outlined),
-        label: Text(widget.returnToMap ? 'Voltar aos Mapas com esta rota' : 'Abrir prévia nos Mapas'),
+        label: const Text('Abrir prévia nos Mapas'),
       ),
       const SizedBox(height: 6),
       const Text('A biblioteca guarda cidades, geometria, instruções e etapas. Não faz recálculo sem internet. Para os mapas da região, use o gerenciador offline na aba Mapas.',
@@ -1103,18 +967,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       breakEveryKm: trip.breakEveryKm,
       breakDurationMinutes: trip.breakMinutes,
       lunchDurationMinutes: trip.lunchMinutes,
-      forceLunch: trip.forceLunch,
     );
     return Card(child: ExpansionTile(
       leading: CircleAvatar(child: Text('${day.day}')),
       title: Text('Dia ${day.day} · ${(day.distanceMeters / 1000).toStringAsFixed(1)} km'),
       subtitle: Text(day.stopLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: IconButton(
-        tooltip: 'Ver parada no mapa',
-        icon: const Icon(Icons.map_outlined),
-        onPressed: () => unawaited(_openMap(trip,
-          focusPoint: LatLng(day.stopLatitude, day.stopLongitude))),
-      ),
       childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       children: [
         Text('Pedal: ${(day.ridingDuration.inMinutes / 60).toStringAsFixed(1)} h · '
@@ -1158,9 +1015,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
 
   @override
   Widget build(BuildContext context) => AdaptiveMainScaffold(
-    currentIndex: widget.returnToMap ? 5 : 0,
+    currentIndex: 0,
     onDestinationSelected: (index) {
-      if (widget.returnToMap && index == 5) { Navigator.of(context).pop(); return; }
       if (index == 0) { Navigator.of(context).pop(); return; }
       navigateToMainDestination(context, index, currentIndex: 0);
     },

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vigiaia/widgets/diagnostic_recovery_host.dart';
-import 'package:vigiaia/core/app_metadata.dart';
 
 void main() {
   // O indicador de carregamento fica animando sob o diálogo. Não aguardar
   // pumpAndSettle() enquanto o aviso estiver aberto: ele nunca ficará ocioso.
-  Future<void> waitForRecoveryDialog(WidgetTester tester, {
-    String title = 'Falha recuperada de versão anterior',
-  }) async {
+  Future<void> waitForRecoveryDialog(WidgetTester tester) async {
     for (var frame = 0; frame < 20; frame++) {
       await tester.pump(const Duration(milliseconds: 50));
-      if (find.text(title).evaluate().isNotEmpty) {
+      if (find.text('Erro detectado no último uso').evaluate().isNotEmpty) {
         // Finaliza a transição do diálogo antes de tocar nos seus botões.
         await tester.pump(const Duration(milliseconds: 350));
         return;
@@ -59,29 +56,11 @@ void main() {
       ),
     );
     await waitForRecoveryDialog(tester);
-    expect(find.text('Falha recuperada de versão anterior'), findsOneWidget);
-    expect(find.textContaining('Registro da versão 1.0.314'), findsOneWidget);
+    expect(find.text('Erro detectado no último uso'), findsOneWidget);
     expect(find.text('Aplicativo pronto'), findsNothing);
     await tester.tap(find.text('Agora não'));
     await tester.pumpAndSettle();
     expect(acknowledged, isFalse);
-    expect(find.text('Aplicativo pronto'), findsOneWidget);
-  });
-
-  testWidgets('incidente da versão instalada mantém título de erro', (
-    tester,
-  ) async {
-    await tester.pumpWidget(host(pending: [
-      <String, Object?>{
-        ...incident,
-        'session': <String, Object?>{'version': AppMetadata.version},
-      },
-    ]));
-    await waitForRecoveryDialog(tester, title: 'Erro detectado no último uso');
-    expect(find.text('Erro detectado no último uso'), findsOneWidget);
-    expect(find.textContaining('Registro da sessão anterior.'), findsOneWidget);
-    await tester.tap(find.text('Agora não'));
-    await tester.pumpAndSettle();
     expect(find.text('Aplicativo pronto'), findsOneWidget);
   });
 

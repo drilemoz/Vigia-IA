@@ -39,17 +39,10 @@ if android_manifest.get("applicationId") != identity.get("applicationId"):
     fail("github-manager.json applicationId diverge de app_identity.json")
 
 metadata_test = (root / "test/app_metadata_test.dart").read_text(encoding="utf-8")
-# The Flutter test reads pubspec.yaml directly. It must not embed a prior
-# version/build literal that can silently survive a later source release.
-for required in (
-    "File('pubspec.yaml').readAsStringSync()",
-    'expect(AppMetadata.version, match!.group(1));',
-    'expect(AppMetadata.build, int.parse(match.group(2)!));',
-):
-    if required not in metadata_test:
-        fail('test/app_metadata_test.dart nao compara versao/build com pubspec.yaml')
-if re.search(r"expect\(AppMetadata\.(?:version|build),\s*(?:'\d|\d)", metadata_test):
-    fail('test/app_metadata_test.dart nao deve fixar versoes ou builds antigos')
+if f"expect(AppMetadata.version, '{version}');" not in metadata_test:
+    fail("test/app_metadata_test.dart espera uma versao diferente do pubspec")
+if f"expect(AppMetadata.build, {build});" not in metadata_test:
+    fail("test/app_metadata_test.dart espera um build diferente do pubspec")
 
 release_notes = root / f"RELEASE-{version}.md"
 if not release_notes.exists():

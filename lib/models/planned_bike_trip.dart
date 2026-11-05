@@ -1,5 +1,3 @@
-import 'package:latlong2/latlong.dart';
-
 import 'map_cycling_route.dart';
 import 'map_destination_search.dart';
 import 'map_navigation_target.dart';
@@ -22,8 +20,6 @@ class PlannedBikeTrip {
     required this.breakEveryKm,
     required this.breakMinutes,
     required this.lunchMinutes,
-    this.balanceDays = true,
-    this.forceLunch = false,
     this.places = const <MapDestinationSearchResult>[],
   });
 
@@ -39,8 +35,6 @@ class PlannedBikeTrip {
   final int breakEveryKm;
   final int breakMinutes;
   final int lunchMinutes;
-  final bool balanceDays;
-  final bool forceLunch;
   final List<MapDestinationSearchResult> places;
 
   MapCyclingRoute get selectedRoute => routes[selectedIndex];
@@ -54,8 +48,6 @@ class PlannedBikeTrip {
     int? breakEveryKm,
     int? breakMinutes,
     int? lunchMinutes,
-    bool? balanceDays,
-    bool? forceLunch,
   }) => PlannedBikeTrip(
     id: id, savedAt: savedAt, origin: origin, destination: destination,
     routes: routes, selectedIndex: selectedIndex ?? this.selectedIndex,
@@ -65,8 +57,6 @@ class PlannedBikeTrip {
     breakEveryKm: breakEveryKm ?? this.breakEveryKm,
     breakMinutes: breakMinutes ?? this.breakMinutes,
     lunchMinutes: lunchMinutes ?? this.lunchMinutes,
-    balanceDays: balanceDays ?? this.balanceDays,
-    forceLunch: forceLunch ?? this.forceLunch,
     places: places ?? this.places,
   );
 
@@ -92,8 +82,6 @@ class PlannedBikeTrip {
     'breakEveryKm': breakEveryKm,
     'breakMinutes': breakMinutes,
     'lunchMinutes': lunchMinutes,
-    'balanceDays': balanceDays,
-    'forceLunch': forceLunch,
     'places': [for (final place in places.take(100)) place.toJson()],
   };
 
@@ -132,18 +120,7 @@ class PlannedBikeTrip {
       breakEveryKm: ((json['breakEveryKm'] as num?)?.toInt() ?? 20).clamp(5, 100).toInt(),
       breakMinutes: ((json['breakMinutes'] as num?)?.toInt() ?? 10).clamp(0, 60).toInt(),
       lunchMinutes: ((json['lunchMinutes'] as num?)?.toInt() ?? 40).clamp(0, 120).toInt(),
-      balanceDays: json['balanceDays'] is bool ? json['balanceDays'] as bool : true,
-      forceLunch: json['forceLunch'] == true,
       places: List<MapDestinationSearchResult>.unmodifiable(places),
     );
   }
-}
-
-/// Resultado do editor ao regressar para a mesma instância de Mapas.
-/// Um foco opcional indica a parada que o usuário decidiu inspecionar.
-class BikeTripEditorResult {
-  const BikeTripEditorResult({required this.trip, this.focusPoint});
-
-  final PlannedBikeTrip trip;
-  final LatLng? focusPoint;
 }

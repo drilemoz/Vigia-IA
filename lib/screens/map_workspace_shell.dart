@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
 
 import '../models/map_workspace_mode.dart';
 import '../widgets/main_navigation_bar.dart';
 import '../widgets/main_navigation_routes.dart';
 import '../services/map_route_service.dart';
-import '../services/saved_bike_route_service.dart';
 import '../services/automatic_diagnostics_service.dart';
 import '../widgets/map_workspace_mode_picker.dart';
 import 'bike_mode_screen.dart';
@@ -21,12 +19,7 @@ import 'settings_screen.dart';
 /// Entrada normal: mapa unico, controles de modos sobrepostos e ferramentas
 /// navegadas sob demanda. O estado do MapMonitoringScreen permanece montado.
 class MapWorkspaceShell extends StatefulWidget {
-  const MapWorkspaceShell({super.key, this.initialSavedRoute, this.initialFocusPoint});
-
-  /// Prévia já calculada entregue pelo editor único de cicloviagem.
-  final SavedBikeRoute? initialSavedRoute;
-  /// Localidade de uma etapa selecionada pelo editor.
-  final LatLng? initialFocusPoint;
+  const MapWorkspaceShell({super.key});
 
   @override
   State<MapWorkspaceShell> createState() => _MapWorkspaceShellState();
@@ -134,8 +127,6 @@ class _MapWorkspaceShellState extends State<MapWorkspaceShell> {
     body: Stack(children: [
       MapMonitoringScreen(
         key: const ValueKey<String>('workspace-map'),
-        initialSavedRoute: widget.initialSavedRoute,
-        initialFocusPoint: widget.initialFocusPoint,
         workspaceVisible: !_toolVisible,
         workspaceHeaderHeight: 0,
         navigationSearchRequests: _destinationSearchRequests,

@@ -1,4 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:crypto/crypto.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:vlc_player/vlc_player.dart';
@@ -22,6 +27,7 @@ class RtspCameraSource implements VideoSource {
     this.emitFrames = true,
     this.softwareDecoding = false,
     this.forceTcp = true,
+    this.transport = 'auto',
     this.rawH264 = false,
   });
 
@@ -30,6 +36,9 @@ class RtspCameraSource implements VideoSource {
   final bool emitFrames;
   final bool softwareDecoding;
   final bool forceTcp;
+  final String transport;
+  String _activeTransport = 'udp';
+  bool _triedAlternative = false;
   /// HTTP com vídeo AVC Annex-B (não é RTSP), validado pelo QR local.
   final bool rawH264;
   final _frames = StreamController<RgbFrame>.broadcast();
@@ -70,7 +79,7 @@ class RtspCameraSource implements VideoSource {
         mediaOptions: <String>[
           if (rawH264) ':network-caching=220' else ':network-caching=500',
           if (rawH264) ':demux=h264',
-          if (!rawH264 && forceTcp) ':rtsp-tcp',
+          if (!rawH264 && _activeTransport == 'tcp') ':rtsp-tcp',
           ':no-audio',
           if (softwareDecoding) ...<String>[
             ':avcodec-hw=none',
@@ -79,6 +88,33 @@ class RtspCameraSource implements VideoSource {
           ],
         ],
       );
+
+  Future<File> _preferenceFile() async {
+    final dir = await getApplicationSupportDirectory();
+    final key = sha256.convert(utf8.encode(url)).toString();
+    return File('${dir.path}/rtsp_transport_$key.txt');
+  }
+
+  Future<String?> _loadPreferredTransport() async {
+    try {
+      final file = await _preferenceFile();
+      if (!await file.exists()) return null;
+      final value = (await file.readAsString()).trim();
+      return value == 'tcp' || value == 'udp' ? value : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _rememberTransport() async {
+    if (rawH264 || transport != 'auto') return;
+    try {
+      final file = await _preferenceFile();
+      await file.writeAsString(_activeTransport, flush: true);
+    } catch (_) {
+      // Falha de armazenamento nao interrompe o video.
+    }
+  }
 
   @override
   Future<void> start() async {
@@ -90,6 +126,11 @@ class RtspCameraSource implements VideoSource {
       throw const FormatException('Endereco do fluxo de video invalido.');
     }
     if (_controller != null) return;
+    _activeTransport = rawH264 ? 'http' : transport == 'auto'
+        ? (await _loadPreferredTransport() ?? 'udp')
+        : (transport == 'tcp' || transport == 'udp' ? transport : (forceTcp ? 'tcp' : 'udp'));
+    if (_disposed) return;
+    _triedAlternative = false;
 
     await _diagnostics.mark('source_start', address: url);
     await _logs.record(
@@ -99,7 +140,7 @@ class RtspCameraSource implements VideoSource {
       context: <String, Object?>{
         'host': RtspDiagnosticsService.safeHost(url),
         'engine': 'LibVLC',
-        'transport': rawH264 ? 'HTTP Annex-B' : (forceTcp ? 'TCP' : 'VLC padrao'),
+        'transport': rawH264 ? 'HTTP Annex-B' : _activeTransport.toUpperCase(),
         'softwareDecoding': softwareDecoding,
       },
     );
@@ -149,7 +190,7 @@ class RtspCameraSource implements VideoSource {
           context: <String, Object?>{
             'host': RtspDiagnosticsService.safeHost(url),
             'engine': 'LibVLC',
-            'transport': rawH264 ? 'HTTP Annex-B' : (forceTcp ? 'TCP' : 'VLC padrao'),
+            'transport': rawH264 ? 'HTTP Annex-B' : _activeTransport.toUpperCase(),
           },
         ));
       }
@@ -157,7 +198,7 @@ class RtspCameraSource implements VideoSource {
         VideoSourceState.error,
         message: 'Falha na reprodução RTSP. Tentando recuperar...',
       ));
-      _scheduleReconnect('player_error');
+      if (!_switchTransport('player_error')) _scheduleReconnect('player_error');
       return;
     }
     if (value.isPlaying) {
@@ -210,6 +251,11 @@ class RtspCameraSource implements VideoSource {
       attachedAt: _attachedAt!,
       lastSuccessfulSnapshot: _frameConfirmed ? _lastSuccessfulFrame : null,
     );
+    if (!rawH264 && transport == 'auto' && !_frameConfirmed &&
+        !_triedAlternative && now.difference(_attachedAt!) >= const Duration(seconds: 10)) {
+      _switchTransport('first_frame_timeout');
+      return;
+    }
     if (issue == RtspFrameIssue.firstFrameTimeout) {
       _scheduleReconnect('first_frame_timeout');
     } else if (issue == RtspFrameIssue.possibleFrameStall) {
@@ -235,6 +281,7 @@ class RtspCameraSource implements VideoSource {
       }
       if (_disposed || _controller != controller) return;
       _lastSuccessfulFrame = DateTime.now();
+      if (!_frameConfirmed) unawaited(_rememberTransport());
       if (!_frameConfirmed) {
         _frameConfirmed = true;
         unawaited(_diagnostics.mark('first_frame', address: url));
@@ -245,7 +292,7 @@ class RtspCameraSource implements VideoSource {
           context: <String, Object?>{
             'host': RtspDiagnosticsService.safeHost(url),
             'engine': 'LibVLC',
-            'transport': rawH264 ? 'HTTP Annex-B' : (forceTcp ? 'TCP' : 'VLC padrao'),
+            'transport': rawH264 ? 'HTTP Annex-B' : _activeTransport.toUpperCase(),
           },
         ));
       }
@@ -272,6 +319,29 @@ class RtspCameraSource implements VideoSource {
     } finally {
       _snapshotInFlight = false;
     }
+  }
+
+  bool _switchTransport(String reason) {
+    if (rawH264 || transport != 'auto' || _triedAlternative ||
+        _frameConfirmed || _disposed || _controller == null || !_controller!.isAttached || _reconnecting) {
+      return false;
+    }
+    _triedAlternative = true;
+    _activeTransport = _activeTransport == 'udp' ? 'tcp' : 'udp';
+    unawaited(_logs.record(
+      level: ErrorLogLevel.info,
+      source: 'RTSP',
+      message: 'Tentando transporte RTSP alternativo após ausência de quadro.',
+      context: <String, Object?>{
+        'host': RtspDiagnosticsService.safeHost(url),
+        'transport': _activeTransport.toUpperCase(),
+        'reason': reason,
+      },
+    ));
+    _statuses.add(VideoSourceStatus(VideoSourceState.reconnecting,
+        message: 'Testando RTSP por ${_activeTransport.toUpperCase()}...'));
+    unawaited(_reconnect());
+    return true;
   }
 
   void _scheduleReconnect(String reason) {

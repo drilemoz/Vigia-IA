@@ -1,81 +1,12 @@
-# Arquitetura — Vigia IA 1.0.350+350
-
-### 1.0.350 — análise estática e retorno de telemetria
-
-A guarda de `_refreshBattery` recebeu chaves explícitas, mantendo as verificações `mounted`, atividade em primeiro plano e valor invariável. Esse ajuste de lint não cria sensores, streams ou timers. Um teste Python preventivo reproduz a estrutura exigida, além do `flutter analyze` em CI.
-
-### 1.0.349 — ciclo de vida e serviços testáveis do mapa
-
-`MapMonitoringScreen` permanece dono do estado visual, mas delega decisões temporais do HUD a `MapHudRefreshPolicy` e conversão/deduplicação de câmeras a `MapCameraSourcePolicy`. Timer e assinatura da bússola param quando a aba oculta ou o Android pausa o app e são retomados sem duplicação no retorno. A rota e o foreground de navegação pertencem aos serviços já existentes e não são encerrados por esse ajuste visual. Telemetria de bateria/rádio usa atualização somente quando os dados mudam, com exceções nativas tratadas. Sem migração de preferências ou mudanças de protocolo.
-
-### 1.0.348 — endurecimento incremental
-
-- Estado online do mapa usa probes HTTPS 204 (TLS e status esperado); não depende apenas de DNS. Falsos negativos ainda podem ocorrer se Google estiver bloqueado.
-- Mapa passivo usa LocationAccuracy.medium/35m, com mudança do stream único quando navegação/gravação exige LocationAccuracy.high/8m; não há stream paralelo de GPS.
-- Recuperação interna de serviço usa receiver não exportado, enquanto boot/package-replace usa receiver exportado só com ações do Android.
-- Concurrency do CI separa push/manual; builds automáticos antigos da mesma ref são cancelados, builds manuais não.
-- HUD ocioso evita reconstrução total em todos os ticks de 10s; atualizações de telemetria dedicadas continuam.
-- Roteamento viário 100% offline requer motor e base de estradas próprios; dados MBTiles são apenas de visualização.
-
-- `MapLayerPickerPanel` (`lib/widgets/map_layer_picker_panel.dart`) separa aparência, provedor e base em três listas dentro do mesmo diálogo, sem duplicar a central de APIs.
-- `MapLayerPickerSelection` mantém escolhas temporárias; `MapMonitoringScreen._showLayerPicker` grava preferências somente após OK, e Cancelar descarta o rascunho.
-- Estilos Stadia e Google Maps são apresentados conforme a disponibilidade de credenciais/SDK no APK; mapa offline e persistência de configurações não foram reestruturados.
-- `test/map_layer_picker_panel_test.dart` e `tool/test_map_layer_picker_347.py` protegem o fluxo. Nenhum componente de câmera/IA/roteamento foi alterado.
-
-# Arquitetura — Vigia IA 1.0.346+346
-
-- O `DiagnosticRecoveryHost` mantém a distinção entre encerramento em memória, falha de versão anterior e falha da versão atual.
-- APK 291: contratos de `test/diagnostic_recovery_host_test.dart` refletem o título contextual por versão; adicionado cenário de versão instalada.
-- Nenhuma alteração funcional de mapas, câmeras, navegação ou diagnósticos nessa revisão.
-
-# Arquitetura — Vigia IA 1.0.346+346
-
-- O `VigiaApplication` instala o registrador antes do Flutter. O `AppDiagnostics` salva uma sessão com PID, versão, amostras limitadas e breadcrumb local. Na próxima inicialização, usa `ApplicationExitInfo` (Android 11+) com PID e intervalo do último checkpoint para associar a morte ao processo correto.
-- `DiagnosticPolicy` classifica encerramentos relevantes como erro/aviso/informação, sem inferir crash de um SIGKILL, uso de memória em cache ou ausência de marcador de fechamento. Encerramentos solicitados pelo usuário permanecem fora dos alertas.
-- `AutomaticDiagnosticsService.capture` tolera indisponibilidade temporária do canal nativo, e `DiagnosticRecoveryHost` consulta novamente no `resumed` se necessário, sem alertar repetidamente o mesmo incidente na mesma sessão. Os arquivos antigos continuam legíveis e a exportação permanece local, sob ação do usuário.
-
-# Arquitetura — Vigia IA 1.0.344+344
-
-## Correção pontual de lint no fluxo de mapas
-
-- `MapMonitoringScreen._tryOpenInitialSavedRoute` preserva o guard de rota inicial e usa bloco obrigatório para `return`, em conformidade com `curly_braces_in_flow_control_structures`.
-- `_showBikeTripPlan` cria a lista de fallback via `<MapCyclingRoute>[?_cyclingRoute]` (elemento anulável em coleção Dart), sem alterar a lista quando a rota é nula nem a lógica da rota selecionada.
-- Novas regressões estruturais em `tool/test_build288_flutter_analyze_343.py`, executadas por `tool/verify_project.sh`. São testes de fonte; o analyzer real precisa executar no CI.
-- Editor e biblioteca únicos permanecem conforme a versão 1.0.341, assim como persistência offline e mapas MapLibre/MBTiles.
-
-# Arquitetura — Vigia IA 1.0.342+342
-
-## Versão como fonte única de verdade
-
-- `pubspec.yaml` é a fonte da versão pública e do build. `AppMetadata`, os manifestos, o catálogo Novidades, a tela Sobre e os User-Agents acompanham a mesma release.
-- `test/app_metadata_test.dart` agora lê a linha `version:` do pubspec durante o Flutter test, em vez de manter números fixos; o `tool/check_version_sync.py` garante que o teste preserva esta verificação dinâmica.
-- `tool/verify_project.sh` executa tanto as regressões Python quanto o verificador de sincronização antes das etapas Flutter no CI. Não altera persistência, lógica de Mapas nem planejador único da release 341.
-
-## 1.0.341 — Editor único de cicloviagem
-
-- `TripPlanningScreen` é a interface compartilhada. Menu Início a abre vazia; `MapMonitoringScreen._showBikeTripPlan` a abre com `initialTrip` produzido por `BikeTripEditorBridge.fromMapRoute` usando uma rota já calculada.
-- `MapWorkspaceShell.initialSavedRoute` e `MapMonitoringScreen.initialSavedRoute` permitem abrir diretamente a geometria salva na origem do Planejamento; a prévia não solicita novo roteamento ou inicia gravação.
-- `PlannedBikeTripService` é a biblioteca compartilhada para Mapas e Planejamento (`upsert` serializado), com o armazenamento legado `SavedBikeRouteService` mantido para rotas antigas. Quando há uma rota Bike antiga não migrada, o editor a importa com ID determinístico, sem sobrescrever viagens existentes.
-- `MapViewSettingsService.bikeTravelPreferences`: velocidade, horas por dia e equilíbrio. `BikeTripScheduleSettingsService`: saída diária, frequência/duração das pausas, almoço automático/manual. `PlannedBikeTrip` serializa ambos, com defaults para versão anterior.
-- `BikeTripPlanner` e `BikeTripSchedule` continuam responsáveis por dividir os dias e estimar horários com base na geometria e nos parâmetros explícitos, não na duração do roteador. Mapa prévio e navegação ativa possuem estados separados; retorno do editor não redireciona navegação em andamento.
-
-# Arquitetura — Vigia IA 1.0.340+340
-
-## Política de Novidades e build preventivo
-
-- `tool/test_news_catalog_policy_301.py` monta a fixture a partir da versão e das mensagens efetivas de `pubspec.yaml` e `UpdateNewsCatalog`. Não depende de uma frase específica de release anterior.
-- `tool/check_news_catalog_policy.py` captura entradas vazias em `changes` para que o catálogo não passe se contiver textos incompletos. Rejeita versões antigas, mensagens curtas e `TODO`; permite descrições legítimas de correções.
-- `tool/verify_project.sh` aceita a implementação atual de `tlhc_hc` e `androidTextureMode: true` e proíbe o antigo padrão `opacity: navigation3dActive ? 1 : 0`, em vez de exigir HC puro ou `AnimatedOpacity`.
-- `tool/verify_project.sh` continua a executar a política antes do analyzer e do build. Nenhum componente de mapa/IA/câmeras foi modificado funcionalmente nesta versão.
-
 # Arquitetura — Vigia IA 1.0.339+339
 
-## Ciclo de vida de MBTiles e renderizador 3D
+## Vigia IA 1.0.339+339 — RTSP UDP/TCP automático
 
-- `RetainedMbTilesTileProvider` faz a ponte entre o `TileLayer` (que pode chamar `dispose` durante desmontagem) e o proprietário do mapa (`release`). O SQLite não fecha sincronicamente na desmontagem: a janela de drenagem de 45 s protege leituras de imagens iniciadas anteriormente. O período é uma mitigação conservadora, não uma confirmação de que todas as leituras concluíram.
-- `OfflineMapService.deletePackage` retira o pacote do catálogo e notifica as telas antes de solicitar a exclusão do arquivo; arquivos ainda abertos aguardam o fechamento dos respectivos provedores. Limpeza na inicialização remove MBTiles não registrados após encerramento abrupto, sem afetar `.part`/arquivos temporários.
-- O MapLibre 3D adota `AndroidPlatformViewMode.tlhc_hc` e `androidTextureMode: true`, e não começa sob `AnimatedOpacity(0)`. A composição pode recorrer a HC em caso de indisponibilidade de TextureView. Notificações de operação/download e estado de rede não invalidam um controlador 3D já montado; ativação de modo e escolha de estilo preservam seus caminhos específicos.
-- ANR e `NullPointerException` nativa continuam a exigir validação com APK instalado; nenhuma correção está declarada como comprovada sem execução no dispositivo.
+- Cadastro RTSP: Automático, Preferir UDP ou Forçar TCP.
+- Automático tenta o último transporte que confirmou quadro, ou UDP inicialmente; troca para o alternativo quando não recebe quadro.
+- Preferência armazenada em arquivo local identificado por hash SHA-256 da URL; o arquivo contém apenas tcp/udp, sem credenciais.
+- MJPEG e HTTP H.264 continuam separados do transporte RTSP.
+- Compilação Flutter/Android e testes físicos pendentes.
 
 # Arquitetura — Vigia IA 1.0.338+338
 

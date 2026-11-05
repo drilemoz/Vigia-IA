@@ -36,7 +36,7 @@ class GeminiMaps325(unittest.TestCase):
         self.assertIn('const ApiServicesSetupScreen()',source('lib/screens/settings_screen.dart'))
         self.assertIn('const GeminiMapSettingsScreen()', source('lib/screens/api_services_setup_screen.dart'))
     def test_version(self):
-        self.assertIn('version: 1.0.350+350',source('pubspec.yaml'))
-        self.assertTrue((ROOT/'RELEASE-1.0.348.md').exists())
-        self.assertIn("build: 350",source('lib/services/update_news_catalog.dart'))
+        self.assertIn('version: 1.0.339+339',source('pubspec.yaml'))
+        self.assertTrue((ROOT/'RELEASE-1.0.339.md').exists())
+        self.assertIn("build: 339",source('lib/services/update_news_catalog.dart'))
 if __name__=='__main__':unittest.main()

@@ -602,6 +602,7 @@ class MonitorController extends ChangeNotifier {
           url: config.rtspUrl ?? '', analysisInterval: analysisInterval,
           softwareDecoding: config.rtspSoftwareDecoding,
           forceTcp: config.rtspForceTcp,
+          transport: config.rtspTransport,
         ),
       VideoSourceType.remotePhone => createRemotePhoneVideoSource(
           config, analysisInterval: analysisInterval,

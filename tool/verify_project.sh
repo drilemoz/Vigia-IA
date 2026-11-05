@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-python3 -m unittest -q tool/test_build294_flutter_analyze_350.py || { echo "APK 294: lint de leitura de bateria retornou." >&2; exit 1; }
-python3 -m unittest -q tool/test_map_layer_picker_347.py || { echo "Seletor compacto de camadas 347 divergente." >&2; exit 1; }
-python3 -m unittest -q tool/test_build291_recovery_dialog_346.py || { echo "APK 291: regressao do titulo contextual de incidente." >&2; exit 1; }
-python3 -m unittest -q tool/test_diagnostic_recovery_345.py || { echo "Diagnóstico de encerramentos 345 regrediu." >&2; exit 1; }
-python3 -m unittest -q tool/test_build289_preview_card_344.py || { echo "APK 289: prévia Bike regressiva após unificação." >&2; exit 1; }
-python3 -m unittest -q tool/test_build288_flutter_analyze_343.py || { echo "APK 288: dois lints Flutter Analyzer retornaram." >&2; exit 1; }
 python3 -m unittest -q tool/test_offline_mode_download_338.py || { echo 'Mapas offline 338: escolha de renderizador/download divergente.' >&2; exit 1; }
 python3 -m unittest -q tool/test_build278_rtsp_lint_332.py || { echo "APK 278: lint RTSP retornou." >&2; exit 1; }
 python3 -m unittest -q tool/test_mcrp_codec_gate_331.py || { echo "MCRP codec gate 331 divergente." >&2; exit 1; }
@@ -63,7 +57,6 @@ python3 tool/check_mcrp_244.py || fail "MCRP v1 inconsistente."
 python3 tool/check_mcrp_272.py || fail 'Comandos remotos MCRP 272 inconsistentes.'
 python3 -m unittest -q tool/test_transmitter_redesign_283.py || fail 'Transmitir 283: QR, comandos e tema divergentes.'
 python3 -m unittest -q tool/test_trip_planning_284.py || fail 'Planejamento 284 e correção do tema do build 237 divergentes.'
-python3 -m unittest -q tool/test_unified_bike_planning_341.py || fail 'Editor único de cicloviagem 341: biblioteca ou retorno de rota divergentes.'
 python3 -m unittest -q tool/test_transmitter_remote_rec_276.py || fail 'Tela do transmissor e confirmacao de REC MCRP regrediram.'
 python3 -m unittest -q tool/test_native_transmitter_273.py || fail 'Transmissor nativo beta 273 divergente.'
 python3 -m unittest -q tool/test_build228_nv21_275.py || fail 'APK 228: rotacao NV21 Kotlin ausente ou invalida.'
@@ -90,9 +83,6 @@ python3 -m unittest -q tool/test_lan_scan_289.py || fail 'Scanner Wi-Fi hibrido 
 python3 -m unittest -q tool/test_build244_flutter_analyze_291.py || fail 'APK 244: lints Dart ou decodificacao TCP/RTSP regressaram.'
 python3 -m unittest -q tool/test_transmitter_exclusive_290.py || fail 'Transmissor Exclusivo 290: isolamento, bateria ou protecao termica regrediu.'
 python3 -m unittest -q tool/test_remote_transmission_288.py || fail 'MCRP de transmissão, economia em espera e última câmera 288 divergentes.'
-python3 -m unittest -q tool/test_app_metadata_dynamic_342.py || fail 'APK 287: teste Dart de versao deve ser dinamico.'
-python3 -m unittest -q tool/test_connectivity_energy_security_348.py || fail 'Regressao da conectividade, GPS, receiver ou CI 1.0.348.'
-python3 -m unittest -q tool/test_map_background_refactor_349.py || fail 'Mapas 1.0.349: suspensao do HUD/bussola ou isolamento da fonte de camera regrediu.'
 python3 tool/check_version_sync.py || fail 'Metadados de versao nao estao sincronizados.'
 python3 -m unittest -q tool/test_build223_version_sync_270.py || fail 'Build 223: metadados Android precisam acompanhar pubspec.'
 python3 tool/check_home_modes_252.py || fail 'Home deve mostrar 4 modos, mantendo MCRP na central Câmeras.'
@@ -110,7 +100,7 @@ if find . -type f \( -name '*.apk' -o -name '*.aab' \) -print -quit | grep -q .;
 fi
 
 grep -q '^name: vigiaia$' pubspec.yaml || fail 'Nome tecnico Dart esperado vigiaia nao encontrado.'
-grep -Fxq 'version: 1.0.350+350' pubspec.yaml || fail 'Versao esperada 1.0.350+350 nao encontrada.'
+grep -Fxq 'version: 1.0.339+339' pubspec.yaml || fail 'Versao esperada 1.0.339+339 nao encontrada.'
 grep -q 'class Esp32CapabilityObservation' lib/models/esp32_capability_status.dart || fail 'Modelo de estado por sensor ESP32 1.0.124 ausente.'
 grep -q 'Esp32CapabilityActivity.live' lib/screens/esp32_settings_screen.dart || fail 'Tela ESP32 nao renderiza estado de leitura ativa 1.0.124.'
 grep -q 'Detectado · não configurado' lib/models/esp32_capability_status.dart || fail 'Estado de sensor novo ESP32 1.0.124 ausente.'
@@ -220,7 +210,7 @@ grep -q 'MapSpeedDial' lib/screens/map_monitoring_screen.dart || fail 'Velocimet
 grep -q 'MapElevationProfileChart' lib/screens/map_monitoring_screen.dart || fail 'Perfil de altitude 1.0.199 ausente.'
 grep -q 'MapGpsQualityIndicator' lib/screens/map_monitoring_screen.dart || fail 'Qualidade GPS 1.0.199 ausente.'
 grep -q 'MapCompassDial' lib/screens/map_monitoring_screen.dart || fail 'Bussola avancada 1.0.199 ausente.'
-grep -q "'forecast_hours': '48'" lib/services/map_weather_service.dart || fail 'Previsao horaria de 48 h 1.0.348 ausente.'
+grep -q "'forecast_hours': '48'" lib/services/map_weather_service.dart || fail 'Previsao horaria de 48 h 1.0.339 ausente.'
 grep -q 'class MapWeatherForecastHour' lib/models/map_weather.dart || fail 'Modelo de previsao horaria 1.0.199 ausente.'
 grep -q 'MapRideWeatherAssessment assessForRide' lib/services/map_weather_policy.dart || fail 'Avaliacao meteorologica Bike 1.0.199 ausente.'
 grep -q 'qualidade GPS combina precisao e idade' test/map_telemetry_policy_test.dart || fail 'Teste de qualidade GPS 1.0.199 ausente.'
@@ -305,17 +295,14 @@ grep -q 'Planejar tempo de bicicleta' lib/screens/map_monitoring_screen.dart || 
 grep -q 'bikeAverageSpeedKmh' lib/services/map_view_settings_service.dart || fail 'Velocidade media Bike 1.0.174 nao e persistida.'
 grep -q 'bikeRidingHoursPerDay' lib/services/map_view_settings_service.dart || fail 'Horas/dia Bike 1.0.174 nao sao persistidas.'
 grep -q '_bikeDurationForDistance' lib/screens/map_monitoring_screen.dart || fail 'ETA Bike personalizado 1.0.174 ausente.'
-grep -q 'Future<void> _showBikeTripPlan()' lib/screens/map_monitoring_screen.dart \
-  && grep -q 'TripPlanningScreen(' lib/screens/map_monitoring_screen.dart \
-  && grep -q 'BikeTripSchedule.forDay(' lib/screens/trip_planning_screen.dart \
-  || fail 'Plano por dias 1.0.348 não usa o editor único.'
+grep -q 'Plano da cicloviagem' lib/screens/map_monitoring_screen.dart || fail 'Plano por dias 1.0.175 ausente.'
 grep -q 'Parada aproximada na rota' lib/services/bike_trip_planner.dart lib/screens/map_monitoring_screen.dart || fail 'Fallback honesto de parada 1.0.175 ausente.'
 grep -q "message: 'Ver plano por dias'" lib/screens/map_monitoring_screen.dart || fail 'Acesso ao plano por dias 1.0.175 ausente.'
 [[ -f test/map_destination_search_model_test.dart ]] || fail 'Teste de pesquisa 1.0.173 ausente.'
 [[ -f test/bike_trip_planner_test.dart ]] || fail 'Teste de planejamento Bike 1.0.174/175 ausente.'
 grep -q '150 km a 15 km/h com 4 h por dia vira 3 dias' test/bike_trip_planner_test.dart || fail 'Teste de divisao realista em dias ausente.'
 grep -q 'não inventa serviço' test/bike_trip_planner_test.dart || fail 'Teste de parada sem servico inventado ausente.'
-grep -q 'VigiaIA/1.0.350 map-search' lib/services/map_destination_search_service.dart || fail 'User-Agent da pesquisa nao acompanha 1.0.256.'
+grep -q 'VigiaIA/1.0.339 map-search' lib/services/map_destination_search_service.dart || fail 'User-Agent da pesquisa nao acompanha 1.0.256.'
 
 # Regressao de busca automatica de cidades - 1.0.238
 [[ -f lib/services/nearby_place_query.dart ]] || fail 'Consulta regional bbox ausente.'
@@ -411,7 +398,7 @@ grep -q "title: 'Clima'" lib/screens/map_monitoring_screen.dart || fail 'Control
 grep -q 'setWeatherVoiceEnabled' lib/services/map_view_settings_service.dart lib/screens/map_monitoring_screen.dart || fail 'Preferencia de voz do clima 1.0.166 ausente.'
 grep -q 'Temperatura medida pelo sensor' lib/services/map_weather_policy.dart || fail 'Fala de temperatura ESP32 1.0.166 ausente.'
 grep -q 'Previsão online' lib/services/map_weather_policy.dart || fail 'Fala de previsao online 1.0.166 ausente.'
-grep -q 'VigiaIA/1.0.350 (weather)' lib/services/map_weather_service.dart || fail 'User-Agent do clima nao acompanha a versao atual.'
+grep -q 'VigiaIA/1.0.339 (weather)' lib/services/map_weather_service.dart || fail 'User-Agent do clima nao acompanha a versao atual.'
 grep -Fq "import '../models/esp32_telemetry.dart';" lib/services/map_weather_service.dart || fail 'MapWeatherService usa Esp32ConnectionState sem importar esp32_telemetry.dart.'
 if grep -Eq "HttpException\([^)]*uri:[[:space:]]*uri" lib/services/map_weather_service.dart; then
   fail 'Clima 1.0.166 nao deve anexar URL potencialmente sensivel ao erro HTTP.'
@@ -436,8 +423,7 @@ grep -q '_styleLoadTimeout = Duration(seconds: 20)' lib/widgets/map_navigation_3
 grep -q "_setStartupPhase('first_render'" lib/widgets/map_navigation_3d_view.dart || fail 'Estagio first_render ausente.'
 grep -q 'MapEventCameraIdle' lib/widgets/map_navigation_3d_view.dart || fail 'Primeiro render nao considera CameraIdle.'
 grep -q 'MapEventIdle' lib/widgets/map_navigation_3d_view.dart || fail 'Primeiro render nao considera MapIdle.'
-grep -q 'androidMode: ml.AndroidPlatformViewMode.tlhc_hc' lib/widgets/map_navigation_3d_view.dart || fail 'Renderer 3D nao usa TLHC com fallback para HC.'
-grep -q 'androidTextureMode: true' lib/widgets/map_navigation_3d_view.dart || fail 'Renderer 3D Android requer TextureView.'
+grep -q 'AndroidPlatformViewMode.hc' lib/widgets/map_navigation_3d_view.dart || fail 'Renderer 3D nao usa Hybrid Composition.'
 grep -q '_attemptStyleFallback' lib/widgets/map_navigation_3d_view.dart || fail 'Fallback de style 3D ausente.'
 grep -q 'fallbackVectorStyleUrl' lib/screens/map_monitoring_screen.dart lib/widgets/map_navigation_3d_view.dart || fail 'Fallback Stadia/OpenFreeMap nao esta ligado.'
 grep -q 'styleProvider' lib/widgets/map_navigation_3d_view.dart || fail 'Diagnostico do provider do style ausente.'
@@ -595,10 +581,7 @@ grep -q 'MapNavigation3DView(' lib/screens/map_monitoring_screen.dart || fail 'M
 grep -q 'initPitch: tuning.pitch' lib/widgets/map_navigation_3d_view.dart || fail 'Pitch dinamico da navegacao 3D ausente.'
 # Estabilidade do renderer 3D 1.0.156
 grep -q 'final navigation3dRequested' lib/screens/map_monitoring_screen.dart || fail 'Gate de preparacao 3D 1.0.156 ausente.'
-grep -q 'ignoring: !navigation3dActive' lib/screens/map_monitoring_screen.dart || fail 'MapLibre 3D deve bloquear toques enquanto prepara o renderer.'
-if grep -Fq 'opacity: navigation3dActive ? 1 : 0' lib/screens/map_monitoring_screen.dart; then
-  fail 'MapLibre 3D nao deve iniciar sob AnimatedOpacity invisivel.'
-fi
+grep -q 'AnimatedOpacity' lib/screens/map_monitoring_screen.dart || fail 'Transicao suave 2D -> 3D 1.0.156 ausente.'
 grep -q 'if (navigation3dRequested)' lib/screens/map_monitoring_screen.dart || fail 'MapLibre nao esta sendo preparado sobre o FlutterMap.'
 python3 - <<'PY' || fail 'FlutterMap 2D nao esta garantido como camada base antes do MapLibre 3D.'
 from pathlib import Path
@@ -612,13 +595,13 @@ grep -q '_mapCreateTimeout = Duration(seconds: 12)' lib/widgets/map_navigation_3
 grep -q 'MapEventIdle' lib/widgets/map_navigation_3d_view.dart || fail 'Gate do primeiro render MapLibre 1.0.156 ausente.'
 grep -q 'fallback_3d_to_2d' lib/widgets/map_navigation_3d_view.dart || fail 'Telemetria de fallback 3D -> 2D ausente.'
 grep -q "source: 'Mapa 3D / MapLibre'" lib/widgets/map_navigation_3d_view.dart || fail 'Diagnostico MapLibre 1.0.156 ausente.'
-grep -q 'AndroidPlatformViewMode.tlhc_hc' lib/widgets/map_navigation_3d_view.dart || fail 'TLHC com fallback HC Android MapLibre nao esta explicito.'
+grep -q 'AndroidPlatformViewMode.hc' lib/widgets/map_navigation_3d_view.dart || fail 'Hybrid Composition Android MapLibre nao esta explicita.'
 grep -Fq "import '../models/map_travel_mode.dart';" lib/widgets/map_navigation_3d_view.dart || fail 'MapNavigation3DView precisa importar diretamente MapTravelModeX para resolver storageValue.'
 if grep -q 'catch (_) {}' lib/widgets/map_navigation_3d_view.dart; then
   fail 'Renderer MapLibre voltou a conter catch silencioso.'
 fi
 [[ -f github-manager.json ]] || fail 'github-manager.json ausente em 1.0.167.'
-grep -q '"version": "1.0.350"' github-manager.json || fail 'github-manager.json nao esta na versao 1.0.256.'
+grep -q '"version": "1.0.339"' github-manager.json || fail 'github-manager.json nao esta na versao 1.0.256.'
 # Version code is validated dynamically by check_version_sync.py against pubspec.yaml.
 python3 tool/check_version_sync.py || fail 'github-manager.json: versionCode/versionName ou build divergente do pubspec.'
 [[ -f test/map_travel_mode_test.dart ]] || fail 'Teste de perfis de transporte 1.0.152 ausente.'
@@ -780,7 +763,7 @@ grep -q 'recalculationCooldown = Duration(seconds: 45)' lib/services/map_navigat
 grep -q '_maybeRecalculateCyclingRoute' lib/screens/map_monitoring_screen.dart || fail 'Recalculo automatico 1.0.136 nao esta ligado ao GPS.'
 grep -q 'Rota recalculada a partir da posição atual' lib/screens/map_monitoring_screen.dart || fail 'Feedback de recalculo 1.0.136 ausente.'
 grep -q 'guidance: _navigationProgress' lib/screens/map_monitoring_screen.dart || fail 'HUD de navegacao 1.0.136 nao recebe progresso.'
-grep -q 'VigiaIA/1.0.350' lib/services/map_cycling_route_service.dart || fail 'User-Agent do roteamento ciclavel nao acompanha a versao atual.'
+grep -q 'VigiaIA/1.0.339' lib/services/map_cycling_route_service.dart || fail 'User-Agent do roteamento ciclavel nao acompanha a versao atual.'
 
 grep -q 'extendBody: true' lib/screens/map_monitoring_screen.dart || fail 'Mapa 1.0.125 nao usa superficie edge-to-edge.'
 grep -q "tooltip: 'Aumentar zoom'" lib/widgets/map_zoom_controls.dart || fail 'Controle flutuante de zoom 1.0.125 ausente.'
@@ -1213,7 +1196,7 @@ grep -q 'velocityY = instantY;' lib/services/object_tracker.dart \
 [[ -f app_identity.json ]] || fail 'Arquivo central de identidade futura nao encontrado.'
 grep -q '"displayName": "Vigia IA"' app_identity.json \
   || fail 'Nome atual nao esta registrado em app_identity.json.'
-grep -q "static const String version = '1.0.350';" lib/core/app_metadata.dart \
+grep -q "static const String version = '1.0.339';" lib/core/app_metadata.dart \
   || fail 'AppMetadata nao esta em 1.0.256.'
 # Build numerico validado contra pubspec, AppMetadata e JSON pelo check_version_sync.py.
 grep -q "version: '1.0.123'" lib/screens/app_info_screen*.dart \
@@ -1385,7 +1368,7 @@ grep -q 'flutter test --reporter expanded --coverage' .github/workflows/android-
   || fail 'Workflow nao gera cobertura expandida dos testes.'
 grep -q 'flutter-test-coverage' .github/workflows/android-apk.yml \
   || fail 'Artifact de cobertura nao encontrado no workflow.'
-grep -Fq 'version: 1.0.350+350' pubspec.yaml \
+grep -Fq 'version: 1.0.339+339' pubspec.yaml \
   || fail 'pubspec.yaml nao esta em 1.0.213+213.'
 
 # Identidade tecnica 1.0.28
@@ -1393,7 +1376,7 @@ grep -q '^name: vigiaia$' pubspec.yaml \
   || fail 'Pacote Dart nao usa vigiaia.'
 grep -q '"projectName": "vigiaia"' app_identity.json \
   || fail 'app_identity.json nao usa projectName vigiaia.'
-grep -q '"version": "1.0.350"' app_identity.json \
+grep -q '"version": "1.0.339"' app_identity.json \
   || fail 'app_identity.json nao esta na versao 1.0.213.'
 # Identidade e build Android validados dinamicamente pelo check_version_sync.py.
 grep -q '"applicationId": "com.vigiaia.app"' app_identity.json \
@@ -1712,7 +1695,7 @@ grep -q 'lite-model_efficientdet_lite0_detection_metadata_1.tflite' tool/fetch_m
 [[ -f test/detection_merger_test.dart ]] || fail 'Teste da segunda passagem nao encontrado.'
 grep -q '^## 1.0.34+34' CHANGELOG.md || fail 'CHANGELOG nao documenta 1.0.34.'
 grep -q 'Evolução 1.0.34' README.md || fail 'README nao documenta 1.0.34.'
-grep -Fq 'Vigia IA 1.0.350+350' ARCHITECTURE.md || fail 'ARCHITECTURE nao esta em 1.0.350+350.'
+grep -Fq 'Vigia IA 1.0.339+339' ARCHITECTURE.md || fail 'ARCHITECTURE nao esta em 1.0.339+339.'
 
 # Evolucao da deteccao 1.0.36
 [[ -f lib/services/detection_scan_planner.dart ]] \
@@ -3266,7 +3249,7 @@ grep -q 'this.dense = false' lib/widgets/vigia_ui.dart || fail 'VigiaStatusPill 
 grep -q 'dense: compact' lib/widgets/vigia_ui.dart || fail 'Card compacto nao usa pills densas.'
 grep -q 'padding: EdgeInsets.all(compact ? 9 : 18)' lib/widgets/vigia_ui.dart || fail 'Card compacto nao recebeu padding seguro do Android-APK-84.'
 grep -q 'final compact = constraints.maxWidth < 66' lib/widgets/vigia_ui.dart || fail 'Acesso rapido nao possui compactacao adaptativa.'
-grep -q 'VigiaIA/1.0.350' lib/services/route_explorer_service.dart || fail 'User-Agent do RouteExplorer nao acompanha a versao atual.'
+grep -q 'VigiaIA/1.0.339' lib/services/route_explorer_service.dart || fail 'User-Agent do RouteExplorer nao acompanha a versao atual.'
 grep -q "modo compacto cabe em celula estreita da Home" test/vigia_ui_test.dart || fail 'Teste de overflow do card compacto ausente.'
 grep -q "acao rapida Diagnostico cabe na grade responsiva" test/vigia_ui_test.dart || fail 'Teste de overflow do acesso rapido ausente.'
 
@@ -3359,8 +3342,8 @@ grep -q '_manualTripStops' lib/screens/map_monitoring_screen.dart || fail 'Integ
 grep -q "returnToNearby: true" lib/screens/map_monitoring_screen.dart || fail 'Retorno para Proximos pontos 1.0.199 ausente.'
 grep -q 'constraints.maxWidth >= 620 ? 4 : 3' lib/screens/map_monitoring_screen.dart || fail 'Grade compacta de categorias 1.0.199 ausente.'
 
-# Painel inicia compacto (1.0.348); detalhes disponíveis mediante expansão manual.
-grep -q 'bool _navigationPanelMinimized = true;' lib/screens/map_monitoring_screen.dart || fail 'Navegacao deve iniciar com painel compacto na 1.0.348.'
+# Painel inicia compacto (1.0.339); detalhes disponíveis mediante expansão manual.
+grep -q 'bool _navigationPanelMinimized = true;' lib/screens/map_monitoring_screen.dart || fail 'Navegacao deve iniciar com painel compacto na 1.0.339.'
 grep -q "tooltip: 'Minimizar navegação'" lib/screens/map_monitoring_screen.dart || fail 'Botao minimizar 1.0.199 ausente.'
 grep -q "tooltip: 'Expandir detalhes da navegação'" lib/screens/map_monitoring_screen.dart || fail 'Botao expandir 1.0.199 ausente.'
 grep -q "label: const Text('Mapa livre · tocar para seguir')" lib/screens/map_monitoring_screen.dart || fail 'Indicador de mapa livre 1.0.199 ausente.'

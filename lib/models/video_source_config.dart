@@ -31,6 +31,7 @@ class VideoSourceConfig {
     this.rtspUrl,
     this.rtspSoftwareDecoding = false,
     this.rtspForceTcp = true,
+    this.rtspTransport = 'auto',
     this.remoteBaseUrl,
     this.remoteAccessKey,
     this.displayName,
@@ -43,6 +44,8 @@ class VideoSourceConfig {
   final String? rtspUrl;
   final bool rtspSoftwareDecoding;
   final bool rtspForceTcp;
+  /// auto, tcp ou udp; configuracoes legadas preservam TCP.
+  final String rtspTransport;
   final String? remoteBaseUrl;
   final String? remoteAccessKey;
   final String? displayName;
@@ -59,6 +62,7 @@ class VideoSourceConfig {
     bool clearRtspUrl = false,
     bool? rtspSoftwareDecoding,
     bool? rtspForceTcp,
+    String? rtspTransport,
     String? remoteBaseUrl,
     String? remoteAccessKey,
     String? displayName,
@@ -71,6 +75,7 @@ class VideoSourceConfig {
         rtspUrl: clearRtspUrl ? null : (rtspUrl ?? this.rtspUrl),
         rtspSoftwareDecoding: rtspSoftwareDecoding ?? this.rtspSoftwareDecoding,
         rtspForceTcp: rtspForceTcp ?? this.rtspForceTcp,
+        rtspTransport: rtspTransport ?? this.rtspTransport,
         remoteBaseUrl: remoteBaseUrl ?? this.remoteBaseUrl,
         remoteAccessKey: remoteAccessKey ?? this.remoteAccessKey,
         displayName: displayName ?? this.displayName,
@@ -84,6 +89,7 @@ class VideoSourceConfig {
         'rtspUrl': includeSensitive ? rtspUrl : null,
         'rtspSoftwareDecoding': rtspSoftwareDecoding,
         'rtspForceTcp': rtspForceTcp,
+        'rtspTransport': rtspTransport,
         'remoteBaseUrl': includeSensitive || !MinhaCameraLiveUrl.isValid(remoteBaseUrl)
             ? remoteBaseUrl : null,
         'remoteAccessKey': includeSensitive ? remoteAccessKey : null,
@@ -104,6 +110,8 @@ class VideoSourceConfig {
       rtspUrl: json['rtspUrl'] as String?,
       rtspSoftwareDecoding: json['rtspSoftwareDecoding'] as bool? ?? false,
       rtspForceTcp: json['rtspForceTcp'] as bool? ?? true,
+      rtspTransport: json['rtspTransport'] as String? ??
+          ((json['rtspForceTcp'] as bool? ?? true) ? 'tcp' : 'udp'),
       remoteBaseUrl: json['remoteBaseUrl'] as String?,
       remoteAccessKey: json['remoteAccessKey'] as String?,
       displayName: json['displayName'] as String?,

@@ -52,10 +52,7 @@ void main() {
               onShowRoute: () => onAction?.call('trajeto'),
               onClose: () => onAction?.call('fechar'),
               onChoose: onChoose ?? (_) {},
-              onPlan: mode == MapTravelMode.bicycle && !loading &&
-                  (routes == null || routes.isNotEmpty)
-              ? () => onAction?.call('plano')
-              : null,
+              onPlan: plan == null ? null : () => onAction?.call('plano'),
               onStart: () => onAction?.call('iniciar'),
               onSave: () => onAction?.call('salvar'),
             ),
@@ -76,7 +73,7 @@ void main() {
     expect(find.text('Ver trajeto'), findsOneWidget);
     expect(find.text('Salvar offline'), findsOneWidget);
     expect(find.text('Iniciar'), findsOneWidget);
-    expect(find.text('Planejar viagem'), findsOneWidget);
+    expect(find.text('Carregando plano'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -115,42 +112,8 @@ void main() {
     await tester.tap(find.text('Editar ritmo do pedal'));
     await tester.tap(find.text('Ver trajeto'));
     await tester.tap(find.text('Salvar offline'));
-    await tester.tap(find.text('Planejar viagem'));
     await tester.tap(find.text('Iniciar'));
-    expect(actions, ['ritmo', 'trajeto', 'salvar', 'plano', 'iniciar']);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('sem plano calculado ainda abre o editor unificado',
-      (tester) async {
-    final actions = <String>[];
-    await render(tester, onAction: actions.add);
-    final button = tester.widget<OutlinedButton>(find.ancestor(
-      of: find.text('Planejar viagem'),
-      matching: find.byType(OutlinedButton),
-    ));
-    expect(button.onPressed, isNotNull);
-    await tester.tap(find.text('Planejar viagem'));
-    expect(actions, ['plano']);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('plano ja calculado exibe dias sem bloquear o editor',
-      (tester) async {
-    final actions = <String>[];
-    const plan = BikeTripPlan(
-      estimate: BikeTripEstimate(
-        distanceMeters: 30000,
-        ridingDuration: Duration(hours: 3),
-        dayCount: 2,
-        preferences: BikeTravelPreferences(averageSpeedKmh: 10),
-      ),
-      days: <BikeTripDayPlan>[],
-    );
-    await render(tester, plan: plan, onAction: actions.add);
-    expect(find.text('Plano 2d'), findsOneWidget);
-    await tester.tap(find.text('Plano 2d'));
-    expect(actions, ['plano']);
+    expect(actions, ['ritmo', 'trajeto', 'salvar', 'iniciar']);
     expect(tester.takeException(), isNull);
   });
 

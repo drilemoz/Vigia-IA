@@ -154,7 +154,7 @@ class MapRoutePreviewCard extends StatelessWidget {
                 Expanded(child: OutlinedButton.icon(
                   onPressed: onPlan,
                   icon: const Icon(Icons.calendar_month_rounded, size: 18),
-                  label: Text(plan == null ? 'Planejar viagem' :
+                  label: Text(plan == null ? 'Carregando plano' :
                     'Plano ${plan!.estimate.dayCount}d'),
                 )),
               if (target.travelMode == MapTravelMode.bicycle)

@@ -1,4 +1,4 @@
-"""Contratos da seleção de mapas MBTiles e downloads seguros na 1.0.343.
+"""Contratos da seleção de mapas MBTiles e downloads seguros na 1.0.339.
 
 Estes testes estáticos complementam, mas não substituem flutter analyze/test.
 """
@@ -78,9 +78,9 @@ class OfflineMap338(unittest.TestCase):
         self.assertIn('Baixe ou selecione um pacote MBTiles válido', service)
 
     def test_document_and_version(self):
-        self.assertIn('version: 1.0.350+350', read('pubspec.yaml'))
-        self.assertTrue((ROOT / 'RELEASE-1.0.348.md').exists())
-        self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').exists())
+        self.assertIn('version: 1.0.339+339', read('pubspec.yaml'))
+        self.assertTrue((ROOT / 'RELEASE-1.0.339.md').exists())
+        self.assertTrue((ROOT / 'VALIDATION-1.0.339.md').exists())
 
 if __name__ == '__main__':
     unittest.main()

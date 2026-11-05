@@ -32,7 +32,7 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
   final _candidates = <LanCameraCandidate>[];
   bool _passwordVisible = false;
   bool _softwareDecoding = false;
-  bool _forceTcp = true;
+  String _transport = 'auto';
   bool _busy = false;
   bool _scanning = false;
   bool _autoDetecting = false;
@@ -49,7 +49,7 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
     final initial = widget.existing?.address ?? widget.initialAddress ?? '';
     _name.text = widget.existing?.name ?? widget.initialName ?? 'Câmera RTSP';
     _softwareDecoding = widget.existing?.rtspSoftwareDecoding ?? false;
-    _forceTcp = widget.existing?.rtspForceTcp ?? true;
+    _transport = widget.existing?.rtspTransport ?? 'auto';
     _applyInitial(initial);
   }
 
@@ -300,7 +300,8 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
       enabled: widget.existing?.enabled ?? true,
       countingEnabled: widget.existing?.countingEnabled ?? false,
       rtspSoftwareDecoding: _softwareDecoding,
-      rtspForceTcp: _forceTcp,
+      rtspForceTcp: _transport == 'tcp',
+      rtspTransport: _transport,
     ));
   }
 
@@ -471,13 +472,20 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
               tilePadding: EdgeInsets.zero,
               title: const Text('Opções avançadas', style: TextStyle(fontSize: 14)),
               children: [
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Priorizar RTSP por TCP'),
-                  subtitle: const Text('Melhor em Wi-Fi instável. Desative para usar o transporte padrão do VLC (geralmente UDP).'),
-                  value: _forceTcp,
-                  onChanged: (value) => setState(() => _forceTcp = value),
+                DropdownButtonFormField<String>(
+                  value: _transport,
+                  decoration: const InputDecoration(labelText: 'Transporte RTSP'),
+                  items: const [
+                    DropdownMenuItem(value: 'auto', child: Text('Automático (TCP / UDP)')),
+                    DropdownMenuItem(value: 'udp', child: Text('Preferir UDP')),
+                    DropdownMenuItem(value: 'tcp', child: Text('Forçar TCP')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setState(() => _transport = value);
+                  },
                 ),
+                const Text('Automático memoriza o transporte que confirmou vídeo. '
+                    'UDP pode funcionar quando TCP não recebe imagem.'),
                 SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Decodificação por software'),

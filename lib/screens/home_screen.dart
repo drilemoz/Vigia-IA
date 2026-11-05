@@ -486,6 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
         accessKey: rememberedSource.remoteAccessKey,
         rtspSoftwareDecoding: rememberedSource.rtspSoftwareDecoding,
         rtspForceTcp: rememberedSource.rtspForceTcp,
+        rtspTransport: rememberedSource.rtspTransport,
         esp32CameraEnabled: true,
       );
     }

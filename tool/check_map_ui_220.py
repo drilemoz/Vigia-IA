@@ -5,7 +5,6 @@ root = Path(__file__).resolve().parents[1]
 read = lambda path: (root / path).read_text(encoding='utf-8')
 key = read('lib/widgets/offline_map_manager_sheet.dart')
 mapui = read('lib/screens/map_monitoring_screen.dart')
-editor = read('lib/screens/trip_planning_screen.dart')
 preview = read('lib/widgets/map_route_preview_card.dart')
 schedule = read('lib/services/bike_trip_schedule.dart')
 tests = read('test/bike_trip_schedule_test.dart')
@@ -20,23 +19,19 @@ checks = {
         'heightFactor: hasPackages || service.busy || height < 740' in key and
         'Nenhum mapa offline baixado' in key,
     'almoço manual é respeitado no cálculo':
-        'bool forceLunch = false' in schedule and
-        'forceLunch: trip.forceLunch' in editor and
-        "_choice('Almoço'" in editor and
+        'bool forceLunch = false' in schedule and 'forceLunch: _tripLunchExplicit' in mapui and
         'almoço manual é aplicado mesmo em trajetos curtos' in tests,
     'ajustes do plano não bloqueiam a lista de dias':
-        'TripPlanningScreen(' in mapui and
-        "title: const Text('Almoço automático')" in editor and
-        'BikeTripSchedule.forDay(' in editor and
-        'Widget _dayCard(' in editor,
+        'Ajustar pausas e refeições' in mapui and
+        'ChoiceChip(label: const Text(\'Automático\')' in mapui,
     'prévia de rota pode ser recolhida':
         'bool _previewCollapsed = false;' in mapui and
         'onToggleCollapsed:' in mapui and 'onPressed: onToggleCollapsed' in preview and 'Ver trajeto' in preview and 'Salvar offline' in preview,
-    'seletor único por abas e com confirmação':
-        'MapLayerPickerPanel(' in mapui and
-        'showMapCenteredDialog<MapLayerPickerSelection>' in mapui and
-        'class _MapStyleThumbnailPainter' in mapui and
-        "ValueKey('layer-tab-" in read('lib/widgets/map_layer_picker_panel.dart'),
+    'configuração de camadas por grupos':
+        "ValueKey('map-appearance-section')" in mapui and
+        "ValueKey('map-provider-section')" in mapui and
+        "ValueKey('map-base-section')" in mapui and
+        'class _MapStyleThumbnailPainter' in mapui,
 }
 for label, passed in checks.items():
     if not passed:

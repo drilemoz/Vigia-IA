@@ -18,7 +18,7 @@ class _CameraDetails extends StatelessWidget {
     final detail = switch (camera.type) {
       CameraEndpointType.local => '',
       CameraEndpointType.rtsp =>
-        'RTSP cadastrado · indicador online verifica apenas a porta (teste de vídeo no editor). ${camera.rtspForceTcp ? 'TCP. ' : 'Transporte VLC padrão. '}${camera.rtspSoftwareDecoding ? 'Decodificação por software. ' : ''}Diagnóstico disponível.',
+        'RTSP cadastrado · indicador online verifica apenas a porta (teste de vídeo no editor). ${camera.rtspTransport == 'auto' ? 'Transporte automático. ' : camera.rtspTransport == 'tcp' ? 'TCP. ' : 'UDP. '}${camera.rtspSoftwareDecoding ? 'Decodificação por software. ' : ''}Diagnóstico disponível.',
       CameraEndpointType.esp32 => _esp32Detail(),
       CameraEndpointType.remotePhone => _remoteDetail(),
     };
