@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.340+340`
+**Versão atual:** `1.0.341+341`
+
+## APK 297 — Correção Flutter Analyze RTSP/Media3 (1.0.341)
+
+O workflow Android APK 297 passou pela verificação preventiva, mas o `flutter analyze --fatal-infos --fatal-warnings` encontrou `undefined_named_parameter` na prévia Media3 (a tela passou `transport` a um widget cujo construtor recebe somente `forceTcp`) e `deprecated_member_use` no seletor RTSP. A prévia Media3 continua independente do monitoramento LibVLC: removido apenas o argumento incompatível, preservando `forceTcp`; `DropdownButtonFormField` agora usa `initialValue`. O fallback UDP/TCP por câmera permanece no player LibVLC, com mapas e demais módulos inalterados. Consulte `RELEASE-1.0.341.md` e `VALIDATION-1.0.341.md`.
+
+**Versão anterior:** `1.0.340+340`
 
 ## Correção APK 296 — Novidades e versionamento (1.0.340)
 

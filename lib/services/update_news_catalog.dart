@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.340', build: 340);
+      AppBuildVersion(version: '1.0.341', build: 341);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.340', build: 340),
+      version: AppBuildVersion(version: '1.0.341', build: 341),
       changes: <String>[
-        'APK 296: corrigida a validação da tela Novidades no GitHub Actions.',
-        'RTSP automático UDP/TCP e preferência por câmera preservados.',
-        'Metadados de versão e histórico atualizados para 1.0.340.',
+        'APK 297: corrigido o parâmetro incompatível na prévia RTSP Media3.',
+        'Atualizado seletor de transporte para Flutter 3.44 sem aviso fatal.',
+        'RTSP automático UDP/TCP, mapas e demais recursos preservados.',
       ],
     ),
   ]);

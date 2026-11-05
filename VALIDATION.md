@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.341+341
+
+- APK 297 (1.0.340): `tool/verify_project.sh` e 434 testes Python passaram no GitHub Actions; a etapa `flutter analyze --fatal-infos --fatal-warnings` retornou dois diagnósticos em `multi_camera_screen.dart` e `rtsp_camera_editor_dialog.dart`, impedindo o build APK.
+- Corrigidos: parâmetro `transport` não aceito pela prévia Media3; membro de formulário `value` depreciado em Flutter 3.44.
+- `bash tool/verify_project.sh` aprovado (exit 0); 437 testes Python executados (436 aprovados, 1 ignorado). Consulte `VALIDATION-1.0.341.md` para os detalhes. Flutter analyze/test e compilação Android precisam de nova execução no CI.
+
 # Validação Vigia IA 1.0.340+340
 
 - APK 296 (1.0.339): interrupção no `test_reject_old_release_or_empty_news` durante verificação preventiva; nenhum `flutter analyze`, `flutter test` ou build APK chegou a ser executado nessa tentativa.

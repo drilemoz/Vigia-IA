@@ -1,3 +1,10 @@
+## 1.0.341+341 (2026-11-04)
+- APK 297: `flutter analyze` detectou `undefined_named_parameter` no teste RTSP Media3, devido ao argumento `transport` indevido; removido da chamada sem afetar a seleção automática UDP/TCP do LibVLC.
+- Corrigido aviso fatal `deprecated_member_use`: seletor RTSP agora passa `initialValue` ao `DropdownButtonFormField`.
+- Acrescentado teste preventivo que verifica a assinatura Media3 e o seletor de transporte, para impedir a regressão antes do CI.
+- Versão, build, catálogo de Novidades, histórico em Sobre, documentação e validadores sincronizados.
+- Flutter analyze/test/compilação APK ainda dependem de execução no GitHub Actions.
+
 ## 1.0.340+340 (2026-11-04)
 - APK 296: corrige teste de regressão de Novidades que buscava texto removido na versão anterior, fazendo o CI parar antes do Flutter.
 - Teste usa a primeira mensagem real e versão dinâmica, com mutações explícitas para versão divergente, texto vazio e TODO/placeholder.

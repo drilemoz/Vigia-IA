@@ -473,7 +473,7 @@ class _RtspCameraEditorDialogState extends State<RtspCameraEditorDialog> {
               title: const Text('Opções avançadas', style: TextStyle(fontSize: 14)),
               children: [
                 DropdownButtonFormField<String>(
-                  value: _transport,
+                  initialValue: _transport,
                   decoration: const InputDecoration(labelText: 'Transporte RTSP'),
                   items: const [
                     DropdownMenuItem(value: 'auto', child: Text('Automático (TCP / UDP)')),

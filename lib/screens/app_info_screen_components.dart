@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.340',
+          version: '1.0.341',
           current: true,
+          changes: [
+            'APK 297: corrigido o erro do argumento transport na prévia Media3.',
+            'Dropdown de RTSP atualizado para initialValue no Flutter 3.44.',
+            'RTSP automático do VLC e outras funções preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.340',
+          current: false,
           changes: [
             'APK 296: corrigido o teste de Novidades que impedia o build.',
             'RTSP automático UDP/TCP e preferência por câmera preservados.',
@@ -2918,8 +2928,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.340',
+          version: '1.0.341',
           current: true,
+          changes: [
+            'APK 297: corrigido o erro do argumento transport na prévia Media3.',
+            'Dropdown de RTSP atualizado para initialValue no Flutter 3.44.',
+            'RTSP automático do VLC e outras funções preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.340',
+          current: false,
           changes: [
             'Corrigido o teste de Novidades que interrompia o workflow APK 296.',
             'Transporte RTSP automático UDP/TCP preservado.',

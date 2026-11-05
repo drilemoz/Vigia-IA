@@ -436,8 +436,9 @@ class _MultiCameraScreenState extends State<MultiCameraScreen> {
                                 builder: (_) => Media3RtspTestScreen(
                                   cameraName: camera.name,
                                   url: rtspTestUrl,
+                                  // A prévia Media3 usa forceTcp; o modo
+                                  // automático por câmera é do LibVLC.
                                   forceTcp: camera.rtspForceTcp,
-                                  transport: camera.rtspTransport,
                                 ),
                               ),
                             )

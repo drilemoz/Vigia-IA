@@ -10,8 +10,9 @@ class RtspAutoTransport339(unittest.TestCase):
     self.assertIn(item,s)
  def test_editor_and_multi_camera(self):
   self.assertIn("DropdownMenuItem(value: 'auto'",read('lib/screens/rtsp_camera_editor_dialog.dart'))
-  for f in ('lib/controllers/monitor_controller.dart','lib/controllers/secondary_camera_controller.dart','lib/screens/multi_camera_screen.dart'):
+  for f in ('lib/controllers/monitor_controller.dart','lib/controllers/secondary_camera_controller.dart'):
    self.assertIn('transport:',read(f))
+  self.assertIn('forceTcp: camera.rtspForceTcp',read('lib/screens/multi_camera_screen.dart'))
  def test_real_frame_confirmation_and_fallback(self):
   s=read('lib/sources/rtsp_camera_source.dart')
   for item in ("_loadPreferredTransport() ?? 'udp'", "_switchTransport('first_frame_timeout')", "_switchTransport('player_error')", "unawaited(_rememberTransport())", "':rtsp-tcp'", 'await controller.setMedia(_mediaSource, autoPlay: true)'):
@@ -19,5 +20,5 @@ class RtspAutoTransport339(unittest.TestCase):
   self.assertIn('sha256.convert(utf8.encode(url))',s)
   self.assertIn('if (rawH264 || transport != \'auto\') return;',s)
  def test_version(self):
-  self.assertIn('version: 1.0.340+340',read('pubspec.yaml'))
+  self.assertIn('version: 1.0.341+341',read('pubspec.yaml'))
 if __name__=='__main__':unittest.main()

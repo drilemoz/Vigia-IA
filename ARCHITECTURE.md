@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.341+341
+
+## APK 297 — Contrato de transporte RTSP e prévia Media3
+
+- `MultiCameraScreen` encaminha `forceTcp` à `Media3RtspTestScreen` (essa prévia experimental usa uma implementação nativa separada). Ela **não** recebe o parâmetro `transport` da política LibVLC, nem implementa a mesma lógica de fallback/memorização por câmera.
+- O modo RTSP automático UDP/TCP, com troca ao faltar primeiro quadro e memorização, permanece em `RtspCameraSource` via LibVLC na visualização principal/múltipla.
+- `RtspCameraEditorDialog` persiste `rtspTransport` e utiliza `initialValue` no DropdownButtonFormField do Flutter atual.
+- `tool/test_build297_rtsp_media3_contract_341.py` faz verificação estrutural do construtor e da chamada para impedir erro `undefined_named_parameter` em futuras edições; o analisador Flutter continua sendo a fonte definitiva de validação Dart.
+
 # Arquitetura — Vigia IA 1.0.340+340
 
 ## Integridade do catálogo de Novidades e CI (APK 296)
