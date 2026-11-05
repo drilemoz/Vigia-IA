@@ -1,3 +1,11 @@
+# Arquitetura — Vigia IA 1.0.340+340
+
+## Integridade do catálogo de Novidades e CI (APK 296)
+
+- `tool/test_news_catalog_policy_301.py` lê versão e build diretamente do `pubspec.yaml` e faz mutações estruturais em uma mensagem realmente presente no catálogo: não assume frase de uma versão antiga. Valida versão divergente, mensagens vazias e placeholders.
+- `tool/check_news_catalog_policy.py` continua responsável pela rejeição dos estados inválidos; a mudança mantém a política existente e torna a regressão confiável.
+- A integração RTSP UDP/TCP da 1.0.339 e o mapa offline da 1.0.338 não são modificados funcionalmente nesta correção.
+
 # Arquitetura — Vigia IA 1.0.339+339
 
 ## Vigia IA 1.0.339+339 — RTSP UDP/TCP automático

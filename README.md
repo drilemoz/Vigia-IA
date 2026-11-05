@@ -1,12 +1,16 @@
-## Vigia IA 1.0.339+339 — RTSP UDP/TCP automático
+**Versão atual:** `1.0.340+340`
 
-- Cadastro RTSP: Automático, Preferir UDP ou Forçar TCP.
-- Automático tenta o último transporte que confirmou quadro, ou UDP inicialmente; troca para o alternativo quando não recebe quadro.
-- Preferência armazenada em arquivo local identificado por hash SHA-256 da URL; o arquivo contém apenas tcp/udp, sem credenciais.
-- MJPEG e HTTP H.264 continuam separados do transporte RTSP.
-- Compilação Flutter/Android e testes físicos pendentes.
+## Correção APK 296 — Novidades e versionamento (1.0.340)
 
-**Versão atual:** `1.0.339+339`
+O workflow Android APK 296 parou na verificação preventiva, antes do `flutter analyze` e da compilação APK. Um teste de regressão procurava uma frase da versão 1.0.338 que já não existia no catálogo 1.0.339; o teste foi ajustado para modificar uma mensagem realmente presente, sem depender de textos de versões passadas. Preservados RTSP automático UDP/TCP, MBTiles offline, mapas, câmeras e IA. Consulte `RELEASE-1.0.340.md` e `VALIDATION-1.0.340.md`.
+
+**Versão anterior:** `1.0.339+339`
+
+## RTSP automático UDP/TCP (1.0.339)
+
+Por câmera: Automático, Preferir UDP ou Forçar TCP. O modo Automático tenta o último transporte que confirmou quadro (ou UDP inicialmente), e pode alternar para o outro quando necessário; preferência local memorizada por câmera. O registro usa hash SHA-256 da URL como identificador e contém apenas a escolha TCP/UDP, sem credenciais. Não inclui gravação RTSP nova nem mudanças nos protocolos MJPEG/H.264 HTTP. Consulte `RELEASE-1.0.339.md`.
+
+**Versão anterior:** `1.0.338+338`
 
 ## Mapas offline 1.0.338 — MBTiles, seleção correta e downloads seguros
 

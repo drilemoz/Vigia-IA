@@ -77,12 +77,21 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.339',
+          version: '1.0.340',
           current: true,
           changes: [
-            'RTSP automático testa UDP/TCP e memoriza o transporte que confirma vídeo.',
-            'Seleção de transporte por câmera e compatibilidade com configurações antigas.',
-            'Diagnósticos RTSP sem expor credenciais; reconexão no mesmo player VLC.',
+            'APK 296: corrigido o teste de Novidades que impedia o build.',
+            'RTSP automático UDP/TCP e preferência por câmera preservados.',
+            'Histórico e metadados da versão sincronizados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.339',
+          current: false,
+          changes: [
+            'RTSP automático alterna UDP/TCP quando não recebe o primeiro quadro.',
+            'Escolha de transporte e preferência memorizada por câmera.',
           ],
         ),
         SizedBox(height: 10),
@@ -2909,12 +2918,30 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.339',
+          version: '1.0.340',
           current: true,
           changes: [
-            'Modo Offline utiliza MBTiles, inclusive com chave do Google Maps configurada.',
-            'Cobertura do pacote é indicada na área visível; modos e downloads mais claros.',
-            'Downloads com cancelamento e validação; atualização sem apagar o mapa existente antes da conclusão.',
+            'Corrigido o teste de Novidades que interrompia o workflow APK 296.',
+            'Transporte RTSP automático UDP/TCP preservado.',
+            'Metadados e histórico de mudanças sincronizados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.339',
+          current: false,
+          changes: [
+            'Seleção de transporte RTSP automática, UDP ou TCP por câmera.',
+            'Fallback e memorização do transporte com vídeo confirmado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.338',
+          current: false,
+          changes: [
+            'Modo Offline utiliza MBTiles mesmo com Google Maps configurado.',
+            'Cobertura offline e downloads mais seguros.',
           ],
         ),
         SizedBox(height: 10),

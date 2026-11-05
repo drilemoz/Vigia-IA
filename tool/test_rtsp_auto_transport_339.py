@@ -19,5 +19,5 @@ class RtspAutoTransport339(unittest.TestCase):
   self.assertIn('sha256.convert(utf8.encode(url))',s)
   self.assertIn('if (rawH264 || transport != \'auto\') return;',s)
  def test_version(self):
-  self.assertIn('version: 1.0.339+339',read('pubspec.yaml'))
+  self.assertIn('version: 1.0.340+340',read('pubspec.yaml'))
 if __name__=='__main__':unittest.main()

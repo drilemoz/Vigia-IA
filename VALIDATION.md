@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.340+340
+
+- APK 296 (1.0.339): interrupção no `test_reject_old_release_or_empty_news` durante verificação preventiva; nenhum `flutter analyze`, `flutter test` ou build APK chegou a ser executado nessa tentativa.
+- Correção: teste de Novidades independente de mensagem obsoleta; três casos negativos cobertos. Versão e documentação sincronizadas.
+- `tool/verify_project.sh` aprovado (exit 0), suíte Python com 434 testes (433 aprovados, 1 ignorado); detalhes em `VALIDATION-1.0.340.md`. Flutter/Android e teste no aparelho permanecem pendentes.
+
 # Validação Vigia IA 1.0.339+339
 
 ## Vigia IA 1.0.339+339 — RTSP UDP/TCP automático

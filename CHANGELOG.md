@@ -1,3 +1,15 @@
+## 1.0.340+340 (2026-11-04)
+- APK 296: corrige teste de regressão de Novidades que buscava texto removido na versão anterior, fazendo o CI parar antes do Flutter.
+- Teste usa a primeira mensagem real e versão dinâmica, com mutações explícitas para versão divergente, texto vazio e TODO/placeholder.
+- Atualizados catálogo de Novidades, histórico em Sobre, README/CHANGELOG/ARCHITECTURE/VALIDATION, metadados e verificadores para 1.0.340+340.
+- Sem mudança no streaming: seleção automática UDP/TCP por câmera da versão 1.0.339 preservada.
+- Flutter analyze/test/compilação Android dependem de validação no GitHub Actions.
+
+## 1.0.339+339 (2026-11-04)
+- Câmeras RTSP: transporte Automático com fallback UDP/TCP e preferência local por câmera, opções manuais e monitoramento de primeiro quadro.
+- Preservados HTTP MJPEG/H.264 e componentes de mapas/offline.
+- APK 296 interrompido por teste de Novidades desatualizado; corrigido na 1.0.340.
+
 ## 1.0.339+339 (2026-11-04)
 
 - Cadastro RTSP: Automático, Preferir UDP ou Forçar TCP.
