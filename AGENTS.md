@@ -10,6 +10,13 @@ Estas regras valem para qualquer correção, melhoria, refatoração, buildfix o
 - Incrementar `version` e `versionCode` em relação à maior versão encontrada; em caso de conflito ou dúvida, documentar a evidência e preservar ambas antes de integrar.
 - Esta regra foi solicitada após a regressão que gerou 1.0.339–341 a partir da 1.0.338, apesar de a 1.0.350 já existir. Origem confirmada nesta recuperação: `Meu Drive/Projetos/Vigia IA/Vigia-IA-v1.0.350-APK294-Flutter-Analyze-Corrigido.zip`.
 
+## Exportação de credenciais autorizada pelo usuário
+
+- **Solicitação da versão 1.0.352:** exportar e importar chaves de APIs em `.env` UTF-8 legível, sem senha nem criptografia de arquivo, quando o usuário acionar a operação. Nunca impedir a exportação solicitada por exigir senha.
+- O armazenamento de chaves no Android continua protegido pelo Keystore. Exportação em texto é ação distinta e explícita, com destino selecionado pelo usuário. Não logar credenciais nem incluir arquivos `.env` em ZIPs do código-fonte.
+- Exibir as chaves cadastradas apenas quando o usuário escolher Mostrar em cada provedor; não revelar por padrão. A chave Maps SDK incorporada ao APK não é equivalente à chave salva na interface.
+- Preservar importação legada `.vigiaapis` para backups anteriores.
+
 ## Versionamento obrigatório
 
 - Nunca entregar uma nova modificação usando a mesma versão da entrega anterior.

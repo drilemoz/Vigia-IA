@@ -36,7 +36,7 @@ class TransmitterRecorder307(unittest.TestCase):
         self.assertIn('Pictures/VigiaIA/', library)
 
     def test_version(self):
-        self.assertIn('version: 1.0.351+351', src('pubspec.yaml'))
+        self.assertIn('version: 1.0.352+352', src('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').exists())
 
 if __name__ == '__main__': unittest.main()

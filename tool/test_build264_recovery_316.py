@@ -41,7 +41,7 @@ class Build264RecoveryRegression(unittest.TestCase):
         self.assertIn('exportIncident', source)
 
     def test_version(self):
-        self.assertIn('version: 1.0.351+351', (ROOT / 'pubspec.yaml').read_text('utf8'))
+        self.assertIn('version: 1.0.352+352', (ROOT / 'pubspec.yaml').read_text('utf8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
 
 

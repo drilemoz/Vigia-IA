@@ -63,7 +63,7 @@ class MapLifecycle339(unittest.TestCase):
         self.assertIn('if (previous.isOffline != current.isOffline)', network)
 
     def test_release_and_version_are_sequential(self):
-        self.assertIn('version: 1.0.351+351', read('pubspec.yaml'))
+        self.assertIn('version: 1.0.352+352', read('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').is_file())
 

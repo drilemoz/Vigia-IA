@@ -25,7 +25,7 @@ class RecoveryDialog346ContractTests(unittest.TestCase):
 
     def test_build_version_consistent(self):
         meta = (ROOT / 'pubspec.yaml').read_text('utf-8')
-        self.assertIn('version: 1.0.351+351', meta)
+        self.assertIn('version: 1.0.352+352', meta)
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
 
 

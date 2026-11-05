@@ -957,7 +957,7 @@ class MainActivity : FlutterActivity() {
                     }
                 } ?: throw IllegalStateException("Arquivo inacessível")
                 val bytes = buffer.toByteArray()
-                require(bytes.size >= 48) { "Arquivo vazio/inválido" }
+                require(bytes.isNotEmpty()) { "Arquivo vazio/inválido" }
                 pending.success(bytes)
             } catch (_: Throwable) {
                 pending.error("api_archive_read", "Não foi possível ler o arquivo de APIs (máximo 64 KiB).", null)

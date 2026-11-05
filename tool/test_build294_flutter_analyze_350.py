@@ -23,7 +23,7 @@ class Build294FlutterAnalyze350Tests(unittest.TestCase):
 
     def test_version_current_and_regression_registered(self):
         source = (ROOT / 'pubspec.yaml').read_text('utf-8')
-        self.assertIn('version: 1.0.351+351', source)
+        self.assertIn('version: 1.0.352+352', source)
         self.assertIn('tool/test_build294_flutter_analyze_350.py',
             (ROOT / 'tool/verify_project.sh').read_text('utf-8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.351.md').exists())

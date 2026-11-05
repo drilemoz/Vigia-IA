@@ -22,6 +22,129 @@ class ApiCredentialsBackupService {
     'gemini', 'googleMapsUser', 'stadia', 'geoapify', 'openrouteservice',
   };
 
+  /// Exportação SEM criptografia, somente após o usuário acionar Exportar.
+  /// A chave incorporada ao APK nunca é lida nem incluída no arquivo.
+  static const Map<String, String> envNames = <String, String>{
+    'gemini': 'GEMINI_API_KEY',
+    'googleMapsUser': 'GOOGLE_MAPS_USER_API_KEY',
+    'stadia': 'STADIA_API_KEY',
+    'geoapify': 'GEOAPIFY_API_KEY',
+    'openrouteservice': 'OPENROUTESERVICE_API_KEY',
+  };
+
+  Future<Map<String, String>> _readConfiguredKeys() async {
+    await OfflineMapService.instance.initialize();
+    final keys = <String, String>{};
+    final values = <String, String?>{
+      'gemini': await GeminiMapService.instance.reveal(),
+      'googleMapsUser': await GoogleMapsKeyService.instance.reveal(),
+      'stadia': await OfflineMapService.instance.revealStadiaApiKey(),
+      'geoapify': await PartnerApiKeyService.instance.reveal(
+          PartnerApiProvider.geoapify),
+      'openrouteservice': await PartnerApiKeyService.instance.reveal(
+          PartnerApiProvider.openrouteservice),
+    };
+    for (final entry in values.entries) {
+      final value = entry.value?.trim();
+      if (value != null && value.isNotEmpty) keys[entry.key] = value;
+    }
+    return keys;
+  }
+
+  /// Texto UTF-8 no padrão NAME=valor, sem senha e sem transformação reversível.
+  /// Destino escolhido pelo usuário com o seletor SAF do Android.
+  Future<bool> exportPlaintextEnv() async {
+    if (!Platform.isAndroid) {
+      throw const FormatException('Exportação disponível no Android.');
+    }
+    final keys = await _readConfiguredKeys();
+    if (keys.isEmpty) {
+      throw const FormatException('Não há chaves cadastradas para exportar.');
+    }
+    final lines = <String>[
+      '# Vigia IA — chaves exportadas sem criptografia (texto legível)',
+      '# Não publique nem envie este arquivo para repositórios.',
+    ];
+    for (final entry in envNames.entries) {
+      final value = keys[entry.key];
+      if (value != null) lines.add('${entry.value}=$value');
+    }
+    if (keys.containsKey('gemini')) {
+      lines.add('GEMINI_MODEL=${await GeminiMapService.instance.savedModel()}');
+    }
+    final now = DateTime.now();
+    final date = '${now.year}${now.month.toString().padLeft(2, '0')}'
+        '${now.day.toString().padLeft(2, '0')}';
+    final result = await NativePlatformService.instance.saveBytesWithPicker(
+      fileName: 'vigiaia-apis-$date.env',
+      mimeType: 'text/plain',
+      bytes: Uint8List.fromList(utf8.encode('${lines.join('\n')}\n')),
+    );
+    return result != null && result.isNotEmpty;
+  }
+
+  /// Importa .env/.txt legível e valida todos os campos antes de gravar.
+  /// As chaves ausentes não são apagadas durante apply().
+  Future<ApiCredentialsImport?> selectPlaintextEnv() async {
+    if (!Platform.isAndroid) {
+      throw const FormatException('Importação disponível no Android.');
+    }
+    final bytes = await _native.invokeMethod<Uint8List>('pickApiArchive');
+    if (bytes == null) return null;
+    if (bytes.isEmpty || bytes.length > 16384) {
+      throw const FormatException('Arquivo de APIs vazio ou grande demais.');
+    }
+    String source;
+    try {
+      source = utf8.decode(bytes, allowMalformed: false).replaceFirst('\uFEFF', '');
+    } on FormatException {
+      throw const FormatException('Selecione um arquivo .env em texto UTF-8.');
+    }
+    return parsePlaintextEnv(source);
+  }
+
+  /// Parser puro, para testar sem Android nem revelar chaves nos erros.
+  static ApiCredentialsImport parsePlaintextEnv(String source) {
+    final reverse = <String, String>{
+      for (final entry in envNames.entries) entry.value: entry.key,
+    };
+    final keys = <String, String>{};
+    String? model;
+    for (final rawLine in source.split(RegExp(r'\r?\n'))) {
+      var line = rawLine.trim();
+      if (line.isEmpty || line.startsWith('#') || line.startsWith('//')) continue;
+      if (line.startsWith('export ')) line = line.substring(7).trim();
+      final equals = line.indexOf('=');
+      if (equals <= 0) {
+        throw const FormatException('Linha inválida: use NOME=valor.');
+      }
+      final name = line.substring(0, equals).trim();
+      final value = line.substring(equals + 1).trim();
+      if (name == 'GEMINI_MODEL') {
+        if (model != null || !GeminiMapService.allowedModels.contains(value)) {
+          throw const FormatException('Modelo Gemini duplicado ou inválido.');
+        }
+        model = value;
+        continue;
+      }
+      final provider = reverse[name];
+      if (provider == null) {
+        throw FormatException('Nome não reconhecido no arquivo: $name');
+      }
+      if (keys.containsKey(provider)) {
+        throw FormatException('Chave duplicada: $name');
+      }
+      if (value.isEmpty || value.length > 4096 || RegExp(r'\s').hasMatch(value)) {
+        throw FormatException('Valor inválido para: $name');
+      }
+      keys[provider] = value;
+    }
+    if (keys.isEmpty) {
+      throw const FormatException('O arquivo não contém chaves de API reconhecidas.');
+    }
+    return ApiCredentialsImport._(keys, model);
+  }
+
   Future<bool> exportEncrypted(String password) async {
     if (!Platform.isAndroid) throw const FormatException('Recurso disponível no Android.');
     _validatePassword(password);

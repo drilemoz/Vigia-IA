@@ -33,7 +33,7 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
   Future<void> _load() async {
     await _service.refresh();
     if (!mounted) return;
-    setState(() => _hasSavedUserKey = _service.status.isUserKey);
+    setState(() => _hasSavedUserKey = _service.status.userConfigured);
   }
 
   @override
@@ -265,13 +265,36 @@ class _GoogleMapsKeyScreenState extends State<GoogleMapsKeyScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                OutlinedButton.icon(onPressed: _saving ? null : () => unawaited(_paste()),
-                  icon: const Icon(Icons.content_paste_rounded), label: const Text('Colar')),
-                OutlinedButton.icon(onPressed: _saving ? null : () => unawaited(_copy()),
-                  icon: const Icon(Icons.copy_outlined), label: const Text('Copiar')),
-                OutlinedButton.icon(onPressed: _saving ? null : () => unawaited(_check()),
-                  icon: const Icon(Icons.fact_check_outlined), label: const Text('Verificar configuração')),
+              Row(children: [
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: _saving ? null : () => unawaited(_paste()),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    visualDensity: VisualDensity.compact),
+                  icon: const Icon(Icons.content_paste_rounded, size: 18),
+                  label: const Text('Colar', style: TextStyle(fontSize: 12)),
+                )),
+                const SizedBox(width: 6),
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: _saving ? null : () => unawaited(_copy()),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    visualDensity: VisualDensity.compact),
+                  icon: const Icon(Icons.copy_outlined, size: 18),
+                  label: const Text('Copiar', style: TextStyle(fontSize: 12)),
+                )),
+                const SizedBox(width: 6),
+                Expanded(child: Tooltip(
+                  message: 'Verificar configuração',
+                  child: OutlinedButton.icon(
+                    onPressed: _saving ? null : () => unawaited(_check()),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      visualDensity: VisualDensity.compact),
+                    icon: const Icon(Icons.fact_check_outlined, size: 18),
+                    label: const Text('Verificar', style: TextStyle(fontSize: 12)),
+                  ),
+                )),
               ]),
               const SizedBox(height: 8),
               Text('O Maps SDK for Android valida a chave incluída no manifesto quando abre o mapa. Salvar nesta tela não altera o APK; o teste local não comprova autenticação ou SHA-1.',

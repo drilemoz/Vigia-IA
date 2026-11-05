@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 -m unittest -q tool/test_api_plaintext_352.py || { echo "Central de APIs/.env 352: regressão de importação ou exportação." >&2; exit 1; }
 python3 tool/check_latest_baseline.py || { echo "Base de fonte de código não verificada." >&2; exit 1; }
 python3 -m unittest -q tool/test_rtsp_auto_transport_339.py tool/test_restore_350_rtsp_351.py || { echo "Integração RTSP/recuperação da base 350 regrediu." >&2; exit 1; }
 python3 -m unittest -q tool/test_build294_flutter_analyze_350.py || { echo "APK 294: lint de leitura de bateria retornou." >&2; exit 1; }

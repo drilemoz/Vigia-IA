@@ -1,4 +1,12 @@
-## 1.0.351+351 (2026-11-05)
+## 1.0.352+352 (2026-11-05)
+
+- Google Maps: Colar, Copiar e Verificar configuração lado a lado na mesma linha.
+- Central de APIs: tela para consultar chaves registradas por provedor com Mostrar/Ocultar/Copiar.
+- Backup padrão: exportação/importação de `.env` em texto legível (sem senha nem criptografia); importação legada `.vigiaapis` mantida.
+- Validação de nomes, duplicatas e tamanho antes de importar. Proteção do armazenamento local mantida; exportação `.env` deliberadamente não protegida.
+- Nenhuma exclusão de arquivos da 1.0.351.
+
+## 1.0.352+352 (2026-11-05)
 - Recuperação: código da 1.0.350 como base real, validada no diretório e Google Drive, evitando regressão causada por linha paralela antiga.
 - Integrado RTSP automático UDP/TCP à 1.0.350: memória local do último transporte com primeiro quadro, fallback, escolha manual e compatibilidade legada, em todas as origens de câmera.
 - Preservados MBTiles, modo offline, mapas e HUD econômico, planejador de cicloviagem, diagnósticos avançados e segurança Android da 1.0.350.

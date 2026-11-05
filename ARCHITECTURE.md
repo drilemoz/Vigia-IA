@@ -1,4 +1,7 @@
-# Arquitetura — Vigia IA 1.0.351+351
+# Arquitetura — Vigia IA 1.0.352+352
+
+A central Serviços e APIs consulta credenciais protegidas sob demanda; a lista exibe status antes da revelação por toque. Exportação solicitada pelo usuário gera arquivo `.env` simples via Storage Access Framework; importar o `.env` valida o conteúdo antes de gravar. Backups legados `.vigiaapis` continuam aceitos pelo caminho separado com senha. O armazenamento criptografado no aparelho é preservado.
+
 
 ## Recuperação da versão mais recente e RTSP
 

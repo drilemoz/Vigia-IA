@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.351',
+          version: '1.0.352',
           current: true,
+          changes: [
+            'Central de APIs lista credenciais cadastradas com ações Mostrar/Ocultar e Copiar.',
+            'Exportação e importação de chaves em .env legível, sem senha obrigatória.',
+            'Google Maps organiza Colar, Copiar e Verificar na mesma linha.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.351',
+          current: false,
           changes: [
             'Integração correta sobre 1.0.350: todos os módulos posteriores preservados.',
             'RTSP automático TCP/UDP com fallback por primeiro quadro e preferência local por câmera.',
@@ -3034,8 +3044,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.351',
+          version: '1.0.352',
           current: true,
+          changes: [
+            'Central de APIs lista credenciais cadastradas com ações Mostrar/Ocultar e Copiar.',
+            'Exportação e importação de chaves em .env legível, sem senha obrigatória.',
+            'Google Maps organiza Colar, Copiar e Verificar na mesma linha.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.351',
+          current: false,
           changes: [
             'Integração correta sobre 1.0.350: todos os módulos posteriores preservados.',
             'RTSP automático TCP/UDP com fallback por primeiro quadro e preferência local por câmera.',

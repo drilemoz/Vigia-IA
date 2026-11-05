@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.352+352
+
+Consulte `VALIDATION-1.0.352.md` para testes de central de APIs e .env.
+
 # Validação Vigia IA 1.0.351+351
 
 Recuperação da base oficial 1.0.350 com integração RTSP automático UDP/TCP. A política `AGENTS.md` agora exige consultar o diretório ou Google Drive para localizar a última fonte antes de modificar. O relatório de testes e ressalvas da nova versão está em `VALIDATION-1.0.351.md`.

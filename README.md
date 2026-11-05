@@ -1,4 +1,8 @@
-**Versão atual:** `1.0.351+351`
+**Versão atual:** `1.0.352+352`
+
+## 1.0.352 — Central de APIs e exportação em texto
+
+A central permite consultar e revelar por toque as credenciais salvas, exportar/importar um arquivo `.env` UTF-8 sem criptografia e importar backups antigos `.vigiaapis` com senha. A chave do Google Maps embutida no APK não é exportada. Botões Colar/Copiar/Verificar ficam na mesma linha na tela Google Maps. Dados continuam protegidos no armazenamento do Android; o arquivo `.env` exportado contém chaves em texto legível.
 
 ## 1.0.351 — Recuperação da base 1.0.350 e RTSP automático
 

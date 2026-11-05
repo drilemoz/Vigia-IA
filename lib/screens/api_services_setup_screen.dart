@@ -13,6 +13,7 @@ import 'api_service_help.dart';
 import 'partner_api_key_screen.dart';
 import 'gemini_map_settings_screen.dart';
 import 'google_maps_key_screen.dart';
+import 'registered_api_keys_screen.dart';
 import 'launch_mode_screen.dart';
 
 /// Configuração opcional após as permissões, também acessível em Configurações.
@@ -150,6 +151,61 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
     }
   }
 
+  Future<void> _transferPlaintextKeys({required bool exporting}) async {
+    if (_transferring) return;
+    setState(() => _transferring = true);
+    try {
+      final service = ApiCredentialsBackupService.instance;
+      if (exporting) {
+        final saved = await service.exportPlaintextEnv();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(saved
+            ? 'APIs exportadas em arquivo .env legível, sem criptografia.'
+            : 'Exportação cancelada.')));
+      } else {
+        final data = await service.selectPlaintextEnv();
+        if (!mounted || data == null) return;
+        await _confirmImport(data);
+      }
+    } on FormatException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(error.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Não foi possível concluir a operação com o arquivo .env.')));
+      }
+    } finally {
+      if (mounted) setState(() => _transferring = false);
+    }
+  }
+
+  Future<void> _confirmImport(ApiCredentialsImport archive) async {
+    final label = archive.providers.join(', ');
+    final confirmed = await showDialog<bool>(context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirmar importação'),
+        content: Text('Provedores no arquivo: $label.\n\n'
+          'As chaves presentes substituirão as correspondentes neste aparelho. '
+          'As demais serão mantidas. A chave incorporada ao APK do Google Maps NÃO muda.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Importar')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await ApiCredentialsBackupService.instance.apply(archive);
+    await _refresh();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Chaves importadas. Use Testar em cada provedor para validar.')));
+  }
+
   Future<void> _transferApiKeys({required bool exporting}) async {
     if (_transferring) return;
     final password = await _askBackupPassword(exporting: exporting);
@@ -166,27 +222,7 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
       } else {
         final archive = await service.selectAndDecrypt(password);
         if (!mounted || archive == null) return;
-        final label = archive.providers.join(', ');
-        final confirmed = await showDialog<bool>(context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text('Confirmar importação'),
-            content: Text('Provedores no arquivo: $label.\n\n'
-              'As chaves presentes substituirão as correspondentes neste aparelho. '
-              'As demais serão mantidas. A chave incorporada ao APK do Google Maps NÃO muda.'),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Cancelar')),
-              FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Importar')),
-            ],
-          ),
-        );
-        if (confirmed != true || !mounted) return;
-        await service.apply(archive);
-        await _refresh();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Chaves importadas. Use Testar em cada provedor para validar.')));
+        await _confirmImport(archive);
       }
     } catch (error) {
       if (!mounted) return;
@@ -253,20 +289,32 @@ class _ApiServicesSetupScreenState extends State<ApiServicesSetupScreen> {
             const SizedBox(height: 10),
             Wrap(spacing: 8, runSpacing: 8, children: [
               OutlinedButton.icon(
-                onPressed: _transferring ? null : () => _transferApiKeys(exporting: true),
+                onPressed: _transferring ? null : () => _transferPlaintextKeys(exporting: true),
                 icon: const Icon(Icons.file_upload_outlined),
                 label: const Text('Exportar APIs'),
               ),
               OutlinedButton.icon(
-                onPressed: _transferring ? null : () => _transferApiKeys(exporting: false),
+                onPressed: _transferring ? null : () => _transferPlaintextKeys(exporting: false),
                 icon: const Icon(Icons.file_download_outlined),
                 label: const Text('Importar APIs'),
               ),
             ]),
-            const SizedBox(height: 6),
-            const Text('Backup com senha (AES-256-GCM). Inclui somente chaves configuradas; '
-              'Open-Meteo não tem chave e a chave Google Maps incorporada ao APK não é exportada.',
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _transferring ? null : () => _openScreen(const RegisteredApiKeysScreen()),
+              icon: const Icon(Icons.visibility_outlined),
+              label: const Text('Ver APIs e chaves cadastradas'),
+            ),
+            const SizedBox(height: 8),
+            const Text('Exportação .env em texto legível, sem senha nem criptografia. '
+              'Guarde o arquivo: qualquer pessoa que o abrir poderá usar as chaves. '
+              'Open-Meteo não exige chave e a chave Google Maps do APK não é exportada.',
               style: TextStyle(fontSize: 12)),
+            Align(alignment: Alignment.centerLeft, child: TextButton.icon(
+              onPressed: _transferring ? null : () => _transferApiKeys(exporting: false),
+              icon: const Icon(Icons.history_rounded),
+              label: const Text('Importar backup antigo (.vigiaapis)'),
+            )),
             const SizedBox(height: 14),
             if (_loading || _transferring) const LinearProgressIndicator(),
             _ApiServiceCard(

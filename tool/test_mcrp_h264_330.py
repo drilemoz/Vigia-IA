@@ -36,7 +36,7 @@ class TestMcrpH264Integration(unittest.TestCase):
         self.assertIn('analysisEnabled: _analyze', s)
         self.assertNotIn('A IA local exige MJPEG', s)
     def test_build_and_release(self):
-        self.assertIn('version: 1.0.351+351', source('pubspec.yaml'))
+        self.assertIn('version: 1.0.352+352', source('pubspec.yaml'))
         self.assertTrue((R / 'RELEASE-1.0.348.md').exists())
 
 if __name__ == '__main__':

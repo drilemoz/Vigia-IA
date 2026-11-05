@@ -54,7 +54,7 @@ class MapBackgroundRefactor349(unittest.TestCase):
         self.assertIn('test(', read('test/map_camera_source_policy_test.dart'))
 
     def test_build_is_sequential(self):
-        self.assertIn('version: 1.0.351+351', read('pubspec.yaml'))
+        self.assertIn('version: 1.0.352+352', read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.349.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.349.md').is_file())
 

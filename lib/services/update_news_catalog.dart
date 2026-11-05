@@ -7,16 +7,16 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.351', build: 351);
+      AppBuildVersion(version: '1.0.352', build: 352);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.351', build: 351),
+      version: AppBuildVersion(version: '1.0.352', build: 352),
       changes: <String>[
-        'Base 1.0.350 restaurada: preservados mapas, GPS, cicloviagem e diagnósticos.',
-        'Câmeras RTSP agora escolhem UDP ou TCP automaticamente quando não chega vídeo.',
-        'Transporte funcional memorizado por câmera; opções manuais UDP e TCP disponíveis.',
-        'Prévia Media3 permanece separada; corrigido o seletor para Flutter atual.',
+        'Serviços e APIs agora permite consultar as chaves cadastradas com Mostrar/Ocultar e Copiar.',
+        'Chaves de APIs podem ser exportadas e importadas em arquivo .env legível, sem senha.',
+        'Colar, Copiar e Verificar configuração do Google Maps ficam na mesma linha.',
+        'Backups antigos protegidos continuam importáveis; RTSP e mapas preservados.',
       ],
     ),
   ]);

@@ -43,7 +43,7 @@ class Restore350Rtsp351(unittest.TestCase):
         self.assertIn('forceTcp: camera.rtspForceTcp',match.group(1))
         self.assertIn('initialValue: _transport',read('lib/screens/rtsp_camera_editor_dialog.dart'))
     def test_version_and_baseline_policy(self):
-        self.assertIn('version: 1.0.351+351',read('pubspec.yaml'))
+        self.assertIn('version: 1.0.352+352',read('pubspec.yaml'))
         self.assertIn('Google Drive',read('AGENTS.md'))
         self.assertIn('versão mais recente',read('AGENTS.md'))
 if __name__=='__main__':unittest.main()

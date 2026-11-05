@@ -78,7 +78,7 @@ class OfflineMap338(unittest.TestCase):
         self.assertIn('Baixe ou selecione um pacote MBTiles válido', service)
 
     def test_document_and_version(self):
-        self.assertIn('version: 1.0.351+351', read('pubspec.yaml'))
+        self.assertIn('version: 1.0.352+352', read('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').exists())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').exists())
 
