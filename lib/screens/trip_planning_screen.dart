@@ -980,7 +980,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
 
   void _openPreviewMap(OfflineMapPackage? package) {
     if (_previewOfflineMapId == package?.id &&
-        (package == null || _previewOfflineTileProvider != null)) return;
+        (package == null || _previewOfflineTileProvider != null)) {
+      return;
+    }
     _previewOfflineTileProvider?.release();
     _previewOfflineTileProvider = null;
     _previewOfflineMapId = package?.id;
@@ -1028,7 +1030,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       if (package.contains(
         latitude: points[i].latitude,
         longitude: points[i].longitude,
-      )) matches++;
+      )) {
+        matches++;
+      }
     }
     if (matches < count) {
       return 'Atenção: $matches de $count amostras da rota estão dentro '

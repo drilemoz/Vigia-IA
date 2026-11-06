@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.356+356
+
+Consultar `VALIDATION-1.0.356.md` para análise do workflow APK 303 e testes da correção; `flutter analyze` e a compilação do APK exigem execução em ambiente com Flutter instalado.
+
 # Validação Vigia IA 1.0.355+355
 
 Ver `VALIDATION-1.0.355.md` para análise dos logs APK 302, testes preventivos e pendências de build Flutter/Gradle.

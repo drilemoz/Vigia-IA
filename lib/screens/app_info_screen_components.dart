@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.355',
+          version: '1.0.356',
           current: true,
+          changes: [
+            'Corrigidos avisos de análise estática na prévia de mapas offline e cobertura do Planejamento (APK 303).',
+            'Adicionado teste contra condições sem chaves na seleção e conferência do MBTiles.',
+            'Pontos offline e funcionalidades anteriores mantidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.355',
+          current: false,
           changes: [
             'Corrigida verificação preventiva do Planejamento que interrompia o workflow APK 302.',
             'Melhorada a tolerância dos testes a mudanças internas de nomes de variáveis.',
@@ -3074,8 +3084,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.355',
+          version: '1.0.356',
           current: true,
+          changes: [
+            'Corrigidos avisos de análise estática na prévia de mapas offline e cobertura do Planejamento (APK 303).',
+            'Adicionado teste contra condições sem chaves na seleção e conferência do MBTiles.',
+            'Pontos offline e funcionalidades anteriores mantidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.355',
+          current: false,
           changes: [
             'Corrigida verificação preventiva do Planejamento que interrompia o workflow APK 302.',
             'Melhorada a tolerância dos testes a mudanças internas de nomes de variáveis.',

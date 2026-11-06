@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.355+355`
+**Versão atual:** `1.0.356+356`
+
+## 1.0.356 — Buildfix APK 303: análise estática do Planejamento
+
+- Corrigido `curly_braces_in_flow_control_structures` em duas condições do arquivo `lib/screens/trip_planning_screen.dart` reportadas pelo `flutter analyze --fatal-infos --fatal-warnings` no workflow APK 303.
+- As correções apenas adicionam blocos com chaves à guarda do provedor MBTiles e ao contador de cobertura da rota; o comportamento original foi preservado.
+- Incluído teste estrutural `tool/test_build303_flutter_analyze_356.py` para cobrir os dois pontos do erro.
+- Nenhuma mudança em cálculos de rota, limites de cache Stadia, dados offline ou políticas de rede. `flutter analyze` e o APK ainda exigem validação no CI.
 
 ## 1.0.355 — Correção do workflow Android APK 302
 

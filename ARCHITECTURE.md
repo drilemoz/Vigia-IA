@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.356+356
+
+## Buildfix APK 303 — prévia MBTiles no Planejamento
+
+Em `TripPlanningScreen`, `_openPreviewMap` e `_previewCoverageMessage` preservam as condições, retorno antecipado e incremento de cobertura, agora com blocos de chaves exigidos pela análise Dart. O teste `test_build303_flutter_analyze_356` cobre esses trechos. Serviços de roteamento, dados offline, API e política de cache não foram alterados nesta versão.
+
 # Arquitetura — Vigia IA 1.0.355+355
 
 ## Buildfix 302 — contrato preventivo de Planejamento

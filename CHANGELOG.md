@@ -1,3 +1,8 @@
+## 1.0.356+356 (2026-11-05)
+- Buildfix APK 303: adicionados blocos com chaves a duas condições na prévia MBTiles do Planejamento que geravam `curly_braces_in_flow_control_structures` em `flutter analyze --fatal-infos --fatal-warnings` (linhas 983 e 1031 da 1.0.355).
+- Novo teste de regressão para essas duas expressões, sem alterar a seleção de mapas nem a contagem de cobertura.
+- Conservadas todas as melhorias offline das versões 1.0.354 e 1.0.355; versionCode, Novidades, User-Agent e metadados sincronizados.
+
 ## 1.0.355+355 (2026-11-05)
 - Buildfix workflow Android APK 302: corrigido teste de contrato do Planejamento que exigia `_routeMap(route)` embora a interface real invoque `_routeMap(trip)`.
 - Teste passa a derivar o parâmetro de `_preview(PlannedBikeTrip ...)`, verificando que mapa e ações usam a mesma viagem, sem depender do nome interno.
