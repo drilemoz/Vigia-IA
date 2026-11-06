@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 python3 -m unittest -q tool/test_trip_terrain_weather_359.py || { echo "Relevo/Clima 359: regressão nos dados salvos ou consulta manual." >&2; exit 1; }
+python3 -m unittest -q tool/test_trip_effort_reserve_360.py || { echo "Planejamento 360: regressão da simulação ou persistência." >&2; exit 1; }
 python3 -m unittest -q tool/test_offline_planning_354.py || { echo 'Offline 354: pontos/MBTiles/planejamento regrediram.' >&2; exit 1; }
 python3 -m unittest -q tool/test_version_guard_353.py tool/test_api_plaintext_352.py || { echo "Central de APIs/.env 352: regressão de importação ou exportação." >&2; exit 1; }
 python3 tool/check_latest_baseline.py || { echo "Base de fonte de código não verificada." >&2; exit 1; }

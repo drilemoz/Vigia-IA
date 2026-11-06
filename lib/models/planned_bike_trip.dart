@@ -25,6 +25,8 @@ class PlannedBikeTrip {
     required this.lunchMinutes,
     this.balanceDays = true,
     this.forceLunch = false,
+    this.climbReserveMinutesPer100m = 0,
+    this.latestArrivalMinute = 18 * 60,
     this.places = const <MapDestinationSearchResult>[],
     this.startDate,
     this.weatherDays = const <TripWeatherDayForecast>[],
@@ -44,6 +46,11 @@ class PlannedBikeTrip {
   final int lunchMinutes;
   final bool balanceDays;
   final bool forceLunch;
+  /// Tempo extra escolhido pelo usuário a cada 100 m de subida documentada.
+  /// Zero mantém a estimativa anterior, sem alteração de velocidade.
+  final int climbReserveMinutesPer100m;
+  /// Limite pessoal para chegada. Não representa anoitecer astronômico.
+  final int latestArrivalMinute;
   final List<MapDestinationSearchResult> places;
   /// Data local escolhida pelo usuário, sem assumir hoje automaticamente.
   final DateTime? startDate;
@@ -66,6 +73,8 @@ class PlannedBikeTrip {
     int? lunchMinutes,
     bool? balanceDays,
     bool? forceLunch,
+    int? climbReserveMinutesPer100m,
+    int? latestArrivalMinute,
   }) => PlannedBikeTrip(
     id: id, savedAt: savedAt, origin: origin, destination: destination,
     routes: routes, selectedIndex: selectedIndex ?? this.selectedIndex,
@@ -77,6 +86,8 @@ class PlannedBikeTrip {
     lunchMinutes: lunchMinutes ?? this.lunchMinutes,
     balanceDays: balanceDays ?? this.balanceDays,
     forceLunch: forceLunch ?? this.forceLunch,
+    climbReserveMinutesPer100m: climbReserveMinutesPer100m ?? this.climbReserveMinutesPer100m,
+    latestArrivalMinute: latestArrivalMinute ?? this.latestArrivalMinute,
     places: places ?? this.places,
     startDate: clearStartDate ? null : startDate ?? this.startDate,
     weatherDays: weatherDays ?? this.weatherDays,
@@ -106,6 +117,8 @@ class PlannedBikeTrip {
     'lunchMinutes': lunchMinutes,
     'balanceDays': balanceDays,
     'forceLunch': forceLunch,
+    'climbReserveMinutesPer100m': climbReserveMinutesPer100m,
+    'latestArrivalMinute': latestArrivalMinute,
     'places': [for (final place in places.take(100)) place.toJson()],
     'startDate': startDate?.toIso8601String(),
     'weatherDays': [for (final forecast in weatherDays.take(16)) forecast.toJson()],
@@ -166,6 +179,15 @@ class PlannedBikeTrip {
       lunchMinutes: ((json['lunchMinutes'] as num?)?.toInt() ?? 40).clamp(0, 120).toInt(),
       balanceDays: json['balanceDays'] is bool ? json['balanceDays'] as bool : true,
       forceLunch: json['forceLunch'] == true,
+      climbReserveMinutesPer100m:
+          (json['climbReserveMinutesPer100m'] is num &&
+                  (json['climbReserveMinutesPer100m'] as num).isFinite
+              ? (json['climbReserveMinutesPer100m'] as num).toInt() : 0)
+              .clamp(0, 20).toInt(),
+      latestArrivalMinute: ((json['latestArrivalMinute'] is num &&
+                  (json['latestArrivalMinute'] as num).isFinite
+              ? (json['latestArrivalMinute'] as num).toInt() : 18 * 60) / 60)
+              .round().clamp(15, 21).toInt() * 60,
       places: List<MapDestinationSearchResult>.unmodifiable(places),
       startDate: parsedDate,
       weatherDays: List<TripWeatherDayForecast>.unmodifiable(forecastDays),

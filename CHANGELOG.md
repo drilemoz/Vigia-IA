@@ -1,3 +1,12 @@
+## 1.0.360+360 (2026-11-06)
+
+- Planejamento: cenário opcional e explícito de reserva de tempo por 100 m de subida informada pelo perfil de altitude da rota, sem preencher lacunas ou supor velocidade real do usuário.
+- Resumo do tempo de pedal e chegada por etapa já inclui a reserva escolhida. Exibe avisos quando a etapa excede o tempo diário, ultrapassa o limite de chegada configurado ou não tem pernoite confirmado.
+- Horário-limite (15h–21h) e reserva por subida são salvos na própria viagem, inclusive nos backups JSON; viagens antigas continuam com reserva 0 e limite 18h.
+- Previsão do tempo continua somente manual; muda o horário estimado de consulta quando há reserva, invalidando dados meteorológicos anteriores quando o cenário é alterado.
+- Comparação das rotas alternativas destaca o ganho de elevação do provedor quando disponível; não indica condição da via ou segurança.
+- Testes Dart e regressões preventivas adicionados. Nenhuma mudança no motor de rotas, limites de cache, transmissão e módulos ESP32/câmeras.
+
 ## 1.0.359+359 (2026-11-05)
 - Planejamento da cicloviagem preserva ganho/perda agregados do ORS e altitude de vértices GeoJSON nas rotas persistidas; o codec JSON mantém compatibilidade com arquivos antigos.
 - Serviço `TripTerrainService` reparte diferenças de elevação conhecidas pelos limites em quilômetros de cada dia e apresenta percentual de cobertura; sem amostras, indica indisponível. Os horários ainda ignoram inclinação e vento.

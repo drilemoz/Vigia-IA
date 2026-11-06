@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.359', build: 359);
+      AppBuildVersion(version: '1.0.360', build: 360);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.359', build: 359),
+      version: AppBuildVersion(version: '1.0.360', build: 360),
       changes: <String>[
-        'Planejamento preserva altitudes e totais de subida/descida nas rotas salvas para consulta offline.',
-        'Exibe relevo por etapa quando o provedor fornece perfil completo ou parcial de altitudes.',
-        'Consulta manual de clima por dia usando a data escolhida, com amostras salvas e avisos de desatualização.',
+        'Reserva opcional de tempo por 100 m de subida com dados altimétricos disponíveis, sem extrapolar lacunas.',
+        'Avisos por dia de pedal acima do limite, chegada tardia e parada sem confirmação.',
+        'Preferências salvas com a viagem e horário da consulta manual de clima ajustado à simulação.',
       ],
     ),
   ]);

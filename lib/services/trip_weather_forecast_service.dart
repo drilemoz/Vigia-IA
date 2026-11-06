@@ -7,6 +7,8 @@ import '../models/bike_trip_plan.dart';
 import '../models/map_cycling_route.dart';
 import '../models/trip_weather_day_forecast.dart';
 import 'bike_trip_schedule.dart';
+import 'trip_effort_reserve_service.dart';
+import 'trip_terrain_service.dart';
 import 'data_usage_service.dart';
 
 class TripWeatherFetchResult {
@@ -34,14 +36,20 @@ class TripWeatherForecastService {
     required int breakMinutes,
     required int lunchMinutes,
     required bool forceLunch,
+    int climbReserveMinutesPer100m = 0,
   }) async {
+    final terrain = TripTerrainService.forDays(route: route, days: days);
     final now = DateTime.now().toUtc();
     final results = <TripWeatherDayForecast>[];
     var eligible = 0;
     var errors = 0;
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
-      for (final day in days) {
+      for (var i = 0; i < days.length; i++) {
+        final day = TripEffortReserveService.adjustedDay(
+          day: days[i], terrain: terrain[i],
+          minutesPer100Meters: climbReserveMinutesPer100m,
+        );
         if (eligible >= maxQueriesPerTap) {
           break;
         }
@@ -98,7 +106,7 @@ class TripWeatherForecastService {
     });
     final request = await client.getUrl(uri).timeout(const Duration(seconds: 6));
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.359 (trip-weather)');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.360 (trip-weather)');
     final response = await request.close().timeout(const Duration(seconds: 10));
     if (response.statusCode != HttpStatus.ok) {
       await response.drain();

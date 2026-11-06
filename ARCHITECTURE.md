@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.360+360 (cenários de esforço e viabilidade por etapa)
+
+O `TripEffortReserveService` transforma uma preferência explícita do usuário (minutos adicionais a cada 100 m de subida documentada) em uma simulação de duração por etapa. Ele consome apenas o `TripTerrainService.forDays` e não cria altitude nem extrapola para trechos sem amostras. A reserva é uma margem hipotética, **não** estimativa física nem velocidade medida; a quantidade de dias permanece calculada pelo modelo base. O `TripDayReadinessService` sinaliza horas de pedal acima da preferência diária, chegada depois do limite pessoal e paradas sem confirmação, sem estimar nascer/pôr do sol.
+
+O `PlannedBikeTrip` serializa as duas preferências extras com padrões retrocompatíveis (0 min/100m e 18h). Ao mudar a reserva, a tela remove previsões que dependiam do horário anterior. A consulta meteorológica continua **exclusivamente sob demanda**, e seu horário leva em conta a reserva simulada. O modo offline não executa novas requisições nem recálculo do grafo de ruas.
+
 # Arquitetura — Vigia IA 1.0.359+359 (relevo e clima da cicloviagem)
 
 O modelo `MapCyclingRoute` inclui `elevationsMeters` (lista opcional alinhada a `points`) e as métricas agregadas preexistentes de subida/descida. A leitura GeoJSON do ORS agora preserva a terceira coordenada quando válida; `SavedBikeRouteService` as serializa somente quando disponíveis. Rotas antigas permanecem válidas e sem perfis fictícios. `TripTerrainService` distribui as diferenças de altitude pelos quilômetros diários com interpolação sobre os segmentos que têm duas alturas válidas. Se houver falta de dados, relata a cobertura e não preenche lacunas.

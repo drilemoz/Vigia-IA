@@ -20,6 +20,7 @@ import '../services/bike_trip_planner.dart';
 import '../services/bike_trip_editor_bridge.dart';
 import '../services/bike_trip_schedule.dart';
 import '../services/trip_terrain_service.dart';
+import '../services/trip_effort_reserve_service.dart';
 import '../services/trip_weather_forecast_service.dart';
 import '../services/bike_trip_schedule_settings_service.dart';
 import '../services/location_tracking_service.dart';
@@ -732,6 +733,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         breakMinutes: trip.breakMinutes,
         lunchMinutes: trip.lunchMinutes,
         forceLunch: trip.forceLunch,
+        climbReserveMinutesPer100m: trip.climbReserveMinutesPer100m,
       );
       if (!mounted || _draft?.id != trip.id ||
           _draft?.startDate != trip.startDate ||
@@ -743,7 +745,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           _draft?.breakMinutes != trip.breakMinutes ||
           _draft?.lunchMinutes != trip.lunchMinutes ||
           _draft?.forceLunch != trip.forceLunch ||
-          _draft?.balanceDays != trip.balanceDays) {
+          _draft?.balanceDays != trip.balanceDays ||
+          _draft?.climbReserveMinutesPer100m != trip.climbReserveMinutesPer100m) {
         return;
       }
       final merged = <int, TripWeatherDayForecast>{
@@ -1300,6 +1303,18 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final plan = _plan(trip);
     final estimate = plan.estimate;
     final terrain = TripTerrainService.forDays(route: route, days: plan.days);
+    final simulatedDays = <BikeTripDayPlan>[
+      for (var i = 0; i < plan.days.length; i++)
+        TripEffortReserveService.adjustedDay(
+          day: plan.days[i], terrain: terrain[i],
+          minutesPer100Meters: trip.climbReserveMinutesPer100m,
+        ),
+    ];
+    final plannedRideSeconds = simulatedDays.fold<int>(0,
+        (sum, day) => sum + day.ridingDuration.inSeconds);
+    final reservedMinutes = ((plannedRideSeconds -
+        plan.days.fold<int>(0, (sum, day) => sum + day.ridingDuration.inSeconds)) / 60)
+        .round();
     final departureDate = trip.startDate;
     return Column(key: _previewKey, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SizedBox(height: 12),
@@ -1309,7 +1324,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
           for (var i = 0; i < trip.routes.length; i++)
             Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(
-              label: Text('Rota ${i + 1} · ${(trip.routes[i].distanceMeters / 1000).toStringAsFixed(0)} km'),
+              label: Text('Rota ${i + 1} · ${(trip.routes[i].distanceMeters / 1000).toStringAsFixed(0)} km'
+                  '${trip.routes[i].ascentMeters == null ? '' : ' · +${trip.routes[i].ascentMeters!.toStringAsFixed(0)} m'}'),
               selected: trip.selectedIndex == i,
               onSelected: (_) {
                 _selectPreviewMapForRoute(trip.routes[i]);
@@ -1337,7 +1353,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         const SizedBox(height: 12),
         Row(children: [
           Expanded(child: _metric('Distância', '${estimate.distanceKm.toStringAsFixed(1)} km', Icons.route_rounded)),
-          Expanded(child: _metric('Pedalando', '${estimate.ridingHours.toStringAsFixed(1)} h', Icons.timer_outlined)),
+          Expanded(child: _metric('Pedalando', '${(plannedRideSeconds / 3600).toStringAsFixed(1)} h', Icons.timer_outlined)),
           Expanded(child: _metric('Dias', '${estimate.dayCount}', Icons.calendar_today_outlined)),
         ]),
         const SizedBox(height: 8),
@@ -1346,9 +1362,55 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
               '${route.ascentMeters?.toStringAsFixed(0) ?? '?'} m · descida '
               '${route.descentMeters?.toStringAsFixed(0) ?? '?'} m',
               style: const TextStyle(fontSize: 12)),
-        const Text('O tempo ainda usa velocidade fixa: não desconta subidas, vento, '
-            'segurança nem desvios. Sem perfil do provedor, relevo indisponível.',
+        Text(reservedMinutes > 0
+            ? 'Cenário: ${estimate.ridingHours.toStringAsFixed(1)} h base + '
+                '$reservedMinutes min de reserva para subidas documentadas.'
+            : 'Tempo base: velocidade média fixa. Sem reserva de subida aplicada.',
+          style: const TextStyle(fontSize: 12), textAlign: TextAlign.center),
+        const Text('Simulação, não previsão de desempenho: vento, bagagem, trânsito e '
+            'acesso às paradas não são calculados. O número de dias usa o tempo base; '
+            'os avisos abaixo apontam etapas que excedem o limite.',
           style: TextStyle(fontSize: 11), textAlign: TextAlign.center),
+      ]))),
+      const SizedBox(height: 8),
+      Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('Reserva de tempo e limite de chegada',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 5),
+        const Text('Escolha quantos minutos acrescentar a cada 100 m de subida '
+            'presentes no perfil de elevação. Zero desativa. Não há extrapolação '
+            'quando faltam altitudes.', style: TextStyle(fontSize: 12)),
+        const SizedBox(height: 7),
+        Row(children: [
+          Expanded(child: _choice('Subidas', trip.climbReserveMinutesPer100m,
+              const [0, 5, 10, 15, 20], 'min/100m', (value) {
+            setState(() => _draft = trip.copyWith(
+              climbReserveMinutesPer100m: value,
+              weatherDays: const <TripWeatherDayForecast>[],
+            ));
+          })),
+          const SizedBox(width: 8),
+          Expanded(child: DropdownButtonFormField<int>(
+            key: ValueKey('chegada-limite-${trip.id}-${trip.latestArrivalMinute}'),
+            initialValue: trip.latestArrivalMinute,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Chegar até', border: OutlineInputBorder(), isDense: true,
+            ),
+            items: [for (final hour in const [15, 16, 17, 18, 19, 20, 21])
+              DropdownMenuItem(value: hour * 60, child: Text('$hour:00'))],
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _draft = trip.copyWith(latestArrivalMinute: value));
+              }
+            },
+          )),
+        ]),
+        const SizedBox(height: 5),
+        const Text('Limite de chegada pessoal; não representa a hora do pôr do sol. '
+            'Para guardar alterações, use Salvar viagem.',
+            style: TextStyle(fontSize: 11)),
       ]))),
       const SizedBox(height: 8),
       Card(child: Padding(
@@ -1472,8 +1534,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ),
       const SizedBox(height: 8),
       Text('Etapas da viagem', style: Theme.of(context).textTheme.titleMedium),
-      for (var i = 0; i < plan.days.length; i++)
-        _dayCard(plan.days[i], trip, terrain[i]),
+      const Text('Abra cada dia para conferir horários, altitude, clima e '
+          'avisos de planejamento. Os limites são suas preferências, não '
+          'garantia de segurança.', style: TextStyle(fontSize: 12)),
+      for (var i = 0; i < simulatedDays.length; i++)
+        _dayCard(simulatedDays[i], trip, terrain[i]),
       const SizedBox(height: 8),
       OutlinedButton.icon(
         onPressed: () => unawaited(_openMap(trip)),
@@ -1595,10 +1660,26 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       lunchDurationMinutes: trip.lunchMinutes,
       forceLunch: trip.forceLunch,
     );
+    final notices = TripDayReadinessService.notices(
+      day: day, schedule: schedule,
+      targetRidingHours: trip.ridingHoursPerDay,
+      latestArrivalMinute: trip.latestArrivalMinute,
+      terrain: terrain,
+      minutesPer100Meters: trip.climbReserveMinutesPer100m,
+    );
+    final climbReserve = TripEffortReserveService.reserveMinutes(
+      terrain: terrain, minutesPer100Meters: trip.climbReserveMinutesPer100m,
+    );
     return Card(child: ExpansionTile(
       leading: CircleAvatar(child: Text('${day.day}')),
       title: Text('Dia ${day.day} · ${(day.distanceMeters / 1000).toStringAsFixed(1)} km'),
-      subtitle: Text(day.stopLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
+      subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(day.stopLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
+        if (notices.isNotEmpty)
+          Text('${notices.length} aviso(s) para revisar',
+              style: TextStyle(color: Theme.of(context).colorScheme.error,
+                  fontSize: 12)),
+      ]),
       trailing: IconButton(
         tooltip: 'Ver parada no mapa',
         icon: const Icon(Icons.map_outlined),
@@ -1612,6 +1693,18 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           'Chegada ~${BikeTripDaySchedule.formatMinute(schedule.arrivalMinute)}'),
         Text('${schedule.breakCount} pausa(s) (${schedule.breakMinutes} min); '
           'almoço ${schedule.lunchMinutes} min.'),
+        if (climbReserve > 0)
+          Text('Reserva simulada para subida: +$climbReserve min '
+              '(incluída no horário acima).'),
+        for (final notice in notices)
+          Padding(padding: const EdgeInsets.only(top: 4), child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.warning_amber_rounded, size: 16),
+              const SizedBox(width: 5),
+              Expanded(child: Text(notice, style: const TextStyle(fontSize: 12))),
+            ],
+          )),
         if (terrain.hasSamples)
           Text('Perfil de elevação: +${terrain.ascentMeters.toStringAsFixed(0)} m '
               '/ -${terrain.descentMeters.toStringAsFixed(0)} m · '

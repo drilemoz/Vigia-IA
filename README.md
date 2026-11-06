@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.359+359`
+**Versão atual:** `1.0.360+360`
+
+## 1.0.360 — Reserva de subida e avaliação de etapas
+
+- Novo controle opcional de **reserva de minutos por 100 m de subida documentada** (0, 5, 10, 15 ou 20 min). O valor é escolhido pelo usuário, não calculado automaticamente como velocidade real. A simulação não extrapola dados de altitude ausentes.
+- O horário estimado das etapas considera pausas, almoço e a reserva escolhida; a tela sinaliza chegada além do **limite pessoal de horário**, excesso de pedalada diária e pernoite sem lugar confirmado. Esses avisos funcionam offline e não substituem avaliação de segurança ou pôr do sol.
+- A duração base e o número inicial de dias continuam derivados da velocidade média configurada; a reserva não muda automaticamente o itinerário nem escolhe novas cidades.
+- Os novos controles são guardados na viagem e aceitam arquivos antigos com valores padrão neutros. Mudar a reserva invalida a previsão meteorológica anterior, e uma nova consulta manual usa o horário simulado.
+- Nenhuma nova requisição automática de GPS, internet ou clima. Todas as funcionalidades existentes são preservadas.
 
 ## 1.0.359 — Relevo persistido e clima por etapa no Planejamento
 

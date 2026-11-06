@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.360+360
+
+Consultar `VALIDATION-1.0.360.md` para regressões de reserva por elevação, horários e persistência. Análise Dart e compilação Android dependem do Flutter SDK/CI.
+
 # Validação Vigia IA 1.0.359+359
 
 Consultar `VALIDATION-1.0.359.md` para testes de relevo, clima, persistência e limitações. `flutter analyze`, `flutter test` e compilação APK dependem do SDK Android/Flutter, indisponível neste ambiente.

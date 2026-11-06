@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.359',
+          version: '1.0.360',
           current: true,
+          changes: [
+            'Reserva opcional de minutos por subida com perfil de altitude real.',
+            'Alertas de tempo excedido, chegada tardia e pernoite não confirmado.',
+            'Preferências salvas com a viagem e clima ajustado ao horário simulado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.359',
+          current: false,
           changes: [
             'Relevo offline conservado e exibido quando disponível.',
             'Previsão de chuva, temperatura e rajadas por etapa, sob demanda.',
@@ -3114,8 +3124,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.359',
+          version: '1.0.360',
           current: true,
+          changes: [
+            'Reserva opcional de minutos por subida com perfil de altitude real.',
+            'Alertas de tempo excedido, chegada tardia e pernoite não confirmado.',
+            'Preferências salvas com a viagem e clima ajustado ao horário simulado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.359',
+          current: false,
           changes: [
             'Relevo offline conservado e exibido quando disponível.',
             'Previsão de chuva, temperatura e rajadas por etapa, sob demanda.',
