@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.357',
+          version: '1.0.358',
           current: true,
+          changes: [
+            'Corrigido aviso fatal de chaves na busca das cidades (APK 305).',
+            'Adicionado teste preventivo para a validação de coordenadas.',
+            'Preservados mapas e pontos offline e itinerário de cicloviagem.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.357',
+          current: false,
           changes: [
             'Cidades e apoios ordenados pelo quilômetro aproximado ao longo da rota.',
             'Localidades previamente armazenadas entram automaticamente no planejamento offline.',
@@ -3094,8 +3104,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.357',
+          version: '1.0.358',
           current: true,
+          changes: [
+            'Corrigido aviso fatal de chaves na busca das cidades (APK 305).',
+            'Adicionado teste preventivo para a validação de coordenadas.',
+            'Preservados mapas e pontos offline e itinerário de cicloviagem.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.357',
+          current: false,
           changes: [
             'Cidades e apoios ordenados pelo quilômetro aproximado ao longo da rota.',
             'Localidades previamente armazenadas entram automaticamente no planejamento offline.',

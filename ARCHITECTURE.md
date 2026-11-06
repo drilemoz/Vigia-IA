@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.358+358
+
+## Buildfix APK 305 — validação de coordenadas da busca de localidades
+
+No serviço `MapDestinationSearchService`, uma guarda de latitude/longitude (nulos, não finitos e fora do intervalo geográfico) passa a envolver `continue` com chaves. A expressão lógica é idêntica à da versão 1.0.357, portanto não há mudança prevista no resultado de busca nem no mecanismo de roteamento. Teste de regressão de código-fonte incluído. Teste real de análise Dart e build permanecem dependentes de CI com Flutter.
+
 # Arquitetura — Vigia IA 1.0.357+357
 
 ## Itinerário de cidades e pontos de apoio (offline primeiro)

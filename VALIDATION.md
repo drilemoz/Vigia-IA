@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.358+358
+
+Consultar `VALIDATION-1.0.358.md`: log do workflow 305, correção de análise Dart e limites de validação local. `flutter analyze`, `flutter test` e build Android dependem da execução no CI.
+
 # Validação Vigia IA 1.0.357+357
 
 Consultar `VALIDATION-1.0.357.md` para os testes de itinerário offline, amostragem e limitações. Flutter Analyze, Flutter Test e build Android permanecem pendentes sem SDK local.

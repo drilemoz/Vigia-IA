@@ -1,3 +1,9 @@
+## 1.0.358+358 (2026-11-05)
+- Buildfix APK 305: `flutter analyze --fatal-infos --fatal-warnings` bloqueava em `map_destination_search_service.dart:613` com `curly_braces_in_flow_control_structures`.
+- Adicionado bloco `{ continue; }` à validação de latitude e longitude, sem mudar o critério de exclusão nem o fluxo da busca de localidades.
+- Adicionado `tool/test_build305_flutter_analyze_358.py` para cobrir a correção; versionamento/Novidades/documentação e User-Agent sincronizados.
+- Mantidos os recursos offline e o itinerário de cidades da 1.0.357, sem alteração nos cálculos, APIs ou limites de cache.
+
 ## 1.0.357+357 (2026-11-05)
 - Criado índice leve `RouteCorridorIndex` com projeção em segmentos, distância progressiva aproximada e seleção de localidades até 3,5 km da geometria, ordenadas pelo sentido da viagem.
 - Planejador agora aplica o índice local automaticamente ao calcular a rota, ao reabrir viagens sem locais e ao trocar de alternativa; sem consulta de rede ou GPS implícita.

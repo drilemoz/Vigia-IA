@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.357+357`
+**Versão atual:** `1.0.358+358`
+
+## 1.0.358 — Correção do workflow APK 305 (Flutter Analyze)
+
+- Corrigida condição de coordenadas inválidas em `lib/services/map_destination_search_service.dart`: bloco com chaves para o `continue` exigido por `flutter analyze --fatal-infos --fatal-warnings` (linha 613 da 1.0.357).
+- Sem mudança da lógica de filtro das coordenadas nem consultas de cidade, buffers de apoio, itinerário offline, mapas MBTiles ou fluxo GPS.
+- Criado teste preventivo para detectar o retorno da instrução sem chaves; `flutter analyze` e o APK ainda precisam da confirmação em CI.
 
 ## 1.0.357 — Itinerário de cidades e apoios ao longo da rota
 

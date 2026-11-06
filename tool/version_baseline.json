@@ -1,6 +1,6 @@
 {
-  "verified_latest_base": "1.0.356+356",
-  "new_version": "1.0.357+357",
-  "source": "ZIP local e Google Drive 1.0.356+356 (metadados verificados); continuação do plano de navegação offline, etapa itinerário de cidades.",
+  "verified_latest_base": "1.0.357+357",
+  "new_version": "1.0.358+358",
+  "source": "ZIP fonte local 1.0.357+357 confirmado por pubspec, AGENTS.md, logs APK 305 e pasta Drive; correção flutter analyze da linha 613.",
   "verified_date": "2026-11-05"
 }
