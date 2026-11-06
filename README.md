@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.358+358`
+**Versão atual:** `1.0.359+359`
+
+## 1.0.359 — Relevo persistido e clima por etapa no Planejamento
+
+- O parser de rotas ORS passa a manter a terceira coordenada (altura), quando recebida, e guarda o ganho e a perda total no arquivo de rotas. Versões antigas sem esse dado continuam legíveis; **não se inventa altitude**.
+- A prévia apresenta ganho e perda totais do provedor e, quando houver perfil de altitudes válido, mostra uma **estimativa de desnível por etapa**, calculada pela geometria. A cobertura percentual sinaliza se há lacunas. **Os tempos continuam usando velocidade fixa**.
+- O Planejamento permite selecionar uma data de partida e solicitar **explicitamente** a previsão Open-Meteo por etapa. O horário estimado usa o calendário escolhido, a duração prevista e o fuso configurado no aparelho. São feitas no máximo oito consultas por toque, sem serviço em segundo plano. A amostra é pontual (metade de cada dia) e não representa todo o trecho.
+- Os resultados (chuva, precipitação, temperatura, rajadas), com data da consulta, ficam na viagem salva e podem ser lidos offline. Uma previsão armazenada **não é atualizada automaticamente**, e dados antigos recebem aviso.
+- Datas além da previsão disponível não recebem números de outro dia. Não há previsão confiável de tempestades severas nesta etapa e nenhum alerta substitui a Defesa Civil ou o INMET. Verifique avisos oficiais antes de viajar.
 
 ## 1.0.358 — Correção do workflow APK 305 (Flutter Analyze)
 

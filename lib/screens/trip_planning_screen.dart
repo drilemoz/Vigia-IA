@@ -15,9 +15,12 @@ import '../models/map_route_point.dart';
 import '../models/map_navigation_target.dart';
 import '../models/map_travel_mode.dart';
 import '../models/planned_bike_trip.dart';
+import '../models/trip_weather_day_forecast.dart';
 import '../services/bike_trip_planner.dart';
 import '../services/bike_trip_editor_bridge.dart';
 import '../services/bike_trip_schedule.dart';
+import '../services/trip_terrain_service.dart';
+import '../services/trip_weather_forecast_service.dart';
 import '../services/bike_trip_schedule_settings_service.dart';
 import '../services/location_tracking_service.dart';
 import '../services/native_platform_service.dart';
@@ -86,6 +89,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   bool _loadingLibrary = true;
   bool _libraryReadFailed = false;
   bool _fetchingPlaces = false;
+  bool _fetchingWeather = false;
   bool _showOnlineBaseMap = false;
   String? _message;
   double _speedKmh = 15;
@@ -655,6 +659,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         lunchMinutes: _lunchMinutes,
         balanceDays: _balanceDays,
         forceLunch: _forceLunch,
+        weatherDays: const <TripWeatherDayForecast>[],
       ));
     }
     _refreshWizard();
@@ -683,6 +688,126 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     } finally {
       if (mounted) setState(() => _fetchingPlaces = false);
     }
+  }
+
+  Future<void> _selectStartDate() async {
+    final trip = _draft;
+    if (trip == null || _fetchingWeather) {
+      return;
+    }
+    final now = DateTime.now();
+    final firstDate = DateTime(2020);
+    final lastDate = DateTime(now.year + 2);
+    final savedDate = trip.startDate ?? now;
+    final initialDate = savedDate.isBefore(firstDate) ? firstDate :
+        savedDate.isAfter(lastDate) ? lastDate : savedDate;
+    final chosen = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      helpText: 'Data prevista de partida',
+    );
+    if (!mounted || chosen == null || _draft?.id != trip.id) {
+      return;
+    }
+    setState(() => _draft = trip.copyWith(startDate: chosen,
+        weatherDays: const <TripWeatherDayForecast>[]));
+  }
+
+  Future<void> _checkTripWeather() async {
+    final trip = _draft;
+    final chosenDate = trip?.startDate;
+    if (trip == null || chosenDate == null || _fetchingWeather) {
+      return;
+    }
+    setState(() => _fetchingWeather = true);
+    try {
+      final result = await const TripWeatherForecastService().fetch(
+        route: trip.selectedRoute,
+        days: _plan(trip).days,
+        startDate: chosenDate,
+        departureMinute: trip.departureMinute,
+        breakEveryKm: trip.breakEveryKm,
+        breakMinutes: trip.breakMinutes,
+        lunchMinutes: trip.lunchMinutes,
+        forceLunch: trip.forceLunch,
+      );
+      if (!mounted || _draft?.id != trip.id ||
+          _draft?.startDate != trip.startDate ||
+          _draft?.selectedIndex != trip.selectedIndex ||
+          _draft?.averageSpeedKmh != trip.averageSpeedKmh ||
+          _draft?.ridingHoursPerDay != trip.ridingHoursPerDay ||
+          _draft?.departureMinute != trip.departureMinute ||
+          _draft?.breakEveryKm != trip.breakEveryKm ||
+          _draft?.breakMinutes != trip.breakMinutes ||
+          _draft?.lunchMinutes != trip.lunchMinutes ||
+          _draft?.forceLunch != trip.forceLunch ||
+          _draft?.balanceDays != trip.balanceDays) {
+        return;
+      }
+      final merged = <int, TripWeatherDayForecast>{
+        for (final old in trip.weatherDays) old.day: old,
+        for (final forecast in result.forecasts) forecast.day: forecast,
+      };
+      setState(() => _draft = trip.copyWith(weatherDays: merged.values.toList()));
+      _notify(result.forecasts.isEmpty
+          ? 'Sem previsão disponível para estas datas. Verifique conexão e horizonte de 16 dias.'
+          : '${result.forecasts.length} etapa(s) com previsão obtida; '
+              '${result.errors} consulta(s) falharam. Salve a viagem para manter os dados offline.');
+    } catch (_) {
+      _notify('Falha ao consultar o clima. As previsões salvas foram preservadas.');
+    } finally {
+      if (mounted) setState(() => _fetchingWeather = false);
+    }
+  }
+
+  String _formatTripDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+  Widget _weatherDayLine(int dayNumber, PlannedBikeTrip trip) {
+    TripWeatherDayForecast? forecast;
+    for (final value in trip.weatherDays) {
+      if (value.day == dayNumber) {
+        forecast = value;
+        break;
+      }
+    }
+    if (forecast == null) {
+      return const Text('Clima: sem previsão para esta etapa.',
+          style: TextStyle(fontSize: 12));
+    }
+    final hour = forecast.estimatedAt.toLocal();
+    final checked = forecast.updatedAt.toLocal();
+    final currentTime = DateTime.now();
+    final stale = currentTime.difference(forecast.updatedAt) >
+        const Duration(hours: 6) ||
+        forecast.estimatedAt.isBefore(currentTime.subtract(const Duration(hours: 1)));
+    String display(double? value, String unit, {int digits = 0}) => value == null
+        ? 'indisponível' : '${value.toStringAsFixed(digits)}$unit';
+    final risky = (forecast.rainProbabilityPercent ?? 0) >= 60 ||
+        (forecast.precipitationMm ?? 0) >= 5 ||
+        (forecast.windGustKmh ?? 0) >= 40 ||
+        (forecast.weatherCode ?? 0) >= 95;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Clima previsto ~${_formatTripDate(hour)} '
+          '${BikeTripDaySchedule.formatMinute(hour.hour * 60 + hour.minute)}'
+          '${stale ? ' · dados antigos' : ''}',
+          style: const TextStyle(fontWeight: FontWeight.w600)),
+      Text('Chuva: ${display(forecast.rainProbabilityPercent, '%')} · '
+          'precipitação na hora: ${display(forecast.precipitationMm, ' mm', digits: 1)} · '
+          'vento: ${display(forecast.windSpeedKmh, ' km/h')} · '
+          'rajadas: ${display(forecast.windGustKmh, ' km/h')} · '
+          'temperatura: ${display(forecast.temperatureC, ' °C')}'),
+      if (risky)
+        const Text('Atenção: chuva, vento ou trovoada potencialmente adversos. '
+            'Não substitui avisos oficiais.', style: TextStyle(fontSize: 12)),
+      Text('Open-Meteo.com · consultado em ${_formatTripDate(checked)} '
+          '${BikeTripDaySchedule.formatMinute(checked.hour * 60 + checked.minute)}. '
+          'Previsão pontual, não cobre toda a etapa.',
+          style: Theme.of(context).textTheme.bodySmall),
+    ]);
   }
 
   Future<void> _save() async {
@@ -1174,6 +1299,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final route = trip.selectedRoute;
     final plan = _plan(trip);
     final estimate = plan.estimate;
+    final terrain = TripTerrainService.forDays(route: route, days: plan.days);
+    final departureDate = trip.startDate;
     return Column(key: _previewKey, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SizedBox(height: 12),
       Text('Resultado do planejamento', style: Theme.of(context).textTheme.titleLarge),
@@ -1186,7 +1313,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
               selected: trip.selectedIndex == i,
               onSelected: (_) {
                 _selectPreviewMapForRoute(trip.routes[i]);
-                final next = trip.copyWith(selectedIndex: i, places: const []);
+                final next = trip.copyWith(selectedIndex: i, places: const [],
+                    weatherDays: const <TripWeatherDayForecast>[]);
                 setState(() => _draft = next);
                 unawaited(_fillLocalPlaces(next));
               },
@@ -1213,9 +1341,48 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           Expanded(child: _metric('Dias', '${estimate.dayCount}', Icons.calendar_today_outlined)),
         ]),
         const SizedBox(height: 8),
-        const Text('Estimativas com velocidade definida. Relevo, vento, segurança e desvios não foram avaliados.',
+        if (route.ascentMeters != null || route.descentMeters != null)
+          Text('Relevo do provedor: subida '
+              '${route.ascentMeters?.toStringAsFixed(0) ?? '?'} m · descida '
+              '${route.descentMeters?.toStringAsFixed(0) ?? '?'} m',
+              style: const TextStyle(fontSize: 12)),
+        const Text('O tempo ainda usa velocidade fixa: não desconta subidas, vento, '
+            'segurança nem desvios. Sem perfil do provedor, relevo indisponível.',
           style: TextStyle(fontSize: 11), textAlign: TextAlign.center),
       ]))),
+      const SizedBox(height: 8),
+      Card(child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Clima por etapa · consulta manual',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 5),
+          Text(departureDate == null
+              ? 'Escolha uma data de partida para relacionar o clima aos dias de pedal.'
+              : 'Partida prevista: ${_formatTripDate(departureDate)}. '
+                  'Previsões já consultadas são preservadas ao salvar a viagem.'),
+          const SizedBox(height: 6),
+          Row(children: [
+            Expanded(child: OutlinedButton.icon(
+              onPressed: _fetchingWeather ? null : () => unawaited(_selectStartDate()),
+              icon: const Icon(Icons.event_outlined),
+              label: const Text('Data de partida'),
+            )),
+            const SizedBox(width: 8),
+            Expanded(child: OutlinedButton.icon(
+              onPressed: departureDate == null || _fetchingWeather
+                  ? null : () => unawaited(_checkTripWeather()),
+              icon: const Icon(Icons.cloud_outlined),
+              label: const Text('Consultar clima'),
+            )),
+          ]),
+          if (_fetchingWeather) const LinearProgressIndicator(),
+          const Text('Open-Meteo.com (CC BY 4.0) · até 16 dias de previsão; no máximo 8 consultas '
+              'por toque. Sem internet, apenas dados consultados e salvos. '
+              'Confira avisos oficiais antes de pedalar.',
+              style: TextStyle(fontSize: 11)),
+        ]),
+      )),
       const SizedBox(height: 6),
       Text(_showOnlineBaseMap
         ? 'Mapa-base online: requer internet. A geometria permanece salva.'
@@ -1305,8 +1472,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ),
       const SizedBox(height: 8),
       Text('Etapas da viagem', style: Theme.of(context).textTheme.titleMedium),
-      for (final day in plan.days)
-        _dayCard(day, trip),
+      for (var i = 0; i < plan.days.length; i++)
+        _dayCard(plan.days[i], trip, terrain[i]),
       const SizedBox(height: 8),
       OutlinedButton.icon(
         onPressed: () => unawaited(_openMap(trip)),
@@ -1419,7 +1586,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     );
   }
 
-  Widget _dayCard(BikeTripDayPlan day, PlannedBikeTrip trip) {
+  Widget _dayCard(BikeTripDayPlan day, PlannedBikeTrip trip, TripDayTerrain terrain) {
     final schedule = BikeTripSchedule.forDay(
       day: day,
       departureMinute: trip.departureMinute,
@@ -1445,6 +1612,15 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           'Chegada ~${BikeTripDaySchedule.formatMinute(schedule.arrivalMinute)}'),
         Text('${schedule.breakCount} pausa(s) (${schedule.breakMinutes} min); '
           'almoço ${schedule.lunchMinutes} min.'),
+        if (terrain.hasSamples)
+          Text('Perfil de elevação: +${terrain.ascentMeters.toStringAsFixed(0)} m '
+              '/ -${terrain.descentMeters.toStringAsFixed(0)} m · '
+              'cobertura ${(terrain.coverageFraction * 100).toStringAsFixed(0)}% '
+              '(estimativa das altitudes do provedor).')
+        else
+          const Text('Desnível nesta etapa: indisponível (sem perfil altimétrico).'),
+        const SizedBox(height: 5),
+        _weatherDayLine(day.day, trip),
         const SizedBox(height: 5),
         Text(day.usesKnownPlace
           ? 'Local candidato: ${day.stopKind}. Distância até a via em linha reta: '

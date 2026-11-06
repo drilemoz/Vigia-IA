@@ -28,6 +28,7 @@ class MapCyclingRoute {
     this.maneuvers = const <MapCyclingManeuver>[],
     this.ascentMeters,
     this.descentMeters,
+    this.elevationsMeters = const <double?>[],
   });
 
   final List<LatLng> points;
@@ -37,4 +38,7 @@ class MapCyclingRoute {
   /// Elevação calculada pelo provedor da rota, se disponibilizada.
   final double? ascentMeters;
   final double? descentMeters;
+  /// Altitudes em metros, alinhadas aos vértices. Vazio: provedor sem perfil.
+  /// Um valor null representa amostra ausente, nunca altitude zero inventada.
+  final List<double?> elevationsMeters;
 }

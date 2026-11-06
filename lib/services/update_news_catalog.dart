@@ -7,14 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.358', build: 358);
+      AppBuildVersion(version: '1.0.359', build: 359);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.358', build: 358),
+      version: AppBuildVersion(version: '1.0.359', build: 359),
       changes: <String>[
-        'Corrigido aviso fatal no Flutter Analyze da busca de cidades ao longo da rota (workflow APK 305).',
-        'Mantidos itinerário de cidades em ordem, pacotes de pontos offline e mapa MBTiles no Planejamento.',
+        'Planejamento preserva altitudes e totais de subida/descida nas rotas salvas para consulta offline.',
+        'Exibe relevo por etapa quando o provedor fornece perfil completo ou parcial de altitudes.',
+        'Consulta manual de clima por dia usando a data escolhida, com amostras salvas e avisos de desatualização.',
       ],
     ),
   ]);

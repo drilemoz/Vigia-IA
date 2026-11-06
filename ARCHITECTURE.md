@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.359+359 (relevo e clima da cicloviagem)
+
+O modelo `MapCyclingRoute` inclui `elevationsMeters` (lista opcional alinhada a `points`) e as métricas agregadas preexistentes de subida/descida. A leitura GeoJSON do ORS agora preserva a terceira coordenada quando válida; `SavedBikeRouteService` as serializa somente quando disponíveis. Rotas antigas permanecem válidas e sem perfis fictícios. `TripTerrainService` distribui as diferenças de altitude pelos quilômetros diários com interpolação sobre os segmentos que têm duas alturas válidas. Se houver falta de dados, relata a cobertura e não preenche lacunas.
+
+`TripWeatherForecastService` só é acionado pelo botão explícito no Planejamento. A data da viagem é escolhida manualmente; a consulta utiliza o ponto intermediário de cada etapa e o horário aproximado com conversão para GMT. No máximo oito dias elegíveis por ação e dentro da janela de previsões; nenhuma consulta na abertura da tela, nenhum GPS e nenhum trabalho em background. `TripWeatherDayForecast` é opcional no JSON da viagem, inclui horário estimado e data de atualização, e não afeta arquivos antigos. Os dados armazenados são históricos de previsão (não alerta meteorológico oficial) e **não** devem ser tratados como atualizações atuais. A latência, a cobertura geográfica e as condições de trânsito não integram o cálculo do tempo de pedal.
+
 # Arquitetura — Vigia IA 1.0.358+358
 
 ## Buildfix APK 305 — validação de coordenadas da busca de localidades

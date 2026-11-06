@@ -1,3 +1,10 @@
+## 1.0.359+359 (2026-11-05)
+- Planejamento da cicloviagem preserva ganho/perda agregados do ORS e altitude de vértices GeoJSON nas rotas persistidas; o codec JSON mantém compatibilidade com arquivos antigos.
+- Serviço `TripTerrainService` reparte diferenças de elevação conhecidas pelos limites em quilômetros de cada dia e apresenta percentual de cobertura; sem amostras, indica indisponível. Os horários ainda ignoram inclinação e vento.
+- Tela de Planejamento ganhou seletor de data de partida e previsão por etapa via Open-Meteo, somente por toque explícito, usando horário GMT de API e ETA local aproximada; até oito solicitações por operação, com timeouts e sem repetição automática.
+- O planejamento salva as últimas amostras meteorológicas consultadas e a data de cada previsão para leitura offline e indicação de dados desatualizados. Nenhuma previsão é inventada para dias fora da janela.
+- Adicionados testes Dart de parse/persistência/relevo e Python de contrato; preservado comportamento independente de GPS e funcionamento sem rede dos módulos existentes.
+
 ## 1.0.358+358 (2026-11-05)
 - Buildfix APK 305: `flutter analyze --fatal-infos --fatal-warnings` bloqueava em `map_destination_search_service.dart:613` com `curly_braces_in_flow_control_structures`.
 - Adicionado bloco `{ continue; }` à validação de latitude e longitude, sem mudar o critério de exclusão nem o fluxo da busca de localidades.

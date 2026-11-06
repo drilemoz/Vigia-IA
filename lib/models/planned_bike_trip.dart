@@ -4,6 +4,7 @@ import 'map_cycling_route.dart';
 import 'map_destination_search.dart';
 import 'map_navigation_target.dart';
 import 'map_travel_mode.dart';
+import 'trip_weather_day_forecast.dart';
 import '../services/saved_bike_route_service.dart';
 
 /// Viagem preparada, sem vincular a origem ao GPS nem iniciar navegação.
@@ -25,6 +26,8 @@ class PlannedBikeTrip {
     this.balanceDays = true,
     this.forceLunch = false,
     this.places = const <MapDestinationSearchResult>[],
+    this.startDate,
+    this.weatherDays = const <TripWeatherDayForecast>[],
   });
 
   final String id;
@@ -42,12 +45,19 @@ class PlannedBikeTrip {
   final bool balanceDays;
   final bool forceLunch;
   final List<MapDestinationSearchResult> places;
+  /// Data local escolhida pelo usuário, sem assumir hoje automaticamente.
+  final DateTime? startDate;
+  /// Última previsão obtida manualmente, legível offline com data/hora.
+  final List<TripWeatherDayForecast> weatherDays;
 
   MapCyclingRoute get selectedRoute => routes[selectedIndex];
 
   PlannedBikeTrip copyWith({
     int? selectedIndex,
     List<MapDestinationSearchResult>? places,
+    DateTime? startDate,
+    bool clearStartDate = false,
+    List<TripWeatherDayForecast>? weatherDays,
     double? averageSpeedKmh,
     double? ridingHoursPerDay,
     int? departureMinute,
@@ -68,6 +78,8 @@ class PlannedBikeTrip {
     balanceDays: balanceDays ?? this.balanceDays,
     forceLunch: forceLunch ?? this.forceLunch,
     places: places ?? this.places,
+    startDate: clearStartDate ? null : startDate ?? this.startDate,
+    weatherDays: weatherDays ?? this.weatherDays,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -95,6 +107,8 @@ class PlannedBikeTrip {
     'balanceDays': balanceDays,
     'forceLunch': forceLunch,
     'places': [for (final place in places.take(100)) place.toJson()],
+    'startDate': startDate?.toIso8601String(),
+    'weatherDays': [for (final forecast in weatherDays.take(16)) forecast.toJson()],
   };
 
   factory PlannedBikeTrip.fromJson(Map<String, dynamic> json) {
@@ -111,6 +125,24 @@ class PlannedBikeTrip {
         places.add(MapDestinationSearchResult.fromJson(Map<String, dynamic>.from(item)));
       }
     }
+    // Cache opcional: uma amostra corrompida não bloqueia a viagem salva.
+    final forecastDays = <TripWeatherDayForecast>[];
+    final rawWeather = json['weatherDays'];
+    if (rawWeather is List) {
+      for (final item in rawWeather.take(16)) {
+        if (item is! Map) {
+          continue;
+        }
+        try {
+          forecastDays.add(TripWeatherDayForecast.fromJson(
+            Map<String, dynamic>.from(item)));
+        } catch (_) {
+          // Descarta só o registro meteorológico inválido.
+        }
+      }
+    }
+    final parsedDate = json['startDate'] is String
+        ? DateTime.tryParse(json['startDate'] as String) : null;
     final origin = MapDestinationSearchResult.fromJson(
       Map<String, dynamic>.from(json['origin'] as Map));
     final destination = MapDestinationSearchResult.fromJson(
@@ -135,6 +167,8 @@ class PlannedBikeTrip {
       balanceDays: json['balanceDays'] is bool ? json['balanceDays'] as bool : true,
       forceLunch: json['forceLunch'] == true,
       places: List<MapDestinationSearchResult>.unmodifiable(places),
+      startDate: parsedDate,
+      weatherDays: List<TripWeatherDayForecast>.unmodifiable(forecastDays),
     );
   }
 }

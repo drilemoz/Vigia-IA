@@ -72,7 +72,7 @@ class MapCyclingRouteService {
       <String, String>{'json': payload},
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.358');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.359');
     request.headers.set('X-Client-Id', 'com.vigiaia.app');
     final response = await request.close().timeout(const Duration(seconds: 12));
     final body = await utf8.decoder.bind(response).join();
@@ -111,7 +111,7 @@ class MapCyclingRouteService {
       request.headers.set(HttpHeaders.authorizationHeader, key);
       request.headers.set(HttpHeaders.acceptHeader, 'application/geo+json, application/json');
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.358');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.359');
       request.add(utf8.encode(payload));
       final response = await request.close().timeout(const Duration(seconds: 9));
       final body = await response.transform(utf8.decoder).join()
@@ -147,6 +147,7 @@ class MapCyclingRouteService {
       throw const FormatException('Geometria ORS inválida');
     }
     final points = <LatLng>[];
+    final elevations = <double?>[];
     for (final raw in (geometry['coordinates'] as List)) {
       if (raw is! List || raw.length < 2 ||
           raw[0] is! num || raw[1] is! num) {
@@ -156,6 +157,10 @@ class MapCyclingRouteService {
       final lon = (raw[0] as num).toDouble();
       if (lat.isFinite && lon.isFinite && lat.abs() <= 90 && lon.abs() <= 180) {
         points.add(LatLng(lat, lon));
+        final height = raw.length >= 3 && raw[2] is num
+            ? (raw[2] as num).toDouble() : null;
+        elevations.add(height != null && height.isFinite &&
+            height >= -500 && height <= 9000 ? height : null);
       }
     }
     if (points.length < 2) {
@@ -211,6 +216,8 @@ class MapCyclingRouteService {
       maneuvers: List<MapCyclingManeuver>.unmodifiable(maneuvers),
       ascentMeters: (summary['ascent'] as num?)?.toDouble(),
       descentMeters: (summary['descent'] as num?)?.toDouble(),
+      elevationsMeters: elevations.any((height) => height != null)
+          ? List<double?>.unmodifiable(elevations) : const <double?>[],
     );
   }
 

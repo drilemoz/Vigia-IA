@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.358',
+          version: '1.0.359',
           current: true,
+          changes: [
+            'Relevo offline conservado e exibido quando disponível.',
+            'Previsão de chuva, temperatura e rajadas por etapa, sob demanda.',
+            'Data de partida e previsão consultada ficam na viagem salva.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.358',
+          current: false,
           changes: [
             'Corrigido aviso fatal de chaves na busca das cidades (APK 305).',
             'Adicionado teste preventivo para a validação de coordenadas.',
@@ -3104,8 +3114,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.358',
+          version: '1.0.359',
           current: true,
+          changes: [
+            'Relevo offline conservado e exibido quando disponível.',
+            'Previsão de chuva, temperatura e rajadas por etapa, sob demanda.',
+            'Data de partida e previsão consultada ficam na viagem salva.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.358',
+          current: false,
           changes: [
             'Corrigido aviso fatal de chaves na busca das cidades (APK 305).',
             'Adicionado teste preventivo para a validação de coordenadas.',

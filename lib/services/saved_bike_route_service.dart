@@ -50,6 +50,9 @@ class SavedBikeRouteService {
     }
   }
 
+  static bool _isValidElevationTotal(double? value) =>
+      value != null && value.isFinite && value >= 0;
+
   static Map<String, Object?> encode(SavedBikeRoute saved) => <String, Object?>{
     'schema': 1,
     'savedAt': DateTime.now().toIso8601String(),
@@ -60,6 +63,11 @@ class SavedBikeRouteService {
         <String, Object?>{
           'distanceMeters': route.distanceMeters,
           'durationSeconds': route.durationSeconds,
+          if (_isValidElevationTotal(route.ascentMeters)) 'ascentMeters': route.ascentMeters,
+          if (_isValidElevationTotal(route.descentMeters)) 'descentMeters': route.descentMeters,
+          if (route.elevationsMeters.length == route.points.length &&
+              route.elevationsMeters.any((h) => h != null))
+            'elevationsMeters': route.elevationsMeters,
           'points': [
             for (final point in route.points)
               [point.latitude, point.longitude],
@@ -120,8 +128,31 @@ class SavedBikeRouteService {
           streetName: value['streetName'] as String?,
         ));
       }
+      // Campos opcionais adicionados sem mudar o schema: rotas antigas
+      // continuam sendo lidas sem criar valores fictícios de relevo.
+      double? metric(String name) {
+        final raw = route[name];
+        if (raw is! num) {
+          return null;
+        }
+        final value = raw.toDouble();
+        return value.isFinite && value >= 0 && value < 1000000 ? value : null;
+      }
+      final rawElevations = route['elevationsMeters'];
+      final elevations = <double?>[];
+      if (rawElevations is List && rawElevations.length == points.length) {
+        for (final raw in rawElevations) {
+          final value = raw is num ? raw.toDouble() : null;
+          elevations.add(value != null && value.isFinite &&
+                  value >= -500 && value <= 9000 ? value : null);
+        }
+      }
       routes.add(MapCyclingRoute(
         points: points,
+        ascentMeters: metric('ascentMeters'),
+        descentMeters: metric('descentMeters'),
+        elevationsMeters: elevations.any((h) => h != null)
+            ? List<double?>.unmodifiable(elevations) : const <double?>[],
         distanceMeters: (route['distanceMeters'] as num).toDouble(),
         durationSeconds: (route['durationSeconds'] as num).toDouble(),
         maneuvers: maneuvers,
