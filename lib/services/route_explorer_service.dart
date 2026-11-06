@@ -278,10 +278,19 @@ class RouteExplorerService extends ChangeNotifier {
         current,
         source: 'offline',
       );
-      _lastSource = 'offline';
-      _resultsUpdatedAt = DateTime.now();
+    } else {
+      // Selecionar pacote nao depende de GPS: as coordenadas dos pontos
+      // continuam validas, mas suas distancias antigas nao sao exibidas.
+      _results = selected.items
+          .map((item) => item.copyWith(source: 'offline'))
+          .toList(growable: false);
     }
-    _statusMessage = 'Pacote offline “${selected.name}” ativado.';
+    _lastSource = 'offline';
+    _error = null;
+    _resultsUpdatedAt = selected.updatedAt;
+    _statusMessage = current == null
+        ? 'Pacote “${selected.name}” aberto sem GPS. Distâncias indisponíveis.'
+        : 'Pacote offline “${selected.name}” ativado.';
     notifyListeners();
     await _persistNow();
   }
@@ -328,6 +337,13 @@ class RouteExplorerService extends ChangeNotifier {
       await _routeState.ensureLocation(requestPermission: requestPermission);
       final current = _routeState.current;
       if (current == null) {
+        // Sem GPS nao e possivel consultar provedores remotos por proximidade.
+        // Ainda assim o usuario pode consultar seu pacote local ativo.
+        if (!saveAsOffline && _offlinePackages.isNotEmpty) {
+          final offline = _activateSelectedOfflineWithoutGps();
+          await _persistNow();
+          return offline;
+        }
         throw StateError('Localização indisponível para explorar a região.');
       }
 
@@ -412,19 +428,7 @@ class RouteExplorerService extends ChangeNotifier {
     notifyListeners();
     try {
       if (_connectivity.isOffline) {
-        final centerLatLng = LatLng(center.latitude, center.longitude);
-        _areaResults = <RouteExplorerResult>[
-          for (final package in _offlinePackages)
-            for (final item in package.items)
-              if (_distance.as(LengthUnit.Meter, centerLatLng,
-                  LatLng(item.latitude, item.longitude)) <=
-                  _settings.radiusKm * 1000)
-                item.copyWith(
-                  distanceMeters: _distance.as(LengthUnit.Meter,
-                    centerLatLng, LatLng(item.latitude, item.longitude)),
-                  source: 'offline',
-                ),
-        ];
+        _areaResults = _offlineItemsAround(center);
         if (_areaResults.isEmpty) {
           _areaError = 'Sem internet e sem pontos offline nesta região.';
         }
@@ -434,7 +438,12 @@ class RouteExplorerService extends ChangeNotifier {
       }
       _areaUpdatedAt = DateTime.now();
     } catch (_) {
-      _areaError = 'Não foi possível consultar pontos nesta região.';
+      // Falha HTTP/transportes nao deve ocultar pacotes locais existentes.
+      _areaResults = _offlineItemsAround(center);
+      _areaUpdatedAt = _areaResults.isEmpty ? null : DateTime.now();
+      _areaError = _areaResults.isEmpty
+          ? 'Consulta online indisponível e nenhum ponto salvo nesta área.'
+          : null;
     } finally {
       _areaLoading = false;
       notifyListeners();
@@ -448,6 +457,50 @@ class RouteExplorerService extends ChangeNotifier {
         .toList(growable: false);
   }
 
+  /// Recupera pontos locais perto de uma area escolhida manualmente,
+  /// independentemente do estado do GPS ou dos servidores Overpass.
+  List<RouteExplorerResult> _offlineItemsAround(MapRoutePoint center) {
+    final origin = LatLng(center.latitude, center.longitude);
+    final unique = <String, RouteExplorerResult>{};
+    for (final package in _offlinePackages) {
+      for (final item in package.items) {
+        final meters = _distance.as(
+          LengthUnit.Meter,
+          origin,
+          LatLng(item.latitude, item.longitude),
+        );
+        if (meters > _settings.radiusKm * 1000) continue;
+        final key = '${item.category.name}:${item.latitude.toStringAsFixed(5)}:'
+            '${item.longitude.toStringAsFixed(5)}:${item.title.toLowerCase()}';
+        unique.putIfAbsent(key, () => item.copyWith(
+          distanceMeters: meters,
+          source: 'offline',
+        ));
+      }
+    }
+    final result = unique.values.toList()
+      ..sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+    return result;
+  }
+
+  List<RouteExplorerResult> _activateSelectedOfflineWithoutGps() {
+    final selected = activeOfflinePackage ??
+        (_offlinePackages.isEmpty ? null : _offlinePackages.first);
+    if (selected == null) return const <RouteExplorerResult>[];
+    _activeOfflinePackageId = selected.id;
+    _offlineResults = selected.items;
+    _offlineUpdatedAt = selected.updatedAt;
+    _results = selected.items
+        .map((item) => item.copyWith(source: 'offline'))
+        .toList(growable: false);
+    _resultsUpdatedAt = selected.updatedAt;
+    _lastSource = 'offline';
+    _error = null;
+    _statusMessage = 'Exibindo “${selected.name}” sem GPS; distâncias indisponíveis.';
+    notifyListeners();
+    return _results;
+  }
+
   Future<List<RouteExplorerResult>> useOfflineForCurrentLocation({
     bool requestPermission = false,
     bool explicitOfflineMode = false,
@@ -458,9 +511,12 @@ class RouteExplorerService extends ChangeNotifier {
     await _routeState.ensureLocation(requestPermission: requestPermission);
     final current = _routeState.current;
     if (current == null) {
-      _statusMessage = 'Localização indisponível para consultar os pontos offline.';
-      notifyListeners();
-      return _results;
+      final result = _activateSelectedOfflineWithoutGps();
+      if (result.isEmpty) {
+        _statusMessage = 'Sem GPS e sem pacotes de pontos salvos.';
+        notifyListeners();
+      }
+      return result;
     }
     final result = _activateOfflineForPosition(
       current,
@@ -865,7 +921,7 @@ class RouteExplorerService extends ChangeNotifier {
         final request = await client.postUrl(Uri.parse(endpoint))
             .timeout(const Duration(seconds: 8));
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.353 route-explorer');
+        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.354 route-explorer');
         request.headers.contentType = ContentType(
           'application', 'x-www-form-urlencoded', charset: 'utf-8',
         );
@@ -1228,6 +1284,13 @@ class RouteExplorerService extends ChangeNotifier {
       _lastSource = decoded['lastSource'] as String? ?? 'none';
       if (_results.isNotEmpty && _lastSource != 'offline') {
         _markResultsAsCache();
+      } else if (_results.isEmpty && _offlineResults.isNotEmpty) {
+        // Pacote ja existente deve estar visivel mesmo sem primeira fixacao GPS.
+        _results = _offlineResults
+            .map((item) => item.copyWith(source: 'offline'))
+            .toList(growable: false);
+        _resultsUpdatedAt = _offlineUpdatedAt;
+        _lastSource = 'offline';
       }
       _statusMessage = decoded['statusMessage'] as String?;
     } catch (_) {
@@ -1264,11 +1327,17 @@ class RouteExplorerService extends ChangeNotifier {
       }
     }
     best ??= _nearestOfflinePackage(current);
-    if (best != null && best.id != _activeOfflinePackageId) {
-      _activeOfflinePackageId = best.id;
-      _offlineResults = best.items;
-      _offlineUpdatedAt = best.updatedAt;
+    if (best == null) {
+      // Nao reutilizar itens de outra regiao so porque o pacote segue ativo.
+      _offlineResults = const <RouteExplorerResult>[];
+      _offlineUpdatedAt = null;
+      return null;
     }
+    if (best.id != _activeOfflinePackageId) {
+      _activeOfflinePackageId = best.id;
+    }
+    _offlineResults = best.items;
+    _offlineUpdatedAt = best.updatedAt;
     return best;
   }
 

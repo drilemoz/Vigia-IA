@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """APK 294: enforce explicit braces around the battery telemetry guard.
 
 These focused structural tests do not replace `flutter analyze` in CI.
@@ -23,7 +24,7 @@ class Build294FlutterAnalyze350Tests(unittest.TestCase):
 
     def test_version_current_and_regression_registered(self):
         source = (ROOT / 'pubspec.yaml').read_text('utf-8')
-        self.assertIn('version: 1.0.353+353', source)
+        self.assertIn('version: ' + current_release(ROOT), source)
         self.assertIn('tool/test_build294_flutter_analyze_350.py',
             (ROOT / 'tool/verify_project.sh').read_text('utf-8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.351.md').exists())

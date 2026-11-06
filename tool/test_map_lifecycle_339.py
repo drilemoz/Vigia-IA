@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressoes estruturais do ciclo de vida MBTiles e MapLibre 3D (1.0.343).
 
 Testes estaticos nao comprovam comportamento Flutter/Android em dispositivo.
@@ -63,7 +64,7 @@ class MapLifecycle339(unittest.TestCase):
         self.assertIn('if (previous.isOffline != current.isOffline)', network)
 
     def test_release_and_version_are_sequential(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').is_file())
 

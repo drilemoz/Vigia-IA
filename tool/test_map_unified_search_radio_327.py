@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contracts for unified map search / radio / header in 1.0.327."""
 import unittest
 from pathlib import Path
@@ -33,6 +34,8 @@ class UnifiedMap327(unittest.TestCase):
   self.assertNotIn('height: 50',shell)
   self.assertIn('_MapWorkspaceModeShortcut',s)
  def test_version_sync(self):
-  self.assertIn('version: 1.0.353+353',file('pubspec.yaml'))
+  self.assertIn('version: ' + current_release(ROOT),file('pubspec.yaml'))
   self.assertTrue((R/'RELEASE-1.0.348.md').exists())
 if __name__=='__main__': unittest.main()
+
+ROOT = Path(__file__).resolve().parents[1]

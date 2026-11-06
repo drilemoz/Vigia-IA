@@ -7,6 +7,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../models/bike_trip_plan.dart';
+import '../models/offline_map_package.dart';
+import '../models/route_explorer_models.dart';
 import '../models/map_cycling_route.dart';
 import '../models/map_destination_search.dart';
 import '../models/map_route_point.dart';
@@ -26,6 +28,7 @@ import '../services/map_view_settings_service.dart';
 import '../services/offline_map_service.dart';
 import '../services/planned_bike_trip_service.dart';
 import '../services/route_explorer_service.dart';
+import '../services/retained_mbtiles_tile_provider.dart';
 import '../services/saved_bike_route_service.dart';
 import '../widgets/main_navigation_bar.dart';
 import '../widgets/main_navigation_routes.dart';
@@ -55,6 +58,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   final _destinationField = TextEditingController();
   final _citySearch = MapDestinationSearchService.instance;
   final _offlineMaps = OfflineMapService.instance;
+  final _savedPois = RouteExplorerService.instance;
+  RetainedMbTilesTileProvider? _previewOfflineTileProvider;
+  String? _previewOfflineMapId;
+  int _previewMinZoom = 0;
+  int _previewMaxZoom = 19;
   final _routeProvider = MapCyclingRouteService();
   final _library = const PlannedBikeTripService();
   final _scheduleSettings = BikeTripScheduleSettingsService.instance;
@@ -95,6 +103,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       await Future.wait(<Future<void>>[
         _citySearch.initialize(),
         _offlineMaps.initialize(),
+        _savedPois.initialize(),
         MapViewSettingsService.instance.initialize(),
         _scheduleSettings.initialize(),
       ]);
@@ -136,6 +145,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       final preferences = MapViewSettingsService.instance.bikeTravelPreferences;
       final schedule = _scheduleSettings.value;
       final initial = widget.initialTrip;
+      _selectPreviewMapForRoute(initial?.selectedRoute);
       setState(() {
         _saved = trips;
         _speedKmh = initial?.averageSpeedKmh ?? preferences.averageSpeedKmh;
@@ -182,6 +192,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   @override
   void dispose() {
     _citySearch.removeListener(_searchChanged);
+    _previewOfflineTileProvider?.release();
     _originField.dispose();
     _destinationField.dispose();
     super.dispose();
@@ -586,6 +597,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         balanceDays: _balanceDays,
         forceLunch: _forceLunch,
       );
+      _selectPreviewMapForRoute(trip.selectedRoute);
       setState(() => _draft = trip);
     } catch (_) {
       if (!mounted) return;
@@ -698,6 +710,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   }
 
   void _loadTrip(PlannedBikeTrip trip) {
+    _selectPreviewMapForRoute(trip.selectedRoute);
     setState(() {
       _draft = trip;
       _origin = trip.origin;
@@ -935,6 +948,124 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     ),
   );
 
+  // A prévia usa apenas pacotes MBTiles autorizados e presentes no aparelho.
+  // O mapa é selecionado pela intersecção aproximada com a geometria; isso
+  // NÃO confirma que todos os tiles existam para os zooms necessários.
+  void _selectPreviewMapForRoute(MapCyclingRoute? route) {
+    final maps = _offlineMaps.packages;
+    if (maps.isEmpty) {
+      _openPreviewMap(null);
+      return;
+    }
+    final points = route?.points ?? const <LatLng>[];
+    final step = points.isEmpty ? 1 : (points.length / 40).ceil();
+    OfflineMapPackage? best;
+    int bestHits = -1;
+    for (final package in maps) {
+      final hits = points.isEmpty ? 0 : <int>[
+        for (var i = 0; i < points.length; i += step)
+          if (package.hasBounds && package.contains(
+            latitude: points[i].latitude,
+            longitude: points[i].longitude,
+          )) i,
+      ].length;
+      if (hits > bestHits || (hits == bestHits &&
+          package.id == _offlineMaps.activeId)) {
+        best = package;
+        bestHits = hits;
+      }
+    }
+    _openPreviewMap(best);
+  }
+
+  void _openPreviewMap(OfflineMapPackage? package) {
+    if (_previewOfflineMapId == package?.id &&
+        (package == null || _previewOfflineTileProvider != null)) return;
+    _previewOfflineTileProvider?.release();
+    _previewOfflineTileProvider = null;
+    _previewOfflineMapId = package?.id;
+    _previewMinZoom = 0;
+    _previewMaxZoom = 19;
+    if (package == null) return;
+    RetainedMbTilesTileProvider? provider;
+    try {
+      provider = RetainedMbTilesTileProvider.fromPath(path: package.path);
+      final metadata = provider.delegate.mbtiles.getMetadata();
+      final minZoom = (metadata.minZoom ?? 0).floor().clamp(0, 22).toInt();
+      final maxZoom = (metadata.maxZoom ?? 19).ceil()
+          .clamp(minZoom, 22).toInt();
+      _previewMinZoom = minZoom;
+      _previewMaxZoom = maxZoom;
+      _previewOfflineTileProvider = provider;
+    } catch (_) {
+      provider?.release();
+      // A rota ainda pode ser visualizada sem mapa-base. Nenhum dado é apagado.
+    }
+  }
+
+  OfflineMapPackage? get _selectedPreviewMap {
+    for (final item in _offlineMaps.packages) {
+      if (item.id == _previewOfflineMapId) return item;
+    }
+    return null;
+  }
+
+  String _previewCoverageMessage(MapCyclingRoute route) {
+    final package = _selectedPreviewMap;
+    if (package == null) return 'Nenhum MBTiles disponível. Importe um na aba Mapas.';
+    if (_previewOfflineTileProvider == null) {
+      return 'Não foi possível abrir este MBTiles. Verifique o arquivo na aba Mapas.';
+    }
+    if (!package.hasBounds) {
+      return 'MBTiles aberto sem limites geográficos informados. Cobertura não verificada.';
+    }
+    final points = route.points;
+    final step = (points.length / 80).ceil().clamp(1, 100000).toInt();
+    var matches = 0;
+    var count = 0;
+    for (var i = 0; i < points.length; i += step) {
+      count++;
+      if (package.contains(
+        latitude: points[i].latitude,
+        longitude: points[i].longitude,
+      )) matches++;
+    }
+    if (matches < count) {
+      return 'Atenção: $matches de $count amostras da rota estão dentro '
+          'dos limites do MBTiles; trechos podem ficar sem mapa.';
+    }
+    return 'Rota dentro dos limites declarados do MBTiles. A presença '
+        'de todos os tiles e níveis de zoom não foi verificada.';
+  }
+
+  List<RouteExplorerResult> _offlinePoisOnRoute(MapCyclingRoute route) {
+    if (_savedPois.offlinePackages.isEmpty) return const <RouteExplorerResult>[];
+    final points = route.points;
+    if (points.isEmpty) return const <RouteExplorerResult>[];
+    final step = (points.length / 120).ceil().clamp(1, 100000).toInt();
+    final samples = <LatLng>[
+      for (var i = 0; i < points.length; i += step) points[i],
+      points.last,
+    ];
+    const measure = Distance();
+    final result = <RouteExplorerResult>[];
+    final seen = <String>{};
+    for (final package in _savedPois.offlinePackages) {
+      for (final poi in package.items) {
+        final key = '${poi.category.name}:${poi.latitude.toStringAsFixed(5)}:'
+            '${poi.longitude.toStringAsFixed(5)}';
+        if (!seen.add(key)) continue;
+        final location = LatLng(poi.latitude, poi.longitude);
+        if (samples.any((point) =>
+            measure.as(LengthUnit.Meter, point, location) <= 2500)) {
+          result.add(poi);
+          if (result.length >= 32) return result;
+        }
+      }
+    }
+    return result;
+  }
+
   List<MapDestinationSearchResult> _nearbyRoutePlaces(PlannedBikeTrip trip) {
     // Distância até amostras do traçado: não equivale a acesso rodoviário.
     final points = trip.selectedRoute.points;
@@ -968,11 +1099,21 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(
               label: Text('Rota ${i + 1} · ${(trip.routes[i].distanceMeters / 1000).toStringAsFixed(0)} km'),
               selected: trip.selectedIndex == i,
-              onSelected: (_) => setState(() => _draft = trip.copyWith(selectedIndex: i, places: const [])),
+              onSelected: (_) {
+                _selectPreviewMapForRoute(trip.routes[i]);
+                setState(() => _draft = trip.copyWith(selectedIndex: i, places: const []));
+              },
             )),
         ])),
       const SizedBox(height: 8),
-      _routeMap(route),
+      _routeMap(trip),
+      if (_savedPois.offlinePackages.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text('Pontos salvos próximos ao trajeto aparecem no mapa, '
+              'mesmo sem GPS ou internet.',
+              style: Theme.of(context).textTheme.bodySmall),
+        ),
       _routeActions(trip),
       const SizedBox(height: 6),
       Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
@@ -990,9 +1131,36 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       ]))),
       const SizedBox(height: 6),
       Text(_showOnlineBaseMap
-        ? 'Mapa online: OpenStreetMap. A geometria da rota permanece salva offline.'
-        : 'Traçado da rota sem mapa-base, disponível offline. Ative o mapa online se desejar.',
+        ? 'Mapa-base online: requer internet. A geometria permanece salva.'
+        : _previewCoverageMessage(route),
         style: Theme.of(context).textTheme.bodySmall),
+      if (_offlineMaps.packages.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: DropdownButtonFormField<String>(
+            key: ValueKey('preview-mbtiles-$_previewOfflineMapId'),
+            initialValue: _previewOfflineMapId,
+            decoration: const InputDecoration(
+              labelText: 'Mapa offline para esta rota',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            items: [
+              for (final package in _offlineMaps.packages)
+                DropdownMenuItem(value: package.id, child: Text(
+                  package.name, overflow: TextOverflow.ellipsis,
+                )),
+            ],
+            onChanged: (value) {
+              for (final package in _offlineMaps.packages) {
+                if (package.id == value) {
+                  setState(() => _openPreviewMap(package));
+                  break;
+                }
+              }
+            },
+          ),
+        ),
       SwitchListTile.adaptive(
         dense: true, contentPadding: EdgeInsets.zero,
         title: const Text('Mostrar mapa-base online'),
@@ -1050,18 +1218,22 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     Text(title, style: Theme.of(context).textTheme.labelSmall),
   ]);
 
-  Widget _routeMap(MapCyclingRoute route) {
+  Widget _routeMap(PlannedBikeTrip trip) {
+    final route = trip.selectedRoute;
     final points = route.points;
     final routePoints = points.length <= 1200 ? points : <LatLng>[
       for (var i = 0; i < points.length; i += (points.length / 1200).ceil()) points[i],
       points.last,
     ];
+    final offlinePois = _offlinePoisOnRoute(route);
+    final provider = _previewOfflineTileProvider;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: SizedBox(height: 220, child: ColoredBox(
+      child: SizedBox(height: 290, child: ColoredBox(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: FlutterMap(
-          key: ValueKey('${_draft?.id}-${_draft?.selectedIndex}-$_showOnlineBaseMap'),
+          key: ValueKey('${_draft?.id}-${_draft?.selectedIndex}-'
+              '$_showOnlineBaseMap-$_previewOfflineMapId'),
           options: MapOptions(
             initialCameraFit: CameraFit.coordinates(
               coordinates: routePoints,
@@ -1071,6 +1243,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             ),
           ),
           children: [
+            if (!_showOnlineBaseMap && provider != null)
+              TileLayer(
+                key: ValueKey('planning-offline-$_previewOfflineMapId'),
+                tileProvider: provider,
+                minNativeZoom: _previewMinZoom,
+                maxNativeZoom: _previewMaxZoom,
+              ),
             if (_showOnlineBaseMap)
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -1078,13 +1257,49 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                 maxNativeZoom: 19,
               ),
             PolylineLayer(polylines: [
-              Polyline(points: routePoints, color: Theme.of(context).colorScheme.primary, strokeWidth: 5),
+              Polyline(points: routePoints,
+                color: Theme.of(context).colorScheme.primary, strokeWidth: 5),
             ]),
+            if (offlinePois.isNotEmpty)
+              MarkerLayer(markers: [
+                for (final poi in offlinePois)
+                  Marker(
+                    point: LatLng(poi.latitude, poi.longitude),
+                    width: 28, height: 28,
+                    child: Tooltip(
+                      message: '${poi.title} · ${poi.category.label} (salvo)',
+                      child: InkWell(
+                        onTap: () => _notify('${poi.title} · ${poi.category.label} · pacote offline'),
+                        child: const Icon(Icons.place_rounded,
+                          color: Colors.deepOrange, size: 22),
+                      ),
+                    ),
+                  ),
+              ]),
+            if (trip.places.isNotEmpty)
+              MarkerLayer(markers: [
+                for (final place in _nearbyRoutePlaces(trip).take(32))
+                  Marker(
+                    point: LatLng(place.latitude, place.longitude),
+                    width: 28, height: 28,
+                    child: Tooltip(
+                      message: '${place.title} · ${place.kind.label}',
+                      child: InkWell(
+                        onTap: () => _notify('${place.title} · ${place.kind.label} '
+                            '· proximidade em linha reta, acesso não verificado'),
+                        child: const Icon(Icons.location_city_rounded,
+                          color: Colors.indigo, size: 22),
+                      ),
+                    ),
+                  ),
+              ]),
             MarkerLayer(markers: [
               Marker(point: points.first, width: 32, height: 32,
-                  child: const Icon(Icons.trip_origin_rounded, color: Colors.green, size: 28)),
+                  child: const Icon(Icons.trip_origin_rounded,
+                    color: Colors.green, size: 28)),
               Marker(point: points.last, width: 32, height: 32,
-                  child: const Icon(Icons.location_on_rounded, color: Colors.red, size: 32)),
+                  child: const Icon(Icons.location_on_rounded,
+                    color: Colors.red, size: 32)),
             ]),
             if (_showOnlineBaseMap)
               const RichAttributionWidget(attributions: [

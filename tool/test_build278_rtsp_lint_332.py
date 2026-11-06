@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressão do lint real identificado pelo APK 278 (Flutter analyze)."""
 from pathlib import Path
 import re
@@ -19,9 +20,9 @@ class Build278RtspLint332(unittest.TestCase):
         self.assertIsNotNone(match, 'A guarda RTSP deve ter bloco de retorno entre chaves')
 
     def test_version_and_news(self):
-        self.assertIn('version: 1.0.353+353', (ROOT / 'pubspec.yaml').read_text('utf-8'))
+        self.assertIn('version: ' + current_release(ROOT), (ROOT / 'pubspec.yaml').read_text('utf-8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
-        self.assertIn("AppBuildVersion(version: '1.0.353', build: 353)",
+        self.assertIn(catalog_reference(ROOT),
                       (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf-8'))
 
 if __name__ == '__main__':

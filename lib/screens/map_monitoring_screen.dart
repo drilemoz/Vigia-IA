@@ -5624,6 +5624,21 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         ],
                       ),
                     ),
+                    if (service.offlinePackages.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(sheetContext).pop();
+                              unawaited(_showOfflinePoiPackages());
+                            },
+                            icon: const Icon(Icons.inventory_2_rounded, size: 18),
+                            label: Text('Abrir pacotes salvos (${service.offlinePackages.length}) · sem GPS'),
+                          ),
+                        ),
+                      ),
                     Expanded(
                       child: searchError != null && sourceResults.isEmpty
                           ? _MapEmptyState(message: searchError)
@@ -5663,7 +5678,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         trailing: Text(
-                                          '${service.formatDistance(item.distanceMeters)}\nem linha reta',
+                                          lookingAtArea || _routeState.current != null
+                                              ? '${service.formatDistance(item.distanceMeters)}\nem linha reta'
+                                              : 'Sem GPS\ndistância indisponível',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w900,
                                           ),

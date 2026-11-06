@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Protege o acesso único às integrações sem remover telas internas existentes."""
 import re
 import unittest
@@ -35,8 +36,8 @@ class ApiCentralization328Tests(unittest.TestCase):
         self.assertNotIn('const GeminiMapSettingsScreen()',assistant)
 
     def test_release_increment(self):
-        self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
-        self.assertIn("static const int build = 353;",read('lib/core/app_metadata.dart'))
+        self.assertIn('version: ' + current_release(ROOT),read('pubspec.yaml'))
+        self.assertIn(f"static const int build = {current_build(ROOT)};",read('lib/core/app_metadata.dart'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

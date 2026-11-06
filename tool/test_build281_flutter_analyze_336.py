@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressões de fonte para os oito diagnósticos do flutter analyze no APK 281.
 
 Estes testes não substituem executar flutter analyze com o SDK Dart.
@@ -51,12 +52,12 @@ class Build281FlutterAnalyze336Test(unittest.TestCase):
         self.assertIn('return _valhalla', body) if 'return _valhalla' in body else self.assertIn('valhalla', body.lower())
 
     def test_public_release_is_sequential_and_history_preserved(self):
-        self.assertIn('version: 1.0.353+353', src('pubspec.yaml'))
-        self.assertIn('static const int build = 353;', src('lib/core/app_metadata.dart'))
+        self.assertIn('version: ' + current_release(ROOT), src('pubspec.yaml'))
+        self.assertIn(f'static const int build = {current_build(ROOT)};', src('lib/core/app_metadata.dart'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').exists())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').exists())
         about = src('lib/screens/app_info_screen_components.dart')
-        self.assertEqual(about.count("version: '1.0.353',\n          current: true"), 2)
+        self.assertEqual(about.count(f"version: '{version_only(ROOT)}',\n          current: true"), 2)
         self.assertIn("version: '1.0.335',\n          current: false", about)
 
 

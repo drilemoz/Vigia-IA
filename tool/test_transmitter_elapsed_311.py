@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressao para o salto 10->13s nos cronometros do transmissor A3."""
 from pathlib import Path
 import unittest
@@ -28,7 +29,7 @@ class NativeElapsed311Contracts(unittest.TestCase):
         self.assertNotIn('NativeCameraTransmitterService.status()', tick)
 
     def test_versao_publica_e_testes_de_clock(self):
-        self.assertIn('version: 1.0.353+353', (ROOT/'pubspec.yaml').read_text())
+        self.assertIn('version: ' + current_release(ROOT), (ROOT/'pubspec.yaml').read_text())
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         tests = (ROOT / 'test/native_elapsed_counter_test.dart').read_text()
         self.assertIn('11);', tests)

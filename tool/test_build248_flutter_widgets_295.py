@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Impede que testes Dart antigos quebrem o workflow após redesign de UI."""
 from pathlib import Path
 import unittest
@@ -34,7 +35,7 @@ class Build248WidgetContracts(unittest.TestCase):
         self.assertNotIn("tester.tap(find.text('Resolução'))", test)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
 
 

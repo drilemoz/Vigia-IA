@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos de interface do assistente 285; não substituem Flutter Analyze."""
 from pathlib import Path
 import unittest
@@ -49,7 +50,7 @@ class Wizard285(unittest.TestCase):
   self.assertIn('maximumTrips = 40',persistence)
   self.assertIn('vigia_planned_trips.json',persistence)
  def test_metadata(self):
-  self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
-  self.assertIn('AppBuildVersion(version: \'1.0.353\', build: 353)',read('lib/services/update_news_catalog.dart'))
+  self.assertIn('version: ' + current_release(ROOT),read('pubspec.yaml'))
+  self.assertIn(catalog_reference(ROOT),read('lib/services/update_news_catalog.dart'))
   self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
 if __name__=='__main__': unittest.main()

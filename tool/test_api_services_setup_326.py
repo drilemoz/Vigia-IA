@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 import unittest
 from pathlib import Path
 
@@ -56,7 +57,7 @@ class ApiServicesSetup326Tests(unittest.TestCase):
         self.assertNotIn('gemini_api_key=', setup)
 
     def test_version_and_documentation(self):
-        self.assertIn('version: 1.0.353+353',src('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT),src('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

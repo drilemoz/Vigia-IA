@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Structural regression checks for the user-reported cycling UI regression and diagnostics."""
 import unittest
 from pathlib import Path
@@ -46,7 +47,7 @@ class RouteAndDiagnostics322(unittest.TestCase):
         self.assertIn('isRtspExitClose',s)
         self.assertIn('pode ser registro anterior',s)
     def test_release(self):
-        self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT),read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

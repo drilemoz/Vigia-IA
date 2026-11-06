@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos da trilha de UI 319: não substituem Flutter/Android compilados."""
 import unittest
 from pathlib import Path
@@ -74,7 +75,7 @@ class UiDiagnostics319(unittest.TestCase):
         self.assertNotIn('recordUiAction(', source('lib/utils/diagnostic_redactor.dart'))
 
     def test_version_and_notes(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').is_file())
 

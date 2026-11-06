@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contracts for Android exit-recovery changes (Flutter tests run in CI)."""
 from pathlib import Path
 import unittest
@@ -33,7 +34,7 @@ class Recovery345Tests(unittest.TestCase):
         self.assertIn('else -> null', policy)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', (ROOT/'pubspec.yaml').read_text())
+        self.assertIn('version: ' + current_release(ROOT), (ROOT/'pubspec.yaml').read_text())
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').exists())
 
 if __name__ == '__main__': unittest.main()

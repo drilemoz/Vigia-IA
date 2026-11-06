@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -28,8 +29,8 @@ class ReleaseConsistency296Tests(unittest.TestCase):
                 shutil.copyfile(real_root / name, target)
             catalog = dest / 'lib/services/update_news_catalog.dart'
             current = catalog.read_text('utf-8')
-            self.assertEqual(current.count("AppBuildVersion(version: '1.0.353', build: 353)"), 2)
-            catalog.write_text(current.replace('build: 353', 'build: 297', 1), 'utf-8')
+            self.assertEqual(current.count(catalog_reference(ROOT)), 2)
+            catalog.write_text(current.replace(f'build: {current_build(ROOT)}', 'build: 297', 1), 'utf-8')
             with patch.object(checks, 'ROOT', dest), self.assertRaisesRegex(ValueError, 'Catalogo de Novidades'):
                 checks.validate()
 
@@ -37,5 +38,10 @@ class ReleaseConsistency296Tests(unittest.TestCase):
         # Validate that version mismatch in standalone metadata is detectable.
         source = Path(__file__).resolve().parents[1] / 'github-manager.json'
         data = __import__('json').loads(source.read_text('utf-8'))
-        self.assertEqual(data['version'], '1.0.353')
-        self.assertEqual(data['android']['versionCode'], 353)
+        self.assertEqual(data['version'], version_only(ROOT))
+        self.assertEqual(data['android']['versionCode'], current_build(ROOT))
+
+def src(name):
+    return (ROOT / name).read_text(encoding="utf-8")
+
+ROOT = Path(__file__).resolve().parents[1]

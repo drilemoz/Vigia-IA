@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 from pathlib import Path
 import unittest
 
@@ -36,8 +37,10 @@ class TestMcrpH264Integration(unittest.TestCase):
         self.assertIn('analysisEnabled: _analyze', s)
         self.assertNotIn('A IA local exige MJPEG', s)
     def test_build_and_release(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((R / 'RELEASE-1.0.348.md').exists())
 
 if __name__ == '__main__':
     unittest.main()
+
+ROOT = Path(__file__).resolve().parents[1]

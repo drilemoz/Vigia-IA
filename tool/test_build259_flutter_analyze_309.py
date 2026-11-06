@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regression for 2 Flutter Analyzer infos observed in Android APK 259.
 
 This structural check is supplemental; only real flutter analyze can prove
@@ -33,7 +34,7 @@ class Build259AnalyzerRegression(unittest.TestCase):
         self.assertIn('now.difference(match.lastSaved!) < repeatSameRegion', code)
 
     def test_new_version_preserves_previous_features(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertIn('class RemoteGalleryScreen', source('lib/screens/remote_gallery_screen.dart'))
         self.assertIn('class VehiclePlateOcrService', source('lib/services/vehicle_plate_ocr_service.dart'))

@@ -1,3 +1,14 @@
+# Arquitetura — Vigia IA 1.0.354+354
+
+## Etapa 1 de robustez offline
+
+- `RouteExplorerService` mantém pacotes de POIs persistidos separados das consultas online. Abertura explícita sem GPS povoa `_results` com `source=offline`, sem calcular ou alegar distâncias sem posição.
+- Em consultas de áreas escolhidas, resultados locais de todos os pacotes são filtrados por raio/distância e deduplicados quando o HTTP falha. Não se reaproveitam pontos de região diferente em `_selectBestOfflinePackage`.
+- `TripPlanningScreen` administra um `RetainedMbTilesTileProvider` próprio, que é liberado na troca de pacote/saída da tela; não altera o mapa ativo em `MapMonitoringScreen`.
+- Seleção inicial do pacote por amostras da rota sobre limites geográficos declarados, com escolha manual posterior. Bounds não implicam tiles completos; o mapa pode ter vazios e não fornece roteamento/elevação.
+- Os marcadores do Planejamento vêm dos pacotes de POIs locais, com limite de renderização para poupar memória; também podem exibir apoios/localidades associados a uma viagem salva. Proximidade não confirma acessibilidade por estrada.
+- **Fora de escopo nesta versão:** mecanismo de rotas offline, inferência de cidades ao longo de toda a rota, análise altimétrica e temporal de chuva/vento.
+
 # Arquitetura — Vigia IA 1.0.353+353
 
 A verificação de versão do `tool/verify_project.sh` deriva os identificadores ativos de `pubspec.yaml`, sem fixar o número do release. Versão e build continuam conferidos pelo `tool/check_version_sync.py` e pelo catálogo de Novidades.

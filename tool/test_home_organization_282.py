@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressão da Home 282: operações compactas e Telemetria sem atalhos redundantes."""
 from pathlib import Path
 import unittest
@@ -41,7 +42,7 @@ class HomeOrganization282(unittest.TestCase):
         self.assertIn('constraints.maxHeight < 570', ui)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
 
 if __name__ == '__main__':
     unittest.main()

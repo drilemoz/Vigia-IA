@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Map SDK: do not mistake a locally saved key for an authenticated APK."""
 import unittest
 from pathlib import Path
@@ -47,7 +48,7 @@ class MapsSdkBuildKey333Tests(unittest.TestCase):
         self.assertIn('MAPS_API_KEY', config)
         self.assertIn('não é injetada no SDK', config)
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', src('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), src('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.353',
+          version: '1.0.354',
           current: true,
+          changes: [
+            'Pacotes de pontos offline podem ser abertos sem GPS e aparecem como marcadores no mapa.',
+            'Consultas de regiões com erro de rede recuperam pontos salvos quando disponíveis.',
+            'Planejamento abre MBTiles locais e exibe pontos offline próximos ao trajeto.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.353',
+          current: false,
           changes: [
             'APK 300: corrigidos contratos preventivos de versão que impediam a compilação.',
             'Checagem dinâmica da versão atual nos validadores do projeto.',
@@ -3054,8 +3064,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.353',
+          version: '1.0.354',
           current: true,
+          changes: [
+            'Pacotes de pontos offline podem ser abertos sem GPS e aparecem como marcadores no mapa.',
+            'Consultas de regiões com erro de rede recuperam pontos salvos quando disponíveis.',
+            'Planejamento abre MBTiles locais e exibe pontos offline próximos ao trajeto.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.353',
+          current: false,
           changes: [
             'APK 300: corrigidos contratos preventivos de versão que impediam a compilação.',
             'Checagem dinâmica da versão atual nos validadores do projeto.',

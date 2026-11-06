@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressão para o resultado real do flutter analyze do build 245."""
 from pathlib import Path
 import re
@@ -24,6 +25,6 @@ class Build245FlutterAnalyzeTests(unittest.TestCase):
         self.assertNotIn('.transform(latin1.decoder)', scanner)
 
     def test_version_and_news_current(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
-        self.assertIn("AppBuildVersion(version: '1.0.353', build: 353)", source('lib/services/update_news_catalog.dart'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
+        self.assertIn(catalog_reference(ROOT), source('lib/services/update_news_catalog.dart'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').exists())

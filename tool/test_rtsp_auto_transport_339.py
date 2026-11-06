@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
@@ -20,5 +21,5 @@ class RtspAutoTransport339(unittest.TestCase):
   self.assertIn('sha256.convert(utf8.encode(url))',s)
   self.assertIn('if (rawH264 || transport != \'auto\') return;',s)
  def test_version(self):
-  self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
+  self.assertIn('version: ' + current_release(ROOT),read('pubspec.yaml'))
 if __name__=='__main__':unittest.main()

@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Structural regression checks for vehicle photos and on-demand local OCR.
 Dart behavior is exercised by test/vehicle_*_test.dart on CI.
 """
@@ -47,7 +48,7 @@ class VehicleHistory305Test(unittest.TestCase):
         self.assertNotIn('VehiclePlateOcrService', source('lib/services/vehicle_capture_service.dart'))
 
     def test_version_and_ui_switch(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertIn('google_mlkit_text_recognition: ^0.17.1', source('pubspec.yaml'))
         self.assertIn('SwitchListTile.adaptive', source('lib/screens/events_screen.dart'))
         self.assertIn('Fotografar veículos automaticamente', source('lib/screens/events_screen.dart'))

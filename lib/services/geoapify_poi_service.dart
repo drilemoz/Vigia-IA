@@ -54,7 +54,7 @@ class GeoapifyPoiService {
       final request = await client.getUrl(uri).timeout(const Duration(seconds: 6));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.353');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.354');
       final response = await request.close().timeout(const Duration(seconds: 8));
       final body = await response.transform(utf8.decoder).join()
           .timeout(const Duration(seconds: 8));

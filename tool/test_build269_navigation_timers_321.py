@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Protege contra timers pendentes de diagnóstico em testes Flutter de menu."""
 import re
 import unittest
@@ -27,7 +28,7 @@ class Build269NavigationTimers321(unittest.TestCase):
         self.assertIn('setUiSection(_mainDestinations[index].label)', nav)
 
     def test_current_version_synced(self):
-        self.assertIn('version: 1.0.353+353', (ROOT / 'pubspec.yaml').read_text('utf-8'))
+        self.assertIn('version: ' + current_release(ROOT), (ROOT / 'pubspec.yaml').read_text('utf-8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').is_file())
 

@@ -1,3 +1,11 @@
+## 1.0.354+354 (2026-11-05)
+- Pontos offline: ativação/restauração de pacote mostra resultados sem GPS; distâncias não são anunciadas sem referência atual.
+- Consulta de região manual recupera pacotes locais após erro HTTP; evita reaproveitar cache remoto de outra região.
+- Planejamento: MBTiles raster local na prévia, seleção manual do pacote, indicação de cobertura não verificada e marcadores de apoios salvos/locais vinculados.
+- Tela Próximos pontos oferece atalho para pacotes salvos e deixa explícita a ausência de GPS.
+- Não expande o limite de cache direto da Stadia Maps; não cria motor offline de rotas, previsão por dia nem cálculo de morros.
+- Testes de contrato estruturais adicionados; compilação real do Android ainda depende de Flutter SDK/CI.
+
 ## 1.0.353+353 (2026-11-05)
 
 - APK #300: corrigida falha da verificação preventiva que exigia `1.0.351+351` em um release 1.0.352.

@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos estruturais do seletor único de camadas (não substitui Flutter test)."""
 import unittest
 from pathlib import Path
@@ -33,8 +34,10 @@ class MapLayerPicker347(unittest.TestCase):
         self.assertEqual(widget_test.count('testWidgets('),4)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT),read('pubspec.yaml'))
         self.assertTrue((R/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((R/'VALIDATION-1.0.348.md').is_file())
 
 if __name__=='__main__': unittest.main()
+
+ROOT = Path(__file__).resolve().parents[1]

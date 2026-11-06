@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.353', build: 353);
+      AppBuildVersion(version: '1.0.354', build: 354);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.353', build: 353),
+      version: AppBuildVersion(version: '1.0.354', build: 354),
       changes: <String>[
-        'APK 300: corrigidos verificadores preventivos que ainda exigiam a versão 1.0.351.',
-        'Contratos de release passam a ler a versão atual, evitando bloqueios após atualizações.',
-        'Central de APIs, exportação .env, RTSP automático e mapas preservados.',
+        'Pacotes de pontos offline agora podem ser abertos sem GPS, com marcadores e distâncias não inventadas.',
+        'Falhas de consulta de uma região tentam pontos locais sem apagar os salvos.',
+        'Planejamento abre MBTiles existentes, permite escolher o mapa e exibe pontos de apoio offline junto da rota.',
       ],
     ),
   ]);

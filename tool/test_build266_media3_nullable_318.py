@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Build 266: impede URL opcional em Media3RtspTestScreen.
 
 Teste estrutural, não substitui flutter analyze.
@@ -29,7 +30,7 @@ class Build266Media3NullSafety318(unittest.TestCase):
         self.assertIn("viewType: 'vigiaia/media3_rtsp'", source)
 
     def test_version_increment(self):
-        self.assertIn('version: 1.0.353+353', (ROOT / 'pubspec.yaml').read_text('utf8'))
+        self.assertIn('version: ' + current_release(ROOT), (ROOT / 'pubspec.yaml').read_text('utf8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
 
 if __name__ == '__main__':

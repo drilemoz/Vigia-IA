@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Guarda estrutural para os 3 infos da análise estática do APK 263.
 
 Não substitui `flutter analyze --fatal-infos --fatal-warnings` do workflow.
@@ -25,7 +26,7 @@ class Build263AnalyzerRegression(unittest.TestCase):
         self.assertIn('DiagnosticRedactor.field(', source)
 
     def test_version_bumped_and_release_documented(self):
-        self.assertIn('version: 1.0.353+353', (ROOT / 'pubspec.yaml').read_text('utf-8'))
+        self.assertIn('version: ' + current_release(ROOT), (ROOT / 'pubspec.yaml').read_text('utf-8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').exists())
 
 

@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regression checks: edit cycling pace without stopping active navigation (323)."""
 import unittest
 from pathlib import Path
@@ -31,7 +32,7 @@ class ActiveBikePace323(unittest.TestCase):
         self.assertIn("'ritmo_navegacao_recalculado'",s)
         self.assertNotIn("recordUiAction('mapas', selection.preferences.toString()", s)
     def test_release(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

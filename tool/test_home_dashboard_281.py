@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Guarda da Home em três cartões e pop-up de ajustes na versão 281."""
 from pathlib import Path
 import unittest
@@ -49,8 +50,10 @@ class HomeDashboard281(unittest.TestCase):
         self.assertIn('class _HomeDashboardCard extends StatelessWidget', read('lib/screens/home_screen_components.dart'))
 
     def test_public_version(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
         self.assertIn("version: '1.0.348'", read('lib/screens/app_info_screen_components.dart'))
 
 if __name__ == '__main__':
     unittest.main()
+
+ROOT = Path(__file__).resolve().parents[1]

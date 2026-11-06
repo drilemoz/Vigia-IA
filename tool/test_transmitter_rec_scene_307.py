@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressions for background transmitter MP4 timing and opt-in local scene photos."""
 from pathlib import Path
 import unittest
@@ -36,7 +37,7 @@ class TransmitterRecorder307(unittest.TestCase):
         self.assertIn('Pictures/VigiaIA/', library)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', src('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), src('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').exists())
 
 if __name__ == '__main__': unittest.main()

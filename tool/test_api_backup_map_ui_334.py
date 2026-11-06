@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos locais do backup de APIs e UX de mapas da 1.0.343.
 Não equivalem a teste Android/SAF ou flutter analyze.
 """
@@ -9,7 +10,7 @@ def read(name): return (R/name).read_text('utf-8')
 
 class ApiBackupAndMapUi335(unittest.TestCase):
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
         self.assertTrue((R/'RELEASE-1.0.348.md').is_file())
     def test_api_central_has_two_real_actions(self):
         s=read('lib/screens/api_services_setup_screen.dart')
@@ -62,3 +63,5 @@ class ApiBackupAndMapUi335(unittest.TestCase):
         self.assertIn('Gemini indisponível. Pesquisa normal ativada.',screen)
 
 if __name__=='__main__': unittest.main()
+
+ROOT = Path(__file__).resolve().parents[1]

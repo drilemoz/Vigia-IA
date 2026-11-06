@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.354+354
+
+Consulte `VALIDATION-1.0.354.md`: testes estruturais preventivos, checagem da base da 1.0.353 e limites da validação local. `flutter analyze`, `flutter test` e build do APK continuam pendentes sem SDK no ambiente.
+
 # Validação Vigia IA 1.0.353+353
 
 Correção da verificação preventiva do workflow APK #300. Detalhes e limites em `VALIDATION-1.0.353.md`.

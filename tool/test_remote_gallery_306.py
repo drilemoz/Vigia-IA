@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Checks that gallery reuses authenticated MCRP media and preserves originals."""
 from pathlib import Path
 import unittest
@@ -46,7 +47,7 @@ class RemoteGallery306(unittest.TestCase):
         self.assertTrue((ROOT/'test/remote_gallery_storage_test.dart').exists())
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
 
 if __name__ == '__main__': unittest.main()

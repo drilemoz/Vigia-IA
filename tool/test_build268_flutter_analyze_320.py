@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Protege os dois avisos fatais reais do Flutter Analyze no build 268."""
 import re
 import unittest
@@ -26,7 +27,7 @@ class Build268Analyzer320(unittest.TestCase):
         self.assertNotIn("import 'dart:ui'", dart)
 
     def test_version_and_release(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.320.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.320.md').is_file())
 

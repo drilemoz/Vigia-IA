@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressão estrutural do erro de timeout em testes Flutter do build 264.
 
 Não substitui flutter test no CI.
@@ -41,7 +42,7 @@ class Build264RecoveryRegression(unittest.TestCase):
         self.assertIn('exportIncident', source)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', (ROOT / 'pubspec.yaml').read_text('utf8'))
+        self.assertIn('version: ' + current_release(ROOT), (ROOT / 'pubspec.yaml').read_text('utf8'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
 
 

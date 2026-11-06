@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos da otimização em segundo plano e da modularização (1.0.349).
 
 O teste estático não substitui flutter analyze/test nem medição de energia.
@@ -54,7 +55,7 @@ class MapBackgroundRefactor349(unittest.TestCase):
         self.assertIn('test(', read('test/map_camera_source_policy_test.dart'))
 
     def test_build_is_sequential(self):
-        self.assertIn('version: 1.0.353+353', read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.349.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.349.md').is_file())
 

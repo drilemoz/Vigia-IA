@@ -1,4 +1,14 @@
-**Versão atual:** `1.0.353+353`
+**Versão atual:** `1.0.354+354`
+
+## 1.0.354 — Pacotes POI e mapa do planejamento offline (etapa 1)
+
+- Abertura explícita de pacotes locais de pontos sem depender de localização GPS: itens aparecem na lista/mapa com indicação de que não há distância atualizada.
+- Quando uma consulta manual de região falha no HTTP/Overpass, o app verifica pacotes locais para essa área e evita eliminar os itens persistidos.
+- Corrigido cache obsoleto de pontos quando o usuário está longe de todas as regiões salvas.
+- Planejamento pode exibir MBTiles raster importado/baixado previamente e permite selecionar o arquivo; mantém aviso quando os limites indicam trechos sem cobertura ou não permitem comprovação.
+- Marcadores dos pontos salvos a até ~2,5 km das amostras da rota, além dos locais já associados à viagem. A proximidade não confirma acesso por via.
+- O limite de cache direto Stadia permanece respeitado. Para mapas grandes, use arquivo MBTiles de fonte que autorize armazenamento offline.
+- **Ainda não implementados nesta etapa:** análise altimétrica de esforço, cidades intermediárias automáticas e previsão de chuva em cada etapa. Não há novo motor de recálculo offline.
 
 ## 1.0.353 — Correção do workflow APK 300
 

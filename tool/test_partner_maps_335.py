@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regression checks for optional API integrations and offline fallbacks (335).
 These inspect the source contracts only; they are not HTTP or Flutter tests.
 """
@@ -73,7 +74,7 @@ class PartnerMaps335(unittest.TestCase):
         self.assertIn('!hud.showBikeShortcut', screen)
 
     def test_release_current(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT / 'VALIDATION-1.0.348.md').is_file())
 

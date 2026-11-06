@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Regressões para os dois diagnósticos fatais do Flutter Analyzer no APK 288.
 
 Estes testes de fonte não substituem `flutter analyze`.
@@ -27,7 +28,7 @@ class Build288FlutterAnalyze343Tests(unittest.TestCase):
         self.assertNotIn('if (_cyclingRoute != null) _cyclingRoute!', body)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', (ROOT/'pubspec.yaml').read_text(encoding='utf8'))
+        self.assertIn('version: ' + current_release(ROOT), (ROOT/'pubspec.yaml').read_text(encoding='utf8'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

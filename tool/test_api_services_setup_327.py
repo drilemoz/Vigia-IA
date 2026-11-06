@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 import unittest
 from pathlib import Path
 
@@ -56,7 +57,7 @@ class ApiServices327Tests(unittest.TestCase):
         self.assertIn('showApiServiceHelp(context, ApiHelpProvider.googleMaps)',screen)
 
     def test_version(self):
-        self.assertIn('version: 1.0.353+353',read('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT),read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.348.md').is_file())
         self.assertTrue((ROOT/'VALIDATION-1.0.348.md').is_file())
 

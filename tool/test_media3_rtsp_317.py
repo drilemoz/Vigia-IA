@@ -1,3 +1,4 @@
+from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos locais do piloto Media3 RTSP, sem Android SDK.
 
 NÃO substitui compilação Gradle, Flutter analyze/test nem reprodução real.
@@ -14,7 +15,7 @@ def source(path):
 
 class Media3Rtsp317Tests(unittest.TestCase):
     def test_version(self):
-        self.assertIn('version: 1.0.353+353', source('pubspec.yaml'))
+        self.assertIn('version: ' + current_release(ROOT), source('pubspec.yaml'))
         self.assertTrue((ROOT / 'RELEASE-1.0.348.md').is_file())
 
     def test_dependencies_consistent_with_radio(self):
