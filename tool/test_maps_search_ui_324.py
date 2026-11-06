@@ -30,7 +30,7 @@ class MapSearchUi324(unittest.TestCase):
         self.assertIn('return Dialog(',wizard)
         self.assertIn('Flexible(child: SingleChildScrollView(',wizard)
         self.assertIn('OverflowBar(',wizard)
-        settings=s.split('Widget _settings()',1)[1].split('List<MapDestinationSearchResult> _nearbyRoutePlaces',1)[0]
+        settings=s.split('Widget _settings()',1)[1].split('  // A prévia usa apenas pacotes MBTiles',1)[0]
         self.assertEqual(settings.count('Row(children:'),3) # 2 filas de controle, 1 do popup
         self.assertIn("_choice('Almoço'",settings)
         self.assertIn("_choice('Pausa'",settings)

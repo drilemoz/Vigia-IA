@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.356+356`
+**Versão atual:** `1.0.357+357`
+
+## 1.0.357 — Itinerário de cidades e apoios ao longo da rota
+
+- Mostra localidades e POIs offline próximos do traçado em **ordem de percurso**, com km aproximado desde a origem e distância linear até a geometria. O acesso por estrada e a passagem efetiva não são confirmados.
+- Ao criar ou reabrir uma rota ainda sem pontos vinculados, o planejador consulta apenas o **índice local** (cidades salvas/recentes, índice de nomes e pacotes de pontos). Não liga GPS ou internet automaticamente.
+- Busca online de apoios somente ao tocar no botão, com amostragem por distância geográfica (em vez de no máximo 8 índices arbitrários), consultas em lotes de 6 posições e parada por falha/limite HTTP 429 ou 503. Não garante catálogo exaustivo; servidores públicos podem falhar.
+- Marcadores de apoios offline passam a usar proximidade geométrica aos segmentos da rota, reduzindo perdas ocasionadas por amostragem esparsa de vértices.
+- Arquivo da viagem mantém os locais encontrados (até 100) para consulta futura sem rede. Matriz de estradas offline, previsão de chuva e cálculo de esforço nas subidas **não foram implementados nesta versão**.
 
 ## 1.0.356 — Buildfix APK 303: análise estática do Planejamento
 

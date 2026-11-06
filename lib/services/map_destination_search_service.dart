@@ -10,6 +10,7 @@ import 'data_usage_service.dart';
 import 'geoapify_map_search_service.dart';
 import 'map_destination_ranking.dart';
 import 'nearby_place_query.dart';
+import 'route_corridor_index.dart';
 
 import '../models/map_destination_search.dart';
 import '../models/map_route_point.dart';
@@ -259,6 +260,9 @@ class MapDestinationSearchService extends ChangeNotifier {
     }
   }
 
+  /// Identifica somente localidades realmente presentes no índice local ou
+  /// recebidas da rede. Classifica a posição pelo traçado, sem inventar vias.
+  /// Consultas online ocorrem somente após ação explícita do usuário.
   Future<List<MapDestinationSearchResult>> placesAlongRoute({
     required List<LatLng> route,
     required MapRoutePoint current,
@@ -268,50 +272,59 @@ class MapDestinationSearchService extends ChangeNotifier {
   }) async {
     await initialize();
     if (route.length < 2) return const <MapDestinationSearchResult>[];
-    final localPlaces = _knownPlaces
-        .map(
-          (place) => _withDistanceAndOfflineSource(
+    final local = <MapDestinationSearchResult>[
+      for (final place in <MapDestinationSearchResult>[
+        ..._savedPlaces, ..._recentPlaces, ..._knownPlaces,
+      ])
+        if (place.storedLocally)
+          _withDistanceAndOfflineSource(
             place,
             current: current,
             offlineMaps: offlineMaps,
           ),
-        )
-        .where((place) => onlineAllowed || place.offline);
-    final local = <MapDestinationSearchResult>[
-      ...localPlaces,
       for (final package in offlinePoiPackages)
         for (final poi in package.items)
-          if (poi.category.name == 'camping' || poi.category.name == 'stop')
-            MapDestinationSearchResult(
-              id: 'poi:${poi.id}',
-              title: poi.title,
-              subtitle: poi.subtitle.trim().isEmpty
-                  ? poi.category.label
-                  : '${poi.category.label} · ${poi.subtitle}',
-              latitude: poi.latitude,
-              longitude: poi.longitude,
-              distanceMeters: _meters(
-                current.latitude,
-                current.longitude,
-                poi.latitude,
-                poi.longitude,
-              ),
-              kind: MapDestinationKind.pointOfInterest,
-              source: 'offline',
-              poiCategory: poi.category,
-            ),
+          MapDestinationSearchResult(
+            id: 'poi:${poi.id}',
+            title: poi.title,
+            subtitle: poi.subtitle.trim().isEmpty
+                ? poi.category.label
+                : '${poi.category.label} · ${poi.subtitle}',
+            latitude: poi.latitude,
+            longitude: poi.longitude,
+            distanceMeters: 0,
+            kind: MapDestinationKind.pointOfInterest,
+            source: 'offline',
+            poiCategory: poi.category,
+          ),
     ];
-    if (!onlineAllowed) return _dedupeAndSort(local);
-    try {
-      final remote = await _fetchRoutePlaces(route, current);
-      _mergeKnownPlaces(
-        remote.where((item) => item.kind != MapDestinationKind.pointOfInterest),
-      );
-      await _persist();
-      return _dedupeAndSort(<MapDestinationSearchResult>[...local, ...remote]);
-    } catch (_) {
-      return _dedupeAndSort(local);
+    var candidates = _dedupeAndSort(local);
+    if (onlineAllowed) {
+      try {
+        final remote = await _fetchRoutePlaces(route, current);
+        if (remote.isNotEmpty) {
+          _mergeKnownPlaces(remote.where(
+            (item) => item.kind != MapDestinationKind.pointOfInterest,
+          ));
+          await _persist();
+          candidates = _dedupeAndSort(<MapDestinationSearchResult>[
+            ...local, ...remote,
+          ]);
+        }
+      } catch (_) {
+        // A rota e as localidades locais continuam úteis sem internet.
+      }
     }
+    final matches = RouteCorridorIndex.locate(
+      route: route,
+      routeDistanceMeters: 0, // Geometria é suficiente para ordenar.
+      places: candidates,
+      maximumProximityMeters: 3500,
+      maximumResults: 100,
+    );
+    return <MapDestinationSearchResult>[
+      for (final match in matches) match.place,
+    ];
   }
 
   Future<void> indexOfflineMapPackage(OfflineMapPackage package) async {
@@ -533,94 +546,93 @@ class MapDestinationSearchService extends ChangeNotifier {
     return _dedupeAndSort(found);
   }
 
+  /// Consultas manuais em grupos pequenos ao Overpass. A seleção uniforme
+  /// por quilômetros cobre melhor trechos longos que 8 vértices arbitrários.
+  /// A consulta não é exaustiva e respeita o bloqueio de servidores públicos.
   Future<List<MapDestinationSearchResult>> _fetchRoutePlaces(
     List<LatLng> route,
     MapRoutePoint current,
   ) async {
-    final sampleCount = route.length.clamp(2, 8).toInt();
-    final indexes = <int>{};
-    for (var index = 0; index < sampleCount; index++) {
-      final fraction = sampleCount == 1 ? 0.0 : index / (sampleCount - 1);
-      indexes.add((fraction * (route.length - 1)).round());
+    final positions = RouteCorridorIndex.searchSamples(route);
+    const batchSize = 6;
+    final found = <MapDestinationSearchResult>[];
+    for (var offset = 0; offset < positions.length; offset += batchSize) {
+      final samples = positions.skip(offset).take(batchSize);
+      final query = StringBuffer('[out:json][timeout:20];(');
+      for (final point in samples) {
+        // Nós, vias e relações podem representar localidades. As coordenadas
+        // centrais não equivalem necessariamente ao acesso pela rodovia.
+        query.write(
+          'nwr(around:17000,${point.latitude},${point.longitude})'
+          '["place"~"city|town|village|hamlet"];',
+        );
+        query.write(
+          'nwr(around:7000,${point.latitude},${point.longitude})'
+          '["tourism"="camp_site"];',
+        );
+      }
+      query.write(');out center 240;');
+      try {
+        final request = await _client
+            .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
+            .timeout(const Duration(seconds: 8));
+        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.357');
+        request.headers.contentType = ContentType(
+          'application', 'x-www-form-urlencoded', charset: 'utf-8');
+        request.write('data=${Uri.encodeQueryComponent(query.toString())}');
+        final response = await request.close()
+            .timeout(const Duration(seconds: 22));
+        // Não insistir quando a instância limitou o cliente.
+        if (response.statusCode == HttpStatus.tooManyRequests ||
+            response.statusCode == HttpStatus.serviceUnavailable) {
+          await response.drain<void>();
+          break;
+        }
+        final body = await utf8.decoder.bind(response).join()
+            .timeout(const Duration(seconds: 8));
+        DataUsageService.instance.record(
+          DataUsageModule.nearby, received: utf8.encode(body).length,
+        );
+        if (response.statusCode != HttpStatus.ok) break;
+        final decoded = jsonDecode(body);
+        if (decoded is! Map || decoded['elements'] is! List) break;
+        for (final raw in (decoded['elements'] as List).whereType<Map>()) {
+          final item = raw.cast<String, dynamic>();
+          final tagsRaw = item['tags'];
+          if (tagsRaw is! Map) continue;
+          final tags = tagsRaw.map(
+            (key, value) => MapEntry(key.toString(), value.toString()));
+          final name = tags['name']?.trim();
+          if (name == null || name.isEmpty) continue;
+          final center = item['center'];
+          final lat = (item['lat'] as num?)?.toDouble() ??
+              (center is Map ? (center['lat'] as num?)?.toDouble() : null);
+          final lon = (item['lon'] as num?)?.toDouble() ??
+              (center is Map ? (center['lon'] as num?)?.toDouble() : null);
+          if (lat == null || lon == null || !lat.isFinite || !lon.isFinite ||
+              lat.abs() > 90 || lon.abs() > 180) continue;
+          final camping = tags['tourism'] == 'camp_site';
+          final kind = camping ? MapDestinationKind.pointOfInterest
+              : MapDestinationKindX.fromOsmType(tags['place']);
+          found.add(MapDestinationSearchResult(
+            id: 'route-osm:${item['type']}:${item['id']}',
+            title: name,
+            subtitle: camping ? 'Camping' : kind.label,
+            latitude: lat,
+            longitude: lon,
+            distanceMeters: _meters(
+              current.latitude, current.longitude, lat, lon),
+            kind: kind,
+            source: 'online',
+          ));
+        }
+      } catch (_) {
+        // Parte obtida anteriormente permanece disponível; sem repetição
+        // automática para não sobrecarregar servidores compartilhados.
+        break;
+      }
     }
-    final query = StringBuffer('[out:json][timeout:20];(');
-    for (final index in indexes) {
-      final point = route[index];
-      query.write(
-        'nwr(around:20000,${point.latitude},${point.longitude})'
-        '["place"~"city|town|village|hamlet"];',
-      );
-      query.write(
-        'nwr(around:12000,${point.latitude},${point.longitude})'
-        '["tourism"="camp_site"];',
-      );
-    }
-    query.write(');out center 180;');
-    final request = await _client
-        .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
-        .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.356');
-    request.headers.contentType = ContentType(
-      'application',
-      'x-www-form-urlencoded',
-      charset: 'utf-8',
-    );
-    request.write('data=${Uri.encodeQueryComponent(query.toString())}');
-    final response = await request.close().timeout(const Duration(seconds: 22));
-    final body = await utf8.decoder.bind(response).join()
-        .timeout(const Duration(seconds: 7));
-    DataUsageService.instance.record(
-      DataUsageModule.nearby,
-      received: utf8.encode(body).length,
-    );
-    if (response.statusCode != HttpStatus.ok) {
-      throw HttpException('Overpass HTTP ${response.statusCode}');
-    }
-    final decoded = jsonDecode(body);
-    if (decoded is! Map) return const <MapDestinationSearchResult>[];
-    final elements = decoded['elements'];
-    if (elements is! List) return const <MapDestinationSearchResult>[];
-    final results = <MapDestinationSearchResult>[];
-    for (final raw in elements.whereType<Map>()) {
-      final item = raw.cast<String, dynamic>();
-      final tagsRaw = item['tags'];
-      if (tagsRaw is! Map) continue;
-      final tags = tagsRaw.map(
-        (key, value) => MapEntry(key.toString(), value.toString()),
-      );
-      final name = tags['name']?.trim();
-      if (name == null || name.isEmpty) continue;
-      final center = item['center'];
-      final lat = (item['lat'] as num?)?.toDouble() ??
-          (center is Map ? (center['lat'] as num?)?.toDouble() : null);
-      final lon = (item['lon'] as num?)?.toDouble() ??
-          (center is Map ? (center['lon'] as num?)?.toDouble() : null);
-      if (lat == null || lon == null) continue;
-      final isCamping = tags['tourism'] == 'camp_site';
-      final placeType = tags['place'];
-      results.add(
-        MapDestinationSearchResult(
-          id: 'route-osm:${item['type']}:${item['id']}',
-          title: name,
-          subtitle: isCamping
-              ? 'Camping'
-              : MapDestinationKindX.fromOsmType(placeType).label,
-          latitude: lat,
-          longitude: lon,
-          distanceMeters: _meters(
-            current.latitude,
-            current.longitude,
-            lat,
-            lon,
-          ),
-          kind: isCamping
-              ? MapDestinationKind.pointOfInterest
-              : MapDestinationKindX.fromOsmType(placeType),
-          source: 'online',
-        ),
-      );
-    }
-    return _dedupeAndSort(results);
+    return _dedupeAndSort(found);
   }
 
   Future<List<MapDestinationSearchResult>> _fetchPlacesInBounds(
@@ -640,7 +652,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.356');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.357');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -773,7 +785,7 @@ class MapDestinationSearchService extends ChangeNotifier {
 
   Future<String> _readNearbyResponse(Uri endpoint, String query) async {
     final request = await _client.postUrl(endpoint);
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.356');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.357');
     request.headers.contentType = ContentType(
       'application', 'x-www-form-urlencoded', charset: 'utf-8',
     );
@@ -859,7 +871,7 @@ class MapDestinationSearchService extends ChangeNotifier {
         final request = await _client.getUrl(uri).timeout(const Duration(seconds: 6));
         request.headers.set(
           HttpHeaders.userAgentHeader,
-          'VigiaIA/1.0.356 map-reverse-search',
+          'VigiaIA/1.0.357 map-reverse-search',
         );
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
         final response = await request.close().timeout(const Duration(seconds: 8));
@@ -961,7 +973,7 @@ class MapDestinationSearchService extends ChangeNotifier {
       },
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.356 map-search');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.357 map-search');
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     final response = await request.close().timeout(const Duration(seconds: 15));
     final body = await utf8.decoder.bind(response).join();

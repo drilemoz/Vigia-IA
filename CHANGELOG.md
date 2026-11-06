@@ -1,3 +1,10 @@
+## 1.0.357+357 (2026-11-05)
+- Criado índice leve `RouteCorridorIndex` com projeção em segmentos, distância progressiva aproximada e seleção de localidades até 3,5 km da geometria, ordenadas pelo sentido da viagem.
+- Planejador agora aplica o índice local automaticamente ao calcular a rota, ao reabrir viagens sem locais e ao trocar de alternativa; sem consulta de rede ou GPS implícita.
+- Busca remota de localidades ao longo da rota, apenas manual, passa a amostrar posições por distância real (~30 km, teto 25 posições), em lotes de 6, encerrando sem repetição quando servidores públicos falham ou retornam limitações HTTP.
+- POIs offline são desenhados pela distância ao segmento, não apenas ao conjunto de vértices amostrados. Mostra km progressivo e distância em linha reta na interface.
+- Adicionados testes Dart puros da projeção e amostragem e testes de contrato preventivos. Sem mudança do formato de armazenamento de viagens, limites de cache ou câmeras.
+
 ## 1.0.356+356 (2026-11-05)
 - Buildfix APK 303: adicionados blocos com chaves a duas condições na prévia MBTiles do Planejamento que geravam `curly_braces_in_flow_control_structures` em `flutter analyze --fatal-infos --fatal-warnings` (linhas 983 e 1031 da 1.0.355).
 - Novo teste de regressão para essas duas expressões, sem alterar a seleção de mapas nem a contagem de cobertura.

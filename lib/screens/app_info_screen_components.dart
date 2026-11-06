@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.356',
+          version: '1.0.357',
           current: true,
+          changes: [
+            'Cidades e apoios ordenados pelo quilômetro aproximado ao longo da rota.',
+            'Localidades previamente armazenadas entram automaticamente no planejamento offline.',
+            'Busca por apoios ampliada para trechos longos, com consultas sob demanda e limites de uso.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.356',
+          current: false,
           changes: [
             'Corrigidos avisos de análise estática na prévia de mapas offline e cobertura do Planejamento (APK 303).',
             'Adicionado teste contra condições sem chaves na seleção e conferência do MBTiles.',
@@ -3084,8 +3094,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.356',
+          version: '1.0.357',
           current: true,
+          changes: [
+            'Cidades e apoios ordenados pelo quilômetro aproximado ao longo da rota.',
+            'Localidades previamente armazenadas entram automaticamente no planejamento offline.',
+            'Busca por apoios ampliada para trechos longos, com consultas sob demanda e limites de uso.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.356',
+          current: false,
           changes: [
             'Corrigidos avisos de análise estática na prévia de mapas offline e cobertura do Planejamento (APK 303).',
             'Adicionado teste contra condições sem chaves na seleção e conferência do MBTiles.',

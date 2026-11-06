@@ -1,3 +1,13 @@
+# Arquitetura — Vigia IA 1.0.357+357
+
+## Itinerário de cidades e pontos de apoio (offline primeiro)
+
+`RouteCorridorIndex` (`lib/services/route_corridor_index.dart`) calcula um conjunto reduzido de segmentos reais, mede a proximidade geodésica de cada POI e projeta sua posição em metros cumulativos da geometria, escalados pela distância oficial retornada pelo serviço de rotas. A correspondência é **apenas geométrica**; não representa conexão por estrada ou certeza de passagem pelo centro urbano.
+
+`MapDestinationSearchService.placesAlongRoute` une favoritos, locais recentes, índice persistente e todos os pacotes POI para compor a lista sem internet. Só executa `_fetchRoutePlaces` com `onlineAllowed: true`, após toque no botão. A busca utiliza amostragem por distância e até 25 centros em grupos de 6; erros de transporte e 429/503 não geram repetição automática. Os resultados ficam limitados ao corredor de 3,5 km e até 100 locais por viagem.
+
+`TripPlanningScreen` carrega os candidatos locais ao criar, abrir ou alternar uma rota; mostra sua ordem e quilometragem e permite focar no mapa. Pacotes MBTiles, previsão meteorológica e motor online de rotas existentes não foram alterados. Uma rota salva guarda geometria e candidatos, não dados integrais de ruas, e não permite recálculo local.
+
 # Arquitetura — Vigia IA 1.0.356+356
 
 ## Buildfix APK 303 — prévia MBTiles no Planejamento

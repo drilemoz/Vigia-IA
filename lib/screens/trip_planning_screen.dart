@@ -28,6 +28,7 @@ import '../services/map_view_settings_service.dart';
 import '../services/offline_map_service.dart';
 import '../services/planned_bike_trip_service.dart';
 import '../services/route_explorer_service.dart';
+import '../services/route_corridor_index.dart';
 import '../services/retained_mbtiles_tile_provider.dart';
 import '../services/saved_bike_route_service.dart';
 import '../widgets/main_navigation_bar.dart';
@@ -63,6 +64,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   String? _previewOfflineMapId;
   int _previewMinZoom = 0;
   int _previewMaxZoom = 19;
+  MapCyclingRoute? _cachedPoiRoute;
+  String? _cachedPoiPackageSignature;
+  List<RouteExplorerResult> _cachedPoiMarkers = const [];
+  PlannedBikeTrip? _cachedTripForPlaces;
+  List<RouteCorridorPlace> _cachedTripMatches = const [];
   final _routeProvider = MapCyclingRouteService();
   final _library = const PlannedBikeTripService();
   final _scheduleSettings = BikeTripScheduleSettingsService.instance;
@@ -168,6 +174,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         }
         _loadingLibrary = false;
       });
+      if (initial != null && initial.places.isEmpty) {
+        unawaited(_fillLocalPlaces(initial));
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -597,8 +606,23 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         balanceDays: _balanceDays,
         forceLunch: _forceLunch,
       );
+      // A primeira lista de cidades e apoios é inteiramente local. Não liga
+      // GPS nem executa Overpass em segundo plano.
+      List<MapDestinationSearchResult> localPlaces = const [];
+      try {
+        localPlaces = await _citySearch.placesAlongRoute(
+          route: trip.selectedRoute.points,
+          current: _reference,
+          onlineAllowed: false,
+          offlineMaps: _offlineMaps.packages,
+          offlinePoiPackages: _savedPois.offlinePackages,
+        );
+      } catch (_) {
+        // O trajeto continua utilizável, mesmo com índice local corrompido.
+      }
+      if (!mounted) return;
       _selectPreviewMapForRoute(trip.selectedRoute);
-      setState(() => _draft = trip);
+      setState(() => _draft = trip.copyWith(places: localPlaces));
     } catch (_) {
       if (!mounted) return;
       setState(() => _message = 'Rota não calculada. Confira a internet e os nomes das cidades. Nenhuma distância foi inventada.');
@@ -709,6 +733,27 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     }
   }
 
+  Future<void> _fillLocalPlaces(PlannedBikeTrip trip) async {
+    if (trip.places.isNotEmpty) return;
+    try {
+      final places = await _citySearch.placesAlongRoute(
+        route: trip.selectedRoute.points,
+        current: _reference,
+        onlineAllowed: false,
+        offlineMaps: _offlineMaps.packages,
+        offlinePoiPackages: _savedPois.offlinePackages,
+      );
+      if (!mounted || places.isEmpty || _draft?.id != trip.id ||
+          _draft?.selectedIndex != trip.selectedIndex ||
+          _draft!.places.isNotEmpty) {
+        return;
+      }
+      setState(() => _draft = trip.copyWith(places: places));
+    } catch (_) {
+      // Não altera viagens salvas quando o índice de localidades falha.
+    }
+  }
+
   void _loadTrip(PlannedBikeTrip trip) {
     _selectPreviewMapForRoute(trip.selectedRoute);
     setState(() {
@@ -728,6 +773,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _lunchMinutes = trip.lunchMinutes;
       _message = null;
     });
+    if (trip.places.isEmpty) unawaited(_fillLocalPlaces(trip));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final previewContext = _previewKey.currentContext;
       if (mounted && previewContext != null) {
@@ -1043,50 +1089,85 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   }
 
   List<RouteExplorerResult> _offlinePoisOnRoute(MapCyclingRoute route) {
-    if (_savedPois.offlinePackages.isEmpty) return const <RouteExplorerResult>[];
-    final points = route.points;
-    if (points.isEmpty) return const <RouteExplorerResult>[];
-    final step = (points.length / 120).ceil().clamp(1, 100000).toInt();
-    final samples = <LatLng>[
-      for (var i = 0; i < points.length; i += step) points[i],
-      points.last,
-    ];
-    const measure = Distance();
-    final result = <RouteExplorerResult>[];
-    final seen = <String>{};
-    for (final package in _savedPois.offlinePackages) {
+    final packages = _savedPois.offlinePackages;
+    if (packages.isEmpty || route.points.length < 2) {
+      return const <RouteExplorerResult>[];
+    }
+    final signature = packages.map((p) =>
+        '${p.id}:${p.itemCount}:${p.updatedAt.millisecondsSinceEpoch}').join('|');
+    if (identical(_cachedPoiRoute, route) &&
+        _cachedPoiPackageSignature == signature) {
+      return _cachedPoiMarkers;
+    }
+    final source = <String, RouteExplorerResult>{};
+    final candidates = <MapDestinationSearchResult>[];
+    var south = double.infinity;
+    var north = double.negativeInfinity;
+    var west = double.infinity;
+    var east = double.negativeInfinity;
+    for (final point in route.points) {
+      if (point.latitude < south) south = point.latitude;
+      if (point.latitude > north) north = point.latitude;
+      if (point.longitude < west) west = point.longitude;
+      if (point.longitude > east) east = point.longitude;
+    }
+    for (final package in packages) {
       for (final poi in package.items) {
+        // Caixa grosseira antes da projeção precisa evita varrer arquivos
+        // enormes a cada desenho da tela; não substitui o teste geodésico.
+        if (poi.latitude < south - 0.04 || poi.latitude > north + 0.04 ||
+            poi.longitude < west - 0.04 || poi.longitude > east + 0.04) {
+          continue;
+        }
         final key = '${poi.category.name}:${poi.latitude.toStringAsFixed(5)}:'
             '${poi.longitude.toStringAsFixed(5)}';
-        if (!seen.add(key)) continue;
-        final location = LatLng(poi.latitude, poi.longitude);
-        if (samples.any((point) =>
-            measure.as(LengthUnit.Meter, point, location) <= 2500)) {
-          result.add(poi);
-          if (result.length >= 32) return result;
-        }
+        if (source.containsKey(key)) continue;
+        source[key] = poi;
+        candidates.add(MapDestinationSearchResult(
+          id: key,
+          title: poi.title,
+          subtitle: poi.subtitle,
+          latitude: poi.latitude,
+          longitude: poi.longitude,
+          distanceMeters: 0,
+          kind: MapDestinationKind.pointOfInterest,
+          source: 'offline',
+          poiCategory: poi.category,
+        ));
+        // Evita varrer milhões de elementos em pacotes enormes na UI.
+        if (candidates.length >= 650) break;
       }
+      if (candidates.length >= 650) break;
     }
-    return result;
+    final located = RouteCorridorIndex.locate(
+      route: route.points,
+      routeDistanceMeters: route.distanceMeters,
+      places: candidates,
+      maximumProximityMeters: 2500,
+      maximumResults: 40,
+    );
+    final markers = <RouteExplorerResult>[
+      for (final match in located)
+        if (source[match.place.id] != null) source[match.place.id]!,
+    ];
+    _cachedPoiRoute = route;
+    _cachedPoiPackageSignature = signature;
+    _cachedPoiMarkers = markers;
+    return markers;
   }
 
-  List<MapDestinationSearchResult> _nearbyRoutePlaces(PlannedBikeTrip trip) {
-    // Distância até amostras do traçado: não equivale a acesso rodoviário.
-    final points = trip.selectedRoute.points;
-    final step = (points.length / 600).ceil().clamp(1, 100000).toInt();
-    const measure = Distance();
-    final close = <MapDestinationSearchResult>[];
-    for (final place in trip.places) {
-      final location = LatLng(place.latitude, place.longitude);
-      var minimum = double.infinity;
-      for (var i = 0; i < points.length; i += step) {
-        final meters = measure.as(LengthUnit.Meter, points[i], location);
-        if (meters < minimum) minimum = meters;
-      }
-      if (minimum < 2500) close.add(place.copyWith(distanceMeters: minimum));
-    }
-    close.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-    return close.take(12).toList(growable: false);
+  List<RouteCorridorPlace> _nearbyRoutePlaces(PlannedBikeTrip trip) {
+    if (identical(_cachedTripForPlaces, trip)) return _cachedTripMatches;
+    final located = RouteCorridorIndex.locate(
+      route: trip.selectedRoute.points,
+      routeDistanceMeters: trip.selectedRoute.distanceMeters,
+      places: trip.places,
+      maximumProximityMeters: 3500,
+      maximumResults: 100,
+    );
+    _cachedTripForPlaces = trip;
+    _cachedTripMatches = located;
+    return located;
   }
 
   Widget _preview(PlannedBikeTrip trip) {
@@ -1105,7 +1186,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
               selected: trip.selectedIndex == i,
               onSelected: (_) {
                 _selectPreviewMapForRoute(trip.routes[i]);
-                setState(() => _draft = trip.copyWith(selectedIndex: i, places: const []));
+                final next = trip.copyWith(selectedIndex: i, places: const []);
+                setState(() => _draft = next);
+                unawaited(_fillLocalPlaces(next));
               },
             )),
         ])),
@@ -1187,18 +1270,39 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       if (_fetchingPlaces) const LinearProgressIndicator(),
       if (trip.places.isNotEmpty) ...[
         const SizedBox(height: 8),
-        Text('Localidades e apoios próximos do traçado',
-          style: Theme.of(context).textTheme.titleMedium),
-        for (final place in _nearbyRoutePlaces(trip))
-          ListTile(
-            dense: true,
-            leading: const Icon(Icons.place_outlined),
-            title: Text(place.title),
-            subtitle: Text('${place.kind.label} · ${place.distanceMeters.toStringAsFixed(0)} m em linha reta da geometria'),
-          ),
-        Text('Proximidade em linha reta não confirma passagem pela via, acesso seguro, água ou hospedagem.',
-          style: Theme.of(context).textTheme.bodySmall),
-      ],
+        Card(child: ExpansionTile(
+          initiallyExpanded: true,
+          title: const Text('Localidades e apoios próximos do traçado'),
+          subtitle: Text('${_nearbyRoutePlaces(trip).length} local(is) em ordem de percurso · '
+              'até 3,5 km em linha reta'),
+          children: [
+            for (final match in _nearbyRoutePlaces(trip))
+              ListTile(
+                dense: true,
+                leading: Icon(match.place.kind == MapDestinationKind.pointOfInterest
+                    ? Icons.local_cafe_outlined : Icons.location_city_outlined),
+                title: Text(match.place.title),
+                subtitle: Text('km ${(match.routeDistanceMeters / 1000).toStringAsFixed(1)} '
+                    '· ${match.place.kind.label} · '
+                    '${match.proximityMeters.toStringAsFixed(0)} m da linha '
+                    '· ${match.place.storedLocally ? 'local' : 'online'}'),
+                onTap: () => unawaited(_openMap(trip,
+                    focusPoint: LatLng(match.place.latitude, match.place.longitude))),
+              ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Text('Proximidade em linha reta não confirma passagem pela via, acesso seguro, água ou hospedagem. '
+                  'Ordem e quilômetros aproximados a partir da geometria.'),
+            ),
+          ],
+        )),
+      ] else
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text('Nenhuma cidade ou apoio identificado no corredor salvo. '
+              'Use “Apoios salvos” ou “Buscar apoios” quando houver internet.',
+            style: Theme.of(context).textTheme.bodySmall),
+        ),
       const SizedBox(height: 8),
       Text('Etapas da viagem', style: Theme.of(context).textTheme.titleMedium),
       for (final day in plan.days)
@@ -1282,14 +1386,14 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
               ]),
             if (trip.places.isNotEmpty)
               MarkerLayer(markers: [
-                for (final place in _nearbyRoutePlaces(trip).take(32))
+                for (final match in _nearbyRoutePlaces(trip).take(32))
                   Marker(
-                    point: LatLng(place.latitude, place.longitude),
+                    point: LatLng(match.place.latitude, match.place.longitude),
                     width: 28, height: 28,
                     child: Tooltip(
-                      message: '${place.title} · ${place.kind.label}',
+                      message: '${match.place.title} · ${match.place.kind.label}',
                       child: InkWell(
-                        onTap: () => _notify('${place.title} · ${place.kind.label} '
+                        onTap: () => _notify('${match.place.title} · ${match.place.kind.label} '
                             '· proximidade em linha reta, acesso não verificado'),
                         child: const Icon(Icons.location_city_rounded,
                           color: Colors.indigo, size: 22),

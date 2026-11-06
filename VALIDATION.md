@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.357+357
+
+Consultar `VALIDATION-1.0.357.md` para os testes de itinerário offline, amostragem e limitações. Flutter Analyze, Flutter Test e build Android permanecem pendentes sem SDK local.
+
 # Validação Vigia IA 1.0.356+356
 
 Consultar `VALIDATION-1.0.356.md` para análise do workflow APK 303 e testes da correção; `flutter analyze` e a compilação do APK exigem execução em ambiente com Flutter instalado.
