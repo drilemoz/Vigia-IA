@@ -1,3 +1,9 @@
+## 1.0.355+355 (2026-11-05)
+- Buildfix workflow Android APK 302: corrigido teste de contrato do Planejamento que exigia `_routeMap(route)` embora a interface real invoque `_routeMap(trip)`.
+- Teste passa a derivar o parâmetro de `_preview(PlannedBikeTrip ...)`, verificando que mapa e ações usam a mesma viagem, sem depender do nome interno.
+- Acrescentada regressão específica do erro do build 302 e mantidas as melhorias offline da 1.0.354.
+- Não houve alteração no serviço de mapas, política de cache, lógica dos POIs, cálculos de rotas nem integração meteorológica.
+
 ## 1.0.354+354 (2026-11-05)
 - Pontos offline: ativação/restauração de pacote mostra resultados sem GPS; distâncias não são anunciadas sem referência atual.
 - Consulta de região manual recupera pacotes locais após erro HTTP; evita reaproveitar cache remoto de outra região.

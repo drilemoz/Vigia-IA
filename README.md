@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.354+354`
+**Versão atual:** `1.0.355+355`
+
+## 1.0.355 — Correção do workflow Android APK 302
+
+- O teste preventivo de `tool/test_trip_planning_wizard_285.py` não fixa mais o nome de um argumento interno (`route`/`trip`). Lê o nome do parâmetro real de `_preview(PlannedBikeTrip ...)` e exige que mapa e ações recebam esse mesmo objeto.
+- Incluído `tool/test_build302_trip_guard_355.py` para prevenir reincidência do bloqueio do workflow 302.
+- Nenhuma funcionalidade do Planejamento ou dos pacotes de mapas/pontos offline foi removida ou substituída.
+- **Limite de validação:** a falha encontrada nos logs aconteceu antes de `flutter analyze`/Gradle; estes ainda exigem execução no GitHub Actions.
 
 ## 1.0.354 — Pacotes POI e mapa do planejamento offline (etapa 1)
 

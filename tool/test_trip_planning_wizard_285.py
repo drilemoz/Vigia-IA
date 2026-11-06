@@ -1,6 +1,7 @@
 from tool.release_version_checks import current_release, version_only, catalog_reference, current_build
 """Contratos de interface do assistente 285; não substituem Flutter Analyze."""
 from pathlib import Path
+import re
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
 def read(rel): return (ROOT/rel).read_text(encoding='utf-8')
@@ -37,8 +38,13 @@ class Wizard285(unittest.TestCase):
   self.assertIn('trip.toJson()',service)
   self.assertIn('!point.latitude.isFinite',service)
  def test_action_bar_map_and_confirmation(self):
-  self.assertIn('_routeMap(route)',self.screen)
-  self.assertIn('_routeActions(trip)',self.screen)
+  # Nome do parâmetro da prévia não é contrato público. Ambos os controles
+  # devem receber a mesma viagem, sem fixar identifiers de versões antigas.
+  preview = re.search(r'Widget\s+_preview\(\s*PlannedBikeTrip\s+(\w+)\s*\)', self.screen)
+  self.assertIsNotNone(preview, 'Método _preview(PlannedBikeTrip) ausente')
+  trip_name = preview.group(1)
+  self.assertIn(f'_routeMap({trip_name})', self.screen)
+  self.assertIn(f'_routeActions({trip_name})', self.screen)
   self.assertIn("const Text('Salvar')",self.screen)
   self.assertIn("const Text('Apagar')",self.screen)
   self.assertIn("Text('Exportar'",self.screen)

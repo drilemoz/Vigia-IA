@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.355+355
+
+## Buildfix 302 — contrato preventivo de Planejamento
+
+O contrato `test_trip_planning_wizard_285` deriva o argumento de `Widget _preview(PlannedBikeTrip ...)` e valida a passagem da mesma viagem aos widgets de mapa e ações. A alteração não afeta o runtime Android, a biblioteca MBTiles nem o armazenamento local de POIs. Teste `test_build302_trip_guard_355` protege essa premissa.
+
 # Arquitetura — Vigia IA 1.0.354+354
 
 ## Etapa 1 de robustez offline

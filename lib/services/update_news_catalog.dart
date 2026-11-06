@@ -7,15 +7,14 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.354', build: 354);
+      AppBuildVersion(version: '1.0.355', build: 355);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.354', build: 354),
+      version: AppBuildVersion(version: '1.0.355', build: 355),
       changes: <String>[
-        'Pacotes de pontos offline agora podem ser abertos sem GPS, com marcadores e distâncias não inventadas.',
-        'Falhas de consulta de uma região tentam pontos locais sem apagar os salvos.',
-        'Planejamento abre MBTiles existentes, permite escolher o mapa e exibe pontos de apoio offline junto da rota.',
+        'Corrigido teste preventivo do Planejamento que bloqueava a geração do APK 302 por nome de variável desatualizado.',
+        'Preservadas as melhorias de mapas MBTiles e pontos de apoio offline da versão anterior.',
       ],
     ),
   ]);

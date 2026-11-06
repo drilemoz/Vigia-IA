@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.354',
+          version: '1.0.355',
           current: true,
+          changes: [
+            'Corrigida verificação preventiva do Planejamento que interrompia o workflow APK 302.',
+            'Melhorada a tolerância dos testes a mudanças internas de nomes de variáveis.',
+            'Mapas MBTiles e pontos salvos offline da 1.0.354 foram preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.354',
+          current: false,
           changes: [
             'Pacotes de pontos offline podem ser abertos sem GPS e aparecem como marcadores no mapa.',
             'Consultas de regiões com erro de rede recuperam pontos salvos quando disponíveis.',
@@ -3064,8 +3074,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.354',
+          version: '1.0.355',
           current: true,
+          changes: [
+            'Corrigida verificação preventiva do Planejamento que interrompia o workflow APK 302.',
+            'Melhorada a tolerância dos testes a mudanças internas de nomes de variáveis.',
+            'Mapas MBTiles e pontos salvos offline da 1.0.354 foram preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.354',
+          current: false,
           changes: [
             'Pacotes de pontos offline podem ser abertos sem GPS e aparecem como marcadores no mapa.',
             'Consultas de regiões com erro de rede recuperam pontos salvos quando disponíveis.',

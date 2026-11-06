@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.355+355
+
+Ver `VALIDATION-1.0.355.md` para análise dos logs APK 302, testes preventivos e pendências de build Flutter/Gradle.
+
 # Validação Vigia IA 1.0.354+354
 
 Consulte `VALIDATION-1.0.354.md`: testes estruturais preventivos, checagem da base da 1.0.353 e limites da validação local. `flutter analyze`, `flutter test` e build do APK continuam pendentes sem SDK no ambiente.
