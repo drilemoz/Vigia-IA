@@ -55,7 +55,7 @@ class GithubUpdater367(unittest.TestCase):
         self.assertIn('path="updates/"',read('android/app/src/main/res/xml/vigia_update_file_paths.xml'))
 
     def test_current_build_and_no_automatic_install(self):
-        self.assertIn('version: 1.0.367+367',read('pubspec.yaml'))
+        self.assertIn('version: 1.0.368+368',read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.367.md').is_file())
         service=read('lib/services/github_release_update_service.dart')
         method=re.search(r'Future<VigiaGitHubRelease\?> checkOnForeground\(\) async \{(.*?)\n  \}',service,re.S)

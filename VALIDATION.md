@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.368+368
+
+Ver `VALIDATION-1.0.368.md` para alteração de altura do painel Próximos pontos, teste preventivo e resultados. `flutter analyze`, `flutter test` e APK precisam ser confirmados no CI.
+
 # Validação Vigia IA 1.0.367+367
 
 Ver `VALIDATION-1.0.367.md` para os testes de políticas de Releases, integração com Sobre, ciclo de vida e instalação segura. `flutter analyze`, `flutter test` e compilação APK dependem de CI Flutter/Android.

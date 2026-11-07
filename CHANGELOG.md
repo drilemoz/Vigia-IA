@@ -1,3 +1,9 @@
+## 1.0.368+368 (2026-11-07)
+
+- Painel Próximos pontos ampliado para 570 dp nos estados vazios/erro e 690 dp na visualização de resultados, com limite responsivo de 92% da altura disponível.
+- Melhor leitura do aviso e maior área útil da lista, sem alterar lógica de GPS, consultas online, cache, mapas, filtros ou pacotes offline.
+- Acrescentado teste preventivo do layout; versão, Novidades, Sobre e documentação sincronizados. Build Flutter/Android pendente do CI.
+
 ## 1.0.367+367 (2026-11-07)
 
 - Novo verificador de atualizações do Vigia IA integrado à tela Sobre, baseado no fluxo de GitHub Releases do Uai Cortes.

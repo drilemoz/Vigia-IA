@@ -5500,7 +5500,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     await showMapCenteredDialog<void>(
       context: context,
       maxWidth: 560,
-      maxHeightFactor: 0.86,
+      maxHeightFactor: 0.92,
       barrierLabel: 'Fechar pontos próximos',
       builder: (sheetContext) => StatefulBuilder(
         builder: (sheetContext, setSheetState) => ListenableBuilder(
@@ -5516,7 +5516,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     .where((item) => _matchesPoiFilter(item, filter))
                     .toList(growable: false);
                 return SizedBox(
-                  height: filtered.isEmpty && !busy ? 420 : 650,
+                  height: filtered.isEmpty && !busy ? 570 : 690,
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

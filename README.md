@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.367+367`
+**Versão atual:** `1.0.368+368`
+
+## 1.0.368 — Painel Próximos pontos ampliado
+
+- Diálogo Próximos pontos passa de 420 dp para 570 dp quando não há resultados ou existe erro, e de 650 dp para 690 dp quando há resultados ou consulta em andamento.
+- Limite vertical do diálogo passa de 86% para 92% da área disponível, respeitando as restrições e barras de sistema; não altera servidores, GPS ou filtros.
+- Mudança exclusivamente visual, com botão de fechar, ações e estado offline preservados.
 
 ## 1.0.367 — Atualizador GitHub Releases em Sobre
 

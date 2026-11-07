@@ -89,8 +89,17 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.367',
+          version: '1.0.368',
           current: true,
+          changes: [
+            'Painel Próximos pontos mais alto e confortável para leitura.',
+            'Mais espaço para avisos e listas; consultas e funcionamento offline preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.367',
+          current: false,
           changes: [
             'Consulta automática de atualizações ao abrir ou retomar o app, com aviso de nova versão.',
             'Novo Verificar atualizações em Sobre, com novidades, progresso e cancelamento.',
@@ -3206,8 +3215,17 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.367',
+          version: '1.0.368',
           current: true,
+          changes: [
+            'Painel Próximos pontos mais alto e confortável para leitura.',
+            'Mais espaço para avisos e listas; consultas e funcionamento offline preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.367',
+          current: false,
           changes: [
             'Consulta automática de atualizações ao abrir ou retomar o app, com aviso de nova versão.',
             'Novo Verificar atualizações em Sobre, com novidades, progresso e cancelamento.',

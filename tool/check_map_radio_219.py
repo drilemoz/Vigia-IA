@@ -41,13 +41,13 @@ check("status.state == 'tocando' && _pendingStation != null" in radio,
 check('enum _RadioSection { discover, recent, favorites, manual }' in radio and
       'String _radioFilterLabel(' in radio and '_maxBitrate' in radio,
       'abas/filtros da rádio ausentes')
-# 1.0.327: a busca passou a folha inferior responsiva; o painel de POIs
-# segue compacto quando vazio, sem voltar ao dialogo de 690 px.
+# 1.0.327 mantém a busca inferior responsiva. Em 1.0.368 o usuário pediu
+# explicitamente mais altura para Próximos pontos, inclusive em estados vazios.
 check(('showModalBottomSheet<void>' in mapui and
        'usableHeight * 0.78' in mapui and
        'height: math.min(480.0' in mapui) and
-      'height: filtered.isEmpty && !busy ? 420 : 650' in mapui,
-      'diálogos vazios não foram compactados')
+      'height: filtered.isEmpty && !busy ? 570 : 690' in mapui,
+      'dimensões do painel Próximos pontos divergentes da 1.0.368')
 check('class RadioSleepTimer' in text('lib/services/radio_sleep_timer.dart') and
       'RadioSleepTimer.schedule(' in radio, 'temporizador local da rádio ausente')
 version_match = re.search(r'^version:\s*([0-9]+\.[0-9]+\.([0-9]+))\+([0-9]+)\s*$', text('pubspec.yaml'), re.M)
