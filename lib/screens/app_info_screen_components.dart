@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.368',
+          version: '1.0.369',
           current: true,
+          changes: [
+            'Correção da detecção de novas Releases do GitHub, mesmo sem APK universal elegível.',
+            'Nova versão aparece em Sobre, com orientação para consultar arquivos oficiais quando necessário.',
+            'Download de APK universal maior permitido, com verificação de SHA-256 e assinatura mantida.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.368',
+          current: false,
           changes: [
             'Painel Próximos pontos mais alto e confortável para leitura.',
             'Mais espaço para avisos e listas; consultas e funcionamento offline preservados.',
@@ -3215,8 +3225,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.368',
+          version: '1.0.369',
           current: true,
+          changes: [
+            'Correção da detecção de novas Releases do GitHub, mesmo sem APK universal elegível.',
+            'Nova versão aparece em Sobre, com orientação para consultar arquivos oficiais quando necessário.',
+            'Download de APK universal maior permitido, com verificação de SHA-256 e assinatura mantida.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.368',
+          current: false,
           changes: [
             'Painel Próximos pontos mais alto e confortável para leitura.',
             'Mais espaço para avisos e listas; consultas e funcionamento offline preservados.',

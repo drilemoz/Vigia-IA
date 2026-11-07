@@ -112,7 +112,8 @@ class _GitHubUpdatesScreenState extends State<GitHubUpdatesScreen> {
                           Text('Versão disponível: ${release.version}+${release.build}',
                               style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 6),
-                          Text('APK universal · ${_size(release.size)}'),
+                          if (release.size > 0)
+                            Text('APK universal · ${_size(release.size)}'),
                           if (release.notes.trim().isNotEmpty) ...[
                             const SizedBox(height: 12),
                             Text('Novidades', style: Theme.of(context).textTheme.titleSmall),
@@ -124,7 +125,11 @@ class _GitHubUpdatesScreenState extends State<GitHubUpdatesScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  if (release.sha256Digest == null)
+                  if (release.downloadUrl == null)
+                    const Text('Uma versão nova foi publicada, mas nenhum APK universal '
+                        'compatível com a verificação interna foi encontrado. '
+                        'Abra Releases no GitHub para consultar os arquivos oficiais.')
+                  else if (release.sha256Digest == null)
                     const Text('A Release não informa um SHA-256 verificável. '
                         'O download interno está bloqueado; consulte a página oficial.')
                   else if (!_updates.downloading && !_updates.readyToInstall)

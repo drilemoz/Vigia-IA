@@ -19,9 +19,9 @@ class NearbyPointsPanelHeight368(unittest.TestCase):
 
     def test_version_and_release(self):
         pubspec = (ROOT / 'pubspec.yaml').read_text('utf8')
-        self.assertIn('version: 1.0.368+368', pubspec)
+        self.assertIn('version: 1.0.369+369', pubspec)
         self.assertTrue((ROOT / 'RELEASE-1.0.368.md').is_file())
-        self.assertIn('1.0.368', (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8'))
+        self.assertIn('1.0.369', (ROOT / 'lib/services/update_news_catalog.dart').read_text('utf8'))
 
 if __name__ == '__main__':
     unittest.main()

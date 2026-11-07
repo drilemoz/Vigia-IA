@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.369+369
+
+Ver `VALIDATION-1.0.369.md` para a correção da detecção de versões recentes do GitHub e limites do download seguro. Compilação Flutter, testes Dart e APK ainda dependem do CI.
+
 # Validação Vigia IA 1.0.368+368
 
 Ver `VALIDATION-1.0.368.md` para alteração de altura do painel Próximos pontos, teste preventivo e resultados. `flutter analyze`, `flutter test` e APK precisam ser confirmados no CI.

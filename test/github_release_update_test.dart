@@ -55,8 +55,12 @@ void main() {
         'https://attacker.example/invalid.apk');
     final wrongAbi = release(filename: 'VigiaIA-v1.0.368+368-arm64-v8a.apk');
     final wrongState = release(state: 'new');
-    expect(VigiaGitHubReleasePolicy.newest(jsonEncode([wrongHost, wrongAbi, wrongState]),
-        installedVersion: '1.0.367', installedBuild: 367), isNull);
+    final found = VigiaGitHubReleasePolicy.newest(
+        jsonEncode([wrongHost, wrongAbi, wrongState]),
+        installedVersion: '1.0.367', installedBuild: 367);
+    expect(found?.build, 368);
+    expect(found?.downloadUrl, isNull); // mostra novidade sem permitir APK inseguro
+    expect(found?.hasDownloadableApk, isFalse);
   });
 
   test('não oferece rascunho, tag inválida nem tamanho abusivo', () {
@@ -65,8 +69,10 @@ void main() {
       release(tag: 'other-tag'),
       release(size: VigiaGitHubReleasePolicy.maxApkBytes + 1),
     ]);
-    expect(VigiaGitHubReleasePolicy.newest(bad,
-        installedVersion: '1.0.367', installedBuild: 367), isNull);
+    final found = VigiaGitHubReleasePolicy.newest(bad,
+        installedVersion: '1.0.367', installedBuild: 367);
+    expect(found?.build, 368);
+    expect(found?.hasDownloadableApk, isFalse);
   });
 
   test('sem SHA-256 mostra release mas bloqueia download interno', () {
@@ -74,6 +80,7 @@ void main() {
         installedVersion: '1.0.367', installedBuild: 367);
     expect(found, isNotNull);
     expect(found?.sha256Digest, isNull);
+    expect(found?.hasDownloadableApk, isFalse);
   });
 
   test('não confunde troca de major menor patch e build', () {
@@ -81,4 +88,28 @@ void main() {
     expect(VigiaGitHubReleasePolicy.newest(jsonEncode([candidate]),
         installedVersion: '1.0.367', installedBuild: 367), isNull);
   });
+  test('versão nova sem APK universal não é confundida com atualizado', () {
+    final candidate = release(filename: 'VigiaIA-v1.0.368+368-arm64-v8a.apk');
+    final found = VigiaGitHubReleasePolicy.newest(jsonEncode([candidate]),
+        installedVersion: '1.0.367', installedBuild: 367);
+    expect(found?.tag, 'v1.0.368+368');
+    expect(found?.downloadUrl, isNull);
+    expect(found?.hasDownloadableApk, isFalse);
+  });
+
+  test('APK universal acima do limite não apaga detecção da nova versão', () {
+    final candidate = release(size: VigiaGitHubReleasePolicy.maxApkBytes + 1);
+    final found = VigiaGitHubReleasePolicy.newest(jsonEncode([candidate]),
+        installedVersion: '1.0.367', installedBuild: 367);
+    expect(found?.build, 368);
+    expect(found?.downloadUrl, isNull);
+  });
+
+  test('APK universal grande dentro do limite é aceito com SHA-256', () {
+    final candidate = release(size: 450 * 1024 * 1024);
+    final found = VigiaGitHubReleasePolicy.newest(jsonEncode([candidate]),
+        installedVersion: '1.0.367', installedBuild: 367);
+    expect(found?.hasDownloadableApk, isTrue);
+  });
+
 }

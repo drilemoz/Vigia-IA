@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.368+368`
+**Versão atual:** `1.0.369+369`
+
+## 1.0.369 — Atualizações do GitHub sem falso "atualizado"
+
+- Detecção de versão independente da disponibilidade de APK universal dentro do limite de tamanho.
+- Release superior aparece no painel; se não houver APK universal elegível, link para Releases oficial.
+- APK universal até 600 MiB com SHA-256 verificado, confirmação de download, integridade/assinatura/pacote confirmados pelo Android antes da instalação.
+- Nenhum download automático. Sem rede, modo offline permanece funcional.
 
 ## 1.0.368 — Painel Próximos pontos ampliado
 

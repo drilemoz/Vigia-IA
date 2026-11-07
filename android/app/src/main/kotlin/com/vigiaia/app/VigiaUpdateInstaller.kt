@@ -16,7 +16,7 @@ import java.security.MessageDigest
 internal object VigiaUpdateInstaller {
     private const val authoritySuffix = ".updates"
     private const val apkName = "vigiaia-update.apk"
-    private const val maxBytes = 300L * 1024L * 1024L
+    private const val maxBytes = 600L * 1024L * 1024L
 
     fun handle(activity: FlutterActivity, call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {

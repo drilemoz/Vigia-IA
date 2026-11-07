@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.368', build: 368);
+      AppBuildVersion(version: '1.0.369', build: 369);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.368', build: 368),
+      version: AppBuildVersion(version: '1.0.369', build: 369),
       changes: <String>[
-        'Próximos pontos abre com mais altura para visualizar resultados e avisos confortavelmente.',
-        'Maior espaço para estados vazios ou erros sem alterar busca, filtros ou GPS.',
-        'Os controles e o funcionamento offline permanecem inalterados.',
+        'Atualizações do GitHub agora detectam Releases novas mesmo se o APK universal não puder ser baixado internamente.',
+        'O aviso não declara mais que o app está atualizado quando há versão mais recente publicada.',
+        'Limite de tamanho para APK universal ampliado, mantendo SHA-256, assinatura e instalação manual.',
       ],
     ),
   ]);

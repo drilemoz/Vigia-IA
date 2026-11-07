@@ -1,3 +1,10 @@
+## 1.0.369+369 (2026-11-07)
+
+- Corrigido falso "O Vigia IA está atualizado" quando existe Release superior sem APK universal dentro dos filtros restritivos.
+- Separa detecção de nova versão do download permitido: mantém aviso e acesso ao GitHub quando falta APK válido, em vez de esconder a nova Release.
+- Ampliado limite controlado do APK universal para 600 MiB, com SHA-256 obrigatório para baixar e validação nativa de assinatura, pacote e versionCode antes de instalar.
+- UI Sobre e testes de regressão aprimorados; verificações automáticas continuam sem downloads nem instalação sem consentimento.
+
 ## 1.0.368+368 (2026-11-07)
 
 - Painel Próximos pontos ampliado para 570 dp nos estados vazios/erro e 690 dp na visualização de resultados, com limite responsivo de 92% da altura disponível.

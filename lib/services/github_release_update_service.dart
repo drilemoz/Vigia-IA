@@ -29,18 +29,23 @@ class VigiaGitHubRelease {
   final int build;
   final String tag;
   final String assetName;
-  final Uri downloadUrl;
+  final Uri? downloadUrl;
   final Uri releaseUrl;
   final int size;
   final String notes;
   final String? sha256Digest;
+
+  /// A versão pode existir mesmo quando o arquivo para atualização interna
+  /// está ausente, excede o limite permitido ou não possui digest confiável.
+  bool get hasDownloadableApk =>
+      downloadUrl != null && size > 0 && sha256Digest != null;
 }
 
 class VigiaGitHubReleasePolicy {
   const VigiaGitHubReleasePolicy._();
 
   static const repository = 'drilemoz/Vigia-IA';
-  static const maxApkBytes = 300 * 1024 * 1024;
+  static const maxApkBytes = 600 * 1024 * 1024;
   static const maxResponseBytes = 4 * 1024 * 1024;
   static final _tag = RegExp(r'^v?(\d+)\.(\d+)\.(\d+)\+(\d+)$');
   static final _digest = RegExp(r'^sha256:([a-fA-F0-9]{64})$');
@@ -84,6 +89,9 @@ class VigiaGitHubReleasePolicy {
         if (i == 2) newerVersion = build > installedBuild;
       }
       if (!newerVersion || build <= installedBuild) continue;
+      // A descoberta da versão é independente da elegibilidade do APK.
+      // Caso o GitHub publique uma Release com arquivo grande/ausente,
+      // mostrar a nova versão, nunca afirmar que o app está atualizado.
       final assetName = 'VigiaIA-v$version+$build-universal.apk';
       final expectedUrl = Uri.parse(
         'https://github.com/$repository/releases/download/$tag/$assetName',
@@ -91,46 +99,57 @@ class VigiaGitHubReleasePolicy {
       final releaseUrl = Uri.parse(
         'https://github.com/$repository/releases/tag/$tag',
       );
+      Uri? downloadUrl;
+      var size = 0;
+      String? digest;
       final assets = entry['assets'];
-      if (assets is! List) continue;
-      for (final asset in assets) {
-        if (asset is! Map || asset['name'] != assetName) continue;
-        if (asset['state'] != 'uploaded') continue;
-        final rawUrl = asset['browser_download_url'];
-        final sourceUrl = rawUrl is String ? Uri.tryParse(rawUrl) : null;
-        if (sourceUrl == null ||
-            sourceUrl.scheme != 'https' ||
-            sourceUrl.host != 'github.com' ||
-            sourceUrl.userInfo.isNotEmpty ||
-            sourceUrl.hasPort ||
-            sourceUrl.hasQuery ||
-            sourceUrl.hasFragment ||
-            !listEquals(sourceUrl.pathSegments, expectedUrl.pathSegments)) {
-          continue;
+      if (assets is List) {
+        for (final asset in assets) {
+          if (asset is! Map || asset['name'] != assetName) continue;
+          if (asset['state'] != 'uploaded') continue;
+          final rawUrl = asset['browser_download_url'];
+          final sourceUrl = rawUrl is String ? Uri.tryParse(rawUrl) : null;
+          if (sourceUrl == null ||
+              sourceUrl.scheme != 'https' ||
+              sourceUrl.host != 'github.com' ||
+              sourceUrl.userInfo.isNotEmpty ||
+              sourceUrl.hasPort ||
+              sourceUrl.hasQuery ||
+              sourceUrl.hasFragment ||
+              !listEquals(sourceUrl.pathSegments, expectedUrl.pathSegments)) {
+            continue;
+          }
+          final assetSize = asset['size'];
+          if (assetSize is! int ||
+              assetSize <= 0 ||
+              assetSize > maxApkBytes) {
+            continue;
+          }
+          final rawDigest = asset['digest'];
+          downloadUrl = sourceUrl;
+          size = assetSize;
+          digest = rawDigest is String
+              ? _digest.firstMatch(rawDigest)?.group(1)?.toLowerCase()
+              : null;
+          break;
         }
-        final size = asset['size'];
-        if (size is! int || size <= 0 || size > maxApkBytes) continue;
-        final rawDigest = asset['digest'];
-        final digest = rawDigest is String
-            ? _digest.firstMatch(rawDigest)?.group(1)?.toLowerCase()
-            : null;
-        final notes = entry['body'] is String
-            ? (entry['body'] as String).substring(
-                0, math.min(1800, (entry['body'] as String).length))
-            : '';
-        final release = VigiaGitHubRelease(
-          version: version,
-          build: build,
-          tag: tag,
-          assetName: assetName,
-          downloadUrl: sourceUrl,
-          releaseUrl: releaseUrl,
-          size: size,
-          notes: notes,
-          sha256Digest: digest,
-        );
-        if (chosen == null || release.build > chosen.build) chosen = release;
       }
+      final notes = entry['body'] is String
+          ? (entry['body'] as String).substring(
+              0, math.min(1800, (entry['body'] as String).length))
+          : '';
+      final release = VigiaGitHubRelease(
+        version: version,
+        build: build,
+        tag: tag,
+        assetName: assetName,
+        downloadUrl: downloadUrl,
+        releaseUrl: releaseUrl,
+        size: size,
+        notes: notes,
+        sha256Digest: digest,
+      );
+      if (chosen == null || release.build > chosen.build) chosen = release;
     }
     return chosen;
   }
@@ -235,8 +254,8 @@ class VigiaGitHubUpdateService extends ChangeNotifier {
 
   Future<void> download(VigiaGitHubRelease release) async {
     if (downloading || latest?.tag != release.tag) return;
-    if (release.sha256Digest == null) {
-      downloadError = 'Esta Release não informa SHA-256; use a página oficial do GitHub.';
+    if (!release.hasDownloadableApk) {
+      downloadError = 'Esta Release não tem APK universal verificável para download interno. Abra a página oficial do GitHub.';
       notifyListeners();
       return;
     }
@@ -258,7 +277,7 @@ class VigiaGitHubUpdateService extends ChangeNotifier {
       final verified = File('${dir.path}/vigiaia-update.apk');
       if (await pending.exists()) await pending.delete();
       if (await verified.exists()) await verified.delete();
-      final request = await client.getUrl(release.downloadUrl).timeout(const Duration(seconds: 15));
+      final request = await client.getUrl(release.downloadUrl!).timeout(const Duration(seconds: 15));
       request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/${AppMetadata.version}');
       final response = await request.close().timeout(const Duration(seconds: 20));
       if (response.statusCode != HttpStatus.ok) {
