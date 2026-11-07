@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.363',
+          version: '1.0.364',
           current: true,
+          changes: [
+            'Corrigida a análise Flutter das notas offline de paradas.',
+            'Preservados mapas, pontos e planejamento offline.',
+            'Teste preventivo para o erro do workflow APK 309.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.363',
+          current: false,
           changes: [
             'Auditoria local de mapas, pontos e paradas antes de sair sem internet.',
             'Avisa onde os limites dos mapas não cobrem o traçado e quais arquivos faltam.',
@@ -3154,8 +3164,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.363',
+          version: '1.0.364',
           current: true,
+          changes: [
+            'Corrigida a análise Flutter das notas offline de paradas.',
+            'Preservados mapas, pontos e planejamento offline.',
+            'Teste preventivo para o erro do workflow APK 309.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.363',
+          current: false,
           changes: [
             'Auditoria local de mapas, pontos e paradas antes de sair sem internet.',
             'Avisa onde os limites dos mapas não cobrem o traçado e quais arquivos faltam.',

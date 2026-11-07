@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.363+363`
+**Versão atual:** `1.0.364+364`
+
+## 1.0.364 — Correção da análise Flutter no Planejamento offline
+
+- Corrigido aviso fatal `invalid_null_aware_operator` do workflow Android APK 309 na apresentação de notas offline vinculadas a paradas verificadas.
+- A correção não altera a persistência nem o comportamento de conferência e mantém a auditoria de preparação offline, mapas MBTiles, POIs e o itinerário inteligente.
+- Adicionado teste preventivo de regressão; `flutter analyze`, `flutter test` e compilação Android seguem pendentes de execução no GitHub Actions.
 
 ## 1.0.363 — Auditoria de preparação offline da cicloviagem
 

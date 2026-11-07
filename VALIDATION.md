@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.364+364
+
+Ver `VALIDATION-1.0.364.md` para a causa e correção do erro `invalid_null_aware_operator` no workflow Android APK 309. `flutter analyze`, `flutter test` e compilação Android dependem de SDK instalado no CI.
+
 # Validação Vigia IA 1.0.363+363
 
 Ver `VALIDATION-1.0.363.md` para os contratos da preparação offline sob demanda. `flutter analyze`, `flutter test` e compilação Android dependem de SDK instalado no CI.

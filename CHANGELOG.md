@@ -1,3 +1,9 @@
+## 1.0.364+364 (2026-11-06)
+
+- Correção do workflow Android APK 309: em `lib/screens/trip_planning_screen.dart:2096`, removido o operador `?.` e o fallback `??` desnecessários de `savedCheck.notes` quando o registro já estava validado como não nulo.
+- Sem alteração no cálculo de roteiro, gravação dos pontos, mapas MBTiles, monitoramento, câmeras ou rede; notas de paradas offline mantidas.
+- Acrescentado teste preventivo para `invalid_null_aware_operator`, com referências e versão sincronizadas. Flutter Analyze/Android devem ser confirmados pelo próximo workflow.
+
 ## 1.0.363+363 (2026-11-06)
 
 - Planejamento inclui diagnóstico sob demanda de **preparação offline**: confere arquivos MBTiles locais não vazios, metadados de limites/expiração, POIs regionais salvos e conferências manuais válidas por etapa.

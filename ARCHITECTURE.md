@@ -1,3 +1,7 @@
+# Arquitetura — Vigia IA 1.0.364+364 (buildfix APK 309)
+
+A tela `trip_planning_screen.dart` exibe notas offline quando `checkValid` está ativo e `savedCheck` possui dados. O ramo já garante a não nulidade do registro; a interpolação agora acessa `savedCheck.notes` diretamente, sem operador null-aware redundante rejeitado pelo analisador Dart. Nenhuma mudança no fluxo de armazenamento, no modelo de paradas, nas chamadas de rede ou nos recursos de mapas offline. Teste de regressão impede o retorno dessa expressão; a análise compilada requer CI Flutter.
+
 # Arquitetura — Vigia IA 1.0.363+363 (preparação offline sob demanda)
 
 `TripOfflineReadinessService.inspect` é um diagnóstico assíncrono chamado somente por toque no Planejamento. Não busca GPS, não usa rede e não altera a biblioteca ou o manifesto dos mapas. A sonda de arquivo consulta apenas `File.stat` para checar tipo/tamanho; testes podem injetar `mapProbe` sem I/O. Arquivos ausentes/zerados não contam para cobertura. Os limites geográficos registrados nos MBTiles são usados somente como **evidência parcial de cobertura**: a união dos retângulos é comparada a até 121 amostras da rota interpoladas por distância. Sem bounds => desconhecido; bounds cobertos => apenas dentro dos retângulos, sem prova de tiles reais ou zoom disponível. Regras de cache Stadia mantidas.

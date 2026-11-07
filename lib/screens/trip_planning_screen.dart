@@ -2093,7 +2093,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           ),
         ]),
         if (checkValid && savedCheck!.notes.isNotEmpty)
-          Text('Nota offline: ${savedCheck?.notes ?? ''}',
+          Text('Nota offline: ${savedCheck.notes}',
               style: Theme.of(context).textTheme.bodySmall),
         if (savedCheck != null && !checkValid)
           const Text('Registro de outra posição/etapa: precisa ser conferido novamente.',
