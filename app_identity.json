@@ -5,6 +5,6 @@
   "namespace": "com.vigiaia.app",
   "identityStatus": "full-vigiaia-technical-identity",
   "notes": "Central de seis APIs; Geoapify/ORS com chaves protegidas e testes manuais; Open-Meteo preservado.",
-  "version": "1.0.365",
-  "build": 365
+  "version": "1.0.366",
+  "build": 366
 }

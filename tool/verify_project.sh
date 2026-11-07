@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 -m unittest -q tool/test_build311_geolocator_import_366.py || { echo "APK 311: import redundante de geolocator_android retornou." >&2; exit 1; }
 python3 -m unittest -q tool/test_map_gps_poi_365.py || { echo 'GPS/POIs 365: regressão de status ou consultas locais.' >&2; exit 1; }
 python3 -m unittest -q tool/test_build309_flutter_analyze_364.py || { echo "APK 309: operador null-aware redundante retornou nas notas offline." >&2; exit 1; }
 python3 -m unittest -q tool/test_trip_terrain_weather_359.py || { echo "Relevo/Clima 359: regressão nos dados salvos ou consulta manual." >&2; exit 1; }

@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.365', build: 365);
+      AppBuildVersion(version: '1.0.366', build: 366);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.365', build: 365),
+      version: AppBuildVersion(version: '1.0.366', build: 366),
       changes: <String>[
-        'GPS: leituras antigas são distinguidas de localização desligada ou permissão negada.',
-        'No Android, mapa visível solicita posição moderada mesmo sem deslocamento.',
-        'Pontos: consultas online com fallback e mensagens claras; busca pelo centro do mapa sem GPS.',
+        'Corrigido aviso do Flutter Analyze no serviço GPS para permitir o próximo build Android.',
+        'Mantidas as atualizações moderadas de GPS, consulta pelo centro do mapa e pontos offline.',
+        'Sem alteração nas permissões nem no rastreamento de trajetos; nova regressão preventiva.',
       ],
     ),
   ]);

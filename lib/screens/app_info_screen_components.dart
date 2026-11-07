@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.365',
+          version: '1.0.366',
           current: true,
+          changes: [
+            'Corrigido o import redundante no serviço de localização.',
+            'Atualizações de GPS e pontos offline preservados.',
+            'Regressão preventiva para o workflow Android APK 311.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.365',
+          current: false,
           changes: [
             'Status GPS distingue localização desligada de leitura antiga.',
             'Atualização moderada de GPS no mapa parado e painel de pontos mais robusto.',
@@ -3174,8 +3184,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.365',
+          version: '1.0.366',
           current: true,
+          changes: [
+            'Corrigido o import redundante no serviço de localização.',
+            'Atualizações de GPS e pontos offline preservados.',
+            'Regressão preventiva para o workflow Android APK 311.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.365',
+          current: false,
           changes: [
             'Status GPS distingue localização desligada de leitura antiga.',
             'Atualização moderada de GPS no mapa parado e painel de pontos mais robusto.',

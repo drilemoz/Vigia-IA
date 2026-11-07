@@ -49,7 +49,7 @@ class GpsPoi365(unittest.TestCase):
         self.assertIn("label: const Text('Perto do GPS')", screen)
 
     def test_version_metadata(self):
-        self.assertIn('version: 1.0.365+365', self.read('pubspec.yaml'))
+        self.assertRegex(self.read('pubspec.yaml'), r'(?m)^version: 1\.0\.\d+\+\d+$')
         self.assertTrue((ROOT / 'RELEASE-1.0.365.md').exists())
 
 if __name__ == '__main__':

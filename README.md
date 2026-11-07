@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.365+365`
+**Versão atual:** `1.0.366+366`
+
+## 1.0.366 — Correção do analisador Flutter APK 311
+
+- Removido somente o import direto redundante de `package:geolocator_android/geolocator_android.dart` em `location_tracking_service.dart`, conforme `flutter analyze` no workflow APK 311.
+- A dependência Android continua em `pubspec.yaml`; `AndroidSettings` é acessível via `geolocator` nesta versão de dependências, como confirmado pelo próprio analisador.
+- GPS passivo, detecção de leitura antiga, consulta de pontos e fallback offline preservados, sem alteração de permissões ou política de precisão.
+- Um novo teste estrutural verifica o import e o contrato de GPS. Build Flutter/Android requer confirmação pelo próximo GitHub Actions.
 
 ## 1.0.365 — Diagnóstico GPS e pontos no mapa
 

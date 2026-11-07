@@ -1,3 +1,7 @@
+# Arquitetura — Vigia IA 1.0.366+366 (buildfix 311)
+
+`LocationTrackingService` usa `Geolocator` e `AndroidSettings` pelo import público `package:geolocator/geolocator.dart`, sem o import adicional de `geolocator_android` que o analisador Flutter marcou como redundante. A dependência `geolocator_android` continua no `pubspec.yaml`. Não houve alteração nos parâmetros `intervalDuration`, `distanceFilter`, solicitação de permissões, rastreamento de alta precisão nem no fluxo do Overpass. Esta alteração resolve somente um lint que bloqueava a compilação; a análise Flutter e os testes em dispositivo devem ser confirmados no CI.
+
 # Arquitetura — Vigia IA 1.0.365+365 (GPS e pontos por região)
 
 A tela `trip_planning_screen.dart` exibe notas offline quando `checkValid` está ativo e `savedCheck` possui dados. O ramo já garante a não nulidade do registro; a interpolação agora acessa `savedCheck.notes` diretamente, sem operador null-aware redundante rejeitado pelo analisador Dart. Nenhuma mudança no fluxo de armazenamento, no modelo de paradas, nas chamadas de rede ou nos recursos de mapas offline. Teste de regressão impede o retorno dessa expressão; a análise compilada requer CI Flutter.

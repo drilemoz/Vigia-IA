@@ -1,3 +1,10 @@
+## 1.0.366+366 (2026-11-06)
+
+- Workflow APK 311: removido import desnecessário de `geolocator_android` no serviço de localização, conforme `unnecessary_import` do Flutter Analyze em `location_tracking_service.dart:5:8`.
+- A biblioteca Android permanece como dependência; `AndroidSettings` e a política de GPS da 1.0.365 continuam sem modificações funcionais.
+- Criado teste preventivo para impedir o retorno do import e manter os contratos de localização e consulta offline. Metadados/Novidades sincronizados.
+- Compilação Flutter e build Android seguem pendentes do próximo CI.
+
 ## 1.0.365+365 (2026-11-06)
 
 - Correção da indicação equivocada de GPS indisponível quando apenas a leitura ficou antiga.

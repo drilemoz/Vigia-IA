@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.366+366
+
+Ver `VALIDATION-1.0.366.md` para a causa do workflow 311, teste preventivo de import e resultados locais. `flutter analyze`, `flutter test` e a compilação Android dependem do CI.
+
 # Validação Vigia IA 1.0.365+365
 
 Consultar `VALIDATION-1.0.365.md`: GPS passivo do Android, painel de pontos e prazos do Overpass. O `flutter analyze`, testes Dart e build Android precisam de SDK Flutter no CI.
