@@ -36,6 +36,13 @@ Antes do ZIP final, manter sincronizados:
 - testes/verificadores de versão;
 - nome do ZIP final.
 
+## Retenção de versões no Google Drive (pedido do usuário em 06/11/2026)
+
+- Pasta de destino: `Meu Drive/Projetos/Vigia IA/` (se faltar, recriar sob `Projetos`).
+- **Manter somente o ZIP de código-fonte da versão vigente** nessa pasta.
+- Após novo upload, conferir id, nome, tamanho e pasta pai em readback do Drive. **Só depois** apagar os ZIPs de código-fonte de versões anteriores do Vigia IA nessa pasta; excluir apenas arquivos reconhecidos pela versão e nome do projeto.
+- Não apagar documentos não relacionados, outros projetos, nem backups locais. Se upload ou verificação falharem, preservar as versões anteriores e relatar a falha.
+
 ## Validação obrigatória
 
 Antes de entregar:

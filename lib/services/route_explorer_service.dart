@@ -365,7 +365,7 @@ class RouteExplorerService extends ChangeNotifier {
       // Limite total: não deixar o indicador de pontos girar por minutos
       // enquanto instâncias Overpass respondem lentamente ou falham.
       final onlineResults = await _fetchOnline(current)
-          .timeout(const Duration(seconds: 18));
+          .timeout(const Duration(seconds: 30));
       _results = onlineResults;
       _resultsUpdatedAt = DateTime.now();
       _lastSearchOrigin = current;
@@ -402,9 +402,7 @@ class RouteExplorerService extends ChangeNotifier {
           return offline;
         }
       }
-      _error = error.toString()
-          .replaceFirst('Exception: ', '')
-          .replaceFirst('Bad state: ', '');
+      _error = _humanReadablePoiError(error);
       if (_results.isNotEmpty) _markResultsAsCache();
       _statusMessage = _results.isEmpty
           ? 'Não foi possível consultar os servidores de pontos agora.'
@@ -434,7 +432,7 @@ class RouteExplorerService extends ChangeNotifier {
         }
       } else {
         _areaResults = await _fetchOnline(center)
-            .timeout(const Duration(seconds: 18));
+            .timeout(const Duration(seconds: 30));
       }
       _areaUpdatedAt = DateTime.now();
     } catch (_) {
@@ -448,6 +446,29 @@ class RouteExplorerService extends ChangeNotifier {
       _areaLoading = false;
       notifyListeners();
     }
+  }
+
+  static String _humanReadablePoiError(Object error) {
+    final raw = error.toString();
+    if (error is TimeoutException || raw.contains('TimeoutException')) {
+      return 'Servidores de pontos demoraram para responder. Tente novamente '
+          'com internet estável ou abra um pacote salvo. O GPS é independente desta consulta.';
+    }
+    if (raw.contains('em espera após erro') || raw.contains('429') ||
+        raw.contains('503') || raw.contains('504')) {
+      return 'Servidores de pontos ocupados ou em espera. Tente mais tarde '
+          'ou consulte seus pacotes offline.';
+    }
+    if (error is SocketException || error is HttpException) {
+      return 'Sem conexão com o serviço de pontos. O mapa pode continuar '
+          'funcionando; consulte um pacote offline.';
+    }
+    if (raw.contains('Localização indisponível')) {
+      return 'Aguardando localização para busca por proximidade. '
+          'Você também pode buscar pelo centro do mapa ou abrir pontos salvos.';
+    }
+    return 'Serviço de pontos indisponível agora. Tente novamente ou '
+        'consulte pacotes offline.';
   }
 
   void _markResultsAsCache() {
@@ -868,8 +889,7 @@ class RouteExplorerService extends ChangeNotifier {
       }
     }
     if (effectiveRadius == 0 && collected.isEmpty && lastFailure != null) {
-      throw StateError('Serviço de pontos temporariamente indisponível. '
-          'Confira a internet ou tente Atualizar novamente. ($lastFailure)');
+      throw StateError('Servidores de pontos indisponíveis: $lastFailure');
     }
     _effectiveOnlineRadiusKm = effectiveRadius == 0 ? null : effectiveRadius;
     _statusMessage = lastFailure != null && collected.isNotEmpty
@@ -906,8 +926,8 @@ class RouteExplorerService extends ChangeNotifier {
         continue;
       }
       final client = HttpClient()
-        ..connectionTimeout = const Duration(seconds: 7)
-        ..idleTimeout = const Duration(seconds: 10);
+        ..connectionTimeout = const Duration(seconds: 5)
+        ..idleTimeout = const Duration(seconds: 7);
       var failureRecorded = false;
       try {
         // Evita consultas sucessivas sem pausa contra serviços públicos.
@@ -919,15 +939,15 @@ class RouteExplorerService extends ChangeNotifier {
         }
         _lastOverpassRequestAt = DateTime.now();
         final request = await client.postUrl(Uri.parse(endpoint))
-            .timeout(const Duration(seconds: 8));
+            .timeout(const Duration(seconds: 5));
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.364 route-explorer');
+        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.365 route-explorer');
         request.headers.contentType = ContentType(
           'application', 'x-www-form-urlencoded', charset: 'utf-8',
         );
         request.write('data=${Uri.encodeQueryComponent(query)}');
         final response = await request.close()
-            .timeout(const Duration(seconds: 17));
+            .timeout(const Duration(seconds: 7));
         if (response.statusCode != HttpStatus.ok) {
           _endpointPolicy.failed(
             endpoint,
@@ -939,7 +959,7 @@ class RouteExplorerService extends ChangeNotifier {
           throw HttpException('Overpass HTTP ${response.statusCode}');
         }
         final body = await response.transform(utf8.decoder).join()
-            .timeout(const Duration(seconds: 17));
+            .timeout(const Duration(seconds: 7));
         DataUsageService.instance.record(
           DataUsageModule.nearby,
           received: utf8.encode(body).length,

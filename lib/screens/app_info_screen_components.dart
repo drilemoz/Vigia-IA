@@ -77,8 +77,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.364',
+          version: '1.0.365',
           current: true,
+          changes: [
+            'Status GPS distingue localização desligada de leitura antiga.',
+            'Atualização moderada de GPS no mapa parado e painel de pontos mais robusto.',
+            'Consulta manual pelo centro do mapa mesmo sem GPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.364',
+          current: false,
           changes: [
             'Corrigida a análise Flutter das notas offline de paradas.',
             'Preservados mapas, pontos e planejamento offline.',
@@ -3164,8 +3174,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.364',
+          version: '1.0.365',
           current: true,
+          changes: [
+            'Status GPS distingue localização desligada de leitura antiga.',
+            'Atualização moderada de GPS no mapa parado e painel de pontos mais robusto.',
+            'Consulta manual pelo centro do mapa mesmo sem GPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.364',
+          current: false,
           changes: [
             'Corrigida a análise Flutter das notas offline de paradas.',
             'Preservados mapas, pontos e planejamento offline.',

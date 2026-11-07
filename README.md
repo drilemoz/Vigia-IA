@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.364+364`
+**Versão atual:** `1.0.365+365`
+
+## 1.0.365 — Diagnóstico GPS e pontos no mapa
+
+- Status correto de GPS: posição recente, leitura antiga, sem permissão ou localização desligada são estados distintos.
+- Android usa `geolocator_android` para atualização passiva aproximadamente a cada 15 s, apenas com mapa visível, sem ativar gravação.
+- Consulta de POIs Overpass com dois endpoints, prazos por servidor e mensagens sem stacktraces; manutenção do fallback e de pacotes offline.
+- Busca manual pelo centro do mapa, mesmo quando a leitura do GPS não está disponível.
+- Validação Flutter/análise Android pendente no CI; comportamento do GPS precisa de teste em aparelho.
 
 ## 1.0.364 — Correção da análise Flutter no Planejamento offline
 

@@ -45,7 +45,8 @@ class MapSearchUi324(unittest.TestCase):
         map_screen=read('lib/screens/map_monitoring_screen.dart')
         self.assertIn('widget.workspaceHeaderHeight +',map_screen)
         self.assertIn('constraints.maxHeight * 0.47',map_screen)
-        self.assertIn('speedSource: liveGps == null',map_screen)
+        self.assertIn('speedSource: MapGpsHudPolicy.label(', map_screen)
+        self.assertIn('MapSystemHud(', map_screen)
 
     def test_direction_and_duration_are_not_unlabeled_or_truncated(self):
         hud=read('lib/widgets/map_status_indicators.dart')

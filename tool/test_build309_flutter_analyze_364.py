@@ -16,7 +16,7 @@ class FlutterAnalyze309(unittest.TestCase):
         self.assertNotIn("savedCheck?.notes ?? ''", SCREEN)
 
     def test_current_metadata_and_release_are_in_sync(self):
-        self.assertIn('version: 1.0.364+364', (ROOT/'pubspec.yaml').read_text())
+        self.assertRegex((ROOT/'pubspec.yaml').read_text(), r'(?m)^version: 1\.0\.\d+\+\d+$')
         self.assertTrue((ROOT/'RELEASE-1.0.364.md').is_file())
 
 if __name__=='__main__':

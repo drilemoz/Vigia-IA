@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:geolocator_android/geolocator_android.dart';
 
 import '../models/map_route_point.dart';
 import 'map_performance_policy.dart';
@@ -39,14 +41,24 @@ class LocationTrackingService {
 
   /// O mapa em consulta usa precisão moderada; gravar e navegar não.
   Stream<MapRoutePoint> positionStream({bool highAccuracy = true}) {
-    final settings = LocationSettings(
-      accuracy: highAccuracy
-          ? LocationAccuracy.high
-          : LocationAccuracy.medium,
-      distanceFilter: highAccuracy
-          ? MapPerformancePolicy.gpsDistanceFilterMeters
-          : MapPerformancePolicy.passiveGpsDistanceFilterMeters,
-    );
+    // No Android o filtro passivo de 35 m pode impedir qualquer atualização
+    // por muito tempo enquanto o ciclista está parado. Com o mapa visível,
+    // solicite atualizações moderadas em intervalos aproximados de 15 s, sem gravar percurso.
+    // O stream é fechado quando a tela deixa de consumi-lo.
+    final LocationSettings settings = Platform.isAndroid && !highAccuracy
+        ? AndroidSettings(
+            accuracy: LocationAccuracy.medium,
+            distanceFilter: 0,
+            intervalDuration: const Duration(seconds: 15),
+          )
+        : LocationSettings(
+            accuracy: highAccuracy
+                ? LocationAccuracy.high
+                : LocationAccuracy.medium,
+            distanceFilter: highAccuracy
+                ? MapPerformancePolicy.gpsDistanceFilterMeters
+                : MapPerformancePolicy.passiveGpsDistanceFilterMeters,
+          );
     return Geolocator.getPositionStream(locationSettings: settings)
         .map(_toPoint);
   }

@@ -1,3 +1,11 @@
+## 1.0.365+365 (2026-11-06)
+
+- Correção da indicação equivocada de GPS indisponível quando apenas a leitura ficou antiga.
+- Stream Android de consulta passiva do mapa com intervalo e sem filtro de movimento, ativo somente enquanto necessário.
+- Overpass: limite global e tempos individuais revisados, mensagens claras e busca manual pelo centro do mapa sem exigir GPS.
+- Novo teste de regressão do GPS/POI e teste Dart da classificação do status.
+- Versão, Novidades e documentos sincronizados; build Android requer execução CI.
+
 ## 1.0.364+364 (2026-11-06)
 
 - Correção do workflow Android APK 309: em `lib/screens/trip_planning_screen.dart:2096`, removido o operador `?.` e o fallback `??` desnecessários de `savedCheck.notes` quando o registro já estava validado como não nulo.

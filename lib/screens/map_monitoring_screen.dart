@@ -53,6 +53,7 @@ import '../services/map_destination_search_service.dart';
 import '../services/map_compass_service.dart';
 import '../services/map_cycling_route_service.dart';
 import '../services/map_gps_filter.dart';
+import '../services/map_gps_hud_policy.dart';
 import '../services/map_diagnostics_service.dart';
 import '../services/map_navigation_guidance.dart';
 import '../services/map_navigation_voice_service.dart';
@@ -5482,6 +5483,18 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
       speedAvailable: false,
       headingAvailable: false,
     );
+    final mapCenter = _mapViewportCenter;
+    final MapRoutePoint? viewportCenter = mapCenter == null ? null : MapRoutePoint(
+      latitude: mapCenter.latitude,
+      longitude: mapCenter.longitude,
+      recordedAt: DateTime.now(),
+      accuracyMeters: 0,
+      speedMetersPerSecond: 0,
+      speedAvailable: false,
+      headingAvailable: false,
+    );
+    var selectedCenter = areaCenter;
+    var areaLabel = selectedArea?.title ?? 'Centro do mapa';
     var viewSelectedArea = areaCenter != null;
     if (areaCenter != null) unawaited(_routeExplorer.searchAround(areaCenter));
     await showMapCenteredDialog<void>(
@@ -5494,7 +5507,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
               listenable: _routeExplorer,
               builder: (context, _) {
                 final service = _routeExplorer;
-                final lookingAtArea = viewSelectedArea && areaCenter != null;
+                final lookingAtArea = viewSelectedArea && selectedCenter != null;
                 final sourceResults = lookingAtArea
                     ? service.areaResults : service.activeResults;
                 final busy = lookingAtArea ? service.areaLoading : service.loading;
@@ -5524,7 +5537,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                                 ),
                                 Text(
                                   lookingAtArea
-                                    ? '${selectedArea!.title} · raio ${service.settings.radiusKm} km · consulta manual'
+                                    ? '$areaLabel · raio ${service.settings.radiusKm} km · consulta manual'
                                     : '${service.effectiveOnlineRadiusKm ?? service.settings.radiusKm} km · '
                                       '${service.lastSource == 'offline' ? 'Pacote offline' : service.lastSource == 'cache' ? 'Cache anterior' : service.lastSource == 'online' ? 'OSM mapeado' : service.lastSource == 'geoapify' ? 'Geoapify' : 'Sem consulta'} · '
                                       '${service.resultsUpdatedAt == null ? 'data desconhecida' : 'consulta ${_formatOfflinePackageDate(service.resultsUpdatedAt!)}'}',
@@ -5551,15 +5564,36 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                     ),
                     if (busy)
                       const LinearProgressIndicator(minHeight: 2),
-                    if (areaCenter != null)
+                    if (areaCenter != null || viewportCenter != null)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Wrap(spacing: 8, children: [
-                          ChoiceChip(
-                            label: Text('Em ${selectedArea!.title}'),
-                            selected: viewSelectedArea,
-                            onSelected: (_) => setSheetState(() => viewSelectedArea = true),
-                          ),
+                          if (selectedArea != null && areaCenter != null)
+                            ChoiceChip(
+                              label: Text('Em ${selectedArea.title}'),
+                              selected: viewSelectedArea && areaLabel == selectedArea.title,
+                              onSelected: (_) {
+                                setSheetState(() {
+                                  selectedCenter = areaCenter;
+                                  areaLabel = selectedArea.title;
+                                  viewSelectedArea = true;
+                                });
+                                unawaited(service.searchAround(areaCenter));
+                              },
+                            ),
+                          if (viewportCenter != null)
+                            ChoiceChip(
+                              label: const Text('Centro do mapa'),
+                              selected: viewSelectedArea && areaLabel == 'Centro do mapa',
+                              onSelected: (_) {
+                                setSheetState(() {
+                                  selectedCenter = viewportCenter;
+                                  areaLabel = 'Centro do mapa';
+                                  viewSelectedArea = true;
+                                });
+                                unawaited(service.searchAround(viewportCenter));
+                              },
+                            ),
                           ChoiceChip(
                             label: const Text('Perto do GPS'),
                             selected: !viewSelectedArea,
@@ -5601,9 +5635,14 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                             child: FilledButton.tonalIcon(
                               onPressed: busy
                                   ? null
-                                  : () => lookingAtArea
-                                      ? unawaited(service.searchAround(areaCenter))
-                                      : unawaited(_refreshNearby()),
+                                  : () {
+                                      final center = selectedCenter;
+                                      if (viewSelectedArea && center != null) {
+                                        unawaited(service.searchAround(center));
+                                      } else {
+                                        unawaited(_refreshNearby());
+                                      }
+                                    },
                               icon: const Icon(Icons.refresh_rounded),
                               label: const Text('Atualizar'),
                             ),
@@ -7369,7 +7408,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                   child: MapSystemHud(
                     batteryPercent: _phoneBattery,
                     gpsReady: liveGps != null,
-                    speedSource: liveGps == null ? 'Sem sinal atual' : speedReading?.source,
+                    gpsReadoutStale: liveGps == null &&
+                        _routeState.availability == LocationTrackingAvailability.ready &&
+                        current != null,
+                    speedSource: MapGpsHudPolicy.label(
+                      availability: _routeState.availability, point: current),
                   ),
                 ),
 

@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.365+365
+
+Consultar `VALIDATION-1.0.365.md`: GPS passivo do Android, painel de pontos e prazos do Overpass. O `flutter analyze`, testes Dart e build Android precisam de SDK Flutter no CI.
+
 # Validação Vigia IA 1.0.364+364
 
 Ver `VALIDATION-1.0.364.md` para a causa e correção do erro `invalid_null_aware_operator` no workflow Android APK 309. `flutter analyze`, `flutter test` e compilação Android dependem de SDK instalado no CI.

@@ -5,9 +5,12 @@ import '../services/map_speed_policy.dart';
 /// Indicadores passivos; nao iniciam GPS, sensores ou temporizadores.
 class MapSystemHud extends StatelessWidget {
   const MapSystemHud({super.key, required this.batteryPercent,
-    required this.gpsReady, required this.speedSource});
+    required this.gpsReady, required this.speedSource,
+    this.gpsReadoutStale = false});
   final int? batteryPercent;
   final bool gpsReady;
+  /// GPS autorizado, mas nenhuma leitura nova dentro da janela de frescor.
+  final bool gpsReadoutStale;
   final String? speedSource;
 
   @override
@@ -23,8 +26,11 @@ class MapSystemHud extends StatelessWidget {
         Text(clock, style: const TextStyle(color: Colors.white,
           fontWeight: FontWeight.w900, fontSize: 12)),
         const Spacer(),
-        Icon(gpsReady ? Icons.gps_fixed_rounded : Icons.gps_off_rounded,
-          size: 14, color: gpsReady ? Colors.lightGreenAccent : Colors.orangeAccent),
+        Icon(
+          gpsReady ? Icons.gps_fixed_rounded
+              : gpsReadoutStale ? Icons.gps_not_fixed_rounded : Icons.gps_off_rounded,
+          size: 14, color: gpsReady ? Colors.lightGreenAccent : Colors.orangeAccent,
+        ),
         const SizedBox(width: 6),
         Text(speedSource ?? '--', style: const TextStyle(color: Colors.white70,
           fontSize: 10)),

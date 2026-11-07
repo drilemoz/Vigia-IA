@@ -58,7 +58,8 @@ class ApiBackupAndMapUi335(unittest.TestCase):
         self.assertIn(').timeout(const Duration(seconds: 10));',dest)
         self.assertIn(').timeout(const Duration(seconds: 8));',dest)
         self.assertIn('if (revision == _searchRevision) _setSearchLoading(false)',dest)
-        self.assertIn('.timeout(const Duration(seconds: 18))',pois)
+        self.assertIn('.timeout(const Duration(seconds: 30))',pois)
+        self.assertIn('connectionTimeout = const Duration(seconds: 5)', pois)
         self.assertIn('looksLikeNaturalLanguage',screen)
         self.assertIn('Gemini indisponível. Pesquisa normal ativada.',screen)
 

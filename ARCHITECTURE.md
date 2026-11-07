@@ -1,4 +1,4 @@
-# Arquitetura — Vigia IA 1.0.364+364 (buildfix APK 309)
+# Arquitetura — Vigia IA 1.0.365+365 (GPS e pontos por região)
 
 A tela `trip_planning_screen.dart` exibe notas offline quando `checkValid` está ativo e `savedCheck` possui dados. O ramo já garante a não nulidade do registro; a interpolação agora acessa `savedCheck.notes` diretamente, sem operador null-aware redundante rejeitado pelo analisador Dart. Nenhuma mudança no fluxo de armazenamento, no modelo de paradas, nas chamadas de rede ou nos recursos de mapas offline. Teste de regressão impede o retorno dessa expressão; a análise compilada requer CI Flutter.
 

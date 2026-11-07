@@ -31,6 +31,20 @@ void main() {
     expect(find.byIcon(Icons.gps_fixed_rounded), findsOneWidget);
   });
 
+  testWidgets('HUD de leitura antiga não mostra GPS desativado', (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(body: Center(child: SizedBox(width: 390,
+        child: MapSystemHud(
+          batteryPercent: 53, gpsReady: false, gpsReadoutStale: true,
+          speedSource: 'Leitura GPS antiga',
+        ),
+      ))),
+    ));
+    expect(find.text('Leitura GPS antiga'), findsOneWidget);
+    expect(find.byIcon(Icons.gps_not_fixed_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.gps_off_rounded), findsNothing);
+  });
+
   testWidgets('velocimetro foca detalhe por callback e preserva fonte/rumo', (tester) async {
     var taps = 0;
     await tester.pumpWidget(MaterialApp(
