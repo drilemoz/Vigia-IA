@@ -49,6 +49,18 @@ class _AboutPanel extends StatelessWidget {
           const Divider(height: 28),
           ListTile(
             contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.system_update_outlined),
+            title: const Text('Verificar atualizações'),
+            subtitle: const Text('GitHub Releases · consultar, baixar e instalar com confirmação'),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const GitHubUpdatesScreen(),
+              ),
+            ),
+          ),
+          const Divider(height: 28),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.gavel_rounded),
             title: Text('Licenças e avisos legais'),
             subtitle: Text('Licenças de bibliotecas e atribuições usadas pelo aplicativo.'),
@@ -77,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.366',
+          version: '1.0.367',
           current: true,
+          changes: [
+            'Consulta automática de atualizações ao abrir ou retomar o app, com aviso de nova versão.',
+            'Novo Verificar atualizações em Sobre, com novidades, progresso e cancelamento.',
+            'APK universal validado por SHA-256, versão, pacote e assinatura antes de chamar o instalador Android.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.366',
+          current: false,
           changes: [
             'Corrigido o import redundante no serviço de localização.',
             'Atualizações de GPS e pontos offline preservados.',
@@ -3184,8 +3206,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.366',
+          version: '1.0.367',
           current: true,
+          changes: [
+            'Consulta automática de atualizações ao abrir ou retomar o app, com aviso de nova versão.',
+            'Novo Verificar atualizações em Sobre, com novidades, progresso e cancelamento.',
+            'APK universal validado por SHA-256, versão, pacote e assinatura antes de chamar o instalador Android.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.366',
+          current: false,
           changes: [
             'Corrigido o import redundante no serviço de localização.',
             'Atualizações de GPS e pontos offline preservados.',

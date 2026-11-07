@@ -281,6 +281,12 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
+        // Instalador seguro das atualizações publicadas no GitHub Releases.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "vigiaia/updates")
+            .setMethodCallHandler { call, result ->
+                VigiaUpdateInstaller.handle(this, call, result)
+            }
+
         // Núcleo nativo Minha Câmera (MCRP v1), independente do ciclo de vida Flutter.
         // O serviço só inicia mediante ação do usuário com a Activity em primeiro plano.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "vigiaia/native_transmitter")

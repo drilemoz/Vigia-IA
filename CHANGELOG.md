@@ -1,3 +1,11 @@
+## 1.0.367+367 (2026-11-07)
+
+- Novo verificador de atualizações do Vigia IA integrado à tela Sobre, baseado no fluxo de GitHub Releases do Uai Cortes.
+- Consulta automática ao abrir/retomar com limite de 60 segundos, aviso opcional e consulta manual, sem bloquear funcionalidades offline.
+- Download confirmado do APK universal com progresso, cancelamento e verificação SHA-256 obrigatória; instalador Android manual confere novamente hash, pacote, versão e assinatura.
+- Repositório fixo público `drilemoz/Vigia-IA`, sem segredos e sem instalar APK de origem desconhecida. Incluídos testes e documentação.
+- Compilação Flutter/Android pendente no GitHub Actions.
+
 ## 1.0.366+366 (2026-11-06)
 
 - Workflow APK 311: removido import desnecessário de `geolocator_android` no serviço de localização, conforme `unnecessary_import` do Flutter Analyze em `location_tracking_service.dart:5:8`.

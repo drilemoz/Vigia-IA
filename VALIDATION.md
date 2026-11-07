@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.367+367
+
+Ver `VALIDATION-1.0.367.md` para os testes de políticas de Releases, integração com Sobre, ciclo de vida e instalação segura. `flutter analyze`, `flutter test` e compilação APK dependem de CI Flutter/Android.
+
 # Validação Vigia IA 1.0.366+366
 
 Ver `VALIDATION-1.0.366.md` para a causa do workflow 311, teste preventivo de import e resultados locais. `flutter analyze`, `flutter test` e a compilação Android dependem do CI.

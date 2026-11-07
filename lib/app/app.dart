@@ -26,9 +26,82 @@ import '../services/error_log_service.dart';
 import '../services/automatic_diagnostics_service.dart';
 import '../services/diagnostic_route_observer.dart';
 import '../widgets/diagnostic_ui_interaction_capture.dart';
+import '../services/github_release_update_service.dart';
+import '../screens/github_updates_screen.dart';
 
-class VigiaIaApp extends StatelessWidget {
+class VigiaIaApp extends StatefulWidget {
   const VigiaIaApp({super.key});
+
+  @override
+  State<VigiaIaApp> createState() => _VigiaIaAppState();
+}
+
+class _VigiaIaAppState extends State<VigiaIaApp> with WidgetsBindingObserver {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  bool _checkingForeground = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkForeground());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _checkForeground();
+  }
+
+  void _checkForeground() {
+    if (!mounted || _checkingForeground) return;
+    _checkingForeground = true;
+    unawaited(_checkUpdates());
+  }
+
+  Future<void> _checkUpdates() async {
+    try {
+      final service = VigiaGitHubUpdateService.instance;
+      final release = await service.checkOnForeground();
+      if (!mounted || release == null) return;
+      final navigator = _navigatorKey.currentState;
+      final context = navigator?.context;
+      if (context == null || !context.mounted) return;
+      final open = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Atualização disponível: ${release.version}+${release.build}'),
+          content: const Text('Há uma nova versão do Vigia IA no GitHub. '
+              'O download e a instalação só acontecem com sua autorização.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Agora não'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Ver atualização'),
+            ),
+          ],
+        ),
+      );
+      service.dismiss(release);
+      if (open == true && mounted) {
+        _navigatorKey.currentState?.push(
+          MaterialPageRoute<void>(builder: (_) => const GitHubUpdatesScreen()),
+        );
+      }
+    } catch (_) {
+      // Sem internet ou GitHub indisponível: nunca bloquear a inicialização.
+    } finally {
+      _checkingForeground = false;
+    }
+  }
 
   ThemeData _theme({required Brightness brightness, required Color seed}) =>
       VigiaTheme.build(brightness: brightness, seed: seed);
@@ -41,6 +114,7 @@ class VigiaIaApp extends StatelessWidget {
       builder: (context, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Vigia IA',
+        navigatorKey: _navigatorKey,
         navigatorObservers: [DiagnosticRouteObserver.instance],
         builder: (context, child) => DiagnosticUiInteractionCapture(
           child: child ?? const SizedBox.shrink(),

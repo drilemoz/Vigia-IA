@@ -29,11 +29,13 @@ cp "$MANIFEST_SOURCE" android/app/src/main/AndroidManifest.xml
 mkdir -p android/app/src/main/res/xml
 cp "$ROOT/tool/android/gemini_backup_rules.xml" android/app/src/main/res/xml/gemini_backup_rules.xml
 cp "$ROOT/tool/android/gemini_data_extraction_rules.xml" android/app/src/main/res/xml/gemini_data_extraction_rules.xml
+cp "$ROOT/tool/android/vigia_update_file_paths.xml" android/app/src/main/res/xml/vigia_update_file_paths.xml
 
 rm -rf android/app/src/main/kotlin/*
 KOTLIN_DIR="android/app/src/main/kotlin/com/vigiaia/app"
 mkdir -p "$KOTLIN_DIR"
 cp "$ROOT/tool/android/MainActivity.kt" "$KOTLIN_DIR/MainActivity.kt"
+cp "$ROOT/tool/android/VigiaUpdateInstaller.kt" "$KOTLIN_DIR/VigiaUpdateInstaller.kt"
 cp "$ROOT/tool/android/Media3RtspPlatformView.kt" "$KOTLIN_DIR/Media3RtspPlatformView.kt"
 for helper in VigiaApplication AppDiagnostics DiagnosticPolicy; do
   cp "$ROOT/tool/android/$helper.kt" "$KOTLIN_DIR/$helper.kt"

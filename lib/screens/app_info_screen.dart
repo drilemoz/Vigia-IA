@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/app_metadata.dart';
+import 'github_updates_screen.dart';
 
 part 'app_info_screen_components.dart';
 

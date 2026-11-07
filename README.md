@@ -1,4 +1,13 @@
-**Versão atual:** `1.0.366+366`
+**Versão atual:** `1.0.367+367`
+
+## 1.0.367 — Atualizador GitHub Releases em Sobre
+
+- Integração do fluxo inspirado no atualizador do Uai Cortes: consulta automática de Releases ao abrir/retomar (janela anti-repetição de 60 s), aviso não intrusivo quando há nova versão e acesso manual em **Sobre → Verificar atualizações**.
+- Repositório público fixo `drilemoz/Vigia-IA` (sem API key/PAT) e seleção estrita de `VigiaIA-vVERSÃO+BUILD-universal.apk`. Ignora rascunhos, Releases antigas, arquivos de outras arquiteturas, nomes incorretos ou URLs não correspondentes ao repositório.
+- Download **somente após confirmação do usuário**, com progresso por bytes, MiB/s, tempo restante aproximado, cancelamento, limites de tamanho e conferência SHA-256 informado pelo GitHub. Sem SHA-256, bloqueia instalação interna e oferece a página oficial.
+- No Android, valida novamente SHA-256, applicationId `com.vigiaia.app`, versionCode superior e certificado de assinatura igual ao instalado; então abre o instalador do sistema. Requer autorização Android de fonte de instalação e jamais desinstala o aplicativo nem instala silenciosamente.
+- Falha de rede não bloqueia o uso offline do Vigia IA; câmera, mapas e sensores permanecem independentes.
+- Testes Dart de política de Releases e testes estruturais de integração. `flutter analyze`, `flutter test` e APK devem ser confirmados pelo CI.
 
 ## 1.0.366 — Correção do analisador Flutter APK 311
 

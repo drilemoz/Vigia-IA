@@ -1,3 +1,7 @@
+# Arquitetura — Vigia IA 1.0.367+367 (atualizador GitHub)
+
+O atualizador não depende da câmera, GPS nem do modo de monitoramento. `VigiaIaApp` observa o foreground, chama `VigiaGitHubUpdateService` com janela de 60 s e mostra aviso quando o parser encontra uma Release mais recente. O parser aceita apenas tags `vMAJOR.MINOR.PATCH+BUILD`, APK `VigiaIA-vMAJOR.MINOR.PATCH+BUILD-universal.apk`, URL construída do repositório público embutido e tamanho limitado. Uma Release sem SHA-256 aparece, mas não pode ser instalada pelo app. O download é iniciado apenas pelo usuário e gravado no cache privado. O Android recebe somente o nome fixo do APK interno e valida novamente hash, `com.vigiaia.app`, incremento de versão e certificados de assinatura. O FileProvider só expõe `updates/` ao instalador com URI temporária. Não há acesso a tokens, credenciais ou armazenamento externo; a navegação offline não requer consultar o serviço.
+
 # Arquitetura — Vigia IA 1.0.366+366 (buildfix 311)
 
 `LocationTrackingService` usa `Geolocator` e `AndroidSettings` pelo import público `package:geolocator/geolocator.dart`, sem o import adicional de `geolocator_android` que o analisador Flutter marcou como redundante. A dependência `geolocator_android` continua no `pubspec.yaml`. Não houve alteração nos parâmetros `intervalDuration`, `distanceFilter`, solicitação de permissões, rastreamento de alta precisão nem no fluxo do Overpass. Esta alteração resolve somente um lint que bloqueava a compilação; a análise Flutter e os testes em dispositivo devem ser confirmados no CI.

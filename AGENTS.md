@@ -72,3 +72,11 @@ Antes de responder com uma entrega, conferir:
 > A versão foi incrementada? Todos os metadados estão sincronizados? O CHANGELOG foi atualizado? O ZIP foi validado e está linkado?
 
 Se alguma resposta for não, corrigir antes de entregar.
+
+## Atualizador por GitHub Releases (desde 1.0.367)
+
+- Preservar a verificação ao iniciar/retomar (intervalo mínimo de 60 s), o acesso manual em Sobre e a regra de **nunca baixar nem instalar automaticamente**.
+- Repositório fixo público `drilemoz/Vigia-IA`; aceitar somente APK universal de release mais nova com nome/tag/URL verificados e digest SHA-256 do GitHub.
+- Antes de abrir o instalador Android, validar novamente SHA-256, packageName, versionCode superior e mesma assinatura da versão instalada. Nunca desinstalar para atualizar.
+- O CI pode recriar `android/` pelo `tool/bootstrap_android.sh`: manter sincronizados os arquivos `tool/android/MainActivity.kt`, `tool/AndroidManifest.xml`, `tool/android/VigiaUpdateInstaller.kt` e `tool/android/vigia_update_file_paths.xml` com suas cópias ativas.
+- Verificar `tool/test_github_updates_367.py` e `test/github_release_update_test.dart` em cada mudança de atualização.
