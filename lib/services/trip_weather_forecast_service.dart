@@ -106,7 +106,7 @@ class TripWeatherForecastService {
     });
     final request = await client.getUrl(uri).timeout(const Duration(seconds: 6));
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.360 (trip-weather)');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.363 (trip-weather)');
     final response = await request.close().timeout(const Duration(seconds: 10));
     if (response.statusCode != HttpStatus.ok) {
       await response.drain();

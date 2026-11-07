@@ -59,6 +59,8 @@ class TripDayReadinessService {
     required int latestArrivalMinute,
     required TripDayTerrain terrain,
     required int minutesPer100Meters,
+    bool overnightManuallyChecked = false,
+    bool accessManuallyChecked = false,
   }) {
     final messages = <String>[];
     final maxSeconds = (targetRidingHours * 3600).round();
@@ -71,9 +73,10 @@ class TripDayReadinessService {
           '${BikeTripDaySchedule.formatMinute(latestArrivalMinute)}. '
           'Não é cálculo do pôr do sol.');
     }
-    if (!day.usesKnownPlace) {
+    if (!day.usesKnownPlace && !overnightManuallyChecked) {
       messages.add('Pernoite não confirmado: a parada é só um ponto da rota.');
-    } else if (day.routeProximityMeters != null &&
+    } else if (!accessManuallyChecked &&
+        day.routeProximityMeters != null &&
         day.routeProximityMeters! > 500) {
       messages.add('Local sugerido a mais de 500 m da linha da rota; '
           'verifique o acesso real pela estrada.');

@@ -1,3 +1,28 @@
+## 1.0.363+363 (2026-11-06)
+
+- Planejamento inclui diagnóstico sob demanda de **preparação offline**: confere arquivos MBTiles locais não vazios, metadados de limites/expiração, POIs regionais salvos e conferências manuais válidas por etapa.
+- Análise amostra até 121 posições da geometria e calcula a união de limites de vários mapas. Dados sem bounds são explicitamente desconhecidos; não há alegação de que todos os tiles e níveis de zoom estejam presentes.
+- Identifica possíveis trechos/etapas fora dos limites declarados, arquivos inacessíveis e pernoites intermediários não conferidos; nenhuma pesquisa de rede, GPS ou remoção de dados é executada.
+- Incluídos testes Dart e contratos Python para casos de arquivo ausente, cobertura repartida, bounds desconhecidos, conferência obsoleta e pontos offline próximos da rota.
+- Atualizados metadados e tela Novidades; compilação Flutter/Android pendente do CI.
+
+## 1.0.362+362 (2026-11-06)
+
+- Planejamento offline: conferência manual por etapa de acesso pela via, água, pernoite e notas, com salvamento imediato e remoção de registro sem depender da rede.
+- O modelo `TripStopCheck` vincula anotações à alternativa de rota, número do dia, coordenadas e posição acumulada; alterações que deslocam a parada marcam a conferência como desatualizada.
+- Viagens antigas continuam legíveis com a lista `stopChecks` opcional, restauração tolerante a entradas inválidas e limite de registros/caracteres. As anotações entram na exportação JSON (não no GPX).
+- Tela informa conferências válidas e sinaliza claramente dados marcados pelo ciclista, sem supor acesso seguro ou serviços disponíveis.
+- Versionamento, Novidades e testes estruturais/Dart atualizados. Flutter analyze e build Android pendentes de CI.
+
+## 1.0.361+361 (2026-11-06)
+
+- Planejamento offline recebeu **Divisão inteligente dos dias** configurável e reversível; a quantidade de dias considera a reserva de tempo para subidas com dados de altitude válidos, além do tempo de pedal base.
+- Pontos de corte estimados pelo esforço acumulado da geometria; locais próximos da via são considerados apenas dentro de limites conservadores do tempo de pedal e capacidade dos dias restantes. Sem local apropriado, a etapa permanece marcada como parada sem confirmação.
+- Marcadores numerados de final de etapa na prévia offline (até 80); mantém pontos de apoio e origem/destino como camadas distintas.
+- Evita atribuir altitude a trechos sem amostras; viagens antigas mantêm o campo opcional com fallback explícito. Mudança do itinerário invalida previsão manual anterior; nenhum GPS ou HTTP é iniciado pelo planejador.
+- Biblioteca de viagens reflete os dias do modo selecionado e usa cache fraco por objeto para evitar refazer a projeção em cada reconstrução da tela.
+- Incluídos testes Flutter/Dart, contratos Python e documentação; análise Flutter e APK requerem CI com SDK.
+
 ## 1.0.360+360 (2026-11-06)
 
 - Planejamento: cenário opcional e explícito de reserva de tempo por 100 m de subida informada pelo perfil de altitude da rota, sem preencher lacunas ou supor velocidade real do usuário.

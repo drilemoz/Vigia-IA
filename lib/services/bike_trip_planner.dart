@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../models/bike_trip_plan.dart';
 import '../models/map_destination_search.dart';
+import 'trip_stage_effort_profile.dart';
 
 class BikeTripPlanner {
   const BikeTripPlanner();
@@ -47,6 +48,9 @@ class BikeTripPlanner {
     required BikeTravelPreferences preferences,
     required String destinationLabel,
     required List<MapDestinationSearchResult> candidates,
+    List<double?> elevationsMeters = const <double?>[],
+    int climbReserveMinutesPer100m = 0,
+    bool smartStages = false,
   }) {
     final tripEstimate = estimate(
       distanceMeters: routeDistanceMeters,
@@ -75,45 +79,101 @@ class BikeTripPlanner {
       candidates: candidates,
     );
 
+    final effort = smartStages ? TripStageEffortProfile.fromRoute(
+      points: routePoints,
+      routeDistanceMeters: routeDistanceMeters,
+      averageSpeedKmh: tripEstimate.preferences.averageSpeedKmh,
+      elevationsMeters: elevationsMeters,
+      climbReserveMinutesPer100m: climbReserveMinutesPer100m,
+    ) : null;
+    // Sem perfil, o esforço é só tempo de pedal em velocidade fixa.
+    // A divisão inteligente não transforma ausência de altitude em subida.
+    final daySeconds = tripEstimate.preferences.ridingHoursPerDay * 3600;
+    final dayCount = effort == null ? tripEstimate.dayCount :
+        math.max(1, (effort.totalSeconds / daySeconds).ceil()).toInt();
+    final planEstimate = BikeTripEstimate(
+      distanceMeters: tripEstimate.distanceMeters,
+      ridingDuration: tripEstimate.ridingDuration,
+      dayCount: dayCount,
+      preferences: tripEstimate.preferences,
+    );
     final days = <BikeTripDayPlan>[];
     final usedIds = <String>{};
     var previousEnd = 0.0;
-    for (var day = 1; day <= tripEstimate.dayCount; day++) {
-      final finalDay = day == tripEstimate.dayCount;
-      final idealEnd = finalDay
-          ? routeDistanceMeters
-          : _idealCumulativeDistance(
+    for (var day = 1; day <= dayCount; day++) {
+      final finalDay = day == dayCount;
+      final previousEffort = effort?.secondsAtMeters(previousEnd) ?? 0.0;
+      final remainingDays = dayCount - day + 1;
+      final idealSeconds = effort == null ? 0.0 :
+          (tripEstimate.preferences.balanceDays
+              ? previousEffort +
+                  (effort.totalSeconds - previousEffort) / remainingDays
+              : math.min(effort.totalSeconds, previousEffort + daySeconds)
+                    .toDouble());
+      final idealEnd = finalDay ? routeDistanceMeters : effort == null
+          ? _idealCumulativeDistance(
               day: day,
-              totalDays: tripEstimate.dayCount,
+              totalDays: dayCount,
               totalDistanceMeters: routeDistanceMeters,
               preferences: tripEstimate.preferences,
-            );
+            ) : effort.metersAtSeconds(idealSeconds);
 
       _MappedTripCandidate? selected;
       if (!finalDay) {
-        final dailyTarget = routeDistanceMeters / tripEstimate.dayCount;
+        final dailyTarget = routeDistanceMeters / dayCount;
         final maxDelta = math.max(18000.0, dailyTarget * 0.35).toDouble();
         for (final candidate in mappedCandidates) {
-          if (usedIds.contains(candidate.result.id)) continue;
-          if (candidate.routeDistanceMeters <= previousEnd + 5000) continue;
-          if (candidate.routeDistanceMeters >= routeDistanceMeters - 5000) continue;
-          // Proximidade linear não equivale a desvio por estrada: evitar
-          // sugerir cidades remotas como paradas garantidas no trajeto.
-          if (candidate.routeProximityMeters > 1500) continue;
+          if (usedIds.contains(candidate.result.id)) {
+            continue;
+          }
+          if (candidate.routeDistanceMeters <= previousEnd + 5000) {
+            continue;
+          }
+          if (candidate.routeDistanceMeters >= routeDistanceMeters - 5000) {
+            continue;
+          }
+          // Proximidade em linha reta NÃO assegura acesso pela estrada.
+          if (candidate.routeProximityMeters > 1500) {
+            continue;
+          }
           final delta = (candidate.routeDistanceMeters - idealEnd).abs();
-          if (delta > maxDelta) continue;
-          final score = delta +
+          if (effort == null) {
+            if (delta > maxDelta) {
+              continue;
+            }
+          } else {
+            final candidateEffort = effort.secondsAtMeters(
+                candidate.routeDistanceMeters);
+            final segmentEffort = candidateEffort - previousEffort;
+            // Evita escolher cidade que ultrapasse o próprio orçamento
+            // diário ou inviabilize os dias restantes.
+            if (segmentEffort > daySeconds * 1.001 ||
+                segmentEffort < daySeconds * 0.55 ||
+                effort.totalSeconds - candidateEffort >
+                    (dayCount - day) * daySeconds * 1.001) {
+              continue;
+            }
+            if ((candidateEffort - idealSeconds).abs() >
+                daySeconds * 0.40) {
+              continue;
+            }
+          }
+          final score = effort == null ? delta +
               candidate.routeProximityMeters * 2.2 +
-              _kindPenalty(candidate.result.kind);
+              _kindPenalty(candidate.result.kind) :
+              (effort.secondsAtMeters(candidate.routeDistanceMeters) -
+                  idealSeconds).abs() +
+                  (candidate.routeProximityMeters * 2.2 +
+                      _kindPenalty(candidate.result.kind)) /
+                      (tripEstimate.preferences.averageSpeedKmh * 1000) * 3600;
           if (selected == null || score < selected.score) {
             selected = candidate.copyWith(score: score);
           }
         }
       }
 
-      final endDistance = finalDay
-          ? routeDistanceMeters
-          : selected?.routeDistanceMeters ?? idealEnd;
+      final endDistance = finalDay ? routeDistanceMeters :
+          selected?.routeDistanceMeters ?? idealEnd;
       final routePoint = _pointAtDistance(
         routePoints: routePoints,
         cumulativeGeometryMeters: cumulative,
@@ -150,7 +210,7 @@ class BikeTripPlanner {
       previousEnd = endDistance;
     }
     return BikeTripPlan(
-      estimate: tripEstimate,
+      estimate: planEstimate,
       days: List<BikeTripDayPlan>.unmodifiable(days),
     );
   }

@@ -16,10 +16,12 @@ import '../models/map_navigation_target.dart';
 import '../models/map_travel_mode.dart';
 import '../models/planned_bike_trip.dart';
 import '../models/trip_weather_day_forecast.dart';
+import '../models/trip_stop_check.dart';
 import '../services/bike_trip_planner.dart';
 import '../services/bike_trip_editor_bridge.dart';
 import '../services/bike_trip_schedule.dart';
 import '../services/trip_terrain_service.dart';
+import '../services/trip_offline_readiness_service.dart';
 import '../services/trip_effort_reserve_service.dart';
 import '../services/trip_weather_forecast_service.dart';
 import '../services/bike_trip_schedule_settings_service.dart';
@@ -78,6 +80,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   final _scheduleSettings = BikeTripScheduleSettingsService.instance;
   final _lastMapPreview = const SavedBikeRouteService();
   final _planner = const BikeTripPlanner();
+  final _planCache = Expando<BikeTripPlan>('trip-stage-plan');
 
   MapDestinationSearchResult? _origin;
   MapDestinationSearchResult? _destination;
@@ -91,11 +94,15 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   bool _libraryReadFailed = false;
   bool _fetchingPlaces = false;
   bool _fetchingWeather = false;
+  bool _checkingOfflineReadiness = false;
+  PlannedBikeTrip? _lastReadinessTrip;
+  TripOfflineReadinessReport? _lastReadinessReport;
   bool _showOnlineBaseMap = false;
   String? _message;
   double _speedKmh = 15;
   double _hoursPerDay = 5;
   bool _balanceDays = true;
+  bool _smartStages = true;
   bool _forceLunch = false;
   int _breakEveryKm = 20;
   int _breakMinutes = 10;
@@ -162,6 +169,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _speedKmh = initial?.averageSpeedKmh ?? preferences.averageSpeedKmh;
         _hoursPerDay = initial?.ridingHoursPerDay ?? preferences.ridingHoursPerDay;
         _balanceDays = initial?.balanceDays ?? preferences.balanceDays;
+        _smartStages = initial?.smartStages ?? true;
         _departure = TimeOfDay(
           hour: (initial?.departureMinute ?? schedule.departureMinute) ~/ 60,
           minute: (initial?.departureMinute ?? schedule.departureMinute) % 60,
@@ -609,6 +617,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         breakMinutes: _breakMinutes,
         lunchMinutes: _lunchMinutes,
         balanceDays: _balanceDays,
+        smartStages: _smartStages,
         forceLunch: _forceLunch,
       );
       // A primeira lista de cidades e apoios é inteiramente local. Não liga
@@ -636,7 +645,12 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     }
   }
 
-  BikeTripPlan _plan(PlannedBikeTrip trip) => _planner.buildPlan(
+  BikeTripPlan _plan(PlannedBikeTrip trip) {
+    final cached = _planCache[trip];
+    if (cached != null) {
+      return cached;
+    }
+    final plan = _planner.buildPlan(
     routePoints: trip.selectedRoute.points,
     routeDistanceMeters: trip.selectedRoute.distanceMeters,
     preferences: BikeTravelPreferences(
@@ -646,7 +660,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     ),
     destinationLabel: trip.destination.title,
     candidates: trip.places,
-  );
+    elevationsMeters: trip.selectedRoute.elevationsMeters,
+    climbReserveMinutesPer100m: trip.climbReserveMinutesPer100m,
+    smartStages: trip.smartStages,
+    );
+    _planCache[trip] = plan;
+    return plan;
+  }
 
   void _refreshDraftPreferences() {
     final draft = _draft;
@@ -659,6 +679,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         breakMinutes: _breakMinutes,
         lunchMinutes: _lunchMinutes,
         balanceDays: _balanceDays,
+        smartStages: _smartStages,
         forceLunch: _forceLunch,
         weatherDays: const <TripWeatherDayForecast>[],
       ));
@@ -680,7 +701,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         offlinePoiPackages: RouteExplorerService.instance.offlinePackages,
       );
       if (!mounted || _draft?.id != draft.id) return;
-      setState(() => _draft = draft.copyWith(places: places));
+      setState(() => _draft = draft.copyWith(places: places,
+          weatherDays: const <TripWeatherDayForecast>[]));
       _notify(places.isEmpty
           ? 'Nenhum apoio confirmado. Os pernoites permanecem aproximados.'
           : '${places.length} local(is) identificado(s); confira os desvios e serviços.');
@@ -746,6 +768,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           _draft?.lunchMinutes != trip.lunchMinutes ||
           _draft?.forceLunch != trip.forceLunch ||
           _draft?.balanceDays != trip.balanceDays ||
+          _draft?.smartStages != trip.smartStages ||
+          !identical(_draft?.places, trip.places) ||
           _draft?.climbReserveMinutesPer100m != trip.climbReserveMinutesPer100m) {
         return;
       }
@@ -876,7 +900,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           _draft!.places.isNotEmpty) {
         return;
       }
-      setState(() => _draft = trip.copyWith(places: places));
+      setState(() => _draft = trip.copyWith(places: places,
+          weatherDays: const <TripWeatherDayForecast>[]));
     } catch (_) {
       // Não altera viagens salvas quando o índice de localidades falha.
     }
@@ -893,6 +918,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _speedKmh = trip.averageSpeedKmh;
       _hoursPerDay = trip.ridingHoursPerDay;
       _balanceDays = trip.balanceDays;
+      _smartStages = trip.smartStages;
       _forceLunch = trip.forceLunch;
       _departure = TimeOfDay(hour: trip.departureMinute ~/ 60,
           minute: trip.departureMinute % 60);
@@ -1045,12 +1071,22 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       SwitchListTile.adaptive(
         dense: true, contentPadding: EdgeInsets.zero,
         title: const Text('Equilibrar os dias'),
-        subtitle: const Text('Distribui distâncias parecidas por dia'),
+        subtitle: const Text('Equilibra o tempo estimado ou, no modo tradicional, a distância por dia'),
         value: _balanceDays,
         onChanged: (value) {
           setState(() => _balanceDays = value);
           _refreshDraftPreferences();
           unawaited(_persistDefaults());
+        },
+      ),
+      SwitchListTile.adaptive(
+        dense: true, contentPadding: EdgeInsets.zero,
+        title: const Text('Divisão inteligente dos dias'),
+        subtitle: const Text('Considera a reserva para subidas documentadas e prioriza paradas próximas da rota. Funciona offline.'),
+        value: _smartStages,
+        onChanged: (value) {
+          setState(() => _smartStages = value);
+          _refreshDraftPreferences();
         },
       ),
       const SizedBox(height: 6),
@@ -1338,6 +1374,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ])),
       const SizedBox(height: 8),
       _routeMap(trip),
+      _offlineReadinessCard(trip, plan),
+      if (plan.days.length > 1)
+        const Text('Os marcadores numerados no mapa indicam os finais de etapa. '
+            'Paradas e acessos precisam de confirmação; rotas muito longas '
+            'mostram até 80 marcadores.', style: TextStyle(fontSize: 11)),
       if (_savedPois.offlinePackages.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -1367,9 +1408,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                 '$reservedMinutes min de reserva para subidas documentadas.'
             : 'Tempo base: velocidade média fixa. Sem reserva de subida aplicada.',
           style: const TextStyle(fontSize: 12), textAlign: TextAlign.center),
-        const Text('Simulação, não previsão de desempenho: vento, bagagem, trânsito e '
-            'acesso às paradas não são calculados. O número de dias usa o tempo base; '
-            'os avisos abaixo apontam etapas que excedem o limite.',
+        Text(trip.smartStages
+            ? 'Divisão inteligente ativa: dias organizados pelo tempo base e pela reserva de subidas com altitude disponível. Paradas sugeridas não são pernoites confirmados.'
+            : 'Divisão tradicional: os dias seguem a distância e a velocidade médias, sem aumentar o número de dias por subida.',
+          style: const TextStyle(fontSize: 11), textAlign: TextAlign.center),
+        const Text('Simulação, não previsão: bagagem, vento, segurança do acesso e disponibilidade de hospedagem não são calculados.',
           style: TextStyle(fontSize: 11), textAlign: TextAlign.center),
       ]))),
       const SizedBox(height: 8),
@@ -1534,6 +1577,15 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ),
       const SizedBox(height: 8),
       Text('Etapas da viagem', style: Theme.of(context).textTheme.titleMedium),
+      Builder(builder: (context) {
+        final verified = plan.days.where((stage) =>
+            trip.stopChecks.any((check) => check.matches(
+              stage: stage, selectedRouteIndex: trip.selectedIndex))).length;
+        return Text('Conferências salvas: $verified de ${plan.days.length} paradas. '
+            'Abra cada etapa e toque em Conferir para anotar acesso, água, '
+            'pernoite e observações sem internet.',
+            style: Theme.of(context).textTheme.bodySmall);
+      }),
       const Text('Abra cada dia para conferir horários, altitude, clima e '
           'avisos de planejamento. Os limites são suas preferências, não '
           'garantia de segurança.', style: TextStyle(fontSize: 12)),
@@ -1551,6 +1603,107 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     ]);
   }
 
+  Future<void> _checkOfflineReadiness(PlannedBikeTrip trip, BikeTripPlan plan) async {
+    if (_checkingOfflineReadiness) {
+      return;
+    }
+    setState(() => _checkingOfflineReadiness = true);
+    try {
+      final result = await TripOfflineReadinessService.inspect(
+        trip: trip,
+        plan: plan,
+        offlineMaps: _offlineMaps.packages,
+        offlinePoiPackages: _savedPois.offlinePackages,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _lastReadinessTrip = trip;
+        _lastReadinessReport = result;
+      });
+    } catch (_) {
+      if (mounted) {
+        _notify('Não foi possível conferir os arquivos locais. Tente novamente.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _checkingOfflineReadiness = false);
+      }
+    }
+  }
+
+  Widget _offlineReadinessCard(PlannedBikeTrip trip, BikeTripPlan plan) {
+    // O diagnóstico é sob demanda e somente vale para a mesma instância
+    // imutável da viagem. Editou o plano? Deve repetir a conferência.
+    final report = identical(_lastReadinessTrip, trip)
+        ? _lastReadinessReport : null;
+    return Card(child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Text('Preparação offline antes de sair',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 5),
+        const Text('Confira sem internet e sem GPS se existem mapas locais, '
+            'quais trechos estão dentro dos limites declarados dos MBTiles, '
+            'pontos de apoio salvos e paradas conferidas. A análise não faz '
+            'download nem verifica cada tile do mapa.',
+            style: TextStyle(fontSize: 12)),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _checkingOfflineReadiness
+              ? null : () => unawaited(_checkOfflineReadiness(trip, plan)),
+          icon: const Icon(Icons.fact_check_outlined),
+          label: Text(_checkingOfflineReadiness
+              ? 'Conferindo arquivos locais…' : 'Verificar preparação offline'),
+        ),
+        if (_checkingOfflineReadiness) const LinearProgressIndicator(),
+        if (report != null) ...[
+          const SizedBox(height: 8),
+          Text(report.needsReview
+              ? 'Há itens a revisar antes da viagem.'
+              : 'Nenhuma pendência básica encontrada; teste os mapas e paradas na prática.',
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          Text('MBTiles presentes: ${report.availableMaps} '
+              '· ausentes/inacessíveis: ${report.missingMapFiles}'),
+          Text('Amostras da rota nos limites declarados: '
+              '${report.samplesWithinMapBounds}/${report.routeSamples} '
+              '· desconhecidas: ${report.samplesWithUnknownCoverage} '
+              '· fora dos limites: ${report.samplesOutsideAvailableBounds}'),
+          Text('Pacotes de pontos: ${report.offlinePoiPackages} '
+              '· apoios próximos identificados: ${report.offlinePoisNearRoute} '
+              '· localidades guardadas na viagem: ${report.savedItineraryPlaces}'),
+          Text('Etapas com conferência manual válida: '
+              '${report.stagesWithManualChecks}/${report.stages} '
+              '· pernoites intermediários pendentes: '
+              '${report.intermediateStopsWithoutOvernightCheck}'),
+          if (report.warnings.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            for (final warning in report.warnings)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Icon(Icons.warning_amber_outlined, size: 17),
+                  const SizedBox(width: 6),
+                  Expanded(child: Text(warning, style: const TextStyle(fontSize: 12))),
+                ]),
+              ),
+          ],
+          const SizedBox(height: 5),
+          Text('Verificado ${report.checkedAt.toLocal().day}/'
+              '${report.checkedAt.toLocal().month} às '
+              '${report.checkedAt.toLocal().hour.toString().padLeft(2, '0')}:'
+              '${report.checkedAt.toLocal().minute.toString().padLeft(2, '0')}. '
+              'Amostragem e retângulos geográficos não garantem tiles em todos '
+              'os zooms, acesso por estrada, água ou hospedagem. '
+              'Repetir após modificar a viagem ou os mapas.',
+              style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ]),
+    ));
+  }
+
   Widget _metric(String title, String value, IconData icon) => Column(children: [
     Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
     const SizedBox(height: 3),
@@ -1566,6 +1719,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       points.last,
     ];
     final offlinePois = _offlinePoisOnRoute(route);
+    final stageStops = _plan(trip).days;
     final provider = _previewOfflineTileProvider;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
@@ -1633,6 +1787,33 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                     ),
                   ),
               ]),
+            // Marcação dos finais de etapa usando dados da própria viagem.
+            // Corresponde ao plano atual; não pressupõe pernoite disponível.
+            if (stageStops.length > 1)
+              MarkerLayer(markers: [
+                for (final day in stageStops.take(80))
+                  if (day.day < stageStops.length)
+                    Marker(
+                      point: LatLng(day.stopLatitude, day.stopLongitude),
+                      width: 35, height: 35,
+                      child: Tooltip(
+                        message: 'Dia ${day.day}: ${day.stopLabel} '
+                            '${day.usesKnownPlace ? '(local candidato)' : '(parada aproximada)'}',
+                        child: InkWell(
+                          onTap: () => _notify('Parada do dia ${day.day}: '
+                              '${day.stopLabel}. Confirme acesso e segurança.'),
+                          child: CircleAvatar(
+                            radius: 14,
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                            child: Text('${day.day}', style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold, fontSize: 12,
+                            )),
+                          ),
+                        ),
+                      ),
+                    ),
+              ]),
             MarkerLayer(markers: [
               Marker(point: points.first, width: 32, height: 32,
                   child: const Icon(Icons.trip_origin_rounded,
@@ -1651,6 +1832,175 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     );
   }
 
+  TripStopCheck? _checkForDay(PlannedBikeTrip trip, int day) {
+    for (final check in trip.stopChecks) {
+      if (check.routeIndex == trip.selectedIndex && check.day == day) {
+        return check;
+      }
+    }
+    return null;
+  }
+
+  /// A anotação é persistida imediatamente, mesmo se a viagem ainda não
+  /// estiver na biblioteca. Não requer GPS, permissões ou conexão de rede.
+  Future<void> _editStopCheck(BikeTripDayPlan day, PlannedBikeTrip trip) async {
+    if (_libraryReadFailed || _busy) {
+      _notify('Biblioteca offline indisponível. Nenhuma anotação foi alterada.');
+      return;
+    }
+    final previous = _checkForDay(trip, day.day);
+    final valid = previous?.matches(stage: day,
+        selectedRouteIndex: trip.selectedIndex) ?? false;
+    var access = valid && previous!.accessChecked;
+    var water = valid && previous!.waterChecked;
+    var overnight = valid && previous!.overnightChecked;
+    final notesController = TextEditingController(text: valid ? previous!.notes : '');
+    final TripStopCheck? edited;
+    try {
+      edited = await showDialog<TripStopCheck>(
+        context: context,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (dialogContext, updateDialog) => AlertDialog(
+            title: Text('Conferir parada · dia ${day.day}'),
+            content: SingleChildScrollView(child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(day.stopLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text('Km ${(day.endDistanceMeters / 1000).toStringAsFixed(1)} da rota. '
+                    'Marque apenas informações verificadas pessoalmente.'),
+                if (previous != null && !valid)
+                  const Padding(padding: EdgeInsets.only(top: 8),
+                    child: Text('A etapa mudou. A conferência anterior está desatualizada; '
+                        'revise cada item para esta nova parada.',
+                        style: TextStyle(fontSize: 12))),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Acesso pela via conferido'),
+                  value: access,
+                  onChanged: (value) => updateDialog(() => access = value ?? false),
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Água conferida'),
+                  value: water,
+                  onChanged: (value) => updateDialog(() => water = value ?? false),
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Pernoite conferido'),
+                  value: overnight,
+                  onChanged: (value) => updateDialog(() => overnight = value ?? false),
+                ),
+                TextField(
+                  controller: notesController,
+                  maxLength: 500,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Notas offline',
+                    hintText: 'Ex.: telefone, horário, fonte da confirmação',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const Text('A marcação é manual, não garante serviço disponível '
+                    'na data da passagem. As notas entram no JSON exportado.',
+                    style: TextStyle(fontSize: 12)),
+              ],
+            )),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              if (previous != null)
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext, TripStopCheck(
+                    day: day.day,
+                    routeIndex: trip.selectedIndex,
+                    endDistanceMeters: day.endDistanceMeters,
+                    latitude: day.stopLatitude,
+                    longitude: day.stopLongitude,
+                    checkedAt: DateTime.now(),
+                  )),
+                  child: const Text('Limpar'),
+                ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, TripStopCheck(
+                  day: day.day,
+                  routeIndex: trip.selectedIndex,
+                  endDistanceMeters: day.endDistanceMeters,
+                  latitude: day.stopLatitude,
+                  longitude: day.stopLongitude,
+                  checkedAt: DateTime.now(),
+                  accessChecked: access,
+                  waterChecked: water,
+                  overnightChecked: overnight,
+                  notes: notesController.text.trim(),
+                )),
+                child: const Text('Salvar no aparelho'),
+              ),
+            ],
+          ),
+        ),
+      );
+    } finally {
+      notesController.dispose();
+    }
+    if (edited == null || !mounted) {
+      return;
+    }
+    final current = _draft;
+    if (current == null || current.id != trip.id ||
+        current.selectedIndex != trip.selectedIndex ||
+        day.day > _plan(current).days.length ||
+        !_isSameStop(_plan(current).days[day.day - 1], day)) {
+      _notify('A rota ou a parada mudou. Reabra a conferência antes de salvar.');
+      return;
+    }
+    final updatedChecks = <TripStopCheck>[
+      for (final check in current.stopChecks)
+        if (check.day != day.day || check.routeIndex != current.selectedIndex) check,
+      if (edited.hasDetails) edited,
+    ];
+    // Nenhuma anotação nova deve sumir silenciosamente por corte no JSON.
+    if (updatedChecks.length > 400) {
+      _notify('Limite de 400 conferências: remova um registro antigo antes de salvar.');
+      return;
+    }
+    // A biblioteca salva 40 viagens. Não expulsa uma viagem antiga apenas
+    // porque o usuário quis anotar a parada de um rascunho novo.
+    if (!_saved.any((saved) => saved.id == current.id) &&
+        _saved.length >= PlannedBikeTripService.maximumTrips) {
+      _notify('Biblioteca cheia (40 viagens). Exclua uma viagem conscientemente antes de salvar.');
+      return;
+    }
+    final updated = current.copyWith(
+        stopChecks: List<TripStopCheck>.unmodifiable(updatedChecks));
+    try {
+      await _library.upsert(updated);
+      final refreshed = await _library.load();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _saved = refreshed;
+        if (identical(_draft, current)) {
+          _draft = updated;
+        }
+      });
+      _notify(edited.hasDetails ? 'Conferência salva no aparelho para consulta offline.'
+          : 'Conferência removida do armazenamento local.');
+    } catch (_) {
+      _notify('Não foi possível salvar a conferência. Nenhum registro anterior foi apagado.');
+    }
+  }
+
+  bool _isSameStop(BikeTripDayPlan current, BikeTripDayPlan previous) =>
+      current.day == previous.day &&
+      (current.endDistanceMeters - previous.endDistanceMeters).abs() <= 250 &&
+      (current.stopLatitude - previous.stopLatitude).abs() <= 0.00005 &&
+      (current.stopLongitude - previous.stopLongitude).abs() <= 0.00005;
+
   Widget _dayCard(BikeTripDayPlan day, PlannedBikeTrip trip, TripDayTerrain terrain) {
     final schedule = BikeTripSchedule.forDay(
       day: day,
@@ -1660,13 +2010,23 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       lunchDurationMinutes: trip.lunchMinutes,
       forceLunch: trip.forceLunch,
     );
+    final savedCheck = _checkForDay(trip, day.day);
+    final checkValid = savedCheck?.matches(
+        stage: day, selectedRouteIndex: trip.selectedIndex) ?? false;
     final notices = TripDayReadinessService.notices(
       day: day, schedule: schedule,
       targetRidingHours: trip.ridingHoursPerDay,
       latestArrivalMinute: trip.latestArrivalMinute,
       terrain: terrain,
       minutesPer100Meters: trip.climbReserveMinutesPer100m,
+      overnightManuallyChecked: checkValid && savedCheck?.overnightChecked == true,
+      accessManuallyChecked: checkValid && savedCheck?.accessChecked == true,
     );
+    final checkedItems = <String>[
+      if (checkValid && savedCheck?.accessChecked == true) 'acesso',
+      if (checkValid && savedCheck?.waterChecked == true) 'água',
+      if (checkValid && savedCheck?.overnightChecked == true) 'pernoite',
+    ];
     final climbReserve = TripEffortReserveService.reserveMinutes(
       terrain: terrain, minutesPer100Meters: trip.climbReserveMinutesPer100m,
     );
@@ -1675,6 +2035,12 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       title: Text('Dia ${day.day} · ${(day.distanceMeters / 1000).toStringAsFixed(1)} km'),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(day.stopLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
+        Text(savedCheck == null ? 'Parada ainda não conferida'
+            : checkValid ? 'Conferência manual salva offline'
+            : 'Conferência antiga: parada alterada, revisar',
+            style: TextStyle(fontSize: 12, color: checkValid
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.error)),
         if (notices.isNotEmpty)
           Text('${notices.length} aviso(s) para revisar',
               style: TextStyle(color: Theme.of(context).colorScheme.error,
@@ -1712,6 +2078,26 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
               '(estimativa das altitudes do provedor).')
         else
           const Text('Desnível nesta etapa: indisponível (sem perfil altimétrico).'),
+        const SizedBox(height: 6),
+        Row(children: [
+          Expanded(child: Text(checkValid
+              ? (checkedItems.isEmpty
+                  ? 'Anotação salva, sem serviços conferidos.'
+                  : 'Conferido por você: ${checkedItems.join(' · ')}')
+              : 'Sem serviços conferidos para esta parada.',
+              style: Theme.of(context).textTheme.bodySmall)),
+          TextButton.icon(
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            onPressed: () => unawaited(_editStopCheck(day, trip)),
+            label: const Text('Conferir'),
+          ),
+        ]),
+        if (checkValid && savedCheck!.notes.isNotEmpty)
+          Text('Nota offline: ${savedCheck?.notes ?? ''}',
+              style: Theme.of(context).textTheme.bodySmall),
+        if (savedCheck != null && !checkValid)
+          const Text('Registro de outra posição/etapa: precisa ser conferido novamente.',
+              style: TextStyle(fontSize: 12)),
         const SizedBox(height: 5),
         _weatherDayLine(day.day, trip),
         const SizedBox(height: 5),
@@ -1737,9 +2123,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         leading: const Icon(Icons.directions_bike_rounded),
         title: Text('${trip.origin.title} → ${trip.destination.title}', maxLines: 2),
         subtitle: Text('${(trip.selectedRoute.distanceMeters / 1000).toStringAsFixed(1)} km · '
-            '${_planner.estimate(distanceMeters: trip.selectedRoute.distanceMeters,
-              preferences: BikeTravelPreferences(averageSpeedKmh: trip.averageSpeedKmh,
-                ridingHoursPerDay: trip.ridingHoursPerDay)).dayCount} dia(s) · offline'),
+            '${_plan(trip).estimate.dayCount} dia(s) · offline'),
         onTap: () => _loadTrip(trip),
         trailing: IconButton(
           tooltip: 'Excluir viagem', icon: const Icon(Icons.delete_outline_rounded),

@@ -1,3 +1,29 @@
+# Arquitetura — Vigia IA 1.0.363+363 (preparação offline sob demanda)
+
+`TripOfflineReadinessService.inspect` é um diagnóstico assíncrono chamado somente por toque no Planejamento. Não busca GPS, não usa rede e não altera a biblioteca ou o manifesto dos mapas. A sonda de arquivo consulta apenas `File.stat` para checar tipo/tamanho; testes podem injetar `mapProbe` sem I/O. Arquivos ausentes/zerados não contam para cobertura. Os limites geográficos registrados nos MBTiles são usados somente como **evidência parcial de cobertura**: a união dos retângulos é comparada a até 121 amostras da rota interpoladas por distância. Sem bounds => desconhecido; bounds cobertos => apenas dentro dos retângulos, sem prova de tiles reais ou zoom disponível. Regras de cache Stadia mantidas.
+
+A checagem de apoios usa unicamente `RouteExplorerService.offlinePackages`, pré-filtra a caixa da rota e encontra POIs num corredor geométrico de 2,5 km, com limite de 1.200 candidatos e 300 resultados. O limite explícito evita processamento ilimitado e relatórios enganosamente completos. Localidades persistidas em `PlannedBikeTrip.places` contam separadamente, sem exigir rede. A checagem de pernoites valida cada `TripStopCheck.matches` com a etapa e a alternativa atuais, nunca reutilizando conferências de paradas alteradas.
+
+O relatório fica somente em memória na tela e é associado por identidade ao objeto imutável `PlannedBikeTrip`, evitando mostrar diagnóstico antigo depois de editar a viagem. Ao tocar novamente, os arquivos são inspecionados de novo. Nenhum arquivo é apagado, nenhum novo pacote é baixado e nenhuma conclusão equivale a certificado de segurança da rota. A renderização da prévia e os módulos de câmeras/IA/ESP32 permanecem independentes.
+
+# Arquitetura — Vigia IA 1.0.362+362 (conferência manual de paradas)
+
+O modelo `TripStopCheck` é imutável e não acessa rede/GPS. Inclui dia, alternativa de rota, distância acumulada e posição da parada, três campos opcionais de conferência manual (acesso, água e pernoite), observações e horário de atualização. `matches(stage, selectedRouteIndex)` invalida visualmente anotações que deixaram de corresponder à etapa (mudança de roteiro/cidades/posição); **não apaga** o registro anterior, que poderá ser reeditado ou limpo. A comparação usa tolerâncias de 250 m em distância acumulada e 0,00005 grau em lat/lon para não vincular registros a outra parada.
+
+A tela de Planejamento abre diálogo material com opções inicialmente desmarcadas, salva/limpa via `PlannedBikeTripService.upsert`, que usa fila de operações e renomeação atômica de arquivo. Atualiza a biblioteca após leitura para confirmar gravação; não anuncia sucesso quando houve falha. Não ativa GPS, câmeras nem HTTP. Reaproveita a viagem imutável e a divisão existente. O contador mostra apenas etapas com vínculos válidos; registros desatualizados recebem aviso em vez de sinalizar disponibilidade.
+
+O JSON de viagem mantém `schema: 1`, adiciona apenas campo `stopChecks` opcional, limitado a 400 entradas (dias 1–730) e 500 caracteres em notas. A importação tolera dados individuais inválidos sem perder geometria ou o restante da viagem. Exportações JSON incluem notas **sem criptografia de arquivo**; GPX não as contém. Este recurso é pessoal, não é auditoria externa nem prova de água, hospedagem ou segurança.
+
+# Arquitetura — Vigia IA 1.0.361+361 (divisão inteligente dos dias)
+
+O `TripStageEffortProfile` constrói vetores cumulativos monotônicos de distância e segundos estimados usando velocidade configurada e **somente** ganho de altitude válido entre vértices adjacentes. A reserva de minutos por 100 m é escolhida pelo usuário. Duas buscas binárias permitem mapear distância ↔ tempo estimado sem repetir cálculos de relevo para cada etapa. Altitude ausente não é interpolada nem inferida.
+
+O `BikeTripPlanner.buildPlan` preserva o algoritmo anterior quando `smartStages=false`. Quando ativo, calcula a quantidade de etapas por tempo de pedal simulado e adapta o ponto de corte ao esforço restante; procura candidatos num corredor de 1,5 km geométricos, exige segmento abaixo do limite de horas e não permite que a escolha sobrecarregue os dias restantes. A aproximação não comprova passagem, serviços ou acesso pela via. Sem local compatível, seleciona coordenadas da rota e marca parada não confirmada. O `PlannedBikeTrip.smartStages` é opcional no JSON, com valor padrão `true`; viagens antigas podem desativá-lo sem reexportação obrigatória. A tela armazena resultados em `Expando<BikeTripPlan>` por objeto imutável, evitando recomputações em rebuilds.
+
+A prévia de mapa desenha marcadores numerados de fim de etapa a partir do plano calculado, limitando a 80 para conter o custo visual.
+
+A simulação não modela tráfego, qualidade da via, vento, capacidade física, horário do sol ou hospedagem; o painel continua com avisos independentes de horário e cobertura de altitude. Consultas climáticas são manuais e as previsões antigas são descartadas quando as cidades/limites mudam. O modo inteligente opera sem GPS, chamadas HTTP nem download de mapas.
+
 # Arquitetura — Vigia IA 1.0.360+360 (cenários de esforço e viabilidade por etapa)
 
 O `TripEffortReserveService` transforma uma preferência explícita do usuário (minutos adicionais a cada 100 m de subida documentada) em uma simulação de duração por etapa. Ele consome apenas o `TripTerrainService.forDays` e não cria altitude nem extrapola para trechos sem amostras. A reserva é uma margem hipotética, **não** estimativa física nem velocidade medida; a quantidade de dias permanece calculada pelo modelo base. O `TripDayReadinessService` sinaliza horas de pedal acima da preferência diária, chegada depois do limite pessoal e paradas sem confirmação, sem estimar nascer/pôr do sol.

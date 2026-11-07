@@ -1,4 +1,31 @@
-**Versão atual:** `1.0.360+360`
+**Versão atual:** `1.0.363+363`
+
+## 1.0.363 — Auditoria de preparação offline da cicloviagem
+
+- Em **Planejamento → Preparação offline antes de sair**, toque em **Verificar preparação offline** para executar diagnóstico 100% local sem GPS, internet, download ou serviço de fundo.
+- Confere se cada MBTiles cadastrado existe como arquivo não vazio, detecta mapa ausente/inacessível e aviso de expiração do cache conforme metadados. Não modifica nem apaga arquivos.
+- Amostra a geometria do trajeto em até 121 pontos espaçados por distância e compara com a **união** dos limites geográficos declarados dos mapas disponíveis, apontando possíveis lacunas e dias afetados. MBTiles sem bounds produz **cobertura desconhecida**, nunca falsamente garantida. Não abre/verifica cada tile e zoom; a porcentagem dos bounds é apenas triagem.
+- Verifica pacotes de POI **já salvos** e encontra até 300 apoios dentro de 2,5 km geométricos do corredor, limitando a análise a 1.200 candidatos para conter uso de CPU; contabiliza também as localidades persistidas no itinerário da viagem.
+- Calcula quantas etapas possuem **conferência manual válida** e quantos pernoites intermediários ainda precisam de confirmação. Registros antigos vinculados a outra parada não contam.
+- Resultado em tela, sob demanda e associado à instância atual da viagem; alterações no planejamento exigem nova verificação. O relatório não é persistido nem cria falsas garantias de acesso, água, hospedagem ou dados cartográficos completos.
+- Flutter SDK não disponível localmente: `flutter analyze`, `flutter test` e build Android devem ser executados no GitHub Actions.
+
+## 1.0.362 — Conferência manual de paradas para uso offline
+
+- Cada etapa do Planejamento permite anotar **acesso conferido, água conferida, pernoite conferido** e observações locais de até 500 caracteres. Todos os itens começam desmarcados; estar perto da linha da rota não implica serviço disponível.
+- Ao tocar **Salvar no aparelho**, a anotação é persistida imediatamente na biblioteca local, mesmo que o roteiro ainda não tenha sido salvo manualmente. Não liga GPS, não pede internet e não consulta serviços remotos.
+- A conferência fica ligada ao dia, à alternativa selecionada, à distância acumulada e às coordenadas do local sugerido. Ao mudar a rota/divisão dos dias, os registros antigos são mantidos para referência, porém ficam marcados para revisão em vez de serem indevidamente reutilizados.
+- Compatibilidade de JSON: `stopChecks` é opcional; viagens antigas continuam abrindo. O limite é de 400 registros, aceitando dias numerados até 730. Registros individuais inválidos são descartados sem perder a rota. Exportação JSON inclui observações em texto simples; exportação GPX contém só trilha e waypoints básicos.
+- A contagem de etapas com conferência válida é exibida ao lado dos avisos. Informações são **marcadas pelo usuário**, sem verificação oficial de acesso, água ou vagas. CI Flutter/Android necessário para compilar.
+
+## 1.0.361 — Divisão inteligente de etapas e paradas offline
+
+- No Planejamento, a opção **Divisão inteligente dos dias** (ativada para novos roteiros, reversível) distribui as etapas por tempo de pedal estimado e pela reserva configurada para subidas documentadas, quando o provedor fornece altitudes por vértice.
+- O algoritmo usa esforço acumulado para definir pontos de corte e evitar escolher localidades que excedam o orçamento de pedal do dia ou tornem os dias restantes inviáveis pelo mesmo limite. Cidades e pontos de apoio são **candidatos**, jamais pernoites, água ou acesso garantidos. Sem candidato adequado, registra parada aproximada sem confirmação.
+- A quantidade de dias é recalculada no modo inteligente; a alternativa tradicional permanece disponível. Sem perfil de elevação ou com reserva 0, não se inventa esforço adicional.
+- A prévia exibe marcadores numerados de final de etapa (até 80) e diferencia candidatos de paradas aproximadas; nenhum é tratado como hospedagem confirmada.
+- Modo offline: só lê geometria, altitudes e locais já disponíveis na viagem. Não liga GPS nem faz consultas de rede; consulta de clima permanece manual e é invalidada se o itinerário mudar.
+- Mantidos mapas MBTiles, câmeras, sensores, APIs e políticas de cache. Os novos campos são opcionais no JSON; viagens antigas continuam abrindo. **Requer build Flutter/Android no CI**.
 
 ## 1.0.360 — Reserva de subida e avaliação de etapas
 

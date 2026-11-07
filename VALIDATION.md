@@ -1,3 +1,15 @@
+# Validação Vigia IA 1.0.363+363
+
+Ver `VALIDATION-1.0.363.md` para os contratos da preparação offline sob demanda. `flutter analyze`, `flutter test` e compilação Android dependem de SDK instalado no CI.
+
+# Validação Vigia IA 1.0.362+362
+
+Ver `VALIDATION-1.0.362.md` para contratos e regressões de checklists offline. O SDK Flutter/Dart não está instalado localmente; `flutter analyze`, `flutter test` e build Android exigem GitHub Actions.
+
+# Validação Vigia IA 1.0.361+361
+
+Consultar `VALIDATION-1.0.361.md` para regressões da divisão dos dias, sem previsão física nem serviços garantidos. `flutter analyze`, `flutter test` e build Android requerem CI com SDK Flutter, ausente no ambiente local.
+
 # Validação Vigia IA 1.0.360+360
 
 Consultar `VALIDATION-1.0.360.md` para regressões de reserva por elevação, horários e persistência. Análise Dart e compilação Android dependem do Flutter SDK/CI.

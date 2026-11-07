@@ -77,8 +77,38 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.360',
+          version: '1.0.363',
           current: true,
+          changes: [
+            'Auditoria local de mapas, pontos e paradas antes de sair sem internet.',
+            'Avisa onde os limites dos mapas não cobrem o traçado e quais arquivos faltam.',
+            'Diagnóstico sob demanda, sem GPS e sem afirmar que todos os tiles existem.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.362',
+          current: false,
+          changes: [
+            'Conferência manual por parada: acesso, água, pernoite e notas offline.',
+            'Registros salvos imediatamente; aviso quando a posição ou a etapa mudar.',
+            'Exportação JSON mantém as notas e aceita viagens antigas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.361',
+          current: false,
+          changes: [
+            'Distribuição opcional dos dias por esforço estimado, com reserva para subidas documentadas.',
+            'Paradas próximas e limite de pedal considerados para não sobrecarregar os demais dias.',
+            'Funciona offline e permite retornar à divisão tradicional.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.360',
+          current: false,
           changes: [
             'Reserva opcional de minutos por subida com perfil de altitude real.',
             'Alertas de tempo excedido, chegada tardia e pernoite não confirmado.',
@@ -3124,8 +3154,38 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.360',
+          version: '1.0.363',
           current: true,
+          changes: [
+            'Auditoria local de mapas, pontos e paradas antes de sair sem internet.',
+            'Avisa onde os limites dos mapas não cobrem o traçado e quais arquivos faltam.',
+            'Diagnóstico sob demanda, sem GPS e sem afirmar que todos os tiles existem.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.362',
+          current: false,
+          changes: [
+            'Conferência manual por parada: acesso, água, pernoite e notas offline.',
+            'Registros salvos imediatamente; aviso quando a posição ou a etapa mudar.',
+            'Exportação JSON mantém as notas e aceita viagens antigas.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.361',
+          current: false,
+          changes: [
+            'Distribuição opcional dos dias por esforço estimado, com reserva para subidas documentadas.',
+            'Paradas próximas e limite de pedal considerados para não sobrecarregar os demais dias.',
+            'Funciona offline e permite retornar à divisão tradicional.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.360',
+          current: false,
           changes: [
             'Reserva opcional de minutos por subida com perfil de altitude real.',
             'Alertas de tempo excedido, chegada tardia e pernoite não confirmado.',

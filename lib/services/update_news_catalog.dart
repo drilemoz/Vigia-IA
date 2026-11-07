@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.360', build: 360);
+      AppBuildVersion(version: '1.0.363', build: 363);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.360', build: 360),
+      version: AppBuildVersion(version: '1.0.363', build: 363),
       changes: <String>[
-        'Reserva opcional de tempo por 100 m de subida com dados altimétricos disponíveis, sem extrapolar lacunas.',
-        'Avisos por dia de pedal acima do limite, chegada tardia e parada sem confirmação.',
-        'Preferências salvas com a viagem e horário da consulta manual de clima ajustado à simulação.',
+        'Conferência de preparação offline sob demanda no Planejamento, sem GPS nem internet.',
+        'Avisa sobre arquivos MBTiles ausentes, trechos fora dos limites declarados e apoios locais encontrados.',
+        'Mostra pernoites e paradas ainda não verificados; não confunde cobertura estimada com tiles testados.', 
       ],
     ),
   ]);

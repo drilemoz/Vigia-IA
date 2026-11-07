@@ -5,6 +5,7 @@ import 'map_destination_search.dart';
 import 'map_navigation_target.dart';
 import 'map_travel_mode.dart';
 import 'trip_weather_day_forecast.dart';
+import 'trip_stop_check.dart';
 import '../services/saved_bike_route_service.dart';
 
 /// Viagem preparada, sem vincular a origem ao GPS nem iniciar navegação.
@@ -24,12 +25,14 @@ class PlannedBikeTrip {
     required this.breakMinutes,
     required this.lunchMinutes,
     this.balanceDays = true,
+    this.smartStages = true,
     this.forceLunch = false,
     this.climbReserveMinutesPer100m = 0,
     this.latestArrivalMinute = 18 * 60,
     this.places = const <MapDestinationSearchResult>[],
     this.startDate,
     this.weatherDays = const <TripWeatherDayForecast>[],
+    this.stopChecks = const <TripStopCheck>[],
   });
 
   final String id;
@@ -45,6 +48,8 @@ class PlannedBikeTrip {
   final int breakMinutes;
   final int lunchMinutes;
   final bool balanceDays;
+  /// Distribui os dias por esforço estimado e procura apoios no corredor.
+  final bool smartStages;
   final bool forceLunch;
   /// Tempo extra escolhido pelo usuário a cada 100 m de subida documentada.
   /// Zero mantém a estimativa anterior, sem alteração de velocidade.
@@ -56,6 +61,8 @@ class PlannedBikeTrip {
   final DateTime? startDate;
   /// Última previsão obtida manualmente, legível offline com data/hora.
   final List<TripWeatherDayForecast> weatherDays;
+  /// Registros locais preenchidos pelo ciclista. Não significam serviço oficial.
+  final List<TripStopCheck> stopChecks;
 
   MapCyclingRoute get selectedRoute => routes[selectedIndex];
 
@@ -65,6 +72,7 @@ class PlannedBikeTrip {
     DateTime? startDate,
     bool clearStartDate = false,
     List<TripWeatherDayForecast>? weatherDays,
+    List<TripStopCheck>? stopChecks,
     double? averageSpeedKmh,
     double? ridingHoursPerDay,
     int? departureMinute,
@@ -72,6 +80,7 @@ class PlannedBikeTrip {
     int? breakMinutes,
     int? lunchMinutes,
     bool? balanceDays,
+    bool? smartStages,
     bool? forceLunch,
     int? climbReserveMinutesPer100m,
     int? latestArrivalMinute,
@@ -85,12 +94,14 @@ class PlannedBikeTrip {
     breakMinutes: breakMinutes ?? this.breakMinutes,
     lunchMinutes: lunchMinutes ?? this.lunchMinutes,
     balanceDays: balanceDays ?? this.balanceDays,
+    smartStages: smartStages ?? this.smartStages,
     forceLunch: forceLunch ?? this.forceLunch,
     climbReserveMinutesPer100m: climbReserveMinutesPer100m ?? this.climbReserveMinutesPer100m,
     latestArrivalMinute: latestArrivalMinute ?? this.latestArrivalMinute,
     places: places ?? this.places,
     startDate: clearStartDate ? null : startDate ?? this.startDate,
     weatherDays: weatherDays ?? this.weatherDays,
+    stopChecks: stopChecks ?? this.stopChecks,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -116,12 +127,14 @@ class PlannedBikeTrip {
     'breakMinutes': breakMinutes,
     'lunchMinutes': lunchMinutes,
     'balanceDays': balanceDays,
+    'smartStages': smartStages,
     'forceLunch': forceLunch,
     'climbReserveMinutesPer100m': climbReserveMinutesPer100m,
     'latestArrivalMinute': latestArrivalMinute,
     'places': [for (final place in places.take(100)) place.toJson()],
     'startDate': startDate?.toIso8601String(),
     'weatherDays': [for (final forecast in weatherDays.take(16)) forecast.toJson()],
+    'stopChecks': [for (final check in stopChecks.take(400)) check.toJson()],
   };
 
   factory PlannedBikeTrip.fromJson(Map<String, dynamic> json) {
@@ -154,6 +167,27 @@ class PlannedBikeTrip {
         }
       }
     }
+    // Conferências são opcionais: descarta apenas entradas inválidas, sem
+    // bloquear a abertura de viagens antigas nem apagar a geometria salva.
+    final stopChecks = <TripStopCheck>[];
+    final rawChecks = json['stopChecks'];
+    if (rawChecks is List) {
+      final used = <String>{};
+      for (final item in rawChecks.take(400)) {
+        if (item is! Map) {
+          continue;
+        }
+        try {
+          final check = TripStopCheck.fromJson(Map<String, dynamic>.from(item));
+          final key = '${check.routeIndex}:${check.day}';
+          if (used.add(key)) {
+            stopChecks.add(check);
+          }
+        } catch (_) {
+          // Corrupção isolada de checklist não invalida a viagem.
+        }
+      }
+    }
     final parsedDate = json['startDate'] is String
         ? DateTime.tryParse(json['startDate'] as String) : null;
     final origin = MapDestinationSearchResult.fromJson(
@@ -178,6 +212,7 @@ class PlannedBikeTrip {
       breakMinutes: ((json['breakMinutes'] as num?)?.toInt() ?? 10).clamp(0, 60).toInt(),
       lunchMinutes: ((json['lunchMinutes'] as num?)?.toInt() ?? 40).clamp(0, 120).toInt(),
       balanceDays: json['balanceDays'] is bool ? json['balanceDays'] as bool : true,
+      smartStages: json['smartStages'] is bool ? json['smartStages'] as bool : true,
       forceLunch: json['forceLunch'] == true,
       climbReserveMinutesPer100m:
           (json['climbReserveMinutesPer100m'] is num &&
@@ -191,6 +226,7 @@ class PlannedBikeTrip {
       places: List<MapDestinationSearchResult>.unmodifiable(places),
       startDate: parsedDate,
       weatherDays: List<TripWeatherDayForecast>.unmodifiable(forecastDays),
+      stopChecks: List<TripStopCheck>.unmodifiable(stopChecks),
     );
   }
 }
