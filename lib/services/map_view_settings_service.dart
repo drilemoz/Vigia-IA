@@ -114,6 +114,7 @@ class MapViewSettingsService extends ChangeNotifier {
   bool _bikeUseHistoricalSpeed = false;
   bool _navigationVoiceEnabled = true;
   bool _weatherVoiceEnabled = true;
+  bool _tripPreviewOnlineBaseMap = true;
   bool _initialized = false;
   File? _file;
 
@@ -133,6 +134,7 @@ class MapViewSettingsService extends ChangeNotifier {
   bool get bikeUseHistoricalSpeed => _bikeUseHistoricalSpeed;
   bool get navigationVoiceEnabled => _navigationVoiceEnabled;
   bool get weatherVoiceEnabled => _weatherVoiceEnabled;
+  bool get tripPreviewOnlineBaseMap => _tripPreviewOnlineBaseMap;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -158,6 +160,7 @@ class MapViewSettingsService extends ChangeNotifier {
           final bikeUseHistoricalSpeed = map['bikeUseHistoricalSpeed'];
           final navigationVoiceEnabled = map['navigationVoiceEnabled'];
           final weatherVoiceEnabled = map['weatherVoiceEnabled'];
+          final tripPreviewOnlineBaseMap = map['tripPreviewOnlineBaseMap'];
           _provider = MapProvider.values.firstWhere(
             (value) => value.name == providerName,
             orElse: () => MapProvider.current,
@@ -193,6 +196,7 @@ class MapViewSettingsService extends ChangeNotifier {
           _bikeUseHistoricalSpeed = bikeUseHistoricalSpeed as bool? ?? false;
           _navigationVoiceEnabled = navigationVoiceEnabled as bool? ?? true;
           _weatherVoiceEnabled = weatherVoiceEnabled as bool? ?? true;
+          _tripPreviewOnlineBaseMap = tripPreviewOnlineBaseMap as bool? ?? true;
         }
       } catch (_) {
         _provider = MapProvider.current;
@@ -208,6 +212,7 @@ class MapViewSettingsService extends ChangeNotifier {
         _bikeUseHistoricalSpeed = false;
         _navigationVoiceEnabled = true;
         _weatherVoiceEnabled = true;
+        _tripPreviewOnlineBaseMap = true;
       }
     }
     _initialized = true;
@@ -277,6 +282,14 @@ class MapViewSettingsService extends ChangeNotifier {
     await _persist();
   }
 
+  Future<void> setTripPreviewOnlineBaseMap(bool value) async {
+    if (!_initialized) await initialize();
+    if (_tripPreviewOnlineBaseMap == value) return;
+    _tripPreviewOnlineBaseMap = value;
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> setWeatherVoiceEnabled(bool value) async {
     if (!_initialized) await initialize();
     if (_weatherVoiceEnabled == value) return;
@@ -331,6 +344,7 @@ class MapViewSettingsService extends ChangeNotifier {
         'bikeUseHistoricalSpeed': _bikeUseHistoricalSpeed,
         'navigationVoiceEnabled': _navigationVoiceEnabled,
         'weatherVoiceEnabled': _weatherVoiceEnabled,
+        'tripPreviewOnlineBaseMap': _tripPreviewOnlineBaseMap,
       }),
       flush: true,
     );

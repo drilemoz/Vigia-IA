@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.375+375
+
+Ver `VALIDATION-1.0.375.md` para correções dos limites e testes de regressão. Sem SDK Flutter local: `flutter analyze`, `flutter test` e APK dependem da execução no CI.
+
 # Validação Vigia IA 1.0.374+374
 
 Ver `VALIDATION-1.0.374.md` para os testes do assistente, metas de quilômetros, limites e compatibilidade. Flutter SDK não disponível neste ambiente; `flutter analyze`, `flutter test` e build Android pendentes do GitHub Actions.

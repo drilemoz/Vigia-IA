@@ -1,3 +1,11 @@
+## 1.0.375+375 — Correções do planejamento (09/11/2026)
+
+- Previne dias negativos e regressão de quilometragem quando sugestões de paradas ultrapassam a meta.
+- Meta em quilômetros valida tempo-base, limite diário de pedal, pausas/almoço e hora máxima de chegada antes da rota; reserva de relevo real continua indicada na prévia.
+- Calendário pós-planejamento impede alterar a partida para um instante passado.
+- Lupa de origem/destino abre a pesquisa em tela cheia; controle online do mapa-base persiste no JSON local.
+- Cancelamento e falha ao calcular restauram os campos anteriores sem apagar a rota aberta. Testes Dart e Python acrescentados.
+
 ## 1.0.374+374 — Assistente de cicloviagem em 3 etapas (09/11/2026)
 
 - Destino → Programação (data futura, saída, pausas, almoço, limite) → Ritmo e metas.

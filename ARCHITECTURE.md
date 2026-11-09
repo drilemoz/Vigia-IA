@@ -1,4 +1,11 @@
-# Arquitetura — Vigia IA 1.0.374+374 (assistente em três etapas e metas de distância)
+# Arquitetura — Vigia IA 1.0.375+375 (limites e continuidade do planejamento)
+
+## Correções 1.0.375
+
+- `BikeTripPlanner.buildPlan`: limites de avanço e reserva mínima de espaço para etapas futuras; filtragem de candidatos por teto de pedal e viabilidade dos dias restantes no modo distância. A divisão de meta não inventa apoios nem supõe segurança de paradas.
+- `TripDistanceGoalSafety`: verificação determinística antes do roteamento, usando o mesmo `BikeTripSchedule` para as pausas e refeição; altitude e outras incertezas são analisadas na prévia.
+- `TripPlanningScreen`: fluxos de data no assistente e no clima bloqueiam partidas passadas, pesquisa pela lupa abre campo acima do teclado; cancelar ou falhar restaura todo estado da edição.
+- `MapViewSettingsService`: `tripPreviewOnlineBaseMap` persiste junto às demais preferências locais, com fallback `true` para arquivos antigos.
 
 ## Planejamento de cicloviagem 1.0.374
 

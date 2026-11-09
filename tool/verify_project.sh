@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 python3 -m unittest -q tool/test_build317_flutter_analyze_372.py || { echo "APK 317: if sem chaves no descarte da rota." >&2; exit 1; }
+python3 -m unittest -q tool/test_trip_planner_safety_375.py || { echo 'Cicloviagem 375: limites de distância/data e persistência divergentes.' >&2; exit 1; }
 python3 -m unittest -q tool/test_trip_distance_goal_374.py || { echo 'Metas de distância e assistente 374 divergentes.' >&2; exit 1; }
 python3 -m unittest -q tool/test_trip_planning_compact_370.py || { echo "Planejamento 370: navegacao, mapa sob demanda e conferencias divergentes." >&2; exit 1; }
 python3 -m unittest -q tool/test_nearby_panel_height_368.py || { echo "Painel Proximos pontos 368 divergente." >&2; exit 1; }

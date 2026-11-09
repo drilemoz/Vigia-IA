@@ -89,12 +89,12 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.374',
+          version: '1.0.375',
           current: true,
           changes: [
-            'Nova rota agora tem três etapas: destino, programação e ritmo.',
-            'Data e horário, pausas e limite de chegada separados dos controles de velocidade.',
-            'Meta de quilômetros no primeiro dia ou em todos, com cálculo das etapas e aviso de segurança.',
+            'Corrigida a progressão das etapas e o limite diário das metas em quilômetros.',
+            'Data de partida, pesquisa por lupa e preferência do mapa online ajustadas.',
+            'Cancelar Nova rota mantém os dados anteriores sem perder a viagem.',
           ],
         ),
         SizedBox(height: 10),
@@ -3265,12 +3265,12 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.374',
+          version: '1.0.375',
           current: true,
           changes: [
-            'Nova rota agora tem três etapas: destino, programação e ritmo.',
-            'Data e horário, pausas e limite de chegada separados dos controles de velocidade.',
-            'Meta de quilômetros no primeiro dia ou em todos, com cálculo das etapas e aviso de segurança.',
+            'Corrigida a progressão das etapas e o limite diário das metas em quilômetros.',
+            'Data de partida, pesquisa por lupa e preferência do mapa online ajustadas.',
+            'Cancelar Nova rota mantém os dados anteriores sem perder a viagem.',
           ],
         ),
         SizedBox(height: 10),

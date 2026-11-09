@@ -18,6 +18,7 @@ import '../models/planned_bike_trip.dart';
 import '../models/trip_weather_day_forecast.dart';
 import '../models/trip_stop_check.dart';
 import '../services/bike_trip_planner.dart';
+import '../services/trip_distance_goal_safety.dart';
 import '../services/bike_trip_editor_bridge.dart';
 import '../services/bike_trip_schedule.dart';
 import '../services/trip_terrain_service.dart';
@@ -185,6 +186,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _distanceGoalKm = initial?.dailyDistanceTargetKm ?? 50;
         _distanceGoalField.text = _distanceGoalKm!.toStringAsFixed(0);
         _arrivalCutoffHour = (initial?.latestArrivalMinute ?? 18 * 60) ~/ 60;
+        _showOnlineBaseMap = MapViewSettingsService.instance.tripPreviewOnlineBaseMap;
         _balanceDays = initial?.balanceDays ?? preferences.balanceDays;
         _smartStages = initial?.smartStages ?? true;
         _departure = TimeOfDay(
@@ -398,6 +400,28 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
 
   Future<void> _newRouteWizard() async {
     if (_busy || _loadingLibrary) return;
+    // Restaura integralmente a edição caso o usuário cancele ou a busca falhe.
+    final previousOrigin = _origin;
+    final previousDestination = _destination;
+    final previousOriginText = _originField.text;
+    final previousDestinationText = _destinationField.text;
+    final previousLookingForOrigin = _lookingForOrigin;
+    final previousMessage = _message;
+    final previousWizardDate = _wizardStartDate;
+    final previousDeparture = _departure;
+    final previousSpeed = _speedKmh;
+    final previousHours = _hoursPerDay;
+    final previousGoalEnabled = _useDistanceGoal;
+    final previousGoalFirstOnly = _distanceFirstDayOnly;
+    final previousGoal = _distanceGoalKm;
+    final previousGoalText = _distanceGoalField.text;
+    final previousArrivalCutoff = _arrivalCutoffHour;
+    final previousBalance = _balanceDays;
+    final previousSmart = _smartStages;
+    final previousBreakEvery = _breakEveryKm;
+    final previousBreakMinutes = _breakMinutes;
+    final previousLunchMinutes = _lunchMinutes;
+    final previousForceLunch = _forceLunch;
     _originField.clear();
     _destinationField.clear();
     _wizardStartDate = null;
@@ -509,9 +533,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                                     if (error != null) { _notify(error); return; }
                                     dialogSetState(() => step = 2);
                                   })
-                                : (!_useDistanceGoal || _validDistanceGoal
+                                : ((!_useDistanceGoal ||
+                                        (_validDistanceGoal && _distanceGoalError() == null))
                                     ? () {
-                                        final error = _wizardScheduleError();
+                                        final error = _wizardScheduleError() ??
+                                            (_useDistanceGoal ? _distanceGoalError() : null);
                                         if (error != null) { _notify(error); return; }
                                         shouldCalculate = true;
                                         Navigator.pop(ctx);
@@ -531,9 +557,38 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _wizardRefresh = null;
       FocusManager.instance.primaryFocus?.unfocus();
     }
-    if (shouldCalculate && mounted) {
+    final calculated = shouldCalculate && mounted && await _calculate();
+    if (calculated && mounted) {
       await _persistDefaults();
-      if (mounted) await _calculate();
+    } else if (mounted) {
+      setState(() {
+        _origin = previousOrigin;
+        _destination = previousDestination;
+        _originField.text = previousOriginText;
+        _destinationField.text = previousDestinationText;
+        _lookingForOrigin = previousLookingForOrigin;
+        _message = shouldCalculate ? _message : previousMessage;
+        _wizardStartDate = previousWizardDate;
+        _departure = previousDeparture;
+        _speedKmh = previousSpeed;
+        _hoursPerDay = previousHours;
+        _useDistanceGoal = previousGoalEnabled;
+        _distanceFirstDayOnly = previousGoalFirstOnly;
+        _distanceGoalKm = previousGoal;
+        _distanceGoalField.text = previousGoalText;
+        _arrivalCutoffHour = previousArrivalCutoff;
+        _balanceDays = previousBalance;
+        _smartStages = previousSmart;
+        _breakEveryKm = previousBreakEvery;
+        _breakMinutes = previousBreakMinutes;
+        _lunchMinutes = previousLunchMinutes;
+        _forceLunch = previousForceLunch;
+      });
+      _citySearch.updateLocalQuery(
+        query: '', current: _reference,
+        offlineMaps: _offlineMaps.packages,
+        offlinePoiPackages: const [], onlyDownloaded: true,
+      );
     }
   }
 
@@ -622,17 +677,17 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _calculate() async {
+  Future<bool> _calculate() async {
     final origin = _origin;
     final destination = _destination;
     if (_busy || origin == null || destination == null) {
       _notify('Selecione origem e destino da lista de cidades.');
-      return;
+      return false;
     }
     if ((origin.latitude - destination.latitude).abs() < 0.000001 &&
         (origin.longitude - destination.longitude).abs() < 0.000001) {
       _notify('Origem e destino precisam ser diferentes.');
-      return;
+      return false;
     }
     setState(() { _busy = true; _message = null; });
     try {
@@ -641,7 +696,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         destination: LatLng(destination.latitude, destination.longitude),
         alternativeCount: 2,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       final trip = PlannedBikeTrip(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         savedAt: DateTime.now(),
@@ -675,7 +730,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       } catch (_) {
         // O trajeto continua utilizável, mesmo com índice local corrompido.
       }
-      if (!mounted) return;
+      if (!mounted) return false;
       _selectPreviewMapForRoute(trip.selectedRoute);
       setState(() {
         _selectedDayIndex = 0;
@@ -683,9 +738,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _showTripTools = false;
         _draft = trip.copyWith(places: localPlaces);
       });
+      return true;
     } catch (_) {
-      if (!mounted) return;
-      setState(() => _message = 'Rota não calculada. Confira a internet e os nomes das cidades. Nenhuma distância foi inventada.');
+      if (mounted) {
+        setState(() => _message = 'Rota não calculada. Confira a internet e os nomes das cidades. Nenhuma distância foi inventada.');
+        _notify(_message!);
+      }
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -748,8 +807,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       return;
     }
     final now = DateTime.now();
-    final firstDate = DateTime(2020);
-    final lastDate = DateTime(now.year + 2);
+    final firstDate = DateUtils.dateOnly(now);
+    final lastDate = DateTime(now.year + 2, 12, 31);
     final savedDate = trip.startDate ?? now;
     final initialDate = savedDate.isBefore(firstDate) ? firstDate :
         savedDate.isAfter(lastDate) ? lastDate : savedDate;
@@ -761,6 +820,12 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       helpText: 'Data prevista de partida',
     );
     if (!mounted || chosen == null || _draft?.id != trip.id) {
+      return;
+    }
+    final scheduled = DateTime(chosen.year, chosen.month, chosen.day,
+        trip.departureMinute ~/ 60, trip.departureMinute % 60);
+    if (!scheduled.isAfter(DateTime.now())) {
+      _notify('A saída nesta data e horário já passou. Escolha uma data futura.');
       return;
     }
     setState(() => _draft = trip.copyWith(startDate: chosen,
@@ -1064,7 +1129,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           suffixIcon: IconButton(
             tooltip: 'Buscar cidade online',
             icon: const Icon(Icons.search_rounded),
-            onPressed: () => unawaited(_searchCity(origin: origin)),
+            onPressed: () => unawaited(_openCitySearch(origin: origin)),
           ),
         ),
         textInputAction: TextInputAction.search,
@@ -1136,6 +1201,22 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
 
   bool get _validDistanceGoal => _distanceGoalKm != null &&
       _distanceGoalKm!.isFinite && _distanceGoalKm! >= 5 && _distanceGoalKm! <= 300;
+
+  String? _distanceGoalError() {
+    if (!_useDistanceGoal) return null;
+    if (!_validDistanceGoal) return 'Digite uma distância válida entre 5 e 300 km.';
+    return TripDistanceGoalSafety.validate(
+      distanceKm: _distanceGoalKm!,
+      averageSpeedKmh: _speedKmh,
+      maxRidingHoursPerDay: _hoursPerDay,
+      departureMinute: _departure.hour * 60 + _departure.minute,
+      latestArrivalMinute: _arrivalCutoffHour * 60,
+      breakEveryKm: _breakEveryKm,
+      breakMinutes: _breakMinutes,
+      lunchMinutes: _lunchMinutes,
+      forceLunch: _forceLunch,
+    );
+  }
 
   /// Reconfere o relógio também ao avançar. Uma data passada não é aceita.
   String? _wizardScheduleError() {
@@ -1292,13 +1373,18 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             selected: !_distanceFirstDayOnly,
             onSelected: (_) => _updateWizard(() => _distanceFirstDayOnly = false)),
         ]),
-        if (_distanceFirstDayOnly) ...[
-          const SizedBox(height: 10),
-          Text('Nos próximos dias: ${_hoursPerDay.toStringAsFixed(0)} h de pedal'),
-          Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
-            label: '${_hoursPerDay.toStringAsFixed(0)} h',
-            onChanged: (v) => _updateWizard(() => _hoursPerDay = v)),
-        ],
+        const SizedBox(height: 10),
+        Text(_distanceFirstDayOnly
+            ? 'Limite diário: ${_hoursPerDay.toStringAsFixed(0)} h (também vale para os próximos dias)'
+            : 'Limite diário de pedal: ${_hoursPerDay.toStringAsFixed(0)} h'),
+        Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
+          label: '${_hoursPerDay.toStringAsFixed(0)} h',
+          onChanged: (v) => _updateWizard(() => _hoursPerDay = v)),
+        if (_validDistanceGoal && _distanceGoalError() != null)
+          Padding(padding: const EdgeInsets.only(top: 6),
+            child: Text(_distanceGoalError()!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error,
+                  fontSize: 12))),
         if (_validDistanceGoal)
           Text('Tempo-base para ${_distanceGoalKm!.toStringAsFixed(0)} km: '
               '${(_distanceGoalKm! / _speedKmh).toStringAsFixed(1)} h pedalando, '
@@ -1623,7 +1709,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             title: const Text('Mostrar mapa-base online'),
             subtitle: const Text('Usa internet. Desative para priorizar MBTiles locais.'),
             value: _showOnlineBaseMap,
-            onChanged: (value) => setState(() => _showOnlineBaseMap = value),
+            onChanged: (value) {
+              setState(() => _showOnlineBaseMap = value);
+              unawaited(MapViewSettingsService.instance
+                  .setTripPreviewOnlineBaseMap(value).catchError((Object _) {
+                if (mounted) _notify('Não foi possível salvar a preferência do mapa.');
+              }));
+            },
           ),
           if (_showRouteMap) _routeMap(trip),
           const SizedBox(height: 6),

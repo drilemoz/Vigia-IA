@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.374+374`
+**Versão atual:** `1.0.375+375`
+
+## 1.0.375 — Correções de segurança no planejamento da cicloviagem
+
+- Estágios avançam sempre: paradas candidatas não geram retrocesso nem distância negativa.
+- Meta em quilômetros tem limite diário de pedal, além da janela de chegada prevista com pausas e almoço; dados de relevo reais ainda geram avisos específicos na prévia.
+- Data posterior bloqueia escolher partida no passado. Lupa abre o campo de busca em tela cheia.
+- O mapa-base online memoriza o estado no armazenamento local; cancelar Nova rota restaura configurações e destinos.
+- Sem Flutter SDK no ambiente local: análise Dart, testes Flutter e compilação Android permanecem pendentes do CI.
 
 ## 1.0.374 — Programação e metas de cicloviagem
 

@@ -121,6 +121,12 @@ class BikeTripPlanner {
     );
     final days = <BikeTripDayPlan>[];
     final usedIds = <String>{};
+    // Sempre reserva espaço para as etapas restantes, mesmo quando uma
+    // localidade próxima da meta fica adiante do fim nominal do dia.
+    // Isto impede etapas com distância negativa ou final anterior ao início.
+    final minimumAdvance = routeDistanceMeters > 0
+        ? math.min(500.0, routeDistanceMeters / (dayCount * 2)).toDouble()
+        : 0.0;
     var previousEnd = 0.0;
     for (var day = 1; day <= dayCount; day++) {
       final finalDay = day == dayCount;
@@ -163,16 +169,34 @@ class BikeTripPlanner {
             : math.min(effort.totalSeconds, previousEffort + daySeconds).toDouble();
         idealEnd = effort.metersAtSeconds(idealEffort);
       }
-      final idealSeconds = effort?.secondsAtMeters(idealEnd) ?? 0.0;
+      final minEnd = math.min(routeDistanceMeters,
+          previousEnd + minimumAdvance).toDouble();
+      var maxEnd = routeDistanceMeters - minimumAdvance * (remainingDays - 1);
+      // Uma parada sugerida não pode engolir o trecho do dia seguinte.
+      if (distanceGoalMeters != null && !distanceGoalFirstDayOnly &&
+          day < dayCount - 1) {
+        final nextGoalEnd = tripEstimate.preferences.balanceDays
+            ? routeDistanceMeters * (day + 1) / dayCount
+            : math.min(routeDistanceMeters, distanceGoalMeters * (day + 1));
+        maxEnd = math.min(maxEnd, nextGoalEnd - minimumAdvance).toDouble();
+      }
+      maxEnd = math.max(minEnd, maxEnd).toDouble();
+      final boundedIdealEnd = finalDay ? routeDistanceMeters :
+          idealEnd.clamp(minEnd, maxEnd).toDouble();
+      final idealSeconds = effort?.secondsAtMeters(boundedIdealEnd) ?? 0.0;
       _MappedTripCandidate? selected;
       if (!finalDay) {
-        final dailyTarget = idealEnd - previousEnd;
-        final maxDelta = math.max(18000.0, dailyTarget * 0.35).toDouble();
+        final dailyTarget = boundedIdealEnd - previousEnd;
+        final maxDelta = usingDistanceToday
+            ? math.max(1000.0, dailyTarget * 0.35).toDouble()
+            : math.max(18000.0, dailyTarget * 0.35).toDouble();
         for (final candidate in mappedCandidates) {
           if (usedIds.contains(candidate.result.id)) {
             continue;
           }
-          if (candidate.routeDistanceMeters <= previousEnd + 5000) {
+          if (candidate.routeDistanceMeters <=
+              math.max(previousEnd + minimumAdvance, previousEnd + 500.0) ||
+              candidate.routeDistanceMeters > maxEnd) {
             continue;
           }
           if (candidate.routeDistanceMeters >= routeDistanceMeters - 5000) {
@@ -182,7 +206,24 @@ class BikeTripPlanner {
           if (candidate.routeProximityMeters > 1500) {
             continue;
           }
-          final delta = (candidate.routeDistanceMeters - idealEnd).abs();
+          // No modo por quilômetros, uma sugestão de local não autoriza
+          // ultrapassar o teto de pedal, nem deixar esforço impossível
+          // para as etapas restantes. O acesso ao local ainda é manual.
+          if (distanceGoalMeters != null) {
+            final candidateEffort = effort?.secondsAtMeters(
+                candidate.routeDistanceMeters) ??
+                candidate.routeDistanceMeters / 1000 /
+                    tripEstimate.preferences.averageSpeedKmh * 3600;
+            final previousTotalEffort = effort?.secondsAtMeters(previousEnd) ??
+                previousEnd / 1000 /
+                    tripEstimate.preferences.averageSpeedKmh * 3600;
+            if (candidateEffort - previousTotalEffort > daySeconds * 1.001 ||
+                totalEffortSeconds - candidateEffort >
+                    (dayCount - day) * daySeconds * 1.001) {
+              continue;
+            }
+          }
+          final delta = (candidate.routeDistanceMeters - boundedIdealEnd).abs();
           if (effort == null || usingDistanceToday) {
             if (delta > maxDelta) {
               continue;
@@ -219,7 +260,8 @@ class BikeTripPlanner {
       }
 
       final endDistance = finalDay ? routeDistanceMeters :
-          selected?.routeDistanceMeters ?? idealEnd;
+          (selected?.routeDistanceMeters ?? boundedIdealEnd)
+              .clamp(minEnd, maxEnd).toDouble();
       final routePoint = _pointAtDistance(
         routePoints: routePoints,
         cumulativeGeometryMeters: cumulative,
