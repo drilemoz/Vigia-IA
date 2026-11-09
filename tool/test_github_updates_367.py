@@ -7,6 +7,12 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def read(path):return (ROOT/path).read_text('utf8')
 
+def current_version(root):
+    for line in (root / 'pubspec.yaml').read_text('utf8').splitlines():
+        if line.startswith('version: '):
+            return line.split(': ', 1)[1]
+    raise AssertionError('Versão ausente no pubspec.yaml')
+
 class GithubUpdater367(unittest.TestCase):
     def test_release_policy_strict(self):
         source=read('lib/services/github_release_update_service.dart')
@@ -55,7 +61,7 @@ class GithubUpdater367(unittest.TestCase):
         self.assertIn('path="updates/"',read('android/app/src/main/res/xml/vigia_update_file_paths.xml'))
 
     def test_current_build_and_no_automatic_install(self):
-        self.assertIn('version: 1.0.369+369',read('pubspec.yaml'))
+        self.assertIn(f'version: {current_version(ROOT)}',read('pubspec.yaml'))
         self.assertTrue((ROOT/'RELEASE-1.0.367.md').is_file())
         service=read('lib/services/github_release_update_service.dart')
         method=re.search(r'Future<VigiaGitHubRelease\?> checkOnForeground\(\) async \{(.*?)\n  \}',service,re.S)

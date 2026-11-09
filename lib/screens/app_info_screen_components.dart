@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.369',
+          version: '1.0.370',
           current: true,
+          changes: [
+            'Planejamento da cicloviagem reorganizado em painel compacto, com um dia por vez.',
+            'Navegue entre os dias pelos botões, indicadores ou deslizando o cartão lateralmente.',
+            'Mapa, conferências e ferramentas mantidos e organizados em seções expansíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.369',
+          current: false,
           changes: [
             'Correção da detecção de novas Releases do GitHub, mesmo sem APK universal elegível.',
             'Nova versão aparece em Sobre, com orientação para consultar arquivos oficiais quando necessário.',
@@ -3225,8 +3235,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.369',
+          version: '1.0.370',
           current: true,
+          changes: [
+            'Planejamento da cicloviagem reorganizado em painel compacto, com um dia por vez.',
+            'Navegue entre os dias pelos botões, indicadores ou deslizando o cartão lateralmente.',
+            'Mapa, conferências e ferramentas mantidos e organizados em seções expansíveis.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.369',
+          current: false,
           changes: [
             'Correção da detecção de novas Releases do GitHub, mesmo sem APK universal elegível.',
             'Nova versão aparece em Sobre, com orientação para consultar arquivos oficiais quando necessário.',

@@ -9,6 +9,12 @@ def read(name):
     return (ROOT / name).read_text('utf8')
 
 
+def current_version(root):
+    for line in (root / 'pubspec.yaml').read_text('utf8').splitlines():
+        if line.startswith('version: '):
+            return line.split(': ', 1)[1]
+    raise AssertionError('Versão ausente no pubspec.yaml')
+
 class GitHubUpdater369(unittest.TestCase):
     def test_new_release_does_not_depend_on_eligible_apk(self):
         code = read('lib/services/github_release_update_service.dart')
@@ -49,9 +55,10 @@ class GitHubUpdater369(unittest.TestCase):
         self.assertIn('1.0.368', tests)
 
     def test_version_sync(self):
-        self.assertIn('version: 1.0.369+369', read('pubspec.yaml'))
-        self.assertIn("version = '1.0.369'", read('lib/core/app_metadata.dart'))
-        self.assertIn('build = 369', read('lib/core/app_metadata.dart'))
+        self.assertIn(f'version: {current_version(ROOT)}', read('pubspec.yaml'))
+        version, build = current_version(ROOT).split('+')
+        self.assertIn(f"version = '{version}'", read('lib/core/app_metadata.dart'))
+        self.assertIn(f'build = {build}', read('lib/core/app_metadata.dart'))
         self.assertTrue((ROOT / 'RELEASE-1.0.369.md').is_file())
 
 

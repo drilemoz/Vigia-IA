@@ -81,6 +81,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   final _lastMapPreview = const SavedBikeRouteService();
   final _planner = const BikeTripPlanner();
   final _planCache = Expando<BikeTripPlan>('trip-stage-plan');
+  final _terrainCache = Expando<List<TripDayTerrain>>('trip-stage-terrain');
 
   MapDestinationSearchResult? _origin;
   MapDestinationSearchResult? _destination;
@@ -98,6 +99,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   PlannedBikeTrip? _lastReadinessTrip;
   TripOfflineReadinessReport? _lastReadinessReport;
   bool _showOnlineBaseMap = false;
+  // Navegação local entre etapas; não modifica o roteiro persistido.
+  int _selectedDayIndex = 0;
+  bool _slideForward = true;
+  bool _showRouteMap = false;
+  bool _showTripTools = false;
   String? _message;
   double _speedKmh = 15;
   double _hoursPerDay = 5;
@@ -179,6 +185,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _lunchMinutes = initial?.lunchMinutes ?? schedule.lunchMinutes;
         _forceLunch = initial?.forceLunch ?? schedule.forceLunch;
         if (initial != null) {
+          _selectedDayIndex = 0;
           _draft = initial;
           _origin = initial.origin;
           _destination = initial.destination;
@@ -536,47 +543,41 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ],
       ),
     );
-    if (discard == true && mounted) setState(() => _draft = null);
+    if (discard == true && mounted) setState(() {
+      _draft = null;
+      _selectedDayIndex = 0;
+    });
   }
 
   Widget _routeActions(PlannedBikeTrip trip) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10),
+    padding: const EdgeInsets.symmetric(vertical: 8),
     child: Row(children: [
       Expanded(child: FilledButton.icon(
         onPressed: _libraryReadFailed ? null : () => unawaited(_save()),
         icon: const Icon(Icons.save_outlined, size: 19),
-        label: const Text('Salvar'),
+        label: const Text('Salvar viagem'),
       )),
-      const SizedBox(width: 6),
-      Expanded(child: OutlinedButton.icon(
-        onPressed: _libraryReadFailed && _saved.any((t) => t.id == trip.id)
-            ? null : () => unawaited(_discardOrDeleteCurrent(trip)),
-        icon: const Icon(Icons.delete_outline_rounded, size: 19),
-        label: const Text('Apagar'),
-      )),
-      const SizedBox(width: 6),
-      Expanded(child: PopupMenuButton<String>(
-        tooltip: 'Exportar planejamento',
-        onSelected: (format) => unawaited(_exportTrip(trip, format)),
-        itemBuilder: (ctx) => const [
-          PopupMenuItem(value: 'gpx', child: Text('Exportar trajeto GPX')),
-          PopupMenuItem(value: 'json', child: Text('Exportar planejamento JSON')),
+      const SizedBox(width: 8),
+      PopupMenuButton<String>(
+        tooltip: 'Mais ações da viagem',
+        icon: const Icon(Icons.more_vert_rounded),
+        onSelected: (value) {
+          if (value == 'delete') {
+            unawaited(_discardOrDeleteCurrent(trip));
+          } else {
+            unawaited(_exportTrip(trip, value));
+          }
+        },
+        itemBuilder: (_) => [
+          const PopupMenuItem(value: 'gpx', child: ListTile(
+            leading: Icon(Icons.route_outlined), title: Text('Exportar GPX'))),
+          const PopupMenuItem(value: 'json', child: ListTile(
+            leading: Icon(Icons.file_download_outlined), title: Text('Exportar JSON'))),
+          if (!_libraryReadFailed || !_saved.any((t) => t.id == trip.id))
+            const PopupMenuItem(value: 'delete', child: ListTile(
+              leading: Icon(Icons.delete_outline_rounded), title: Text('Apagar ou descartar'))),
         ],
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.ios_share_rounded, size: 19),
-              SizedBox(width: 4),
-              Flexible(child: Text('Exportar', maxLines: 1)),
-            ]),
-          ),
-        ),
-      )),
+      ),
     ]),
   );
 
@@ -636,7 +637,12 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       }
       if (!mounted) return;
       _selectPreviewMapForRoute(trip.selectedRoute);
-      setState(() => _draft = trip.copyWith(places: localPlaces));
+      setState(() {
+        _selectedDayIndex = 0;
+        _showRouteMap = false;
+        _showTripTools = false;
+        _draft = trip.copyWith(places: localPlaces);
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() => _message = 'Rota não calculada. Confira a internet e os nomes das cidades. Nenhuma distância foi inventada.');
@@ -877,6 +883,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           _saved = updated;
           if (_draft?.id == trip.id) {
             _draft = null;
+            _selectedDayIndex = 0;
           }
         });
       }
@@ -911,6 +918,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     _selectPreviewMapForRoute(trip.selectedRoute);
     setState(() {
       _draft = trip;
+      _selectedDayIndex = 0;
+      _showRouteMap = false;
+      _showTripTools = false;
       _origin = trip.origin;
       _destination = trip.destination;
       _originField.text = trip.origin.title;
@@ -1334,11 +1344,16 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     return located;
   }
 
+  // O resumo, os dias e as ferramentas são separados: a prévia do mapa
+  // só monta o FlutterMap quando o usuário expande a respectiva seção.
   Widget _preview(PlannedBikeTrip trip) {
     final route = trip.selectedRoute;
     final plan = _plan(trip);
     final estimate = plan.estimate;
-    final terrain = TripTerrainService.forDays(route: route, days: plan.days);
+    // Alternar entre dias não reprocessa o perfil altimétrico inteiro.
+    final terrain = _terrainCache[trip] ??
+        TripTerrainService.forDays(route: route, days: plan.days);
+    _terrainCache[trip] = terrain;
     final simulatedDays = <BikeTripDayPlan>[
       for (var i = 0; i < plan.days.length; i++)
         TripEffortReserveService.adjustedDay(
@@ -1351,11 +1366,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final reservedMinutes = ((plannedRideSeconds -
         plan.days.fold<int>(0, (sum, day) => sum + day.ridingDuration.inSeconds)) / 60)
         .round();
-    final departureDate = trip.startDate;
     return Column(key: _previewKey, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SizedBox(height: 12),
-      Text('Resultado do planejamento', style: Theme.of(context).textTheme.titleLarge),
-      const SizedBox(height: 8),
       if (trip.routes.length > 1)
         SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
           for (var i = 0; i < trip.routes.length; i++)
@@ -1367,27 +1379,16 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                 _selectPreviewMapForRoute(trip.routes[i]);
                 final next = trip.copyWith(selectedIndex: i, places: const [],
                     weatherDays: const <TripWeatherDayForecast>[]);
-                setState(() => _draft = next);
+                setState(() {
+                  _draft = next;
+                  _selectedDayIndex = 0;
+                  _showRouteMap = false;
+                  _showTripTools = false;
+                });
                 unawaited(_fillLocalPlaces(next));
               },
             )),
         ])),
-      const SizedBox(height: 8),
-      _routeMap(trip),
-      _offlineReadinessCard(trip, plan),
-      if (plan.days.length > 1)
-        const Text('Os marcadores numerados no mapa indicam os finais de etapa. '
-            'Paradas e acessos precisam de confirmação; rotas muito longas '
-            'mostram até 80 marcadores.', style: TextStyle(fontSize: 11)),
-      if (_savedPois.offlinePackages.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text('Pontos salvos próximos ao trajeto aparecem no mapa, '
-              'mesmo sem GPS ou internet.',
-              style: Theme.of(context).textTheme.bodySmall),
-        ),
-      _routeActions(trip),
-      const SizedBox(height: 6),
       Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
         Text('${trip.origin.title} → ${trip.destination.title}',
           style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
@@ -1395,78 +1396,217 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         Row(children: [
           Expanded(child: _metric('Distância', '${estimate.distanceKm.toStringAsFixed(1)} km', Icons.route_rounded)),
           Expanded(child: _metric('Pedalando', '${(plannedRideSeconds / 3600).toStringAsFixed(1)} h', Icons.timer_outlined)),
-          Expanded(child: _metric('Dias', '${estimate.dayCount}', Icons.calendar_today_outlined)),
+          Expanded(child: _metric('Dias', '${simulatedDays.length}', Icons.calendar_today_outlined)),
         ]),
         const SizedBox(height: 8),
-        if (route.ascentMeters != null || route.descentMeters != null)
-          Text('Relevo do provedor: subida '
-              '${route.ascentMeters?.toStringAsFixed(0) ?? '?'} m · descida '
-              '${route.descentMeters?.toStringAsFixed(0) ?? '?'} m',
-              style: const TextStyle(fontSize: 12)),
         Text(reservedMinutes > 0
-            ? 'Cenário: ${estimate.ridingHours.toStringAsFixed(1)} h base + '
-                '$reservedMinutes min de reserva para subidas documentadas.'
-            : 'Tempo base: velocidade média fixa. Sem reserva de subida aplicada.',
-          style: const TextStyle(fontSize: 12), textAlign: TextAlign.center),
-        Text(trip.smartStages
-            ? 'Divisão inteligente ativa: dias organizados pelo tempo base e pela reserva de subidas com altitude disponível. Paradas sugeridas não são pernoites confirmados.'
-            : 'Divisão tradicional: os dias seguem a distância e a velocidade médias, sem aumentar o número de dias por subida.',
-          style: const TextStyle(fontSize: 11), textAlign: TextAlign.center),
-        const Text('Simulação, não previsão: bagagem, vento, segurança do acesso e disponibilidade de hospedagem não são calculados.',
-          style: TextStyle(fontSize: 11), textAlign: TextAlign.center),
+            ? '${estimate.ridingHours.toStringAsFixed(1)} h base + $reservedMinutes min de reserva para subidas.'
+            : 'Tempo base, sem reserva adicional para subidas.',
+            style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
       ]))),
+      _routeActions(trip),
+      if (simulatedDays.isNotEmpty) _stageSlides(trip, simulatedDays, terrain),
       const SizedBox(height: 8),
-      Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Reserva de tempo e limite de chegada',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 5),
-        const Text('Escolha quantos minutos acrescentar a cada 100 m de subida '
-            'presentes no perfil de elevação. Zero desativa. Não há extrapolação '
-            'quando faltam altitudes.', style: TextStyle(fontSize: 12)),
-        const SizedBox(height: 7),
-        Row(children: [
-          Expanded(child: _choice('Subidas', trip.climbReserveMinutesPer100m,
-              const [0, 5, 10, 15, 20], 'min/100m', (value) {
-            setState(() => _draft = trip.copyWith(
-              climbReserveMinutesPer100m: value,
-              weatherDays: const <TripWeatherDayForecast>[],
-            ));
-          })),
-          const SizedBox(width: 8),
-          Expanded(child: DropdownButtonFormField<int>(
-            key: ValueKey('chegada-limite-${trip.id}-${trip.latestArrivalMinute}'),
-            initialValue: trip.latestArrivalMinute,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Chegar até', border: OutlineInputBorder(), isDense: true,
+      Card(child: ExpansionTile(
+        key: ValueKey('trip-map-${trip.id}-${trip.selectedIndex}'),
+        onExpansionChanged: (expanded) => setState(() => _showRouteMap = expanded),
+        leading: const Icon(Icons.map_outlined),
+        title: const Text('Mapa da rota'),
+        subtitle: Text(_previewOfflineMapId == null && !_showOnlineBaseMap
+            ? 'Traçado salvo · sem mapa-base offline selecionado'
+            : 'Visualizar trajeto e finais de etapa'),
+        childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        children: [
+          if (_showRouteMap) _routeMap(trip),
+          const SizedBox(height: 6),
+          if (plan.days.length > 1)
+            const Text('Marcadores: finais de etapa (até 80); paradas precisam ser conferidas.',
+                style: TextStyle(fontSize: 12)),
+          if (_savedPois.offlinePackages.isNotEmpty)
+            const Text('Os apoios locais cadastrados aparecem sem internet ou GPS.',
+                style: TextStyle(fontSize: 12)),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => unawaited(_openMap(trip)),
+            icon: const Icon(Icons.open_in_full_outlined),
+            label: Text(widget.returnToMap ? 'Voltar aos Mapas com esta rota' : 'Abrir prévia nos Mapas'),
+          ),
+        ],
+      )),
+      Card(child: ExpansionTile(
+        key: ValueKey('trip-tools-${trip.id}'),
+        onExpansionChanged: (expanded) => setState(() => _showTripTools = expanded),
+        leading: const Icon(Icons.tune_rounded),
+        title: const Text('Ferramentas e ajustes'),
+        subtitle: const Text('Clima, offline, apoios, relevo e horários'),
+        childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+        children: [
+          if (_showTripTools) _planningTools(trip, plan),
+        ],
+      )),
+      const SizedBox(height: 8),
+      const Text('Planejamento estimado: bagagem, vento, acesso seguro e hospedagem não são garantidos. '
+          'A rota e as conferências salvas podem ser consultadas offline.',
+          style: TextStyle(fontSize: 12)),
+    ]);
+  }
+
+  void _switchStage(int next, int count) {
+    if (next < 0 || next >= count || next == _selectedDayIndex) return;
+    setState(() {
+      _slideForward = next > _selectedDayIndex;
+      _selectedDayIndex = next;
+    });
+  }
+
+  Widget _stageSlides(PlannedBikeTrip trip, List<BikeTripDayPlan> days,
+      List<TripDayTerrain> terrain) {
+    final selected = _selectedDayIndex.clamp(0, days.length - 1).toInt();
+    final validChecks = days.where((day) => trip.stopChecks.any((check) =>
+        check.matches(stage: day, selectedRouteIndex: trip.selectedIndex))).length;
+    return Card(child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text('Dia ${selected + 1} de ${days.length}',
+              style: Theme.of(context).textTheme.titleMedium),
+          Text('$validChecks/${days.length} conferidos',
+              style: Theme.of(context).textTheme.bodySmall),
+        ]),
+        const SizedBox(height: 10),
+        // Indicadores limitados para não criar dezenas de botões em roteiros
+        // extensos; os botões Anterior/Próximo sempre alcançam todas as etapas.
+        if (days.length <= 14)
+          Row(children: [
+            for (var i = 0; i < days.length; i++)
+              Expanded(child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Semantics(
+                  button: true,
+                  label: 'Mostrar dia ${i + 1} de ${days.length}',
+                  selected: i == selected,
+                  child: InkWell(
+                    onTap: () => _switchStage(i, days.length),
+                    borderRadius: BorderRadius.circular(7),
+                    child: Container(
+                      height: 25,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: i == selected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Text('${i + 1}', style: TextStyle(fontSize: 11,
+                        color: i == selected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurfaceVariant)),
+                    ),
+                  ),
+                ),
+              )),
+          ]),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onHorizontalDragEnd: (details) {
+            final velocity = details.primaryVelocity ?? 0;
+            if (velocity.abs() < 180) return;
+            _switchStage(selected + (velocity < 0 ? 1 : -1), days.length);
+          },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: Offset(_slideForward ? 0.12 : -0.12, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
             ),
-            items: [for (final hour in const [15, 16, 17, 18, 19, 20, 21])
-              DropdownMenuItem(value: hour * 60, child: Text('$hour:00'))],
-            onChanged: (value) {
-              if (value != null) {
-                setState(() => _draft = trip.copyWith(latestArrivalMinute: value));
-              }
-            },
+            child: KeyedSubtree(
+              key: ValueKey('${trip.id}-${trip.selectedIndex}-${days[selected].day}'),
+              child: _dayCard(days[selected], trip, terrain[selected]),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(children: [
+          Expanded(child: OutlinedButton.icon(
+            onPressed: selected == 0 ? null : () => _switchStage(selected - 1, days.length),
+            icon: const Icon(Icons.chevron_left_rounded),
+            label: const Text('Anterior'),
+          )),
+          const SizedBox(width: 8),
+          Expanded(child: FilledButton(
+            onPressed: selected == days.length - 1
+                ? null : () => _switchStage(selected + 1, days.length),
+            child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Flexible(child: Text('Próximo dia', maxLines: 1)),
+              Icon(Icons.chevron_right_rounded),
+            ]),
           )),
         ]),
-        const SizedBox(height: 5),
-        const Text('Limite de chegada pessoal; não representa a hora do pôr do sol. '
-            'Para guardar alterações, use Salvar viagem.',
-            style: TextStyle(fontSize: 11)),
-      ]))),
-      const SizedBox(height: 8),
-      Card(child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Clima por etapa · consulta manual',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 5),
-          Text(departureDate == null
-              ? 'Escolha uma data de partida para relacionar o clima aos dias de pedal.'
-              : 'Partida prevista: ${_formatTripDate(departureDate)}. '
-                  'Previsões já consultadas são preservadas ao salvar a viagem.'),
-          const SizedBox(height: 6),
+        const SizedBox(height: 4),
+        Text('Deslize o cartão para os lados para trocar de dia. '
+            'As paradas sugeridas não confirmam água, acesso ou pernoite.',
+            style: Theme.of(context).textTheme.bodySmall),
+      ]),
+    ));
+  }
+
+  Widget _planningTools(PlannedBikeTrip trip, BikeTripPlan plan) {
+    final route = trip.selectedRoute;
+    final departureDate = trip.startDate;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ExpansionTile(
+        leading: const Icon(Icons.schedule_rounded),
+        title: const Text('Reserva de subida e chegada'),
+        subtitle: Text('${trip.climbReserveMinutesPer100m} min/100 m · '
+            'limite ${BikeTripDaySchedule.formatMinute(trip.latestArrivalMinute)}'),
+        children: [
+          const Text('Reserva adicional a cada 100 m de subida com altitude disponível. '
+              'Zero desativa; sem perfil altimétrico não há extrapolação.',
+              style: TextStyle(fontSize: 12)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(child: _choice('Subidas', trip.climbReserveMinutesPer100m,
+                const [0, 5, 10, 15, 20], 'min/100m', (value) {
+              setState(() => _draft = trip.copyWith(
+                climbReserveMinutesPer100m: value,
+                weatherDays: const <TripWeatherDayForecast>[],
+              ));
+            })),
+            const SizedBox(width: 8),
+            Expanded(child: DropdownButtonFormField<int>(
+              key: ValueKey('chegada-limite-${trip.id}-${trip.latestArrivalMinute}'),
+              initialValue: trip.latestArrivalMinute,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: 'Chegar até', border: OutlineInputBorder(), isDense: true,
+              ),
+              items: [for (final hour in const [15, 16, 17, 18, 19, 20, 21])
+                DropdownMenuItem(value: hour * 60, child: Text('$hour:00'))],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _draft = trip.copyWith(latestArrivalMinute: value));
+                }
+              },
+            )),
+          ]),
+          const Text('Chegada limite é preferência pessoal, não horário de pôr do sol. '
+              'Use Salvar viagem após alterar.', style: TextStyle(fontSize: 12)),
+        ],
+      ),
+      ExpansionTile(
+        leading: const Icon(Icons.cloud_outlined),
+        title: const Text('Clima por etapa'),
+        subtitle: Text(departureDate == null
+            ? 'Defina a data de partida'
+            : 'Partida prevista: ${_formatTripDate(departureDate)}'),
+        children: [
           Row(children: [
             Expanded(child: OutlinedButton.icon(
               onPressed: _fetchingWeather ? null : () => unawaited(_selectStartDate()),
@@ -1482,124 +1622,96 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             )),
           ]),
           if (_fetchingWeather) const LinearProgressIndicator(),
-          const Text('Open-Meteo.com (CC BY 4.0) · até 16 dias de previsão; no máximo 8 consultas '
-              'por toque. Sem internet, apenas dados consultados e salvos. '
-              'Confira avisos oficiais antes de pedalar.',
-              style: TextStyle(fontSize: 11)),
-        ]),
-      )),
-      const SizedBox(height: 6),
-      Text(_showOnlineBaseMap
-        ? 'Mapa-base online: requer internet. A geometria permanece salva.'
-        : _previewCoverageMessage(route),
-        style: Theme.of(context).textTheme.bodySmall),
-      if (_offlineMaps.packages.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: DropdownButtonFormField<String>(
-            key: ValueKey('preview-mbtiles-$_previewOfflineMapId'),
-            initialValue: _previewOfflineMapId,
-            decoration: const InputDecoration(
-              labelText: 'Mapa offline para esta rota',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-            items: [
-              for (final package in _offlineMaps.packages)
-                DropdownMenuItem(value: package.id, child: Text(
-                  package.name, overflow: TextOverflow.ellipsis,
-                )),
-            ],
-            onChanged: (value) {
-              for (final package in _offlineMaps.packages) {
-                if (package.id == value) {
-                  setState(() => _openPreviewMap(package));
-                  break;
-                }
-              }
-            },
-          ),
-        ),
-      SwitchListTile.adaptive(
-        dense: true, contentPadding: EdgeInsets.zero,
-        title: const Text('Mostrar mapa-base online'),
-        subtitle: const Text('Consome internet; não baixa mapas para uso offline.'),
-        value: _showOnlineBaseMap,
-        onChanged: (v) => setState(() => _showOnlineBaseMap = v),
+          const Text('Open-Meteo.com (CC BY 4.0) · até 16 dias, máximo 8 consultas '
+              'por toque. Offline, somente previsões consultadas e salvas. '
+              'Confira avisos oficiais.', style: TextStyle(fontSize: 12)),
+        ],
       ),
-      const SizedBox(height: 6),
-      Row(children: [
-        Expanded(child: OutlinedButton.icon(
-          onPressed: _fetchingPlaces ? null : () => unawaited(_findStops(online: false)),
-          icon: const Icon(Icons.offline_pin_outlined), label: const Text('Apoios salvos'),
-        )),
-        const SizedBox(width: 8),
-        Expanded(child: OutlinedButton.icon(
-          onPressed: _fetchingPlaces ? null : () => unawaited(_findStops(online: true)),
-          icon: const Icon(Icons.travel_explore_rounded), label: const Text('Buscar apoios'),
-        )),
-      ]),
-      if (_fetchingPlaces) const LinearProgressIndicator(),
-      if (trip.places.isNotEmpty) ...[
-        const SizedBox(height: 8),
-        Card(child: ExpansionTile(
-          initiallyExpanded: true,
-          title: const Text('Localidades e apoios próximos do traçado'),
-          subtitle: Text('${_nearbyRoutePlaces(trip).length} local(is) em ordem de percurso · '
-              'até 3,5 km em linha reta'),
-          children: [
+      ExpansionTile(
+        leading: const Icon(Icons.offline_pin_outlined),
+        title: const Text('Preparação offline'),
+        subtitle: Text(_offlineMaps.packages.isEmpty
+            ? 'Nenhum MBTiles cadastrado'
+            : '${_offlineMaps.packages.length} mapa(s) local(is) cadastrado(s)'),
+        children: [
+          _offlineReadinessCard(trip, plan),
+          const SizedBox(height: 6),
+          Text(_showOnlineBaseMap
+              ? 'Mapa-base online requer internet; a rota permanece salva.'
+              : _previewCoverageMessage(route),
+              style: Theme.of(context).textTheme.bodySmall),
+          if (_offlineMaps.packages.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: DropdownButtonFormField<String>(
+                key: ValueKey('preview-mbtiles-$_previewOfflineMapId'),
+                initialValue: _previewOfflineMapId,
+                decoration: const InputDecoration(
+                  labelText: 'Mapa offline para esta rota',
+                  border: OutlineInputBorder(), isDense: true,
+                ),
+                items: [
+                  for (final package in _offlineMaps.packages)
+                    DropdownMenuItem(value: package.id, child: Text(
+                      package.name, overflow: TextOverflow.ellipsis)),
+                ],
+                onChanged: (value) {
+                  for (final package in _offlineMaps.packages) {
+                    if (package.id == value) {
+                      setState(() => _openPreviewMap(package));
+                      break;
+                    }
+                  }
+                },
+              ),
+            ),
+          SwitchListTile.adaptive(
+            dense: true, contentPadding: EdgeInsets.zero,
+            title: const Text('Mostrar mapa-base online'),
+            subtitle: const Text('Consome internet; não baixa mapas para uso offline.'),
+            value: _showOnlineBaseMap,
+            onChanged: (v) => setState(() => _showOnlineBaseMap = v),
+          ),
+        ],
+      ),
+      ExpansionTile(
+        leading: const Icon(Icons.place_outlined),
+        title: const Text('Localidades e pontos de apoio'),
+        subtitle: Text('${_nearbyRoutePlaces(trip).length} local(is) no corredor da rota'),
+        children: [
+          Row(children: [
+            Expanded(child: OutlinedButton.icon(
+              onPressed: _fetchingPlaces ? null : () => unawaited(_findStops(online: false)),
+              icon: const Icon(Icons.offline_pin_outlined), label: const Text('Apoios salvos'),
+            )),
+            const SizedBox(width: 8),
+            Expanded(child: OutlinedButton.icon(
+              onPressed: _fetchingPlaces ? null : () => unawaited(_findStops(online: true)),
+              icon: const Icon(Icons.travel_explore_rounded), label: const Text('Buscar apoios'),
+            )),
+          ]),
+          if (_fetchingPlaces) const LinearProgressIndicator(),
+          if (trip.places.isNotEmpty)
             for (final match in _nearbyRoutePlaces(trip))
               ListTile(
                 dense: true,
                 leading: Icon(match.place.kind == MapDestinationKind.pointOfInterest
                     ? Icons.local_cafe_outlined : Icons.location_city_outlined),
                 title: Text(match.place.title),
-                subtitle: Text('km ${(match.routeDistanceMeters / 1000).toStringAsFixed(1)} '
-                    '· ${match.place.kind.label} · '
-                    '${match.proximityMeters.toStringAsFixed(0)} m da linha '
-                    '· ${match.place.storedLocally ? 'local' : 'online'}'),
+                subtitle: Text('km ${(match.routeDistanceMeters / 1000).toStringAsFixed(1)} · '
+                    '${match.place.kind.label} · '
+                    '${match.proximityMeters.toStringAsFixed(0)} m da linha · '
+                    '${match.place.storedLocally ? 'local' : 'online'}'),
                 onTap: () => unawaited(_openMap(trip,
                     focusPoint: LatLng(match.place.latitude, match.place.longitude))),
-              ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: Text('Proximidade em linha reta não confirma passagem pela via, acesso seguro, água ou hospedagem. '
-                  'Ordem e quilômetros aproximados a partir da geometria.'),
-            ),
-          ],
-        )),
-      ] else
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text('Nenhuma cidade ou apoio identificado no corredor salvo. '
-              'Use “Apoios salvos” ou “Buscar apoios” quando houver internet.',
-            style: Theme.of(context).textTheme.bodySmall),
-        ),
-      const SizedBox(height: 8),
-      Text('Etapas da viagem', style: Theme.of(context).textTheme.titleMedium),
-      Builder(builder: (context) {
-        final verified = plan.days.where((stage) =>
-            trip.stopChecks.any((check) => check.matches(
-              stage: stage, selectedRouteIndex: trip.selectedIndex))).length;
-        return Text('Conferências salvas: $verified de ${plan.days.length} paradas. '
-            'Abra cada etapa e toque em Conferir para anotar acesso, água, '
-            'pernoite e observações sem internet.',
-            style: Theme.of(context).textTheme.bodySmall);
-      }),
-      const Text('Abra cada dia para conferir horários, altitude, clima e '
-          'avisos de planejamento. Os limites são suas preferências, não '
-          'garantia de segurança.', style: TextStyle(fontSize: 12)),
-      for (var i = 0; i < simulatedDays.length; i++)
-        _dayCard(simulatedDays[i], trip, terrain[i]),
-      const SizedBox(height: 8),
-      OutlinedButton.icon(
-        onPressed: () => unawaited(_openMap(trip)),
-        icon: const Icon(Icons.map_outlined),
-        label: Text(widget.returnToMap ? 'Voltar aos Mapas com esta rota' : 'Abrir prévia nos Mapas'),
+              )
+          else
+            const Text('Nenhuma localidade identificada. Consulte apoios locais ou busque '
+                'quando houver internet.', style: TextStyle(fontSize: 12)),
+          const Text('Distâncias em linha reta não garantem passagem pela via, '
+              'acesso seguro, água ou hospedagem.', style: TextStyle(fontSize: 12)),
+        ],
       ),
-      const SizedBox(height: 6),
-      const Text('A biblioteca guarda cidades, geometria, instruções e etapas. Não faz recálculo sem internet. Para os mapas da região, use o gerenciador offline na aba Mapas.',
-        style: TextStyle(fontSize: 12)),
     ]);
   }
 
@@ -2030,86 +2142,143 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final climbReserve = TripEffortReserveService.reserveMinutes(
       terrain: terrain, minutesPer100Meters: trip.climbReserveMinutesPer100m,
     );
-    return Card(child: ExpansionTile(
-      leading: CircleAvatar(child: Text('${day.day}')),
-      title: Text('Dia ${day.day} · ${(day.distanceMeters / 1000).toStringAsFixed(1)} km'),
-      subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(day.stopLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
-        Text(savedCheck == null ? 'Parada ainda não conferida'
-            : checkValid ? 'Conferência manual salva offline'
-            : 'Conferência antiga: parada alterada, revisar',
-            style: TextStyle(fontSize: 12, color: checkValid
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.error)),
-        if (notices.isNotEmpty)
-          Text('${notices.length} aviso(s) para revisar',
-              style: TextStyle(color: Theme.of(context).colorScheme.error,
-                  fontSize: 12)),
+    final scheme = Theme.of(context).colorScheme;
+    final statusColor = checkValid ? scheme.primary : scheme.error;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Row(children: [
+        CircleAvatar(
+          backgroundColor: scheme.primaryContainer,
+          child: Text('${day.day}', style: TextStyle(
+            color: scheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(width: 10),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(day.stopLabel, maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 2),
+          Text(savedCheck == null ? 'Parada não conferida'
+              : checkValid ? 'Conferência manual salva offline'
+              : 'Conferência antiga: revisar parada',
+            style: TextStyle(fontSize: 12, color: statusColor)),
+        ])),
+        IconButton(
+          tooltip: 'Ver parada do dia ${day.day} no mapa',
+          icon: const Icon(Icons.map_outlined),
+          onPressed: () => unawaited(_openMap(trip,
+              focusPoint: LatLng(day.stopLatitude, day.stopLongitude))),
+        ),
       ]),
-      trailing: IconButton(
-        tooltip: 'Ver parada no mapa',
-        icon: const Icon(Icons.map_outlined),
-        onPressed: () => unawaited(_openMap(trip,
-          focusPoint: LatLng(day.stopLatitude, day.stopLongitude))),
-      ),
-      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-      children: [
-        Text('Pedal: ${(day.ridingDuration.inMinutes / 60).toStringAsFixed(1)} h · '
-          'Saída ${BikeTripDaySchedule.formatMinute(schedule.departureMinute)} · '
-          'Chegada ~${BikeTripDaySchedule.formatMinute(schedule.arrivalMinute)}'),
-        Text('${schedule.breakCount} pausa(s) (${schedule.breakMinutes} min); '
-          'almoço ${schedule.lunchMinutes} min.'),
-        if (climbReserve > 0)
-          Text('Reserva simulada para subida: +$climbReserve min '
-              '(incluída no horário acima).'),
-        for (final notice in notices)
-          Padding(padding: const EdgeInsets.only(top: 4), child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.warning_amber_rounded, size: 16),
-              const SizedBox(width: 5),
-              Expanded(child: Text(notice, style: const TextStyle(fontSize: 12))),
-            ],
-          )),
-        if (terrain.hasSamples)
-          Text('Perfil de elevação: +${terrain.ascentMeters.toStringAsFixed(0)} m '
-              '/ -${terrain.descentMeters.toStringAsFixed(0)} m · '
-              'cobertura ${(terrain.coverageFraction * 100).toStringAsFixed(0)}% '
-              '(estimativa das altitudes do provedor).')
-        else
-          const Text('Desnível nesta etapa: indisponível (sem perfil altimétrico).'),
-        const SizedBox(height: 6),
+      const SizedBox(height: 12),
+      Row(children: [
+        Expanded(child: _dayInfoMetric('Distância',
+            '${(day.distanceMeters / 1000).toStringAsFixed(1)} km', Icons.route_rounded)),
+        Expanded(child: _dayInfoMetric('Pedalando',
+            '${(day.ridingDuration.inMinutes / 60).toStringAsFixed(1)} h', Icons.timer_outlined)),
+      ]),
+      const SizedBox(height: 12),
+      Row(children: [
+        Expanded(child: _dayInfoMetric('Saída',
+            BikeTripDaySchedule.formatMinute(schedule.departureMinute), Icons.access_time_rounded)),
+        Expanded(child: _dayInfoMetric('Chegada estimada',
+            '~${BikeTripDaySchedule.formatMinute(schedule.arrivalMinute)}', Icons.flag_outlined)),
+      ]),
+      if (terrain.hasSamples) ...[
+        const SizedBox(height: 12),
         Row(children: [
-          Expanded(child: Text(checkValid
-              ? (checkedItems.isEmpty
-                  ? 'Anotação salva, sem serviços conferidos.'
-                  : 'Conferido por você: ${checkedItems.join(' · ')}')
-              : 'Sem serviços conferidos para esta parada.',
+          const Icon(Icons.terrain_rounded, size: 18),
+          const SizedBox(width: 7),
+          Expanded(child: Text('Subida estimada: +${terrain.ascentMeters.toStringAsFixed(0)} m '
+              '· descida: -${terrain.descentMeters.toStringAsFixed(0)} m',
               style: Theme.of(context).textTheme.bodySmall)),
-          TextButton.icon(
-            icon: const Icon(Icons.edit_outlined, size: 18),
-            onPressed: () => unawaited(_editStopCheck(day, trip)),
-            label: const Text('Conferir'),
-          ),
         ]),
-        if (checkValid && savedCheck!.notes.isNotEmpty)
-          Text('Nota offline: ${savedCheck.notes}',
-              style: Theme.of(context).textTheme.bodySmall),
-        if (savedCheck != null && !checkValid)
-          const Text('Registro de outra posição/etapa: precisa ser conferido novamente.',
-              style: TextStyle(fontSize: 12)),
-        const SizedBox(height: 5),
-        _weatherDayLine(day.day, trip),
-        const SizedBox(height: 5),
-        Text(day.usesKnownPlace
-          ? 'Local candidato: ${day.stopKind}. Distância até a via em linha reta: '
-              '${day.routeProximityMeters?.toStringAsFixed(0) ?? 'não medida'} m. Verifique acesso e hospedagem.'
-          : 'Parada aproximada nas coordenadas ${day.stopLatitude.toStringAsFixed(4)}, '
-              '${day.stopLongitude.toStringAsFixed(4)}. Não indica cidade ou hospedagem confirmada.',
-          style: Theme.of(context).textTheme.bodySmall),
       ],
-    ));
+      if (notices.isNotEmpty) ...[
+        const SizedBox(height: 9),
+        Row(children: [
+          Icon(Icons.warning_amber_rounded, color: scheme.error, size: 18),
+          const SizedBox(width: 6),
+          Expanded(child: Text('${notices.length} aviso(s) para revisar nos detalhes',
+            style: TextStyle(color: scheme.error, fontSize: 12))),
+        ]),
+      ],
+      const SizedBox(height: 10),
+      Row(children: [
+        Expanded(child: Text(checkValid
+            ? (checkedItems.isEmpty
+                ? 'Anotação salva; serviços não marcados.'
+                : 'Conferido: ${checkedItems.join(' · ')}')
+            : 'Acesso, água e pernoite não confirmados.',
+            style: Theme.of(context).textTheme.bodySmall)),
+        TextButton.icon(
+          icon: const Icon(Icons.edit_outlined, size: 18),
+          onPressed: () => unawaited(_editStopCheck(day, trip)),
+          label: const Text('Conferir'),
+        ),
+      ]),
+      ExpansionTile(
+        key: ValueKey('details-${trip.id}-${trip.selectedIndex}-${day.day}'),
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 6),
+        title: const Text('Mais detalhes do dia'),
+        children: [
+          Align(alignment: Alignment.centerLeft,
+            child: Text('${schedule.breakCount} pausa(s) (${schedule.breakMinutes} min); '
+                'almoço ${schedule.lunchMinutes} min.')),
+          if (climbReserve > 0)
+            Align(alignment: Alignment.centerLeft,
+              child: Text('Reserva de subida: +$climbReserve min '
+                '(incluída no horário estimado).')),
+          if (terrain.hasSamples)
+            Align(alignment: Alignment.centerLeft,
+              child: Text('Cobertura altimétrica: '
+                  '${(terrain.coverageFraction * 100).toStringAsFixed(0)}% '
+                  '(estimativa do provedor).'))
+          else
+            const Align(alignment: Alignment.centerLeft,
+              child: Text('Perfil altimétrico indisponível; não foram inventados desníveis.')),
+          for (final notice in notices)
+            Padding(padding: const EdgeInsets.only(top: 6), child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Icon(Icons.warning_amber_outlined, color: scheme.error, size: 17),
+                const SizedBox(width: 6),
+                Expanded(child: Text(notice, style: const TextStyle(fontSize: 12))),
+              ],
+            )),
+          if (checkValid && savedCheck!.notes.isNotEmpty)
+            Align(alignment: Alignment.centerLeft,
+              child: Text('Nota offline: ${savedCheck.notes}',
+                  style: Theme.of(context).textTheme.bodySmall)),
+          if (savedCheck != null && !checkValid)
+            const Text('Registro vinculado a outra posição ou etapa; confira novamente.',
+                style: TextStyle(fontSize: 12)),
+          const SizedBox(height: 6),
+          _weatherDayLine(day.day, trip),
+          const SizedBox(height: 6),
+          Align(alignment: Alignment.centerLeft,
+            child: Text(day.usesKnownPlace
+              ? 'Local candidato: ${day.stopKind}. Distância da via em linha reta: '
+                  '${day.routeProximityMeters?.toStringAsFixed(0) ?? 'não medida'} m. '
+                  'Verifique o acesso e a hospedagem.'
+              : 'Parada aproximada: ${day.stopLatitude.toStringAsFixed(4)}, '
+                  '${day.stopLongitude.toStringAsFixed(4)}. '
+                  'Não indica cidade ou hospedagem confirmada.',
+              style: Theme.of(context).textTheme.bodySmall)),
+        ],
+      ),
+    ]);
   }
+
+  Widget _dayInfoMetric(String label, String value, IconData icon) =>
+      Row(children: [
+        Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 7),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.labelSmall),
+            Text(value, style: Theme.of(context).textTheme.titleMedium),
+          ],
+        )),
+      ]);
 
   Widget _librarySection() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     const SizedBox(height: 22),
@@ -2151,7 +2320,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     body: SafeArea(child: Center(child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 760),
       child: ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 32), children: [
-        Card(child: Padding(
+        if (_draft != null)
+          Align(alignment: Alignment.centerRight, child: TextButton.icon(
+            onPressed: _busy || _loadingLibrary ? null : () => unawaited(_newRouteWizard()),
+            icon: const Icon(Icons.add_road_rounded),
+            label: const Text('Nova rota'),
+          ))
+        else Card(child: Padding(
           padding: const EdgeInsets.all(18),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Row(children: [

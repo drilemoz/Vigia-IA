@@ -1,3 +1,12 @@
+## 1.0.370+370 (2026-11-09)
+
+- Reorganizada a tela de Planejamento com resumo compacto, navegação por uma etapa de cada vez e mudança por botões, indicadores ou gesto horizontal.
+- Informações essenciais do dia (distância, ritmo, saída, chegada, elevação, alertas e situação da conferência) disponíveis sem abrir um cartão longo; detalhes adicionais recolhíveis.
+- Mapa passa a ser exibido sob demanda. Ferramentas de clima manual, reserva de subida, offline/MBTiles, localidades e apoios ficam agrupadas em painéis recolhíveis.
+- Salvar em destaque, opções de exportação GPX/JSON e exclusão no menu Mais, preservando os fluxos originais.
+- A simulação, os registros offline, a geometria, o clima salvo e as verificações continuam usando os serviços existentes; nenhuma chamada de rede foi adicionada à navegação de dias.
+- Verificações estruturais e testes locais registrados na entrega. Compilação Flutter e APK precisam de confirmação no workflow.
+
 ## 1.0.369+369 (2026-11-07)
 
 - Corrigido falso "O Vigia IA está atualizado" quando existe Release superior sem APK universal dentro dos filtros restritivos.

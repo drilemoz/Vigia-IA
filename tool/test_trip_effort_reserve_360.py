@@ -27,7 +27,7 @@ class EffortReserve360(unittest.TestCase):
         screen=read('lib/screens/trip_planning_screen.dart')
         for term in ('TripEffortReserveService.adjustedDay(',
                      'TripDayReadinessService.notices(',
-                     'simulatedDays[i]', 'reservedMinutes',
+                     'days[selected]', 'reservedMinutes',
                      'latestArrivalMinute', 'Chegar até'):
             self.assertIn(term,screen)
         self.assertIn('weatherDays: const <TripWeatherDayForecast>[]',screen)

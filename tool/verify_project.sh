@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 -m unittest -q tool/test_trip_planning_compact_370.py || { echo "Planejamento 370: navegacao, mapa sob demanda e conferencias divergentes." >&2; exit 1; }
 python3 -m unittest -q tool/test_nearby_panel_height_368.py || { echo "Painel Proximos pontos 368 divergente." >&2; exit 1; }
 python3 -m unittest -q tool/test_github_updates_367.py || { echo "Atualizador GitHub 367: política ou integração divergente." >&2; exit 1; }
 python3 -m unittest -q tool/test_build311_geolocator_import_366.py || { echo "APK 311: import redundante de geolocator_android retornou." >&2; exit 1; }

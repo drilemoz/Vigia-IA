@@ -45,9 +45,10 @@ class Wizard285(unittest.TestCase):
   trip_name = preview.group(1)
   self.assertIn(f'_routeMap({trip_name})', self.screen)
   self.assertIn(f'_routeActions({trip_name})', self.screen)
-  self.assertIn("const Text('Salvar')",self.screen)
-  self.assertIn("const Text('Apagar')",self.screen)
-  self.assertIn("Text('Exportar'",self.screen)
+  self.assertIn("const Text('Salvar viagem')",self.screen)
+  self.assertIn("Text('Apagar ou descartar')",self.screen)
+  self.assertIn("Text('Exportar GPX')",self.screen)
+  self.assertIn("Text('Exportar JSON')",self.screen)
   self.assertIn('_discardOrDeleteCurrent',self.screen)
   self.assertIn('_delete(trip)',self.screen)
  def test_existing_storage_not_migrated(self):

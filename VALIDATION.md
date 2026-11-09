@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.370+370
+
+Ver `VALIDATION-1.0.370.md` para os testes locais do planejamento compacto; build Flutter/Android permanece pendente de confirmação pelo CI.
+
 # Validação Vigia IA 1.0.369+369
 
 Ver `VALIDATION-1.0.369.md` para a correção da detecção de versões recentes do GitHub e limites do download seguro. Compilação Flutter, testes Dart e APK ainda dependem do CI.

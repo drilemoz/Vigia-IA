@@ -1,3 +1,12 @@
+# Arquitetura — Vigia IA 1.0.370+370 (planejamento por etapas)
+
+## Planejamento compacto e etapas navegáveis (1.0.370)
+
+- `TripPlanningScreen._preview` concentra resumo de viagem e a etapa selecionada; `_stageSlides` troca somente a apresentação local sem alterar a instância da viagem nem recalcular rotas.
+- `_dayCard` preserva o serviço de horários, esforço, avisos, conferência manual, clima e coordenadas. Mais detalhes é uma `ExpansionTile` local ao cartão.
+- `_routeMap` é criado apenas na expansão do mapa; `_planningTools` mantém as opções de previsão manual, MBTiles, reservas e apoios com chamadas existentes sob demanda.
+- Ao carregar uma viagem, calcular uma rota ou trocar de alternativa, o índice de dia volta ao início. A seleção visual não entra no JSON da biblioteca.
+
 # Arquitetura — Vigia IA 1.0.369+369 (atualização GitHub: detecção separada do download)
 
 O atualizador não depende da câmera, GPS nem do modo de monitoramento. `VigiaIaApp` observa o foreground, chama `VigiaGitHubUpdateService` com janela de 60 s e mostra aviso quando o parser encontra uma Release mais recente. O parser aceita apenas tags `vMAJOR.MINOR.PATCH+BUILD`, APK `VigiaIA-vMAJOR.MINOR.PATCH+BUILD-universal.apk`, URL construída do repositório público embutido e tamanho limitado. Uma Release sem SHA-256 aparece, mas não pode ser instalada pelo app. O download é iniciado apenas pelo usuário e gravado no cache privado. O Android recebe somente o nome fixo do APK interno e valida novamente hash, `com.vigiaia.app`, incremento de versão e certificados de assinatura. O FileProvider só expõe `updates/` ao instalador com URI temporária. Não há acesso a tokens, credenciais ou armazenamento externo; a navegação offline não requer consultar o serviço.

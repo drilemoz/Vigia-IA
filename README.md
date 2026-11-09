@@ -1,4 +1,12 @@
-**Versão atual:** `1.0.369+369`
+**Versão atual:** `1.0.370+370`
+
+## 1.0.370 — Planejamento da cicloviagem mais compacto
+
+- O painel da viagem prioriza o destino, a distância, o tempo e a quantidade de dias, sem exigir rolagem por todos os dias.
+- As etapas são exibidas uma por vez, com Anterior, Próximo dia, indicadores numéricos (até 14 dias) e gesto de deslizar lateralmente, sem recalcular a rota.
+- O cartão diário destaca distância, horário, subida estimada (quando disponível), avisos e conferência de acesso, água e pernoite; detalhes, previsão salva e coordenadas permanecem acessíveis.
+- A prévia do mapa só é renderizada ao expandir a seção. Clima, reserva de subida, arquivos MBTiles e apoios ficam em Ferramentas e ajustes.
+- Salvar é ação principal; exportação GPX/JSON e descarte estão no menu de ações. Nenhuma alteração no formato da biblioteca ou na regra de confirmação das paradas.
 
 ## 1.0.369 — Atualizações do GitHub sem falso "atualizado"
 
