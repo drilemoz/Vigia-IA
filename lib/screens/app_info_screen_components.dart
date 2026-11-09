@@ -89,7 +89,7 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.372',
+          version: '1.0.373',
           current: true,
           changes: [
             'Corrigida a análise estática Flutter do build Android APK 317.',
@@ -3255,7 +3255,7 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.372',
+          version: '1.0.373',
           current: true,
           changes: [
             'Corrigida a análise estática Flutter do build Android APK 317.',

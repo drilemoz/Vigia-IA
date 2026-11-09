@@ -1,4 +1,4 @@
-# Vigia IA 1.0.372+372 — Buildfix Android APK 317
+# Vigia IA 1.0.373+373 — Buildfix Android APK 317
 
 **Data:** 09/11/2026
 

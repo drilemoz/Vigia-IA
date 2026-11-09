@@ -26,7 +26,7 @@ class Build317FlutterAnalyze372(unittest.TestCase):
         self.assertIn("setState(() {", segment)
 
     def test_release_version(self):
-        self.assertIn("version: 1.0.372+372", (ROOT / "pubspec.yaml").read_text())
+        self.assertIn("version: 1.0.373+373", (ROOT / "pubspec.yaml").read_text())
 
 
 if __name__ == "__main__":

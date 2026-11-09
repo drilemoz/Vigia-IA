@@ -1,4 +1,4 @@
-# Vigia IA 1.0.372+372 — Validação do build 317
+# Vigia IA 1.0.373+373 — Validação do build 317
 
 - Fonte: `Vigia-IA-Android-APK-317-logs.zip` (19 arquivos), etapa `11_Analise estatica.txt`.
 - `flutter analyze --fatal-infos --fatal-warnings`: erro de lint `curly_braces_in_flow_control_structures` em `lib/screens/trip_planning_screen.dart:546:37`; exit code 1.

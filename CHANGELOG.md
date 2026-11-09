@@ -1,4 +1,11 @@
-## 1.0.372+372 (2026-11-09)
+## 1.0.373+373 — Planejamento e mapa (09/11/2026)
+
+- Pesquisa de cidades em diálogo de tela cheia, adaptado ao teclado.
+- Data de partida obrigatória no assistente, com Hoje/calendário e validação de horário passado.
+- Datas previstas no resumo; mapa online ligado inicialmente e controle visível no cartão de mapa.
+- Preserva a rota anterior ao abrir/cancelar a criação de nova rota.
+
+## 1.0.373+373 (2026-11-09)
 
 - Corrigido o bloqueio do build Android APK 317 em `flutter analyze --fatal-infos --fatal-warnings`: a estrutura `if (discard == true && mounted)` agora possui chaves e engloba `setState` corretamente.
 - Teste de regressão incluído e conectado ao verificador preventivo. A correção é exclusivamente sintática, sem mudança no descarte da rota.

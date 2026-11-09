@@ -21,7 +21,7 @@ class MapSearchUi324(unittest.TestCase):
         self.assertNotIn('searchSubmitted(',block) # política pública Nominatim: sem autocomplete
         for expected in ('_citySearch.searchSubmitted(', 'onSubmitted: (_) => unawaited(_searchCity(origin: origin))',
                          'Buscar "$activeText" online', 'Selecione um resultado para habilitar Avançar',
-                         'onTap: () => _selectCity(place)'):
+                         'onTap: () {\n              _selectCity(place);'):
             self.assertIn(expected,s)
 
     def test_wizard_is_responsive_and_settings_are_2x2(self):

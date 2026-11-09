@@ -98,7 +98,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   bool _checkingOfflineReadiness = false;
   PlannedBikeTrip? _lastReadinessTrip;
   TripOfflineReadinessReport? _lastReadinessReport;
-  bool _showOnlineBaseMap = false;
+  bool _showOnlineBaseMap = true;
+  DateTime? _wizardStartDate;
   // Navegação local entre etapas; não modifica o roteiro persistido.
   int _selectedDayIndex = 0;
   bool _slideForward = true;
@@ -243,7 +244,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       } else {
         _destination = null;
       }
-      _draft = null;
       _message = null;
     });
     _refreshWizard();
@@ -286,7 +286,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _destination = place;
         _destinationField.text = place.title;
       }
-      _draft = null;
       _message = null;
     });
     _refreshWizard();
@@ -346,7 +345,6 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _origin = location;
         _originField.text = 'Meu local (GPS)';
         _lookingForOrigin = true;
-        _draft = null;
         _message = null;
       });
       _citySearch.updateLocalQuery(
@@ -391,10 +389,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     if (_busy || _loadingLibrary) return;
     _originField.clear();
     _destinationField.clear();
+    _wizardStartDate = null;
     setState(() {
       _origin = null;
       _destination = null;
-      _draft = null;
       _message = null;
       _lookingForOrigin = true;
     });
@@ -460,6 +458,33 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                         Text('${_origin!.title} → ${_destination!.title}',
                             textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleSmall),
                         const SizedBox(height: 10),
+                        Card(child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                            const Text('Data de partida obrigatória', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Wrap(spacing: 8, runSpacing: 8, children: [
+                              OutlinedButton.icon(
+                                onPressed: () { dialogSetState(() => _wizardStartDate = DateUtils.dateOnly(DateTime.now())); },
+                                icon: const Icon(Icons.today_rounded), label: const Text('Hoje')),
+                              OutlinedButton.icon(
+                                onPressed: () async {
+                                  final today = DateUtils.dateOnly(DateTime.now());
+                                  final date = await showDatePicker(context: ctx,
+                                    initialDate: _wizardStartDate ?? today,
+                                    firstDate: today,
+                                    lastDate: DateTime(today.year + 2, 12, 31));
+                                  if (date != null && ctx.mounted) dialogSetState(() => _wizardStartDate = date);
+                                },
+                                icon: const Icon(Icons.calendar_month_rounded),
+                                label: Text(_wizardStartDate == null ? 'Escolher data' : _formatTripDate(_wizardStartDate!))),
+                            ]),
+                            if (_wizardStartDate == null)
+                              const Text('Selecione Hoje ou uma data no calendário para continuar.',
+                                style: TextStyle(fontSize: 12)),
+                          ]),
+                        )),
+                        const SizedBox(height: 8),
                         _settings(),
                         const SizedBox(height: 6),
                         Text('Os tempos são estimativas, não incluem relevo e vento.',
@@ -481,7 +506,19 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                                 ? () { FocusManager.instance.primaryFocus?.unfocus();
                                     dialogSetState(() => step = 1); }
                                 : null)
-                            : () { shouldCalculate = true; Navigator.pop(ctx); },
+                            : (_wizardStartDate == null ? null : () {
+                                final now = DateTime.now();
+                                final chosen = _wizardStartDate!;
+                                final departureAt = DateTime(chosen.year, chosen.month, chosen.day,
+                                    _departure.hour, _departure.minute);
+                                if (departureAt.isBefore(now)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                    content: Text('O horário de saída já passou. Escolha outra data ou horário.')));
+                                  return;
+                                }
+                                shouldCalculate = true;
+                                Navigator.pop(ctx);
+                              }),
                         icon: Icon(step == 0 ? Icons.arrow_forward_rounded : Icons.route_rounded),
                         label: Text(step == 0 ? 'Avançar' : 'Ver trajeto'),
                       ),
@@ -622,6 +659,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         balanceDays: _balanceDays,
         smartStages: _smartStages,
         forceLunch: _forceLunch,
+        startDate: _wizardStartDate,
       );
       // A primeira lista de cidades e apoios é inteiramente local. Não liga
       // GPS nem executa Overpass em segundo plano.
@@ -988,6 +1026,40 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     }
   }
 
+  Future<void> _openCitySearch({required bool origin}) async {
+    _activateCityField(origin: origin);
+    final controller = origin ? _originField : _destinationField;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog.fullscreen(
+        child: SafeArea(child: Column(children: [
+          Padding(padding: const EdgeInsets.all(12), child: Row(children: [
+            IconButton(onPressed: () => Navigator.pop(dialogContext),
+              icon: const Icon(Icons.arrow_back_rounded)),
+            Expanded(child: TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: origin ? 'Pesquisar origem' : 'Pesquisar destino',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(icon: const Icon(Icons.search_rounded),
+                  onPressed: () => unawaited(_searchCity(origin: origin))),
+              ),
+              textInputAction: TextInputAction.search,
+              onChanged: (text) => _typing(text, origin: origin),
+              onSubmitted: (_) => unawaited(_searchCity(origin: origin)),
+            )),
+          ])),
+          Expanded(child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: AnimatedBuilder(animation: _citySearch, builder: (context, _) => _searchResults()),
+          )),
+        ])),
+      ),
+    );
+    _refreshWizard();
+  }
+
   Widget _cityField({required bool origin}) {
     final selected = origin ? _origin : _destination;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1007,7 +1079,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ),
         textInputAction: TextInputAction.search,
         autocorrect: false,
-        onTap: () => _activateCityField(origin: origin),
+        onTap: () => unawaited(_openCitySearch(origin: origin)),
+        readOnly: true,
         onChanged: (text) => _typing(text, origin: origin),
         onSubmitted: (_) => unawaited(_searchCity(origin: origin)),
       ),
@@ -1055,7 +1128,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             title: Text(place.title, maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text(place.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: place.storedLocally ? const Icon(Icons.offline_pin_outlined, size: 18) : null,
-            onTap: () => _selectCity(place),
+            onTap: () {
+              _selectCity(place);
+              if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+            },
           ),
       ],
     ]);
@@ -1401,6 +1477,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           Expanded(child: _metric('Dias', '${simulatedDays.length}', Icons.calendar_today_outlined)),
         ]),
         const SizedBox(height: 8),
+        if (trip.startDate != null) Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text('Partida: ${_formatTripDate(trip.startDate!)} · ${BikeTripDaySchedule.formatMinute(trip.departureMinute)}  |  Chegada prevista: ${_formatTripDate(trip.startDate!.add(Duration(days: simulatedDays.length - 1)))} (estimativa; sem dias de descanso)',
+            textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+        ),
         Text(reservedMinutes > 0
             ? '${estimate.ridingHours.toStringAsFixed(1)} h base + $reservedMinutes min de reserva para subidas.'
             : 'Tempo base, sem reserva adicional para subidas.',
@@ -1419,6 +1500,13 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             : 'Visualizar trajeto e finais de etapa'),
         childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         children: [
+          SwitchListTile.adaptive(
+            dense: true, contentPadding: EdgeInsets.zero,
+            title: const Text('Mostrar mapa-base online'),
+            subtitle: const Text('Usa internet. Desative para priorizar MBTiles locais.'),
+            value: _showOnlineBaseMap,
+            onChanged: (value) => setState(() => _showOnlineBaseMap = value),
+          ),
           if (_showRouteMap) _routeMap(trip),
           const SizedBox(height: 6),
           if (plan.days.length > 1)
@@ -1475,6 +1563,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           Text('$validChecks/${days.length} conferidos',
               style: Theme.of(context).textTheme.bodySmall),
         ]),
+        if (trip.startDate != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text('Data prevista: ${_formatTripDate(trip.startDate!.add(Duration(days: selected)))}',
+            style: Theme.of(context).textTheme.bodySmall),
+        ),
         const SizedBox(height: 10),
         // Indicadores limitados para não criar dezenas de botões em roteiros
         // extensos; os botões Anterior/Próximo sempre alcançam todas as etapas.
@@ -1667,13 +1760,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                 },
               ),
             ),
-          SwitchListTile.adaptive(
-            dense: true, contentPadding: EdgeInsets.zero,
-            title: const Text('Mostrar mapa-base online'),
-            subtitle: const Text('Consome internet; não baixa mapas para uso offline.'),
-            value: _showOnlineBaseMap,
-            onChanged: (v) => setState(() => _showOnlineBaseMap = v),
-          ),
+
         ],
       ),
       ExpansionTile(

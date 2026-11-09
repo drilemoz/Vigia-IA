@@ -1,6 +1,6 @@
-**Versão atual:** `1.0.372+372`
+**Versão atual:** `1.0.373+373`
 
-## 1.0.372 — Correção do Flutter Analyze no build Android APK 317
+## 1.0.373 — Correção do Flutter Analyze no build Android APK 317
 
 - O workflow 317 aprovou a verificação preventiva com 561 testes, mas parou em `flutter analyze --fatal-infos --fatal-warnings` por `curly_braces_in_flow_control_structures` em `lib/screens/trip_planning_screen.dart:546`.
 - A condicional de descarte de rota não salva foi envolvida em um bloco `{ ... }` explícito, sem mudar o estado atualizado ou os fluxos de confirmação do usuário.
@@ -2663,3 +2663,6 @@ Detalhes técnicos: `docs/TRANSMITTER_EXCLUSIVE_290.md`.
 ### Controle remoto e IA na 1.0.294
 
 A câmera remota agora apresenta Zoom (+, − e restaurar) e Resolução em janelas próprias; informações detalhadas abrem pelo ícone de ajuda junto ao Wi-Fi. A imagem não repete o nome do transmissor no rodapé. EfficientDet-Lite0 passa a ser o modelo de partida, inclusive no Automático; o YOLO26s permanece selecionável manualmente. Perfis antigos com padrão YOLO migram uma vez para Lite0 (schema 9).
+
+
+Planejamento 1.0.373: busca de cidades em tela cheia, data de partida obrigatória e mapa-base online inicial.
