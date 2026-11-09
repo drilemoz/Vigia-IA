@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.371', build: 371);
+      AppBuildVersion(version: '1.0.372', build: 372);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.371', build: 371),
+      version: AppBuildVersion(version: '1.0.372', build: 372),
       changes: <String>[
-        'Corrigida a verificação preventiva da prévia de rotas após a reorganização do planejamento.',
-        'Aviso completo de acesso seguro, água e hospedagem restaurado no painel de apoios.',
-        'Planejamento por slides, mapa e ferramentas recolhíveis preservados.',
+        'Corrigido o aviso de análise estática do Flutter no descarte de uma rota não salva.',
+        'Mantidos o planejamento compacto por dias e as conferências offline.',
+        'Verificação preventiva do projeto aprovada no build Android APK 317.',
       ],
     ),
   ]);

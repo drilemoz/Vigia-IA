@@ -1,4 +1,9 @@
-# Arquitetura — Vigia IA 1.0.371+371 (planejamento por etapas e aviso de acesso)
+# Arquitetura — Vigia IA 1.0.372+372 (planejamento por etapas, lint 317 corrigido)
+
+## Buildfix do descartador de rota (1.0.372)
+
+- `TripPlanningScreen`: estrutura de controle do descarte de rota não salva agora usa chaves explícitas no `if` que envolve `setState`.
+- Sem mudanças no modelo, na lógica de cálculo, na UI por etapas ou na persistência de conferências; alteração estrutural para o analisador Flutter (build Android APK 317).
 
 ## Correção do contrato de informação de segurança (1.0.371)
 

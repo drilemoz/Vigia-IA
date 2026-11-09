@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.371+371`
+**Versão atual:** `1.0.372+372`
+
+## 1.0.372 — Correção do Flutter Analyze no build Android APK 317
+
+- O workflow 317 aprovou a verificação preventiva com 561 testes, mas parou em `flutter analyze --fatal-infos --fatal-warnings` por `curly_braces_in_flow_control_structures` em `lib/screens/trip_planning_screen.dart:546`.
+- A condicional de descarte de rota não salva foi envolvida em um bloco `{ ... }` explícito, sem mudar o estado atualizado ou os fluxos de confirmação do usuário.
+- Incluído teste de regressão `tool/test_build317_flutter_analyze_372.py` para evitar retorno do padrão de if sem chaves nesse trecho.
+- Preservados navegação por dias, controles recolhíveis, conferências offline e avisos de segurança. Build Android e testes Flutter aguardam execução no CI.
 
 ## 1.0.371 — Correção da verificação preventiva Android APK 316
 

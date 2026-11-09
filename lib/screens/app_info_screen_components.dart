@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.371',
+          version: '1.0.372',
           current: true,
+          changes: [
+            'Corrigida a análise estática Flutter do build Android APK 317.',
+            'Condicional do descarte da rota agora usa bloco com chaves, sem mudança de comportamento.',
+            'Planejamento compacto, conferências e mapas offline preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.371',
+          current: false,
           changes: [
             'Corrigido o verificador de prévia de rotas no build Android APK 316.',
             'Aviso de proximidade, passagem pela via e acesso seguro preservado no painel de apoios.',
@@ -3245,8 +3255,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.371',
+          version: '1.0.372',
           current: true,
+          changes: [
+            'Corrigida a análise estática Flutter do build Android APK 317.',
+            'Condicional do descarte da rota agora usa bloco com chaves, sem mudança de comportamento.',
+            'Planejamento compacto, conferências e mapas offline preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.371',
+          current: false,
           changes: [
             'Corrigido o verificador de prévia de rotas no build Android APK 316.',
             'Aviso de proximidade, passagem pela via e acesso seguro preservado no painel de apoios.',

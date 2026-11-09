@@ -543,10 +543,12 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         ],
       ),
     );
-    if (discard == true && mounted) setState(() {
-      _draft = null;
-      _selectedDayIndex = 0;
-    });
+    if (discard == true && mounted) {
+      setState(() {
+        _draft = null;
+        _selectedDayIndex = 0;
+      });
+    }
   }
 
   Widget _routeActions(PlannedBikeTrip trip) => Padding(

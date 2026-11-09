@@ -1,3 +1,9 @@
+## 1.0.372+372 (2026-11-09)
+
+- Corrigido o bloqueio do build Android APK 317 em `flutter analyze --fatal-infos --fatal-warnings`: a estrutura `if (discard == true && mounted)` agora possui chaves e engloba `setState` corretamente.
+- Teste de regressão incluído e conectado ao verificador preventivo. A correção é exclusivamente sintática, sem mudança no descarte da rota.
+- Verificação preventiva do build 317: 561 testes aprovados. Compilação e suíte Flutter/Android da nova versão aguardam novo CI.
+
 ## 1.0.371+371 (2026-11-09)
 
 - Corrigido o bloqueio da verificação preventiva do workflow Android APK 316: `FALHA 229: sem status de acesso por estrada`.
