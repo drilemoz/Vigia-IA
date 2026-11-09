@@ -26,7 +26,12 @@ class Build317FlutterAnalyze372(unittest.TestCase):
         self.assertIn("setState(() {", segment)
 
     def test_release_version(self):
-        self.assertIn("version: 1.0.373+373", (ROOT / "pubspec.yaml").read_text())
+        # Um buildfix anterior não deve bloquear novas versões sequenciais.
+        content = (ROOT / "pubspec.yaml").read_text()
+        match = re.search(r"(?m)^version: (1\.0\.(\d+))\+(\d+)$", content)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(2), match.group(3))
+        self.assertGreaterEqual(int(match.group(2)), 372)
 
 
 if __name__ == "__main__":

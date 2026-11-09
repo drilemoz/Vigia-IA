@@ -16,8 +16,12 @@ class Build239TripLint286(unittest.TestCase):
         gps_catch = self.source[self.source.index('Não foi possível obter uma posição GPS atual.')-160:self.source.index('Não foi possível obter uma posição GPS atual.')+130]
         self.assertNotRegex(gps_catch, r'if \(mounted\)\s+setState\(\(\) => _message')
 
-    def test_preferences_update_is_braced(self):
-        self.assertRegex(self.source, r'if \(draft != null\) \{\s*setState\(\(\) => _draft')
+    def test_wizard_updates_are_braced_and_do_not_mutate_saved_draft(self):
+        # A etapa de configuração foi separada em 1.0.374. O callback de
+        # preferências do rascunho foi removido para que Cancelar preserve a rota.
+        self.assertIn('void _updateWizard(VoidCallback update) {', self.source)
+        self.assertIn('setState(update);', self.source)
+        self.assertNotIn('void _refreshDraftPreferences()', self.source)
         self.assertNotRegex(self.source, r'if \(draft != null\)\s+setState\(')
 
     def test_delete_update_is_braced(self):

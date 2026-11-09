@@ -1,4 +1,13 @@
-**Versão atual:** `1.0.373+373`
+**Versão atual:** `1.0.374+374`
+
+## 1.0.374 — Programação e metas de cicloviagem
+
+- O assistente de Nova rota foi dividido em 3 etapas: origem/destino, data/horário/pausas e ritmo/metas.
+- A data continua obrigatória; ao escolher Hoje, horários passados impedem avançar e apresentam aviso.
+- O modo tradicional por horas foi preservado. O modo por quilômetros aceita 5–300 km para só a primeira etapa ou todas as etapas, com planejamento e JSON persistentes.
+- A etapa por distância é um objetivo aproximado, não uma promessa de água, pernoite, segurança, altitude ou cumprimento do horário. Limite de chegada permanece um alerta.
+- A prévia mostra data/hora de chegada estimada a partir do último dia, das pausas e do almoço, sem dias de descanso.
+- Novos testes Dart e Python; é necessário validar no CI Flutter/Android.
 
 ## 1.0.373 — Correção do Flutter Analyze no build Android APK 317
 

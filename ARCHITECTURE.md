@@ -1,4 +1,11 @@
-# Arquitetura — Vigia IA 1.0.373+373 (planejamento por etapas, lint 317 corrigido)
+# Arquitetura — Vigia IA 1.0.374+374 (assistente em três etapas e metas de distância)
+
+## Planejamento de cicloviagem 1.0.374
+
+- `TripPlanningScreen`: três etapas isoladas, com programação por data/hora/pausas e ritmo por horas ou quilômetros; nenhuma rede nem GPS é ativado automaticamente.
+- `PlannedBikeTrip`: `dailyDistanceTargetKm` nulo indica modo legado por horas; `distanceGoalFirstDayOnly` decide se a meta se limita à etapa 1, serializada no JSON com validação de limites.
+- `BikeTripPlanner.buildPlan`: primeiro dia por distância com restantes por horas/esforço, ou alvo de distância distribuído pelos dias; candidatos a parada permanecem próximos da geometria e sem garantia de acesso ou hospedagem.
+- `BikeTripDaySchedule` calcula o horário da última etapa para a prévia da chegada; não pressupõe dias de descanso ou condições climáticas.
 
 ## Buildfix do descartador de rota (1.0.373)
 

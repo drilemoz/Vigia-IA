@@ -15,9 +15,10 @@ class Wizard285(unittest.TestCase):
   self.assertIn('if (_draft != null) _preview(_draft!)',body)
   self.assertNotIn('_cityField(origin: true)',body)
   self.assertNotIn('_settings()',body)
- def test_wizard_has_two_steps(self):
-  self.assertIn("'Nova rota · 1 de 2'",self.screen)
-  self.assertIn("'Ritmo da pedalada · 2 de 2'",self.screen)
+ def test_wizard_has_three_steps(self):
+  self.assertIn("'Nova rota · 1 de 3'",self.screen)
+  self.assertIn("'Programação · 2 de 3'",self.screen)
+  self.assertIn("'Ritmo e metas · 3 de 3'",self.screen)
   self.assertIn('barrierDismissible: false',self.screen)
   self.assertIn('validCities && !_locating',self.screen)
   self.assertIn('shouldCalculate = true',self.screen)

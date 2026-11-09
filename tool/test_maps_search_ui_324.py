@@ -24,18 +24,20 @@ class MapSearchUi324(unittest.TestCase):
                          'onTap: () {\n              _selectCity(place);'):
             self.assertIn(expected,s)
 
-    def test_wizard_is_responsive_and_settings_are_2x2(self):
+    def test_wizard_is_responsive_and_controls_are_grouped_by_step(self):
         s=read('lib/screens/trip_planning_screen.dart')
         wizard=s.split('Future<void> _newRouteWizard()',1)[1].split('Future<void> _exportTrip(',1)[0]
         self.assertIn('return Dialog(',wizard)
         self.assertIn('Flexible(child: SingleChildScrollView(',wizard)
         self.assertIn('OverflowBar(',wizard)
-        settings=s.split('Widget _settings()',1)[1].split('  // A prévia usa apenas pacotes MBTiles',1)[0]
-        self.assertEqual(settings.count('Row(children:'),3) # 2 filas de controle, 1 do popup
-        self.assertIn("_choice('Almoço'",settings)
-        self.assertIn("_choice('Pausa'",settings)
-        self.assertIn("_choice('A cada'",settings)
-        self.assertIn('Saída ${_departure.format(context)}',settings)
+        self.assertIn('_wizardSchedule()',wizard)
+        self.assertIn('_wizardRidingGoal()',wizard)
+        schedule=s.split('Widget _wizardSchedule()',1)[1].split('Widget _wizardRidingGoal()',1)[0]
+        for item in ("_choice('Almoço'", "_choice('Pausa'", "_choice('A cada'",
+                     "Text('Saída: ${_departure.format(context)}')"):
+            self.assertIn(item,schedule)
+        self.assertIn('Só no primeiro dia',s)
+        self.assertIn('Em todos os dias',s)
 
     def test_map_header_has_no_white_appbar_and_hud_has_reserved_space(self):
         shell=read('lib/screens/map_workspace_shell.dart')

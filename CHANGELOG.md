@@ -1,3 +1,10 @@
+## 1.0.374+374 — Assistente de cicloviagem em 3 etapas (09/11/2026)
+
+- Destino → Programação (data futura, saída, pausas, almoço, limite) → Ritmo e metas.
+- Meta em quilômetros, no primeiro dia ou em todos, conectada à divisão efetiva dos trechos e persistida no planejamento offline.
+- Compatibilidade com viagens antigas por horas; resumo com data e hora de chegada calculada, ressalva sobre dias de descanso.
+- Novos testes preventivos e Dart, sem alterar módulos de câmera, IA ou sensores.
+
 ## 1.0.373+373 — Planejamento e mapa (09/11/2026)
 
 - Pesquisa de cidades em diálogo de tela cheia, adaptado ao teclado.

@@ -51,6 +51,8 @@ class BikeTripPlanner {
     List<double?> elevationsMeters = const <double?>[],
     int climbReserveMinutesPer100m = 0,
     bool smartStages = false,
+    double? dailyDistanceTargetKm,
+    bool distanceGoalFirstDayOnly = true,
   }) {
     final tripEstimate = estimate(
       distanceMeters: routeDistanceMeters,
@@ -89,8 +91,28 @@ class BikeTripPlanner {
     // Sem perfil, o esforço é só tempo de pedal em velocidade fixa.
     // A divisão inteligente não transforma ausência de altitude em subida.
     final daySeconds = tripEstimate.preferences.ridingHoursPerDay * 3600;
-    final dayCount = effort == null ? tripEstimate.dayCount :
-        math.max(1, (effort.totalSeconds / daySeconds).ceil()).toInt();
+    // Meta opcional: preferências de horas continuam válidas para viagens antigas.
+    final distanceGoalMeters = dailyDistanceTargetKm != null &&
+        dailyDistanceTargetKm.isFinite &&
+        dailyDistanceTargetKm >= 5 && dailyDistanceTargetKm <= 300
+        ? dailyDistanceTargetKm * 1000 : null;
+    final firstGoalMeters = math.min(routeDistanceMeters,
+        distanceGoalMeters ?? routeDistanceMeters).toDouble();
+    final totalEffortSeconds = effort?.totalSeconds ??
+        tripEstimate.ridingDuration.inSeconds.toDouble();
+    final firstGoalEffortSeconds = effort?.secondsAtMeters(firstGoalMeters) ??
+        firstGoalMeters / 1000 / tripEstimate.preferences.averageSpeedKmh * 3600;
+    final int dayCount;
+    if (distanceGoalMeters == null) {
+      dayCount = effort == null ? tripEstimate.dayCount :
+          math.max(1, (effort.totalSeconds / daySeconds).ceil()).toInt();
+    } else if (distanceGoalFirstDayOnly && firstGoalMeters < routeDistanceMeters) {
+      final remainingSeconds = math.max(0.0,
+          totalEffortSeconds - firstGoalEffortSeconds).toDouble();
+      dayCount = 1 + math.max(1, (remainingSeconds / daySeconds).ceil()).toInt();
+    } else {
+      dayCount = math.max(1, (routeDistanceMeters / distanceGoalMeters).ceil()).toInt();
+    }
     final planEstimate = BikeTripEstimate(
       distanceMeters: tripEstimate.distanceMeters,
       ridingDuration: tripEstimate.ridingDuration,
@@ -104,23 +126,47 @@ class BikeTripPlanner {
       final finalDay = day == dayCount;
       final previousEffort = effort?.secondsAtMeters(previousEnd) ?? 0.0;
       final remainingDays = dayCount - day + 1;
-      final idealSeconds = effort == null ? 0.0 :
-          (tripEstimate.preferences.balanceDays
-              ? previousEffort +
-                  (effort.totalSeconds - previousEffort) / remainingDays
-              : math.min(effort.totalSeconds, previousEffort + daySeconds)
-                    .toDouble());
-      final idealEnd = finalDay ? routeDistanceMeters : effort == null
-          ? _idealCumulativeDistance(
-              day: day,
-              totalDays: dayCount,
-              totalDistanceMeters: routeDistanceMeters,
-              preferences: tripEstimate.preferences,
-            ) : effort.metersAtSeconds(idealSeconds);
-
+      final usingDistanceToday = distanceGoalMeters != null &&
+          (!distanceGoalFirstDayOnly || day == 1);
+      // Primeiro dia por quilômetros: o restante volta à duração diária;
+      // todos os dias por quilômetros: aproxima a meta sem fabricar apoios.
+      final double idealEnd;
+      if (finalDay) {
+        idealEnd = routeDistanceMeters;
+      } else if (usingDistanceToday) {
+        idealEnd = distanceGoalFirstDayOnly
+            ? firstGoalMeters
+            : tripEstimate.preferences.balanceDays
+                ? routeDistanceMeters * day / dayCount
+                : math.min(routeDistanceMeters, distanceGoalMeters! * day).toDouble();
+      } else if (distanceGoalMeters != null && distanceGoalFirstDayOnly) {
+        if (effort == null) {
+          final remainingDistance = routeDistanceMeters - firstGoalMeters;
+          idealEnd = tripEstimate.preferences.balanceDays
+              ? firstGoalMeters + remainingDistance * (day - 1) / (dayCount - 1)
+              : math.min(routeDistanceMeters, firstGoalMeters +
+                  (day - 1) * tripEstimate.preferences.averageSpeedKmh *
+                  tripEstimate.preferences.ridingHoursPerDay * 1000).toDouble();
+        } else {
+          final targetEffort = tripEstimate.preferences.balanceDays
+              ? previousEffort + (effort.totalSeconds - previousEffort) / remainingDays
+              : math.min(effort.totalSeconds, previousEffort + daySeconds).toDouble();
+          idealEnd = effort.metersAtSeconds(targetEffort);
+        }
+      } else if (effort == null) {
+        idealEnd = _idealCumulativeDistance(
+            day: day, totalDays: dayCount, totalDistanceMeters: routeDistanceMeters,
+            preferences: tripEstimate.preferences);
+      } else {
+        final idealEffort = tripEstimate.preferences.balanceDays
+            ? previousEffort + (effort.totalSeconds - previousEffort) / remainingDays
+            : math.min(effort.totalSeconds, previousEffort + daySeconds).toDouble();
+        idealEnd = effort.metersAtSeconds(idealEffort);
+      }
+      final idealSeconds = effort?.secondsAtMeters(idealEnd) ?? 0.0;
       _MappedTripCandidate? selected;
       if (!finalDay) {
-        final dailyTarget = routeDistanceMeters / dayCount;
+        final dailyTarget = idealEnd - previousEnd;
         final maxDelta = math.max(18000.0, dailyTarget * 0.35).toDouble();
         for (final candidate in mappedCandidates) {
           if (usedIds.contains(candidate.result.id)) {
@@ -137,7 +183,7 @@ class BikeTripPlanner {
             continue;
           }
           final delta = (candidate.routeDistanceMeters - idealEnd).abs();
-          if (effort == null) {
+          if (effort == null || usingDistanceToday) {
             if (delta > maxDelta) {
               continue;
             }
@@ -158,7 +204,7 @@ class BikeTripPlanner {
               continue;
             }
           }
-          final score = effort == null ? delta +
+          final score = effort == null || usingDistanceToday ? delta +
               candidate.routeProximityMeters * 2.2 +
               _kindPenalty(candidate.result.kind) :
               (effort.secondsAtMeters(candidate.routeDistanceMeters) -

@@ -27,6 +27,8 @@ class PlannedBikeTrip {
     this.balanceDays = true,
     this.smartStages = true,
     this.forceLunch = false,
+    this.dailyDistanceTargetKm,
+    this.distanceGoalFirstDayOnly = true,
     this.climbReserveMinutesPer100m = 0,
     this.latestArrivalMinute = 18 * 60,
     this.places = const <MapDestinationSearchResult>[],
@@ -51,6 +53,11 @@ class PlannedBikeTrip {
   /// Distribui os dias por esforço estimado e procura apoios no corredor.
   final bool smartStages;
   final bool forceLunch;
+  /// Meta de quilômetros: null mantém o planejamento tradicional por horas.
+  /// Não substitui a conferência de horários, subida e segurança da parada.
+  final double? dailyDistanceTargetKm;
+  /// Quando true, só a etapa 1 utiliza a meta de quilômetros.
+  final bool distanceGoalFirstDayOnly;
   /// Tempo extra escolhido pelo usuário a cada 100 m de subida documentada.
   /// Zero mantém a estimativa anterior, sem alteração de velocidade.
   final int climbReserveMinutesPer100m;
@@ -82,6 +89,9 @@ class PlannedBikeTrip {
     bool? balanceDays,
     bool? smartStages,
     bool? forceLunch,
+    double? dailyDistanceTargetKm,
+    bool clearDailyDistanceTarget = false,
+    bool? distanceGoalFirstDayOnly,
     int? climbReserveMinutesPer100m,
     int? latestArrivalMinute,
   }) => PlannedBikeTrip(
@@ -96,6 +106,9 @@ class PlannedBikeTrip {
     balanceDays: balanceDays ?? this.balanceDays,
     smartStages: smartStages ?? this.smartStages,
     forceLunch: forceLunch ?? this.forceLunch,
+    dailyDistanceTargetKm: clearDailyDistanceTarget ? null :
+        dailyDistanceTargetKm ?? this.dailyDistanceTargetKm,
+    distanceGoalFirstDayOnly: distanceGoalFirstDayOnly ?? this.distanceGoalFirstDayOnly,
     climbReserveMinutesPer100m: climbReserveMinutesPer100m ?? this.climbReserveMinutesPer100m,
     latestArrivalMinute: latestArrivalMinute ?? this.latestArrivalMinute,
     places: places ?? this.places,
@@ -129,6 +142,8 @@ class PlannedBikeTrip {
     'balanceDays': balanceDays,
     'smartStages': smartStages,
     'forceLunch': forceLunch,
+    'dailyDistanceTargetKm': dailyDistanceTargetKm,
+    'distanceGoalFirstDayOnly': distanceGoalFirstDayOnly,
     'climbReserveMinutesPer100m': climbReserveMinutesPer100m,
     'latestArrivalMinute': latestArrivalMinute,
     'places': [for (final place in places.take(100)) place.toJson()],
@@ -214,6 +229,12 @@ class PlannedBikeTrip {
       balanceDays: json['balanceDays'] is bool ? json['balanceDays'] as bool : true,
       smartStages: json['smartStages'] is bool ? json['smartStages'] as bool : true,
       forceLunch: json['forceLunch'] == true,
+      dailyDistanceTargetKm: json['dailyDistanceTargetKm'] is num &&
+              (json['dailyDistanceTargetKm'] as num).isFinite &&
+              (json['dailyDistanceTargetKm'] as num) >= 5 &&
+              (json['dailyDistanceTargetKm'] as num) <= 300
+          ? (json['dailyDistanceTargetKm'] as num).toDouble() : null,
+      distanceGoalFirstDayOnly: json['distanceGoalFirstDayOnly'] != false,
       climbReserveMinutesPer100m:
           (json['climbReserveMinutesPer100m'] is num &&
                   (json['climbReserveMinutesPer100m'] as num).isFinite

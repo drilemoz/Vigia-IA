@@ -63,6 +63,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   final _previewKey = GlobalKey();
   final _originField = TextEditingController();
   final _destinationField = TextEditingController();
+  final _distanceGoalField = TextEditingController(text: '50');
   final _citySearch = MapDestinationSearchService.instance;
   final _offlineMaps = OfflineMapService.instance;
   final _savedPois = RouteExplorerService.instance;
@@ -108,6 +109,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
   String? _message;
   double _speedKmh = 15;
   double _hoursPerDay = 5;
+  bool _useDistanceGoal = false;
+  bool _distanceFirstDayOnly = true;
+  double? _distanceGoalKm = 50;
+  int _arrivalCutoffHour = 18;
   bool _balanceDays = true;
   bool _smartStages = true;
   bool _forceLunch = false;
@@ -175,6 +180,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         _saved = trips;
         _speedKmh = initial?.averageSpeedKmh ?? preferences.averageSpeedKmh;
         _hoursPerDay = initial?.ridingHoursPerDay ?? preferences.ridingHoursPerDay;
+        _useDistanceGoal = initial?.dailyDistanceTargetKm != null;
+        _distanceFirstDayOnly = initial?.distanceGoalFirstDayOnly ?? true;
+        _distanceGoalKm = initial?.dailyDistanceTargetKm ?? 50;
+        _distanceGoalField.text = _distanceGoalKm!.toStringAsFixed(0);
+        _arrivalCutoffHour = (initial?.latestArrivalMinute ?? 18 * 60) ~/ 60;
         _balanceDays = initial?.balanceDays ?? preferences.balanceDays;
         _smartStages = initial?.smartStages ?? true;
         _departure = TimeOfDay(
@@ -225,6 +235,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     _previewOfflineTileProvider?.release();
     _originField.dispose();
     _destinationField.dispose();
+    _distanceGoalField.dispose();
     super.dispose();
   }
 
@@ -390,6 +401,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     _originField.clear();
     _destinationField.clear();
     _wizardStartDate = null;
+    _useDistanceGoal = false;
+    _distanceFirstDayOnly = true;
+    _distanceGoalKm = 50;
+    _distanceGoalField.text = '50';
     setState(() {
       _origin = null;
       _destination = null;
@@ -423,10 +438,12 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(step == 0 ? Icons.route_rounded : Icons.directions_bike_rounded,
+                    Icon(step == 0 ? Icons.route_rounded :
+                        step == 1 ? Icons.calendar_month_rounded : Icons.directions_bike_rounded,
                       color: Theme.of(ctx).colorScheme.primary, size: 29),
                     const SizedBox(height: 8),
-                    Text(step == 0 ? 'Nova rota · 1 de 2' : 'Ritmo da pedalada · 2 de 2',
+                    Text(step == 0 ? 'Nova rota · 1 de 3' :
+                        step == 1 ? 'Programação · 2 de 3' : 'Ritmo e metas · 3 de 3',
                       textAlign: TextAlign.center,
                       style: Theme.of(ctx).textTheme.titleLarge),
                     const SizedBox(height: 12),
@@ -436,6 +453,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                       children: step == 0 ? <Widget>[
+                      
                         Text('Digite o destino e toque em Buscar (ou na lupa). Selecione um resultado para continuar. Locais salvos funcionam offline.',
                           style: Theme.of(ctx).textTheme.bodySmall),
                         const SizedBox(height: 14),
@@ -454,41 +472,19 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                           padding: const EdgeInsets.only(top: 10),
                           child: Text(_message!, style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
                         ),
+                      ] : step == 1 ? <Widget>[
+                        Text('${_origin!.title} → ${_destination!.title}',
+                          textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleSmall),
+                        const SizedBox(height: 10),
+                        _wizardSchedule(),
                       ] : <Widget>[
                         Text('${_origin!.title} → ${_destination!.title}',
-                            textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleSmall),
+                          textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleSmall),
                         const SizedBox(height: 10),
-                        Card(child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                            const Text('Data de partida obrigatória', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8),
-                            Wrap(spacing: 8, runSpacing: 8, children: [
-                              OutlinedButton.icon(
-                                onPressed: () { dialogSetState(() => _wizardStartDate = DateUtils.dateOnly(DateTime.now())); },
-                                icon: const Icon(Icons.today_rounded), label: const Text('Hoje')),
-                              OutlinedButton.icon(
-                                onPressed: () async {
-                                  final today = DateUtils.dateOnly(DateTime.now());
-                                  final date = await showDatePicker(context: ctx,
-                                    initialDate: _wizardStartDate ?? today,
-                                    firstDate: today,
-                                    lastDate: DateTime(today.year + 2, 12, 31));
-                                  if (date != null && ctx.mounted) dialogSetState(() => _wizardStartDate = date);
-                                },
-                                icon: const Icon(Icons.calendar_month_rounded),
-                                label: Text(_wizardStartDate == null ? 'Escolher data' : _formatTripDate(_wizardStartDate!))),
-                            ]),
-                            if (_wizardStartDate == null)
-                              const Text('Selecione Hoje ou uma data no calendário para continuar.',
-                                style: TextStyle(fontSize: 12)),
-                          ]),
-                        )),
-                        const SizedBox(height: 8),
-                        _settings(),
+                        _wizardRidingGoal(),
                         const SizedBox(height: 6),
-                        Text('Os tempos são estimativas, não incluem relevo e vento.',
-                            style: Theme.of(ctx).textTheme.bodySmall),
+                        Text('Estimativas: relevo, vento, água e pernoite exigem conferência.',
+                          style: Theme.of(ctx).textTheme.bodySmall),
                       ],
                       ),
                     )),
@@ -497,8 +493,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                       spacing: 8, overflowSpacing: 6, children: [
                       TextButton(onPressed: () => Navigator.pop(ctx),
                         child: const Text('Cancelar')),
-                      if (step == 1)
-                        OutlinedButton(onPressed: () => dialogSetState(() => step = 0),
+                      if (step > 0)
+                        OutlinedButton(onPressed: () => dialogSetState(() => step -= 1),
                           child: const Text('Voltar')),
                       FilledButton.icon(
                         onPressed: step == 0
@@ -506,21 +502,22 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                                 ? () { FocusManager.instance.primaryFocus?.unfocus();
                                     dialogSetState(() => step = 1); }
                                 : null)
-                            : (_wizardStartDate == null ? null : () {
-                                final now = DateTime.now();
-                                final chosen = _wizardStartDate!;
-                                final departureAt = DateTime(chosen.year, chosen.month, chosen.day,
-                                    _departure.hour, _departure.minute);
-                                if (departureAt.isBefore(now)) {
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                    content: Text('O horário de saída já passou. Escolha outra data ou horário.')));
-                                  return;
-                                }
-                                shouldCalculate = true;
-                                Navigator.pop(ctx);
-                              }),
-                        icon: Icon(step == 0 ? Icons.arrow_forward_rounded : Icons.route_rounded),
-                        label: Text(step == 0 ? 'Avançar' : 'Ver trajeto'),
+                            : step == 1
+                                ? (_wizardScheduleError() != null ? null : () {
+                                    // A hora real é conferida novamente no toque.
+                                    final error = _wizardScheduleError();
+                                    if (error != null) { _notify(error); return; }
+                                    dialogSetState(() => step = 2);
+                                  })
+                                : (!_useDistanceGoal || _validDistanceGoal
+                                    ? () {
+                                        final error = _wizardScheduleError();
+                                        if (error != null) { _notify(error); return; }
+                                        shouldCalculate = true;
+                                        Navigator.pop(ctx);
+                                      } : null),
+                        icon: Icon(step == 2 ? Icons.route_rounded : Icons.arrow_forward_rounded),
+                        label: Text(step == 2 ? 'Ver trajeto' : 'Próximo'),
                       ),
                     ]),
                   ]),
@@ -660,6 +657,9 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         smartStages: _smartStages,
         forceLunch: _forceLunch,
         startDate: _wizardStartDate,
+        dailyDistanceTargetKm: _useDistanceGoal ? _distanceGoalKm : null,
+        distanceGoalFirstDayOnly: _distanceFirstDayOnly,
+        latestArrivalMinute: _arrivalCutoffHour * 60,
       );
       // A primeira lista de cidades e apoios é inteiramente local. Não liga
       // GPS nem executa Overpass em segundo plano.
@@ -709,28 +709,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     elevationsMeters: trip.selectedRoute.elevationsMeters,
     climbReserveMinutesPer100m: trip.climbReserveMinutesPer100m,
     smartStages: trip.smartStages,
+    dailyDistanceTargetKm: trip.dailyDistanceTargetKm,
+    distanceGoalFirstDayOnly: trip.distanceGoalFirstDayOnly,
     );
     _planCache[trip] = plan;
     return plan;
-  }
-
-  void _refreshDraftPreferences() {
-    final draft = _draft;
-    if (draft != null) {
-      setState(() => _draft = draft.copyWith(
-        averageSpeedKmh: _speedKmh,
-        ridingHoursPerDay: _hoursPerDay,
-        departureMinute: _departure.hour * 60 + _departure.minute,
-        breakEveryKm: _breakEveryKm,
-        breakMinutes: _breakMinutes,
-        lunchMinutes: _lunchMinutes,
-        balanceDays: _balanceDays,
-        smartStages: _smartStages,
-        forceLunch: _forceLunch,
-        weatherDays: const <TripWeatherDayForecast>[],
-      ));
-    }
-    _refreshWizard();
   }
 
   Future<void> _findStops({required bool online}) async {
@@ -808,6 +791,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           _draft?.selectedIndex != trip.selectedIndex ||
           _draft?.averageSpeedKmh != trip.averageSpeedKmh ||
           _draft?.ridingHoursPerDay != trip.ridingHoursPerDay ||
+          _draft?.dailyDistanceTargetKm != trip.dailyDistanceTargetKm ||
+          _draft?.distanceGoalFirstDayOnly != trip.distanceGoalFirstDayOnly ||
           _draft?.departureMinute != trip.departureMinute ||
           _draft?.breakEveryKm != trip.breakEveryKm ||
           _draft?.breakMinutes != trip.breakMinutes ||
@@ -967,6 +952,11 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _destinationField.text = trip.destination.title;
       _speedKmh = trip.averageSpeedKmh;
       _hoursPerDay = trip.ridingHoursPerDay;
+      _useDistanceGoal = trip.dailyDistanceTargetKm != null;
+      _distanceFirstDayOnly = trip.distanceGoalFirstDayOnly;
+      _distanceGoalKm = trip.dailyDistanceTargetKm ?? 50;
+      _distanceGoalField.text = _distanceGoalKm!.toStringAsFixed(0);
+      _arrivalCutoffHour = trip.latestArrivalMinute ~/ 60;
       _balanceDays = trip.balanceDays;
       _smartStages = trip.smartStages;
       _forceLunch = trip.forceLunch;
@@ -1130,94 +1120,203 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
             trailing: place.storedLocally ? const Icon(Icons.offline_pin_outlined, size: 18) : null,
             onTap: () {
               _selectCity(place);
-              if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
             },
           ),
       ],
     ]);
   }
 
-  Widget _settings() => Container(
+  void _updateWizard(VoidCallback update) {
+    setState(update);
+    _refreshWizard();
+  }
+
+  bool get _validDistanceGoal => _distanceGoalKm != null &&
+      _distanceGoalKm!.isFinite && _distanceGoalKm! >= 5 && _distanceGoalKm! <= 300;
+
+  /// Reconfere o relógio também ao avançar. Uma data passada não é aceita.
+  String? _wizardScheduleError() {
+    final date = _wizardStartDate;
+    if (date == null) {
+      return 'Selecione Hoje ou uma data no calendário.';
+    }
+    final departureAt = DateTime(date.year, date.month, date.day,
+        _departure.hour, _departure.minute);
+    if (!departureAt.isAfter(DateTime.now())) {
+      return 'A data ou a hora de saída já passou. Escolha uma partida futura.';
+    }
+    return null;
+  }
+
+  Widget _wizardSchedule() => Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(18),
     ),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('Ritmo da viagem', style: Theme.of(context).textTheme.titleMedium),
-      const SizedBox(height: 6),
-      Text('Velocidade média: ${_speedKmh.toStringAsFixed(0)} km/h'),
-      Slider(value: _speedKmh, min: 5, max: 40, divisions: 35,
-          label: '${_speedKmh.toStringAsFixed(0)} km/h',
-          onChanged: (v) { setState(() => _speedKmh = v); _refreshDraftPreferences(); },
-          onChangeEnd: (_) => unawaited(_persistDefaults())),
-      Text('Pedal por dia: ${_hoursPerDay.toStringAsFixed(0)} h'),
-      Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
-          label: '${_hoursPerDay.toStringAsFixed(0)} h',
-          onChanged: (v) { setState(() => _hoursPerDay = v); _refreshDraftPreferences(); },
-          onChangeEnd: (_) => unawaited(_persistDefaults())),
-      SwitchListTile.adaptive(
-        dense: true, contentPadding: EdgeInsets.zero,
-        title: const Text('Equilibrar os dias'),
-        subtitle: const Text('Equilibra o tempo estimado ou, no modo tradicional, a distância por dia'),
-        value: _balanceDays,
-        onChanged: (value) {
-          setState(() => _balanceDays = value);
-          _refreshDraftPreferences();
-          unawaited(_persistDefaults());
-        },
-      ),
-      SwitchListTile.adaptive(
-        dense: true, contentPadding: EdgeInsets.zero,
-        title: const Text('Divisão inteligente dos dias'),
-        subtitle: const Text('Considera a reserva para subidas documentadas e prioriza paradas próximas da rota. Funciona offline.'),
-        value: _smartStages,
-        onChanged: (value) {
-          setState(() => _smartStages = value);
-          _refreshDraftPreferences();
-        },
-      ),
-      const SizedBox(height: 6),
-      Row(children: [
-        Expanded(child: OutlinedButton.icon(
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text('Data e horário de partida', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        OutlinedButton.icon(
+          onPressed: () => _updateWizard(() =>
+              _wizardStartDate = DateUtils.dateOnly(DateTime.now())),
+          icon: const Icon(Icons.today_rounded), label: const Text('Hoje')),
+        OutlinedButton.icon(
           onPressed: () async {
-            final value = await showTimePicker(context: context, initialTime: _departure);
-            if (value == null || !mounted) return;
-            setState(() => _departure = value);
-            _refreshDraftPreferences();
-            unawaited(_persistDefaults());
+            final today = DateUtils.dateOnly(DateTime.now());
+            final last = DateTime(today.year + 2, 12, 31);
+            final selected = _wizardStartDate;
+            final initial = selected != null && !selected.isBefore(today) &&
+                !selected.isAfter(last) ? selected : today;
+            final date = await showDatePicker(context: context,
+              initialDate: initial, firstDate: today, lastDate: last,
+              helpText: 'Quando pretende partir?');
+            if (date != null && mounted) {
+              _updateWizard(() => _wizardStartDate = date);
+            }
           },
-          icon: const Icon(Icons.schedule_rounded, size: 18),
-          label: FittedBox(fit: BoxFit.scaleDown,
-            child: Text('Saída ${_departure.format(context)}')),
-        )),
-        const SizedBox(width: 8),
+          icon: const Icon(Icons.calendar_month_rounded),
+          label: Text(_wizardStartDate == null ? 'Escolher data' :
+              _formatTripDate(_wizardStartDate!))),
+      ]),
+      const SizedBox(height: 8),
+      OutlinedButton.icon(
+        onPressed: () async {
+          final time = await showTimePicker(context: context, initialTime: _departure);
+          if (time != null && mounted) {
+            _updateWizard(() => _departure = time);
+          }
+        },
+        icon: const Icon(Icons.schedule_rounded),
+        label: Text('Saída: ${_departure.format(context)}'),
+      ),
+      if (_wizardScheduleError() != null) Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text(_wizardScheduleError()!,
+          style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+      ),
+      if (_departure.hour >= _arrivalCutoffHour)
+        Padding(padding: const EdgeInsets.only(top: 6),
+          child: Text('Aviso: a saída está no horário ou depois do limite '
+              'de chegada. Revise a programação ou considere descanso.',
+              style: TextStyle(color: Theme.of(context).colorScheme.error,
+                  fontSize: 12))),
+      const Divider(height: 24),
+      Text('Pausas durante o pedal', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      Row(children: [
         Expanded(child: _choice('A cada', _breakEveryKm,
-          const [15, 20, 30], 'km', (v) {
-            setState(() => _breakEveryKm = v); _refreshDraftPreferences(); unawaited(_persistDefaults());
-          })),
+          const [10, 15, 20, 30, 40], 'km', (v) => _updateWizard(() => _breakEveryKm = v))),
+        const SizedBox(width: 8),
+        Expanded(child: _choice('Pausa', _breakMinutes,
+          const [5, 10, 15, 20], 'min', (v) => _updateWizard(() => _breakMinutes = v))),
       ]),
       const SizedBox(height: 8),
       Row(children: [
-        Expanded(child: _choice('Pausa', _breakMinutes,
-          const [5, 10, 15, 20], 'min', (v) {
-            setState(() => _breakMinutes = v); _refreshDraftPreferences(); unawaited(_persistDefaults());
-          })),
-        const SizedBox(width: 8),
         Expanded(child: _choice('Almoço', _lunchMinutes,
-          const [0, 30, 40, 60], 'min', (v) {
-            setState(() { _lunchMinutes = v; _forceLunch = true; }); _refreshDraftPreferences(); unawaited(_persistDefaults());
-          })),
+          const [0, 30, 40, 60], 'min', (v) =>
+              _updateWizard(() { _lunchMinutes = v; _forceLunch = true; }))),
+        const SizedBox(width: 8),
+        Expanded(child: _choice('Chegar até', _arrivalCutoffHour,
+          const [15, 16, 17, 18, 19, 20, 21], 'h', (v) =>
+              _updateWizard(() => _arrivalCutoffHour = v))),
       ]),
       CheckboxListTile(
         dense: true, contentPadding: EdgeInsets.zero,
         title: const Text('Almoço automático'),
+        subtitle: const Text('Insere almoço quando o horário e a duração justificarem.'),
         value: !_forceLunch,
-        onChanged: (value) {
-          setState(() => _forceLunch = !(value ?? true));
-          _refreshDraftPreferences();
-          unawaited(_persistDefaults());
-        },
+        onChanged: (v) => _updateWizard(() => _forceLunch = !(v ?? true)),
+      ),
+      const Text('O limite de chegada é um aviso, não a hora do pôr do sol.',
+          style: TextStyle(fontSize: 12)),
+    ]),
+  );
+
+  Widget _wizardRidingGoal() => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text('Ritmo e metas', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      Text('Velocidade média: ${_speedKmh.toStringAsFixed(0)} km/h'),
+      Slider(value: _speedKmh, min: 5, max: 40, divisions: 35,
+        label: '${_speedKmh.toStringAsFixed(0)} km/h',
+        onChanged: (v) => _updateWizard(() => _speedKmh = v)),
+      const SizedBox(height: 6),
+      Text('Planejar por', style: Theme.of(context).textTheme.titleSmall),
+      const SizedBox(height: 6),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        ChoiceChip(label: const Text('Horas por dia'), selected: !_useDistanceGoal,
+            onSelected: (_) => _updateWizard(() => _useDistanceGoal = false)),
+        ChoiceChip(label: const Text('Quilômetros'), selected: _useDistanceGoal,
+            onSelected: (_) => _updateWizard(() => _useDistanceGoal = true)),
+      ]),
+      const SizedBox(height: 8),
+      if (!_useDistanceGoal) ...[
+        Text('Pedal por dia: ${_hoursPerDay.toStringAsFixed(0)} h'),
+        Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
+          label: '${_hoursPerDay.toStringAsFixed(0)} h',
+          onChanged: (v) => _updateWizard(() => _hoursPerDay = v)),
+        Text('Meta base: ~${(_hoursPerDay * _speedKmh).toStringAsFixed(0)} km/dia, '
+          'antes do relevo e das pausas.', style: Theme.of(context).textTheme.bodySmall),
+      ] else ...[
+        TextField(
+          controller: _distanceGoalField,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            labelText: 'Meta de distância (km)', border: OutlineInputBorder(),
+            helperText: 'Entre 5 e 300 km; meta desejada, não garantia.',
+          ),
+          onChanged: (value) => _updateWizard(() =>
+              _distanceGoalKm = double.tryParse(value.replaceAll(',', '.'))),
+        ),
+        if (!_validDistanceGoal)
+          Text('Digite uma distância válida entre 5 e 300 km.',
+            style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+        const SizedBox(height: 8),
+        Text('Aplicar esta meta:', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          ChoiceChip(label: const Text('Só no primeiro dia'),
+            selected: _distanceFirstDayOnly,
+            onSelected: (_) => _updateWizard(() => _distanceFirstDayOnly = true)),
+          ChoiceChip(label: const Text('Em todos os dias'),
+            selected: !_distanceFirstDayOnly,
+            onSelected: (_) => _updateWizard(() => _distanceFirstDayOnly = false)),
+        ]),
+        if (_distanceFirstDayOnly) ...[
+          const SizedBox(height: 10),
+          Text('Nos próximos dias: ${_hoursPerDay.toStringAsFixed(0)} h de pedal'),
+          Slider(value: _hoursPerDay, min: 1, max: 12, divisions: 11,
+            label: '${_hoursPerDay.toStringAsFixed(0)} h',
+            onChanged: (v) => _updateWizard(() => _hoursPerDay = v)),
+        ],
+        if (_validDistanceGoal)
+          Text('Tempo-base para ${_distanceGoalKm!.toStringAsFixed(0)} km: '
+              '${(_distanceGoalKm! / _speedKmh).toStringAsFixed(1)} h pedalando, '
+              'sem pausas e subidas.', style: Theme.of(context).textTheme.bodySmall),
+      ],
+      SwitchListTile.adaptive(
+        dense: true, contentPadding: EdgeInsets.zero,
+        title: const Text('Equilibrar os dias'),
+        subtitle: const Text('Redistribui os trechos restantes conforme a meta.'),
+        value: _balanceDays,
+        onChanged: (v) => _updateWizard(() => _balanceDays = v),
+      ),
+      SwitchListTile.adaptive(
+        dense: true, contentPadding: EdgeInsets.zero,
+        title: const Text('Divisão inteligente dos dias'),
+        subtitle: const Text('Busca paradas próximas ao traçado e avalia o relevo.'),
+        value: _smartStages,
+        onChanged: (v) => _updateWizard(() => _smartStages = v),
       ),
     ]),
   );
@@ -1444,6 +1543,18 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
     final reservedMinutes = ((plannedRideSeconds -
         plan.days.fold<int>(0, (sum, day) => sum + day.ridingDuration.inSeconds)) / 60)
         .round();
+    final finalArrivalMinute = simulatedDays.isEmpty ? trip.departureMinute :
+        BikeTripSchedule.forDay(
+          day: simulatedDays.last,
+          departureMinute: trip.departureMinute,
+          breakEveryKm: trip.breakEveryKm,
+          breakDurationMinutes: trip.breakMinutes,
+          lunchDurationMinutes: trip.lunchMinutes,
+          forceLunch: trip.forceLunch,
+        ).arrivalMinute;
+    final finalArrivalDate = trip.startDate?.add(Duration(
+        days: (simulatedDays.isEmpty ? 0 : simulatedDays.length - 1) +
+            finalArrivalMinute ~/ (24 * 60)));
     return Column(key: _previewKey, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SizedBox(height: 12),
       if (trip.routes.length > 1)
@@ -1477,9 +1588,16 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           Expanded(child: _metric('Dias', '${simulatedDays.length}', Icons.calendar_today_outlined)),
         ]),
         const SizedBox(height: 8),
+        if (trip.dailyDistanceTargetKm != null) Padding(
+          padding: const EdgeInsets.only(top: 6, bottom: 4),
+          child: Text('Meta: ${trip.dailyDistanceTargetKm!.toStringAsFixed(1)} km '
+              '${trip.distanceGoalFirstDayOnly ? 'no primeiro dia' : 'por dia'} '
+              '· valores ajustados conforme a divisão da rota.',
+            textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+        ),
         if (trip.startDate != null) Padding(
           padding: const EdgeInsets.only(bottom: 6),
-          child: Text('Partida: ${_formatTripDate(trip.startDate!)} · ${BikeTripDaySchedule.formatMinute(trip.departureMinute)}  |  Chegada prevista: ${_formatTripDate(trip.startDate!.add(Duration(days: simulatedDays.length - 1)))} (estimativa; sem dias de descanso)',
+          child: Text('Partida: ${_formatTripDate(trip.startDate!)} · ${BikeTripDaySchedule.formatMinute(trip.departureMinute)}  |  Chegada prevista: ${_formatTripDate(finalArrivalDate!)} · ~${BikeTripDaySchedule.formatMinute(finalArrivalMinute % (24 * 60))} (sem dias de descanso)',
             textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
         ),
         Text(reservedMinutes > 0
@@ -2273,6 +2391,14 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
         Expanded(child: _dayInfoMetric('Chegada estimada',
             '~${BikeTripDaySchedule.formatMinute(schedule.arrivalMinute)}', Icons.flag_outlined)),
       ]),
+      if (trip.dailyDistanceTargetKm != null &&
+          (!trip.distanceGoalFirstDayOnly || day.day == 1))
+        Padding(padding: const EdgeInsets.only(top: 8), child: Text(
+          'Meta: ${trip.dailyDistanceTargetKm!.toStringAsFixed(1)} km · '
+          'planejado: ${(day.distanceMeters / 1000).toStringAsFixed(1)} km. '
+          'Confira o acesso e as paradas; a meta não garante pernoite.',
+          style: Theme.of(context).textTheme.bodySmall,
+        )),
       if (terrain.hasSamples) ...[
         const SizedBox(height: 12),
         Row(children: [

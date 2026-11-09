@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.373',
+          version: '1.0.374',
           current: true,
+          changes: [
+            'Nova rota agora tem três etapas: destino, programação e ritmo.',
+            'Data e horário, pausas e limite de chegada separados dos controles de velocidade.',
+            'Meta de quilômetros no primeiro dia ou em todos, com cálculo das etapas e aviso de segurança.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.373',
+          current: false,
           changes: [
             'Corrigida a análise estática Flutter do build Android APK 317.',
             'Condicional do descarte da rota agora usa bloco com chaves, sem mudança de comportamento.',
@@ -3255,8 +3265,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.373',
+          version: '1.0.374',
           current: true,
+          changes: [
+            'Nova rota agora tem três etapas: destino, programação e ritmo.',
+            'Data e horário, pausas e limite de chegada separados dos controles de velocidade.',
+            'Meta de quilômetros no primeiro dia ou em todos, com cálculo das etapas e aviso de segurança.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.373',
+          current: false,
           changes: [
             'Corrigida a análise estática Flutter do build Android APK 317.',
             'Condicional do descarte da rota agora usa bloco com chaves, sem mudança de comportamento.',

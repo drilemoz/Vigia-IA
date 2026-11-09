@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.374+374
+
+Ver `VALIDATION-1.0.374.md` para os testes do assistente, metas de quilômetros, limites e compatibilidade. Flutter SDK não disponível neste ambiente; `flutter analyze`, `flutter test` e build Android pendentes do GitHub Actions.
+
 # Validação Vigia IA 1.0.373+373
 
 Ver `VALIDATION-1.0.373.md` para o buildfix #317; ver `VALIDATION-1.0.371.md` para o buildfix #316 e `VALIDATION-1.0.370.md` para o planejamento compacto; build Flutter/Android permanece pendente de confirmação pelo CI.
