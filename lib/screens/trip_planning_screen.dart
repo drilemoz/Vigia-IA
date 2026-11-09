@@ -1708,8 +1708,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
           else
             const Text('Nenhuma localidade identificada. Consulte apoios locais ou busque '
                 'quando houver internet.', style: TextStyle(fontSize: 12)),
-          const Text('Distâncias em linha reta não garantem passagem pela via, '
-              'acesso seguro, água ou hospedagem.', style: TextStyle(fontSize: 12)),
+          // Manter a advertência completa para não atribuir às localidades
+          // encontradas a garantia de passagem, acesso ou pernoite.
+          const Text('Proximidade em linha reta não confirma passagem pela via, acesso seguro, água ou hospedagem.',
+              style: TextStyle(fontSize: 12)),
         ],
       ),
     ]);
@@ -2249,7 +2251,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
               child: Text('Nota offline: ${savedCheck.notes}',
                   style: Theme.of(context).textTheme.bodySmall)),
           if (savedCheck != null && !checkValid)
-            const Text('Registro vinculado a outra posição ou etapa; confira novamente.',
+            const Text('Conferência antiga: parada alterada, revisar',
                 style: TextStyle(fontSize: 12)),
           const SizedBox(height: 6),
           _weatherDayLine(day.day, trip),

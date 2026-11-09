@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.370+370`
+**Versão atual:** `1.0.371+371`
+
+## 1.0.371 — Correção da verificação preventiva Android APK 316
+
+- O workflow 316 parou em `tool/check_route_preview_229.py` antes de `flutter analyze`, `flutter test` ou da compilação Android: o verificador exigia texto de cautela substituído na reorganização da 1.0.370.
+- Restaurada a advertência completa no painel recolhível **Localidades e pontos de apoio**: proximidade geométrica não confirma passagem pela via, acesso seguro, água nem hospedagem. A informação segue acessível ao expandir a seção.
+- Preservados os slides de dias, animação, conferências offline, dados de clima e elevação, e ações de salvar/exportar sem alterar cálculos. Restabelecido o aviso de conferência antiga para parada alterada.
+- `check_route_preview_229.py`: 11 contratos aprovados. Verificação geral `tool/verify_project.sh` finalizada com código 0, 561 testes em `unittest discover` (560 aprovados, 1 pulado sem Dart). Flutter SDK local indisponível; compilação, análise, testes Flutter e uso em aparelho pendentes de novo CI.
 
 ## 1.0.370 — Planejamento da cicloviagem mais compacto
 

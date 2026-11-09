@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.370', build: 370);
+      AppBuildVersion(version: '1.0.371', build: 371);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.370', build: 370),
+      version: AppBuildVersion(version: '1.0.371', build: 371),
       changes: <String>[
-        'Planejamento com resumo de rota e cartões individuais para cada dia da cicloviagem.',
-        'Botões Anterior e Próximo dia, toque nos indicadores e gesto lateral para mudar de etapa.',
-        'Mapa e ferramentas de clima, apoios e preparação offline organizados em painéis recolhíveis.',
+        'Corrigida a verificação preventiva da prévia de rotas após a reorganização do planejamento.',
+        'Aviso completo de acesso seguro, água e hospedagem restaurado no painel de apoios.',
+        'Planejamento por slides, mapa e ferramentas recolhíveis preservados.',
       ],
     ),
   ]);

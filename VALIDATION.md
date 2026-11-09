@@ -1,6 +1,6 @@
-# Validação Vigia IA 1.0.370+370
+# Validação Vigia IA 1.0.371+371
 
-Ver `VALIDATION-1.0.370.md` para os testes locais do planejamento compacto; build Flutter/Android permanece pendente de confirmação pelo CI.
+Ver `VALIDATION-1.0.371.md` para o buildfix #316 e `VALIDATION-1.0.370.md` para o planejamento compacto; build Flutter/Android permanece pendente de confirmação pelo CI.
 
 # Validação Vigia IA 1.0.369+369
 

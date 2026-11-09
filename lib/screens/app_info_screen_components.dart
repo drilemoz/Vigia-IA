@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.370',
+          version: '1.0.371',
           current: true,
+          changes: [
+            'Corrigido o verificador de prévia de rotas no build Android APK 316.',
+            'Aviso de proximidade, passagem pela via e acesso seguro preservado no painel de apoios.',
+            'Planejamento por slides, mapa e ferramentas recolhíveis mantidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.370',
+          current: false,
           changes: [
             'Planejamento da cicloviagem reorganizado em painel compacto, com um dia por vez.',
             'Navegue entre os dias pelos botões, indicadores ou deslizando o cartão lateralmente.',
@@ -3235,8 +3245,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.370',
+          version: '1.0.371',
           current: true,
+          changes: [
+            'Corrigido o verificador de prévia de rotas no build Android APK 316.',
+            'Aviso de proximidade, passagem pela via e acesso seguro preservado no painel de apoios.',
+            'Planejamento por slides, mapa e ferramentas recolhíveis mantidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.370',
+          current: false,
           changes: [
             'Planejamento da cicloviagem reorganizado em painel compacto, com um dia por vez.',
             'Navegue entre os dias pelos botões, indicadores ou deslizando o cartão lateralmente.',

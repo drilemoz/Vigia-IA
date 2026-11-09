@@ -1,3 +1,10 @@
+## 1.0.371+371 (2026-11-09)
+
+- Corrigido o bloqueio da verificação preventiva do workflow Android APK 316: `FALHA 229: sem status de acesso por estrada`.
+- Restaurada, em Localidades e pontos de apoio (painel expansível), a advertência explícita de que proximidade em linha reta não confirma passagem pela via, acesso seguro, água ou hospedagem. Também foi restabelecido o aviso de conferência antiga quando a parada mudou.
+- Preservados a navegação por dias da 1.0.370, o mapa sob demanda, as ferramentas e as verificações de segurança. Nenhum cálculo de rota ou dado persistido alterado.
+- Verificador `check_route_preview_229.py` aprovado com 11 contratos; testes Flutter/Android continuam pendentes da execução em CI.
+
 ## 1.0.370+370 (2026-11-09)
 
 - Reorganizada a tela de Planejamento com resumo compacto, navegação por uma etapa de cada vez e mudança por botões, indicadores ou gesto horizontal.

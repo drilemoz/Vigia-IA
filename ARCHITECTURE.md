@@ -1,4 +1,10 @@
-# Arquitetura — Vigia IA 1.0.370+370 (planejamento por etapas)
+# Arquitetura — Vigia IA 1.0.371+371 (planejamento por etapas e aviso de acesso)
+
+## Correção do contrato de informação de segurança (1.0.371)
+
+- `TripPlanningScreen._planningTools`: o painel expansível **Localidades e pontos de apoio** preserva advertência explícita de que proximidade geométrica não comprova passagem por via, acesso seguro, água ou hospedagem.
+- `tool/check_route_preview_229.py` preserva o contrato pré-existente, evitando que esse aviso seja perdido em futuras mudanças de interface.
+- Nenhuma alteração nos serviços de cálculo ou nos dados da rota; a correção é textual e não desfaz a navegação por etapas da 1.0.370.
 
 ## Planejamento compacto e etapas navegáveis (1.0.370)
 
