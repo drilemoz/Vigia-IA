@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.375',
+          version: '1.0.376',
           current: true,
+          changes: [
+            'Corrigido o aviso de análise estática que impedia gerar o APK.',
+            'Operador desnecessário removido sem mudar as metas da cicloviagem.',
+            'Planejamento e dados das viagens existentes preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.375',
+          current: false,
           changes: [
             'Corrigida a progressão das etapas e o limite diário das metas em quilômetros.',
             'Data de partida, pesquisa por lupa e preferência do mapa online ajustadas.',
@@ -3265,8 +3275,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.375',
+          version: '1.0.376',
           current: true,
+          changes: [
+            'Corrigido o aviso de análise estática que impedia gerar o APK.',
+            'Operador desnecessário removido sem mudar as metas da cicloviagem.',
+            'Planejamento e dados das viagens existentes preservados.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.375',
+          current: false,
           changes: [
             'Corrigida a progressão das etapas e o limite diário das metas em quilômetros.',
             'Data de partida, pesquisa por lupa e preferência do mapa online ajustadas.',

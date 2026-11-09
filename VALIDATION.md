@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.376+376
+
+Consultar `VALIDATION-1.0.376.md` para os builds 320/321 e resultados locais. A análise estática Dart/Flutter e a compilação Android precisam ser confirmadas pelo GitHub Actions.
+
 # Validação Vigia IA 1.0.375+375
 
 Ver `VALIDATION-1.0.375.md` para correções dos limites e testes de regressão. Sem SDK Flutter local: `flutter analyze`, `flutter test` e APK dependem da execução no CI.

@@ -1,3 +1,10 @@
+## 1.0.376+376 — Correção do Flutter Analyze (09/11/2026)
+
+- Corrigido `unnecessary_non_null_assertion` reportado nos workflows Android APK 320 (1.0.374, linha 141) e 321 (1.0.375, linha 147), removendo `!` redundante em `BikeTripPlanner`.
+- Mantido exatamente o mesmo cálculo de metas e progressão de etapas.
+- Adicionado teste estático `tool/test_build321_lint_376.py` para detectar retorno do operador no ramo já promovido para não nulo.
+- `flutter analyze --fatal-infos --fatal-warnings`, testes Dart e APK ainda requerem CI.
+
 ## 1.0.375+375 — Correções do planejamento (09/11/2026)
 
 - Previne dias negativos e regressão de quilometragem quando sugestões de paradas ultrapassam a meta.

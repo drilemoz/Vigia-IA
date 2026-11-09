@@ -7,16 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.375', build: 375);
+      AppBuildVersion(version: '1.0.376', build: 376);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.375', build: 375),
+      version: AppBuildVersion(version: '1.0.376', build: 376),
       changes: <String>[
-        'Planejamento: paradas não podem gerar dias com distância negativa.',
-        'Metas de quilômetros agora conferem limite diário e horário com pausas.',
-        'Calendário, pesquisa de cidades e opção do mapa online corrigidos.',
-        'Cancelar Nova rota preserva as escolhas e o planejamento anteriores.',
+        'Correção da análise estática do planejamento que bloqueava o APK.',
+        'Removido operador redundante no cálculo das metas diárias.',
+        'Cálculo, divisão de etapas e dados salvos da cicloviagem preservados.',
       ],
     ),
   ]);

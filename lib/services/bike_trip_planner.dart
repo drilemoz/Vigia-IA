@@ -144,7 +144,7 @@ class BikeTripPlanner {
             ? firstGoalMeters
             : tripEstimate.preferences.balanceDays
                 ? routeDistanceMeters * day / dayCount
-                : math.min(routeDistanceMeters, distanceGoalMeters! * day).toDouble();
+                : math.min(routeDistanceMeters, distanceGoalMeters * day).toDouble();
       } else if (distanceGoalMeters != null && distanceGoalFirstDayOnly) {
         if (effort == null) {
           final remainingDistance = routeDistanceMeters - firstGoalMeters;

@@ -1,4 +1,10 @@
-# Arquitetura — Vigia IA 1.0.375+375 (limites e continuidade do planejamento)
+# Arquitetura — Vigia IA 1.0.376+376 (buildfix de análise estática)
+
+## Buildfix 1.0.376
+
+- `BikeTripPlanner.buildPlan`: remoção apenas do operador `!` no ramo `usingDistanceToday`, depois da promoção do tipo pelo fluxo de controle Dart. `distanceGoalMeters` já está comprovadamente não nulo nesse ramo, como apontou o analisador do Flutter 3.44.9 no CI.
+- A expressão resultante continua multiplicando a mesma distância-alvo pelos dias; sem alterações de regras, persistência ou roteamento.
+- O teste Python preventivo verifica o trecho problemático; a confirmação de tipos é responsabilidade do `flutter analyze` executado pelo workflow Android.
 
 ## Correções 1.0.375
 

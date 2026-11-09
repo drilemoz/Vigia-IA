@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.375+375`
+**Versão atual:** `1.0.376+376`
+
+## 1.0.376 — Correção de análise estática dos builds 320 e 321
+
+- Removeu `!` desnecessário em `lib/services/bike_trip_planner.dart`: a análise Dart identifica corretamente o alvo de distância como não nulo nesse ramo.
+- A matemática e o comportamento de divisão da viagem permanecem inalterados.
+- Incluiu contrato preventivo para o aviso `unnecessary_non_null_assertion` no CI.
+- Testes e empacotamento locais não substituem a nova execução de `flutter analyze` e do APK no GitHub Actions.
 
 ## 1.0.375 — Correções de segurança no planejamento da cicloviagem
 
