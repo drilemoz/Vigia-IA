@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.383+383
+
+Consultar `VALIDATION-1.0.383.md` para a correção do build 327.
+
 # Validação Vigia IA 1.0.382+382
 
 Consultar `VALIDATION-1.0.382.md` para a correção do build 326.

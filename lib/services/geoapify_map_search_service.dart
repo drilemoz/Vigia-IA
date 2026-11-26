@@ -38,7 +38,7 @@ class GeoapifyMapSearchService {
       ).timeout(const Duration(seconds: 5));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.382');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.383');
       final response = await request.close().timeout(const Duration(seconds: 6));
       final body = await response.transform(utf8.decoder).join()
           .timeout(const Duration(seconds: 6));
@@ -76,7 +76,7 @@ class GeoapifyMapSearchService {
       final request = await client.getUrl(uri).timeout(const Duration(seconds: 5));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.382');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.383');
       final response = await request.close().timeout(const Duration(seconds: 6));
       final body = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 6));
       DataUsageService.instance.record(DataUsageModule.nearby, received: utf8.encode(body).length);

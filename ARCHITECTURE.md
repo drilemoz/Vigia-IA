@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.383+383
+
+- Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.
+- O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.
+- Preservadas as validações do modelo real e as integrações de mapas e GPS.
+
 # Arquitetura — Vigia IA 1.0.382+382
 
 - Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.

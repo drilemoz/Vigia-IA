@@ -3,6 +3,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Mesmo Python usado para pip, exportação e validação no workflow.
+# Falha antes de baixar dependências em um ambiente incompatível.
+python3 - <<'PYTHON'
+import sys
+if sys.version_info[:2] != (3, 12):
+    raise SystemExit(f'Exportação YOLO26s requer Python 3.12; encontrado {sys.version.split()[0]}.')
+print(f'Python do exportador: {sys.version.split()[0]}')
+PYTHON
+
 # O PyTorch 2.13 e o torchvision 0.28 são um par oficial. O LiteRT Torch
 # 0.9.4 requer esta linha do PyTorch; deixar o pip trocar apenas torch
 # (como ocorreu no build 218) produz um ambiente inconsistente.

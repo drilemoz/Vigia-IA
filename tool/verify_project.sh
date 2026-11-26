@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 -m unittest -q tool/test_build327_python_383.py || { echo "Build 327: Python do exportador incompatível." >&2; exit 1; }
 python3 -m unittest -q tool/test_build326_lint_382.py || { echo "Build 326: blocos if sem chaves." >&2; exit 1; }
 python3 -m unittest -q tool/test_api_complement_379.py || { echo "Integração complementar 379 divergente." >&2; exit 1; }
 python3 -m unittest -q tool/test_api_integration_378.py || { echo "Integrações 378 divergentes." >&2; exit 1; }

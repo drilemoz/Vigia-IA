@@ -1,4 +1,11 @@
-**Versão atual:** `1.0.382+382`
+**Versão atual:** `1.0.383+383`
+
+## 1.0.383 — Correção do build 327
+
+- Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.
+- O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.
+- Preservadas as validações do modelo real e as integrações de mapas e GPS.
+
 
 ## 1.0.382 — Correção do build 326
 

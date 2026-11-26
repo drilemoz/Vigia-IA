@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.382', build: 382);
+      AppBuildVersion(version: '1.0.383', build: 383);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.382', build: 382),
+      version: AppBuildVersion(version: '1.0.383', build: 383),
       changes: <String>[
-        'Corrigidos os dois avisos fatais de blocos if no Flutter Analyze do build Android 326.',
-        'Preservadas as regras de pernoite e seleção de rotas em modo chuva.',
-        'Adicionados testes de regressão para os blocos corrigidos.',
+        'Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.',
+        'O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.',
+        'Preservadas as validações do modelo real e as integrações de mapas e GPS.',
       ],
     ),
   ]);

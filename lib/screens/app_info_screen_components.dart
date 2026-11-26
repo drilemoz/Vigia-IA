@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.382',
+          version: '1.0.383',
           current: true,
+          changes: [
+            'Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.',
+            'O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.',
+            'Preservadas as validações do modelo real e as integrações de mapas e GPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.382',
+          current: false,
           changes: [
             'Corrigidos os dois avisos fatais de blocos if no Flutter Analyze do build Android 326.',
             'Preservadas as regras de pernoite e seleção de rotas em modo chuva.',
@@ -3335,8 +3345,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.382',
+          version: '1.0.383',
           current: true,
+          changes: [
+            'Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.',
+            'O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.',
+            'Preservadas as validações do modelo real e as integrações de mapas e GPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.382',
+          current: false,
           changes: [
             'Corrigidos os dois avisos fatais de blocos if no Flutter Analyze do build Android 326.',
             'Preservadas as regras de pernoite e seleção de rotas em modo chuva.',
