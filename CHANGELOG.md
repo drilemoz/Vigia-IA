@@ -1,3 +1,9 @@
+## 1.0.384+384 — Correção do build 328
+
+- Corrigido o teste Flutter da comparação de rotas para validar o nome do provedor.
+- Preservados os nomes das APIs, as distâncias, os tempos estimados e a seleção de alternativas.
+- Mantidas as verificações do YOLO26s offline e do Flutter Analyze.
+
 ## 1.0.383+383 — Correção do build 327
 
 - Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.

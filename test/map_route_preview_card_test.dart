@@ -7,10 +7,13 @@ import 'package:vigiaia/models/map_travel_mode.dart';
 import 'package:vigiaia/widgets/map_route_preview_card.dart';
 
 void main() {
-  MapCyclingRoute route(double meters, double seconds) => MapCyclingRoute(
+  MapCyclingRoute route(double meters, double seconds,
+          {String provider = 'Não informado'}) =>
+      MapCyclingRoute(
         points: const [],
         distanceMeters: meters,
         durationSeconds: seconds,
+        provider: provider,
       );
 
   Future<void> render(
@@ -96,13 +99,21 @@ void main() {
       (tester) async {
     final choices = <int>[];
     await render(tester,
-        routes: [route(30000, 3600), route(35000, 3300)],
+        routes: [
+          route(30000, 3600, provider: 'OpenRouteService'),
+          route(35000, 3300, provider: 'Geoapify'),
+        ],
         selectedIndex: 1,
         onChoose: choices.add);
-    expect(find.textContaining('Rota 1 · 30.0 km · 3h00'), findsOneWidget);
-    expect(find.textContaining('Rota 2 · 35.0 km · 3h30'), findsOneWidget);
+    expect(find.text('Rota 1 · OpenRouteService · 30.0 km · 3h00'),
+        findsOneWidget);
+    expect(find.text('Rota 2 · Geoapify · 35.0 km · 3h30'),
+        findsOneWidget);
     expect(find.textContaining('+5.0 km em relação à rota 1'), findsOneWidget);
-    await tester.tap(find.textContaining('Rota 1 · 30.0 km · 3h00'));
+    expect(find.text('Provedor: Geoapify'), findsOneWidget);
+    expect(tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip,
+        'Rota 2 · Geoapify · 35.0 km · 3h30')).selected, isTrue);
+    await tester.tap(find.text('Rota 1 · OpenRouteService · 30.0 km · 3h00'));
     expect(choices, [0]);
     expect(tester.takeException(), isNull);
   });

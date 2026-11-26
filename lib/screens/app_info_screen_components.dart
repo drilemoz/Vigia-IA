@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.383',
+          version: '1.0.384',
           current: true,
+          changes: [
+            'Corrigido o teste Flutter da comparação de rotas para validar o nome do provedor.',
+            'Preservados os nomes das APIs, as distâncias, os tempos estimados e a seleção de alternativas.',
+            'Mantidas as verificações do YOLO26s offline e do Flutter Analyze.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.383',
+          current: false,
           changes: [
             'Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.',
             'O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.',
@@ -3345,8 +3355,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.383',
+          version: '1.0.384',
           current: true,
+          changes: [
+            'Corrigido o teste Flutter da comparação de rotas para validar o nome do provedor.',
+            'Preservados os nomes das APIs, as distâncias, os tempos estimados e a seleção de alternativas.',
+            'Mantidas as verificações do YOLO26s offline e do Flutter Analyze.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.383',
+          current: false,
           changes: [
             'Corrigida a incompatibilidade do Python na preparação do modelo YOLO26s offline.',
             'O GitHub Actions utiliza Python 3.12 para a exportação e validação do modelo.',
