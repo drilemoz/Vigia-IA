@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from tool.release_version_checks import current_release, version_only
+from tool.release_version_checks import current_release, version_only, current_build
 ROOT=Path(__file__).resolve().parents[1]
 def src(p): return (ROOT/p).read_text()
 class ApiComplement379(unittest.TestCase):
@@ -23,5 +23,6 @@ class ApiComplement379(unittest.TestCase):
         for t in ('amenity.toilet','camping.caravan_site','tourism.sights.bridge','_cache.length >= 32','potabilidade não verificada','Banheiro mapeado'):
             self.assertIn(t,s)
     def test_version(self):
-        self.assertEqual(current_release(ROOT),'1.0.379+379')
+        self.assertGreaterEqual(current_build(ROOT), 379)
+        self.assertIn('version: ' + current_release(ROOT), src('pubspec.yaml'))
         self.assertIn(version_only(ROOT),src('lib/core/app_metadata.dart'))

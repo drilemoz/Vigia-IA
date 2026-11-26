@@ -135,7 +135,7 @@ class MapRoutePreviewCard extends StatelessWidget {
             if (chosen != null) Text('Provedor: ${chosen.provider}'),
             Text(chosen?.surfaceLabel ?? 'Pavimento desconhecido.',
               style: Theme.of(context).textTheme.bodySmall),
-            Text('Pavimento desconhecido ou terra: confira antes de pedalar. Segurança e condição atual não verificadas.',
+            Text('Pavimento desconhecido ou terra: confira antes de pedalar. Relevo, segurança e condição atual não verificados em campo.',
               style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 8),
             Row(children: [

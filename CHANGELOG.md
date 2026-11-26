@@ -1,3 +1,9 @@
+## 1.0.380+380 — Correção do build 324
+
+- Corrigida a verificação preventiva que interrompia o build Android 324.
+- Testes de integração Geoapify atualizados sem desativar as verificações.
+- Metadados e testes de versão sincronizados para preservar as próximas atualizações.
+
 ## 1.0.379 — Integração complementar de mapas
 
 - Cache em memória: 30 min para reversa (64 entradas) e 15 min para POIs (32 entradas); SDK Android 36 explícito.

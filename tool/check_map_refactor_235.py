@@ -17,7 +17,8 @@ checks={
  'usa metricas ja existentes': 'MapRoutePreviewMetrics.forRoute(' in widget,
  'callbacks mantidos': all('onPressed: '+x in widget or 'onSelected: (_) => '+x+'(index)' in widget for x in ('onShowRoute','onClose','onToggleCollapsed','onEditPace','onStart','onSave','onPlan','onChoose')),
  'seguranca sem inicio automatico': 'onPressed: onStart' in widget and 'onStart: _startPreviewNavigation' in screen,
- 'nao inventa relevo': 'Relevo, pavimento e segurança sem dados verificados.' in widget,
+ 'nao inventa relevo': ('Relevo, segurança e condição atual não verificados em campo.' in widget and
+                        "chosen?.surfaceLabel ?? 'Pavimento desconhecido.'" in widget),
  'aviso offline mantido': 'Trajeto salvo pode ser consultado offline; novos cálculos exigem internet.' in widget,
  'testes widgets presentes': test.count('testWidgets(')>=5,
  'contratos antigos ainda ativos': all((root/'tool'/x).exists() for x in ('check_map_refactor_233.py','check_map_refactor_234.py','check_route_preview_229.py')),

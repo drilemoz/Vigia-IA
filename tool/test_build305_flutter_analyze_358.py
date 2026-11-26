@@ -18,9 +18,13 @@ class Build305FlutterAnalyze358(unittest.TestCase):
         self.assertRegex(SERVICE, pattern)
 
     def test_route_places_and_valid_destination_logic_remain(self):
-        self.assertIn('final camping =', SERVICE)
-        self.assertIn('MapDestinationSearchResult(', SERVICE)
-        self.assertIn("source: 'online'", SERVICE)
+        corridor = SERVICE.split('Future<List<MapDestinationSearchResult>> _fetchRoutePlaces(', 1)[1].split('Future<List<MapDestinationSearchResult>> _fetchPlacesInBounds(', 1)[0]
+        self.assertIn('RouteExplorerCategory.camping', corridor)
+        self.assertIn('camp_site|caravan_site', corridor)
+        self.assertIn('RouteExplorerPoiCatalog.resolveCategory(tags)', corridor)
+        self.assertIn('MapDestinationSearchResult(', corridor)
+        self.assertIn('poiCategory: category', corridor)
+        self.assertIn("source: 'online'", corridor)
 
     def test_no_unbraced_multiline_coordinate_guard(self):
         self.assertNotRegex(SERVICE, r'lon\.abs\(\)\s*>\s*180\)\s*continue;')

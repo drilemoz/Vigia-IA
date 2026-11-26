@@ -41,7 +41,8 @@ class MapsSdkBuildKey333Tests(unittest.TestCase):
         central = src('lib/screens/api_services_setup_screen.dart')
         for term in ('Google Gemini','Google Maps Platform','Stadia Maps','Geoapify',
                      'OpenRouteService', 'Open-Meteo', 'chave salva', 'sdkReady',
-                     'Busca de destinos e alternativa de pontos próximos online', 'não exige chave'):
+                     'endereço por coordenadas', 'pontos próximos', 'apoios na rota',
+                     'roteamento alternativo', 'não exige chave'):
             self.assertIn(term, central)
         config = src('lib/screens/google_maps_key_screen.dart')
         self.assertIn('O Maps SDK for Android valida a chave', config)

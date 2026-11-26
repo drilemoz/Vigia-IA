@@ -1,3 +1,9 @@
+# Validação Vigia IA 1.0.380+380
+
+- Corrigida a verificação preventiva que interrompia o build Android 324.
+- Testes de integração Geoapify atualizados sem desativar as verificações.
+- Metadados e testes de versão sincronizados para preservar as próximas atualizações.
+
 # Validação Vigia IA 1.0.376+376
 
 Consultar `VALIDATION-1.0.376.md` para os builds 320/321 e resultados locais. A análise estática Dart/Flutter e a compilação Android precisam ser confirmadas pelo GitHub Actions.

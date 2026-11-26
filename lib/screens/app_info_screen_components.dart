@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.379',
+          version: '1.0.380',
           current: true,
+          changes: [
+            'Corrigida a verificação preventiva que interrompia o build Android 324.',
+            'Testes de integração Geoapify atualizados sem desativar as verificações.',
+            'Metadados e testes de versão sincronizados para preservar as próximas atualizações.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.379',
+          current: false,
           changes: [
             'Geoapify: endereço aproximado ao selecionar ponto no mapa, com fallback Nominatim e cache temporário.',
             'Mapas: consulta manual complementa categorias ausentes via Geoapify; economia de dados preservada.',
@@ -3305,8 +3315,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.379',
+          version: '1.0.380',
           current: true,
+          changes: [
+            'Corrigida a verificação preventiva que interrompia o build Android 324.',
+            'Testes de integração Geoapify atualizados sem desativar as verificações.',
+            'Metadados e testes de versão sincronizados para preservar as próximas atualizações.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.379',
+          current: false,
           changes: [
             'Geoapify: endereço aproximado ao selecionar ponto no mapa, com fallback Nominatim e cache temporário.',
             'Mapas: consulta manual complementa categorias ausentes via Geoapify; economia de dados preservada.',

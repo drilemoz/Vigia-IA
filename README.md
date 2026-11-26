@@ -1,3 +1,11 @@
+**Versão atual:** `1.0.380+380`
+
+## 1.0.380 — Correção do build 324
+
+- Corrigida a verificação preventiva que interrompia o build Android 324.
+- Testes de integração Geoapify atualizados sem desativar as verificações.
+- Metadados e testes de versão sincronizados para preservar as próximas atualizações.
+
 ## 1.0.379 — Integração complementar de mapas
 
 - Cache em memória: 30 min para reversa (64 entradas) e 15 min para POIs (32 entradas); SDK Android 36 explícito.
@@ -14,7 +22,7 @@
 - Amostragem de apoios não exaustiva, até quatro chamadas Geoapify por busca; Overpass complementa.
 - Sem confirmação de acesso real, potabilidade, horário de funcionamento ou segurança da via.
 
-**Versão atual:** `1.0.377+377`
+
 
 ## 1.0.377+377 — GPS, pavimento e APIs
 
@@ -839,7 +847,7 @@ Detalhes e roteiro: `RELEASE-1.0.313.md`. APK/Flutter e testes físicos ainda pr
 - Lista limitada a 20 entradas e URL validada novamente ao abrir; arquivo JSON armazenado somente no diretório de suporte privado do aplicativo. Como o QR contém token de acesso, proteger backups do aparelho.
 - Transmissão MJPEG, IA local opcional, MCRP, QR e módulos de mapas não foram alterados.
 
-**Versão atual:** `1.0.300+300`
+
 
 **Buildfix 1.0.246:** o workflow Android-APK-201 identificou um `if` sem chaves na guarda de inferência do painel MCRP. Corrigida a sintaxe sem mudar o comportamento do detector; QR, MJPEG, controles, modo legado e Galeria preservados. Acrescentados cinco testes preventivos. [BUILD-201-REPORT-1.0.246.md](BUILD-201-REPORT-1.0.246.md).
 
