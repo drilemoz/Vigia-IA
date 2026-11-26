@@ -98,6 +98,7 @@ class MapDestinationSearchResult {
         'latitude': latitude,
         'longitude': longitude,
         'kind': kind.name,
+        if (poiCategory != null) 'poiCategory': poiCategory!.name,
       };
 
   factory MapDestinationSearchResult.fromJson(Map<String, dynamic> json) {
@@ -113,6 +114,7 @@ class MapDestinationSearchResult {
         orElse: () => MapDestinationKind.place,
       ),
       source: 'cache',
+      poiCategory: RouteExplorerCategoryX.fromStorageKey(json['poiCategory']?.toString() ?? ''),
     );
   }
 }

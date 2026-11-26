@@ -86,6 +86,8 @@ import pathlib, re, sys
 path = pathlib.Path(sys.argv[1])
 text = path.read_text()
 text = re.sub(r'minSdk\s*=\s*flutter\.minSdkVersion', 'minSdk = 29', text)
+text = re.sub(r'compileSdk\s*=\s*flutter\.compileSdkVersion', 'compileSdk = 36', text)
+text = re.sub(r'targetSdk\s*=\s*flutter\.targetSdkVersion', 'targetSdk = 36', text)
 text = re.sub(r'namespace\s*=\s*"[^"]+"', 'namespace = "com.vigiaia.app"', text)
 text = re.sub(r'applicationId\s*=\s*"[^"]+"', 'applicationId = "com.vigiaia.app"', text)
 if 'minSdk = 29' not in text:

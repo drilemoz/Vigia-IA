@@ -1669,6 +1669,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
         Text('${trip.origin.title} → ${trip.destination.title}',
           style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+        Text('Provedor: ${trip.selectedRoute.provider}'),
         Text(trip.selectedRoute.surfaceLabel),
         const Text('Confira trechos desconhecidos e não pavimentados antes de sair.'),
         const SizedBox(height: 12),
@@ -2002,9 +2003,10 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
                     ? Icons.local_cafe_outlined : Icons.location_city_outlined),
                 title: Text(match.place.title),
                 subtitle: Text('km ${(match.routeDistanceMeters / 1000).toStringAsFixed(1)} · '
-                    '${match.place.kind.label} · '
+                    '${match.place.poiCategory?.label ?? match.place.kind.label} · '
                     '${match.proximityMeters.toStringAsFixed(0)} m da linha · '
-                    '${match.place.storedLocally ? 'local' : 'online'}'),
+                    '${match.place.storedLocally ? 'local' : match.place.source == 'geoapify' ? 'Geoapify' : 'online'}'
+                    '${match.place.kind == MapDestinationKind.pointOfInterest && match.place.subtitle.isNotEmpty ? '\n${match.place.subtitle}' : ''}'),
                 onTap: () => unawaited(_openMap(trip,
                     focusPoint: LatLng(match.place.latitude, match.place.longitude))),
               )

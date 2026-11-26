@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 -m unittest -q tool/test_api_complement_379.py || { echo "Integração complementar 379 divergente." >&2; exit 1; }
+python3 -m unittest -q tool/test_api_integration_378.py || { echo "Integrações 378 divergentes." >&2; exit 1; }
 python3 -m unittest -q tool/test_gps_surface_api_377.py || { echo "GPS/pavimento/APIs 377 divergentes." >&2; exit 1; }
 python3 -m unittest -q tool/test_build317_flutter_analyze_372.py || { echo "APK 317: if sem chaves no descarte da rota." >&2; exit 1; }
 python3 -m unittest -q tool/test_build321_lint_376.py || { echo 'Build 321: operador non-null redundante no planejador.' >&2; exit 1; }

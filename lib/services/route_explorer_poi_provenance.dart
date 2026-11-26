@@ -7,7 +7,7 @@ class RouteExplorerPoiProvenance {
 
   static String sourceLabel(RouteExplorerResult item) => switch (item.source) {
         'offline' => 'Pacote offline',
-        'cache' => 'Cache local (OSM)',
+        'cache' => item.id.startsWith('geoapify:') ? 'Cache local (Geoapify)' : 'Cache local (OSM)',
         'geoapify' => 'Geoapify / OSM',
         _ => 'OSM mapeado',
       };

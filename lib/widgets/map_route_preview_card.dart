@@ -116,7 +116,7 @@ class MapRoutePreviewCard extends StatelessWidget {
                       bikePreferences: bikePreferences);
                     return ChoiceChip(
                     visualDensity: VisualDensity.compact,
-                    label: Text('Rota ${index + 1} · '
+                    label: Text('Rota ${index + 1} · ${option.provider} · '
                       '${optionMetrics.distanceLabel} · '
                       '${optionMetrics.durationLabel}'),
                     selected: selectedIndex == index,
@@ -132,6 +132,7 @@ class MapRoutePreviewCard extends StatelessWidget {
                   : 'Rota ${selectedIndex + 1}: ${metrics.distanceDifference(firstMetrics)}',
                 style: Theme.of(context).textTheme.bodySmall),
             ],
+            if (chosen != null) Text('Provedor: ${chosen.provider}'),
             Text(chosen?.surfaceLabel ?? 'Pavimento desconhecido.',
               style: Theme.of(context).textTheme.bodySmall),
             Text('Pavimento desconhecido ou terra: confira antes de pedalar. Segurança e condição atual não verificadas.',

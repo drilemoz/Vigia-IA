@@ -5558,7 +5558,7 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                                   lookingAtArea
                                     ? '$areaLabel · raio ${service.settings.radiusKm} km · consulta manual'
                                     : '${service.effectiveOnlineRadiusKm ?? service.settings.radiusKm} km · '
-                                      '${service.lastSource == 'offline' ? 'Pacote offline' : service.lastSource == 'cache' ? 'Cache anterior' : service.lastSource == 'online' ? 'OSM mapeado' : service.lastSource == 'geoapify' ? 'Geoapify' : 'Sem consulta'} · '
+                                      '${service.lastSource == 'offline' ? 'Pacote offline' : service.lastSource == 'cache' ? 'Cache anterior' : service.lastSource == 'online' ? 'OSM mapeado' : service.lastSource == 'geoapify' ? 'Geoapify' : service.lastSource == 'mixed' ? 'OSM + Geoapify' : 'Sem consulta'} · '
                                       '${service.resultsUpdatedAt == null ? 'data desconhecida' : 'consulta ${_formatOfflinePackageDate(service.resultsUpdatedAt!)}'}',
                                   style: Theme.of(sheetContext).textTheme.bodySmall,
                                 ),

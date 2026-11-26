@@ -43,9 +43,10 @@ class MapCyclingRouteService {
     final preference = MapViewSettingsService.instance.bikeSurface;
     final preferPaved = preference == BikeSurfacePreference.paved || preference == BikeSurfacePreference.rain;
     final safeAlternativeCount = alternativeCount.clamp(0, 2).toInt();
-    // ORS é opcional e só é usado para bicicletas; Valhalla continua como
+    // ORS é opcional (bicicleta, carro e caminhada); Valhalla continua como
     // fallback, inclusive quando a credencial foi revogada ou está sem cota.
-    if (travelMode == MapTravelMode.bicycle) {
+    final candidates = <MapCyclingRoute>[];
+    if (travelMode != MapTravelMode.motorcycle) {
       try {
         final key = await PartnerApiKeyService.instance.reveal(
           PartnerApiProvider.openrouteservice,
@@ -53,26 +54,33 @@ class MapCyclingRouteService {
         if (key != null && key.isNotEmpty) {
           final routes = await _fetchOrs(
             origin: origin, destination: destination, key: key,
-            preference: preference, alternativeCount: safeAlternativeCount,
+            preference: preference, alternativeCount: safeAlternativeCount, travelMode: travelMode,
           ).timeout(const Duration(seconds: 20));
-          final ranked = rankSurfaceRoutes(routes, preference);
-          if (ranked.isNotEmpty) return ranked;
+          final ranked = travelMode == MapTravelMode.bicycle ? rankSurfaceRoutes(routes, preference) : routes;
+          candidates.addAll(ranked);
+          if (ranked.isNotEmpty && (safeAlternativeCount == 0 || ranked.length > 1) &&
+              !(travelMode == MapTravelMode.bicycle && preference == BikeSurfacePreference.rain && ranked.first.unknownSurfaceMeters > 0)) return ranked;
         }
       } catch (_) {
         // Não impedir a navegação por falha na API opcional.
       }
     }
-    if (travelMode == MapTravelMode.bicycle) {
+    if (candidates.length <= 1 || (travelMode == MapTravelMode.bicycle && preference == BikeSurfacePreference.rain && candidates.first.unknownSurfaceMeters > 0)) {
       try {
         final key = await PartnerApiKeyService.instance.reveal(PartnerApiProvider.geoapify);
         if (key != null && key.isNotEmpty) {
-          final routes = await _fetchGeoapify(origin, destination, key, preference);
-          final ranked = rankSurfaceRoutes(routes, preference);
-          if (ranked.isNotEmpty) return ranked;
+          final routes = await _fetchGeoapify(origin, destination, key, preference, travelMode);
+          final ranked = travelMode == MapTravelMode.bicycle ? rankSurfaceRoutes(routes, preference) : routes;
+          for (final route in ranked) {
+            if (!_duplicatesExistingRoute(candidates, route)) candidates.add(route);
+          }
         }
       } catch (_) {
         // Chave opcional: Valhalla permanece disponível sem credencial.
       }
+    }
+    if (candidates.isNotEmpty) {
+      return travelMode == MapTravelMode.bicycle ? rankSurfaceRoutes(candidates, preference) : candidates;
     }
     final payload = jsonEncode(<String, Object>{
       'locations': <Map<String, double>>[
@@ -97,7 +105,7 @@ class MapCyclingRouteService {
       <String, String>{'json': payload},
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.377');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
     request.headers.set('X-Client-Id', 'com.vigiaia.app');
     final response = await request.close().timeout(const Duration(seconds: 12));
     final body = await utf8.decoder.bind(response).join().timeout(const Duration(seconds: 12));
@@ -114,14 +122,19 @@ class MapCyclingRouteService {
   }
 
   Future<List<MapCyclingRoute>> _fetchGeoapify(LatLng origin, LatLng destination,
-      String key, BikeSurfacePreference preference) async {
+      String key, BikeSurfacePreference preference, MapTravelMode travelMode) async {
     final preferPaved = preference == BikeSurfacePreference.paved || preference == BikeSurfacePreference.rain;
     final uri = Uri.https('api.geoapify.com', '/v1/routing', {
       'waypoints': '${origin.latitude},${origin.longitude}|${destination.latitude},${destination.longitude}',
-      'mode': preferPaved ? 'road_bike' : 'bicycle',
-      'type': preference == BikeSurfacePreference.shortest ? 'short' : 'balanced',
+      'mode': switch (travelMode) {
+        MapTravelMode.bicycle => preferPaved ? 'road_bike' : 'bicycle',
+        MapTravelMode.walking => 'walk',
+        MapTravelMode.car => 'drive',
+        MapTravelMode.motorcycle => 'motorcycle',
+      },
+      'type': travelMode == MapTravelMode.bicycle && preference == BikeSurfacePreference.shortest ? 'short' : 'balanced',
       'lang': 'pt', 'units': 'metric', 'format': 'geojson',
-      'details': 'route_details', 'apiKey': key,
+      if (travelMode == MapTravelMode.bicycle) 'details': 'route_details', 'apiKey': key,
     });
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
@@ -183,7 +196,7 @@ class MapCyclingRouteService {
       if (paved + unpaved > distance) {
         final factor = distance / (paved + unpaved); paved *= factor; unpaved *= factor;
       }
-      routes.add(MapCyclingRoute(points: List.unmodifiable(points), distanceMeters: distance,
+      routes.add(MapCyclingRoute(provider: 'Geoapify', points: List.unmodifiable(points), distanceMeters: distance,
         durationSeconds: time, maneuvers: List.unmodifiable(maneuvers), pavedMeters: paved, unpavedMeters: unpaved));
     }
     if (routes.isEmpty) throw const FormatException('Geoapify sem rotas válidas');
@@ -196,6 +209,7 @@ class MapCyclingRouteService {
     required String key,
     required BikeSurfacePreference preference,
     required int alternativeCount,
+    required MapTravelMode travelMode,
   }) async {
     final payload = jsonEncode(<String, Object>{
       'coordinates': <List<double>>[
@@ -203,8 +217,8 @@ class MapCyclingRouteService {
         <double>[destination.longitude, destination.latitude],
       ],
       'elevation': true,
-      'extra_info': ['surface'],
-      if (preference == BikeSurfacePreference.shortest) 'preference': 'shortest',
+      if (travelMode == MapTravelMode.bicycle) 'extra_info': ['surface'],
+      if (travelMode == MapTravelMode.bicycle && preference == BikeSurfacePreference.shortest) 'preference': 'shortest',
       if (alternativeCount > 0) 'alternative_routes': {'target_count': alternativeCount + 1, 'share_factor': 0.6, 'weight_factor': 1.6},
       'instructions': true,
       'language': 'pt',
@@ -213,15 +227,19 @@ class MapCyclingRouteService {
     try {
       final request = await client.postUrl(Uri.https(
         'api.heigit.org',
-        preference == BikeSurfacePreference.paved || preference == BikeSurfacePreference.rain
-            ? '/openrouteservice/v2/directions/cycling-road/geojson'
-            : '/openrouteservice/v2/directions/cycling-regular/geojson',
+        travelMode == MapTravelMode.bicycle && preference != BikeSurfacePreference.paved && preference != BikeSurfacePreference.rain
+            ? '/openrouteservice/v2/directions/cycling-regular/geojson'
+            : '/openrouteservice/v2/directions/${switch (travelMode) {
+          MapTravelMode.walking => 'foot-walking',
+          MapTravelMode.car || MapTravelMode.motorcycle => 'driving-car',
+          MapTravelMode.bicycle => preference == BikeSurfacePreference.paved || preference == BikeSurfacePreference.rain ? 'cycling-road' : 'cycling-regular',
+        }}/geojson',
       )).timeout(const Duration(seconds: 5));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.authorizationHeader, key);
       request.headers.set(HttpHeaders.acceptHeader, 'application/geo+json, application/json');
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.377');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
       request.add(utf8.encode(payload));
       final response = await request.close().timeout(const Duration(seconds: 9));
       final body = await response.transform(utf8.decoder).join()
@@ -356,6 +374,7 @@ class MapCyclingRouteService {
       paved *= factor; unpaved *= factor;
     }
     return MapCyclingRoute(
+      provider: 'OpenRouteService',
       points: List<LatLng>.unmodifiable(points),
       pavedMeters: paved, unpavedMeters: unpaved,
       distanceMeters: distance,
@@ -453,6 +472,7 @@ class MapCyclingRouteService {
     }
     if (points.length < 2) throw const FormatException('Rota sem geometria');
     return MapCyclingRoute(
+      provider: 'Valhalla',
       points: List<LatLng>.unmodifiable(points),
       distanceMeters: ((summary['length'] as num?)?.toDouble() ?? 0) * 1000,
       durationSeconds: (summary['time'] as num?)?.toDouble() ?? 0,

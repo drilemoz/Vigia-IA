@@ -38,7 +38,7 @@ class GeoapifyMapSearchService {
       ).timeout(const Duration(seconds: 5));
       request.followRedirects = false;
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.364');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
       final response = await request.close().timeout(const Duration(seconds: 6));
       final body = await response.transform(utf8.decoder).join()
           .timeout(const Duration(seconds: 6));
@@ -53,6 +53,57 @@ class GeoapifyMapSearchService {
     } finally {
       client.close(force: true);
     }
+  }
+
+  static final _reverseCache = <String, ({DateTime at, MapDestinationSearchResult item})>{};
+
+  static Future<MapDestinationSearchResult?> reverse({
+    required MapRoutePoint point,
+  }) async {
+    final key = await PartnerApiKeyService.instance.reveal(PartnerApiProvider.geoapify);
+    if (key == null || key.isEmpty) return null;
+    final cacheKey = '${point.latitude.toStringAsFixed(5)},${point.longitude.toStringAsFixed(5)}';
+    final cached = _reverseCache[cacheKey];
+    if (cached != null && DateTime.now().difference(cached.at) < const Duration(minutes: 30)) {
+      return cached.item;
+    }
+    final uri = Uri.https('api.geoapify.com', '/v1/geocode/reverse', {
+      'lat': point.latitude.toString(), 'lon': point.longitude.toString(),
+      'format': 'json', 'lang': 'pt', 'limit': '1', 'apiKey': key,
+    });
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    try {
+      final request = await client.getUrl(uri).timeout(const Duration(seconds: 5));
+      request.followRedirects = false;
+      request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
+      final response = await request.close().timeout(const Duration(seconds: 6));
+      final body = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 6));
+      DataUsageService.instance.record(DataUsageModule.nearby, received: utf8.encode(body).length);
+      if (response.statusCode != HttpStatus.ok) {
+        throw HttpException('Geoapify reversa HTTP ${response.statusCode}');
+      }
+      final item = decodeReverse(body, point);
+      if (item != null) {
+        if (_reverseCache.length >= 64) _reverseCache.remove(_reverseCache.keys.first);
+        _reverseCache[cacheKey] = (at: DateTime.now(), item: item);
+      }
+      return item;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  static MapDestinationSearchResult? decodeReverse(String body, MapRoutePoint point) {
+    final decoded = decodeResponse(body, point);
+    if (decoded.isEmpty) return null;
+    final item = decoded.first;
+    return MapDestinationSearchResult(
+      id: 'reverse:${item.id}', title: item.title,
+      subtitle: 'Endereço aproximado · ${item.subtitle}',
+      latitude: point.latitude, longitude: point.longitude,
+      distanceMeters: 0, kind: item.kind, source: 'geoapify',
+    );
   }
 
   /// Parser puro, independente de rede/chave, para testes de contrato.

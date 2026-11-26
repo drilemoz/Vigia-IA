@@ -23,7 +23,7 @@ if (googleMapsApiKey.isNotEmpty() &&
 
 android {
     namespace = "com.vigiaia.app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -35,7 +35,7 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = googleMapsApiKey
         applicationId = "com.vigiaia.app"
         minSdk = 29
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

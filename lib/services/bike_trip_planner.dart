@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../models/bike_trip_plan.dart';
 import '../models/map_destination_search.dart';
+import '../models/route_explorer_models.dart';
 import 'trip_stage_effort_profile.dart';
 
 class BikeTripPlanner {
@@ -331,6 +332,9 @@ class BikeTripPlanner {
     final step = math.max(1, (routePoints.length / 450).ceil()).toInt();
     final mapped = <_MappedTripCandidate>[];
     for (final result in candidates) {
+      // Apoios de abastecimento não são candidatos automáticos a pernoite.
+      if (result.kind == MapDestinationKind.pointOfInterest &&
+          result.poiCategory != null && result.poiCategory != RouteExplorerCategory.camping) continue;
       final candidatePoint = LatLng(result.latitude, result.longitude);
       var nearestMeters = double.infinity;
       var nearestGeometryMeters = 0.0;

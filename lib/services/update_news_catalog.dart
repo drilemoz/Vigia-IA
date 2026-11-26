@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.377', build: 377);
+      AppBuildVersion(version: '1.0.379', build: 379);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.377', build: 377),
+      version: AppBuildVersion(version: '1.0.379', build: 379),
       changes: <String>[
-        'GPS: aquisição de alta precisão, limite de espera e reconexão.',
-        'Preferências de pavimento compartilhadas entre Mapas e Planejamento.',
-        'OpenRouteService migrado ao novo endpoint HeiGIT e alternativas com dados de superfície.',
+        'Geoapify: endereço aproximado ao selecionar ponto no mapa, com fallback Nominatim e cache temporário.',
+        'Mapas: consulta manual complementa categorias ausentes via Geoapify; economia de dados preservada.',
+        'Mais detalhes de água, banheiros, estacionamentos e campings; origem dos pontos preservada ao atualizar GPS.',
       ],
     ),
   ]);

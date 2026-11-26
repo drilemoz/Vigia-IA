@@ -51,27 +51,54 @@ class PartnerApiKeyService {
     masked: data?['masked'] as String? ?? '',
   );
 
-  /// Teste mínimo de uma única consulta, somente por toque explícito.
+  /// Teste das operações integradas, somente por toque explícito; até quatro consultas.
   /// Nunca escreve corpo de erro, URL com a chave ou a chave em logs.
   Future<String> test(PartnerApiProvider provider) async {
     final key = await reveal(provider);
     if (key == null || key.isEmpty) return 'Salve uma chave antes de testar.';
-    final uri = switch (provider) {
-      PartnerApiProvider.geoapify => Uri.https(
-        'api.geoapify.com', '/v1/geocode/search', {
-          'text': 'Brasília, Brasil', 'format': 'json', 'limit': '1',
-          'apiKey': key,
+    if (provider == PartnerApiProvider.geoapify) {
+      final operations = <String, Uri>{
+        'Busca de endereços': Uri.https('api.geoapify.com', '/v1/geocode/search', {
+          'text': 'Brasília, Brasil', 'format': 'json', 'limit': '1', 'apiKey': key,
         }),
-      PartnerApiProvider.openrouteservice => Uri.https(
-        'api.heigit.org', '/openrouteservice/v2/directions/cycling-regular/geojson'),
+        'Endereço por coordenadas': Uri.https('api.geoapify.com', '/v1/geocode/reverse', {
+          'lat': '-15.7942', 'lon': '-47.8825', 'format': 'json', 'limit': '1', 'apiKey': key,
+        }),
+        'Pontos de interesse': Uri.https('api.geoapify.com', '/v2/places', {
+          'categories': 'commercial.supermarket', 'filter': 'circle:-47.8825,-15.7942,2000',
+          'limit': '1', 'apiKey': key,
+        }),
+        'Rota de bicicleta': Uri.https('api.geoapify.com', '/v1/routing', {
+          'waypoints': '-15.7942,-47.8825|-15.7915,-47.8790',
+          'mode': 'bicycle', 'apiKey': key,
+        }),
+      };
+      final results = await Future.wait(operations.entries.map((entry) async {
+        final result = await _testOperation(entry.value);
+        return '${entry.key}: $result';
+      }));
+      return results.join('\n');
+    }
+    final profiles = <String, String>{
+      'Bicicleta': 'cycling-regular', 'A pé': 'foot-walking', 'Carro': 'driving-car',
     };
+    final results = await Future.wait(profiles.entries.map((entry) async {
+      final uri = entry.value == 'cycling-regular'
+          ? Uri.https('api.heigit.org', '/openrouteservice/v2/directions/cycling-regular/geojson')
+          : Uri.https('api.heigit.org', '/openrouteservice/v2/directions/${entry.value}/geojson');
+      return '${entry.key}: ${await _testOperation(uri, authorization: key)}';
+    }));
+    return results.join('\n');
+  }
+
+  Future<String> _testOperation(Uri uri, {String? authorization}) async {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
-      final request = await (provider == PartnerApiProvider.openrouteservice
+      final request = await (authorization != null
           ? client.postUrl(uri) : client.getUrl(uri)).timeout(const Duration(seconds: 10));
       request.followRedirects = false;
-      if (provider == PartnerApiProvider.openrouteservice) {
-        request.headers.set('Authorization', key);
+      if (authorization != null) {
+        request.headers.set('Authorization', authorization);
         request.headers.contentType = ContentType.json;
         request.write('{"coordinates":[[-47.8825,-15.7942],[-47.8790,-15.7915]]}');
       }
@@ -80,9 +107,7 @@ class PartnerApiKeyService {
       final code = response.statusCode;
       // Drena no máximo o cabeçalho efetivo e fecha; não armazena ou exibe o corpo.
       await response.drain<void>().timeout(const Duration(seconds: 10));
-      if (code == 200) return provider == PartnerApiProvider.geoapify
-          ? 'Busca de endereço respondeu HTTP 200. O roteamento usa outra operação e pode ter cota própria.'
-          : 'Roteamento de bicicleta respondeu HTTP 200.';
+      if (code == 200) return 'HTTP 200 · respondeu com sucesso.';
       if (code == 401 || code == 403) return 'Acesso negado (HTTP $code). Verifique a chave e suas restrições.';
       if (code == 410) return 'Endpoint desativado (HTTP 410). Atualize o aplicativo.';
       if (code == 429) return 'Limite de requisições atingido (HTTP 429).';

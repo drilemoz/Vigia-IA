@@ -45,21 +45,21 @@ const Map<ApiHelpProvider, ApiHelpInfo> apiHelp = {
     ], 'https://client.stadiamaps.com/dashboard/', keyRequired: true,
     warning: 'Verifique os termos de cache, uso não comercial e limites de créditos.'),
   ApiHelpProvider.geoapify: ApiHelpInfo(
-    'Geoapify', 'Pesquisa de destinos, POIs e fallback de rotas para bicicleta.', [
+    'Geoapify', 'Pesquisa de destinos, endereço por coordenadas, pontos próximos e apoios na rota; roteamento alternativo.', [
       'Abra o painel Geoapify e crie uma conta gratuita.',
       'Crie um projeto e acesse API Keys.',
       'Copie a chave e configure nesta central.',
-      'Use Testar para validar a conexão de geocodificação.',
+      'Use Testar para validar busca, pontos de interesse e roteamento.',
     ], 'https://myprojects.geoapify.com/', keyRequired: true,
     warning: 'Teste e consultas consomem créditos da cota gratuita. Sem chave, os provedores atuais continuam disponíveis.'),
   ApiHelpProvider.openrouteservice: ApiHelpInfo(
-    'OpenRouteService · HeiGIT', 'Rotas para bicicleta com geometria, manobras e elevação; com alternativas Geoapify e Valhalla.', [
+    'OpenRouteService · HeiGIT', 'Rotas para bicicleta, carro e caminhada com geometria, manobras e elevação; com alternativas Geoapify e Valhalla.', [
       'Crie uma conta no painel oficial HeiGIT.',
       'Acesse o painel de API keys e crie ou copie uma chave gratuita.',
       'Cole, salve e teste aqui.',
       'A API usa api.heigit.org/openrouteservice, não a URL antiga.',
     ], 'https://account.heigit.org/', keyRequired: true,
-    warning: 'A cota e as condições de uso dependem da conta. Testar faz uma consulta curta de bicicleta.'),
+    warning: 'A cota e as condições de uso dependem da conta. Testar faz três consultas curtas.'),
   ApiHelpProvider.openMeteo: ApiHelpInfo(
     'Open-Meteo', 'Previsão meteorológica já utilizada no Vigia Maps.', [
       'Nenhum cadastro ou chave é necessário no endpoint público de uso não comercial.',

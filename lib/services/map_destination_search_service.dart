@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'data_usage_service.dart';
 import 'geoapify_map_search_service.dart';
+import 'geoapify_poi_service.dart';
+import 'route_explorer_poi_catalog.dart';
 import 'map_destination_ranking.dart';
 import 'nearby_place_query.dart';
 import 'route_corridor_index.dart';
@@ -59,6 +61,8 @@ class MapDestinationSearchService extends ChangeNotifier {
   Future<void> _nominatimGate = Future<void>.value();
   final Map<String, ({DateTime at, List<MapDestinationSearchResult> items})>
       _queryCache = {};
+  final Map<String, ({DateTime at, List<MapDestinationSearchResult> items})>
+      _corridorCache = {};
   int _searchRevision = 0;
   DateTime? _nearbyRetryAfter;
   bool _nearbyLastFetchFailed = false;
@@ -301,14 +305,26 @@ class MapDestinationSearchService extends ChangeNotifier {
     var candidates = _dedupeAndSort(local);
     if (onlineAllowed) {
       try {
-        final remote = await _fetchRoutePlaces(route, current);
+        final key = RouteCorridorIndex.searchSamples(route).map((p) =>
+          '${p.latitude.toStringAsFixed(4)},${p.longitude.toStringAsFixed(4)}').join('|');
+        final cached = _corridorCache[key];
+        final List<MapDestinationSearchResult> remote;
+        if (cached != null && DateTime.now().difference(cached.at) < const Duration(minutes: 15)) {
+          remote = cached.items;
+        } else {
+          remote = await _fetchRoutePlaces(route, current);
+          if (remote.isNotEmpty) {
+            if (_corridorCache.length >= 8) _corridorCache.remove(_corridorCache.keys.first);
+            _corridorCache[key] = (at: DateTime.now(), items: remote);
+          }
+        }
         if (remote.isNotEmpty) {
           _mergeKnownPlaces(remote.where(
             (item) => item.kind != MapDestinationKind.pointOfInterest,
           ));
           await _persist();
           candidates = _dedupeAndSort(<MapDestinationSearchResult>[
-            ...local, ...remote,
+            ...local, ...remote.map((item) => item.copyWith(distanceMeters: _meters(current.latitude, current.longitude, item.latitude, item.longitude))),
           ]);
         }
       } catch (_) {
@@ -554,8 +570,36 @@ class MapDestinationSearchService extends ChangeNotifier {
     MapRoutePoint current,
   ) async {
     final positions = RouteCorridorIndex.searchSamples(route);
+    const support = <RouteExplorerCategory>{
+      RouteExplorerCategory.water, RouteExplorerCategory.camping,
+      RouteExplorerCategory.market, RouteExplorerCategory.health,
+      RouteExplorerCategory.workshop, RouteExplorerCategory.fuel,
+      RouteExplorerCategory.restaurant, RouteExplorerCategory.stop,
+    };
+    // No máximo quatro chamadas pagas por pesquisa manual. Amostragem não exaustiva.
+    final partnerResults = <MapDestinationSearchResult>[];
+    for (final sample in RouteCorridorIndex.searchSamples(route, maximumSamples: 4)) {
+      try {
+        final items = await GeoapifyPoiService.search(
+          origin: MapRoutePoint(latitude: sample.latitude, longitude: sample.longitude,
+            recordedAt: DateTime.now(), accuracyMeters: 0, speedMetersPerSecond: 0),
+          radiusKm: 16, enabled: support,
+        ).timeout(const Duration(seconds: 10));
+        if (items == null) break;
+        for (final poi in items) {
+          partnerResults.add(MapDestinationSearchResult(
+            id: poi.id, title: poi.title,
+            subtitle: [poi.subtitle, if (poi.openingHours != null) 'Horário: ${poi.openingHours}', if (poi.phone != null) 'Tel.: ${poi.phone}', if (poi.website != null) poi.website!].where((text) => text.trim().isNotEmpty).join(' · '),
+            latitude: poi.latitude, longitude: poi.longitude,
+            distanceMeters: _meters(current.latitude, current.longitude, poi.latitude, poi.longitude),
+            kind: MapDestinationKind.pointOfInterest, source: 'geoapify',
+            poiCategory: poi.category,
+          ));
+        }
+      } catch (_) { break; }
+    }
     const batchSize = 6;
-    final found = <MapDestinationSearchResult>[];
+    final found = <MapDestinationSearchResult>[...partnerResults];
     for (var offset = 0; offset < positions.length; offset += batchSize) {
       final samples = positions.skip(offset).take(batchSize);
       final query = StringBuffer('[out:json][timeout:20];(');
@@ -566,17 +610,20 @@ class MapDestinationSearchService extends ChangeNotifier {
           'nwr(around:17000,${point.latitude},${point.longitude})'
           '["place"~"city|town|village|hamlet"];',
         );
-        query.write(
-          'nwr(around:7000,${point.latitude},${point.longitude})'
-          '["tourism"="camp_site"];',
-        );
+        // POIs próximos da rota; inclui locais que a Geoapify não catalogou.
+        query.write('nwr(around:3500,${point.latitude},${point.longitude})'
+          '["amenity"~"^(fuel|restaurant|fast_food|cafe|pharmacy|hospital|clinic|drinking_water|toilets|shower|shelter|bicycle_repair_station)\$"];');
+        query.write('nwr(around:3500,${point.latitude},${point.longitude})'
+          '["shop"~"^(supermarket|convenience|grocery|bicycle|car_repair)\$"];');
+        query.write('nwr(around:7000,${point.latitude},${point.longitude})'
+          '["tourism"~"^(camp_site|caravan_site)\$"];');
       }
       query.write(');out center 240;');
       try {
         final request = await _client
             .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
             .timeout(const Duration(seconds: 8));
-        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.377');
+        request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
         request.headers.contentType = ContentType(
           'application', 'x-www-form-urlencoded', charset: 'utf-8');
         request.write('data=${Uri.encodeQueryComponent(query.toString())}');
@@ -602,7 +649,8 @@ class MapDestinationSearchService extends ChangeNotifier {
           if (tagsRaw is! Map) continue;
           final tags = tagsRaw.map(
             (key, value) => MapEntry(key.toString(), value.toString()));
-          final name = tags['name']?.trim();
+          final category = RouteExplorerPoiCatalog.resolveCategory(tags);
+          final name = tags['name']?.trim() ?? category?.label;
           if (name == null || name.isEmpty) continue;
           final center = item['center'];
           final lat = (item['lat'] as num?)?.toDouble() ??
@@ -613,13 +661,13 @@ class MapDestinationSearchService extends ChangeNotifier {
               lat.abs() > 90 || lon.abs() > 180) {
             continue;
           }
-          final camping = tags['tourism'] == 'camp_site';
-          final kind = camping ? MapDestinationKind.pointOfInterest
+          final kind = category != null ? MapDestinationKind.pointOfInterest
               : MapDestinationKindX.fromOsmType(tags['place']);
           found.add(MapDestinationSearchResult(
             id: 'route-osm:${item['type']}:${item['id']}',
             title: name,
-            subtitle: camping ? 'Camping' : kind.label,
+            subtitle: category?.label ?? kind.label,
+            poiCategory: category,
             latitude: lat,
             longitude: lon,
             distanceMeters: _meters(
@@ -654,7 +702,7 @@ class MapDestinationSearchService extends ChangeNotifier {
     final request = await _client
         .postUrl(Uri.parse('https://overpass-api.de/api/interpreter'))
         .timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.377');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
     request.headers.contentType = ContentType(
       'application',
       'x-www-form-urlencoded',
@@ -787,7 +835,7 @@ class MapDestinationSearchService extends ChangeNotifier {
 
   Future<String> _readNearbyResponse(Uri endpoint, String query) async {
     final request = await _client.postUrl(endpoint);
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.377');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379');
     request.headers.contentType = ContentType(
       'application', 'x-www-form-urlencoded', charset: 'utf-8',
     );
@@ -857,6 +905,23 @@ class MapDestinationSearchService extends ChangeNotifier {
 
     if (onlineAllowed) {
       try {
+        final partner = await GeoapifyMapSearchService.reverse(
+          point: MapRoutePoint(latitude: point.latitude, longitude: point.longitude,
+            recordedAt: DateTime.now(), accuracyMeters: 0, speedMetersPerSecond: 0),
+        ).timeout(const Duration(seconds: 8));
+        if (partner != null) {
+          return MapDestinationSearchResult(
+            id: partner.id, title: partner.title, subtitle: partner.subtitle,
+            latitude: point.latitude, longitude: point.longitude,
+            distanceMeters: current == null ? 0 : _meters(current.latitude,
+              current.longitude, point.latitude, point.longitude),
+            kind: partner.kind, source: partner.source,
+          );
+        }
+      } catch (_) {
+        // A chave opcional nunca bloqueia a reversa OSM ou as coordenadas.
+      }
+      try {
         await _respectNominatimRateLimit();
         final uri = Uri.https(
           'nominatim.openstreetmap.org',
@@ -873,7 +938,7 @@ class MapDestinationSearchService extends ChangeNotifier {
         final request = await _client.getUrl(uri).timeout(const Duration(seconds: 6));
         request.headers.set(
           HttpHeaders.userAgentHeader,
-          'VigiaIA/1.0.377 map-reverse-search',
+          'VigiaIA/1.0.379 map-reverse-search',
         );
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
         final response = await request.close().timeout(const Duration(seconds: 8));
@@ -975,7 +1040,7 @@ class MapDestinationSearchService extends ChangeNotifier {
       },
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.377 map-search');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.379 map-search');
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
     final response = await request.close().timeout(const Duration(seconds: 15));
     final body = await utf8.decoder.bind(response).join();

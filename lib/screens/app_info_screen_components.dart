@@ -89,8 +89,28 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.377',
+          version: '1.0.379',
           current: true,
+          changes: [
+            'Geoapify: endereço aproximado ao selecionar ponto no mapa, com fallback Nominatim e cache temporário.',
+            'Mapas: consulta manual complementa categorias ausentes via Geoapify; economia de dados preservada.',
+            'Mais detalhes de água, banheiros, estacionamentos e campings; origem dos pontos preservada ao atualizar GPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.378',
+          current: false,
+          changes: [
+            'Geoapify: busca de pontos de apoio ao longo da rota e detalhes disponíveis de contato.',
+            'Rotas com identificação do provedor; ORS para bicicleta, carro e caminhada, Geoapify também para moto.',
+            'Testes individuais de busca, pontos de interesse e roteamento; fallback preservado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.377',
+          current: false,
           changes: [
             'GPS: aquisição de alta precisão, limite de espera e reconexão.',
             'Preferências de pavimento compartilhadas entre Mapas e Planejamento.',
@@ -3285,8 +3305,28 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.377',
+          version: '1.0.379',
           current: true,
+          changes: [
+            'Geoapify: endereço aproximado ao selecionar ponto no mapa, com fallback Nominatim e cache temporário.',
+            'Mapas: consulta manual complementa categorias ausentes via Geoapify; economia de dados preservada.',
+            'Mais detalhes de água, banheiros, estacionamentos e campings; origem dos pontos preservada ao atualizar GPS.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.378',
+          current: false,
+          changes: [
+            'Geoapify: busca de pontos de apoio ao longo da rota e detalhes disponíveis de contato.',
+            'Rotas com identificação do provedor; ORS para bicicleta, carro e caminhada, Geoapify também para moto.',
+            'Testes individuais de busca, pontos de interesse e roteamento; fallback preservado.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.377',
+          current: false,
           changes: [
             'GPS: aquisição de alta precisão, limite de espera e reconexão.',
             'Preferências de pavimento compartilhadas entre Mapas e Planejamento.',

@@ -138,7 +138,12 @@ class _PartnerApiKeyScreenState extends State<PartnerApiKeyScreen> {
                 ? 'Chave protegida cadastrada: ${_status.masked}'
                 : 'Sem chave cadastrada · opcional'),
             const SizedBox(height: 7),
-            const Text('A chave cadastrada é utilizada sob demanda nos serviços de mapas. Geoapify atende buscas e rotas alternativas; OpenRouteService calcula rotas de bicicleta. Falhas permitem recorrer a outros provedores.'),
+            Text(widget.provider == PartnerApiProvider.geoapify
+                ? 'Busca de endereços, endereço por coordenadas, pontos próximos e apoios ao longo da rota. Roteamento alternativo para bicicleta, carro, moto e caminhada.'
+                : 'Rotas de bicicleta, carro e caminhada, com elevação quando disponível. Geoapify e Valhalla são alternativas.'),
+            Text(widget.provider == PartnerApiProvider.geoapify
+                ? 'Testar conexão realiza até quatro consultas e pode consumir créditos.'
+                : 'Testar conexão realiza até três consultas e pode consumir créditos.'),
           ],
         ))),
         const SizedBox(height: 12),

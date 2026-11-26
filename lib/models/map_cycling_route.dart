@@ -26,6 +26,7 @@ class MapCyclingRoute {
     required this.distanceMeters,
     required this.durationSeconds,
     this.maneuvers = const <MapCyclingManeuver>[],
+    this.provider = 'Não informado',
     this.pavedMeters = 0,
     this.unpavedMeters = 0,
     this.ascentMeters,
@@ -38,6 +39,7 @@ class MapCyclingRoute {
   final double durationSeconds;
   final List<MapCyclingManeuver> maneuvers;
   /// Distâncias de pavimento informadas pelo provedor; desconhecido é separado.
+  final String provider;
   final double pavedMeters;
   final double unpavedMeters;
   double get unknownSurfaceMeters => (distanceMeters - pavedMeters - unpavedMeters).clamp(0.0, distanceMeters).toDouble();

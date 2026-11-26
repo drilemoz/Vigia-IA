@@ -134,7 +134,7 @@ class MapDestinationRanking {
         final other = result[index];
         final otherId = _osmKey(other.id);
         final sameOsm = osmId != null && osmId == otherId;
-        final sameNamedLocation = fold(item.title) == fold(other.title) &&
+        final sameNamedLocation = item.poiCategory == other.poiCategory && fold(item.title) == fold(other.title) &&
             _straightMeters(item.latitude, item.longitude,
                 other.latitude, other.longitude) <= 85;
         if (sameOsm || sameNamedLocation) {
@@ -163,7 +163,7 @@ class MapDestinationRanking {
   static int _priority(MapDestinationSearchResult item) => switch (item.source) {
         'offline' => 3,
         'cache' => 2,
-        'online' => 1,
+        'online' || 'geoapify' => 1,
         _ => 0,
       };
 
