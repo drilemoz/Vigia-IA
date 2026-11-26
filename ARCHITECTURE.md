@@ -1,3 +1,9 @@
+# Arquitetura — Vigia IA 1.0.381+381
+
+- Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.
+- Preservados os avisos de pavimento, relevo e segurança para cicloviagens.
+- Sincronizados os contratos e metadados da versão sem desativar testes.
+
 # Arquitetura — Vigia IA 1.0.380+380
 
 - Corrigida a verificação preventiva que interrompia o build Android 324.

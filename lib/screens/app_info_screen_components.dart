@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.380',
+          version: '1.0.381',
           current: true,
+          changes: [
+            'Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.',
+            'Preservados os avisos de pavimento, relevo e segurança para cicloviagens.',
+            'Sincronizados os contratos e metadados da versão sem desativar testes.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.380',
+          current: false,
           changes: [
             'Corrigida a verificação preventiva que interrompia o build Android 324.',
             'Testes de integração Geoapify atualizados sem desativar as verificações.',
@@ -3315,8 +3325,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.380',
+          version: '1.0.381',
           current: true,
+          changes: [
+            'Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.',
+            'Preservados os avisos de pavimento, relevo e segurança para cicloviagens.',
+            'Sincronizados os contratos e metadados da versão sem desativar testes.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.380',
+          current: false,
           changes: [
             'Corrigida a verificação preventiva que interrompia o build Android 324.',
             'Testes de integração Geoapify atualizados sem desativar as verificações.',

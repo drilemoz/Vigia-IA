@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.380', build: 380);
+      AppBuildVersion(version: '1.0.381', build: 381);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.380', build: 380),
+      version: AppBuildVersion(version: '1.0.381', build: 381),
       changes: <String>[
-        'Corrigida a verificação preventiva que interrompia o build Android 324.',
-        'Testes de integração Geoapify atualizados sem desativar as verificações.',
-        'Metadados e testes de versão sincronizados para preservar as próximas atualizações.',
+        'Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.',
+        'Preservados os avisos de pavimento, relevo e segurança para cicloviagens.',
+        'Sincronizados os contratos e metadados da versão sem desativar testes.',
       ],
     ),
   ]);

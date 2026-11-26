@@ -105,7 +105,7 @@ class MapCyclingRouteService {
       <String, String>{'json': payload},
     );
     final request = await _client.getUrl(uri).timeout(const Duration(seconds: 8));
-    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.380');
+    request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.381');
     request.headers.set('X-Client-Id', 'com.vigiaia.app');
     final response = await request.close().timeout(const Duration(seconds: 12));
     final body = await utf8.decoder.bind(response).join().timeout(const Duration(seconds: 12));
@@ -239,7 +239,7 @@ class MapCyclingRouteService {
       request.headers.set(HttpHeaders.authorizationHeader, key);
       request.headers.set(HttpHeaders.acceptHeader, 'application/geo+json, application/json');
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.380');
+      request.headers.set(HttpHeaders.userAgentHeader, 'VigiaIA/1.0.381');
       request.add(utf8.encode(payload));
       final response = await request.close().timeout(const Duration(seconds: 9));
       final body = await response.transform(utf8.decoder).join()
