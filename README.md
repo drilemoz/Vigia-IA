@@ -1,4 +1,10 @@
-**Versão atual:** `1.0.381+381`
+**Versão atual:** `1.0.382+382`
+
+## 1.0.382 — Correção do build 326
+
+- Corrigidos os dois avisos fatais de blocos if no Flutter Analyze do build Android 326.
+- Preservadas as regras de pernoite e seleção de rotas em modo chuva.
+- Adicionados testes de regressão para os blocos corrigidos.
 
 ## 1.0.381 — Correção do build 325
 

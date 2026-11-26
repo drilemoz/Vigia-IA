@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.381',
+          version: '1.0.382',
           current: true,
+          changes: [
+            'Corrigidos os dois avisos fatais de blocos if no Flutter Analyze do build Android 326.',
+            'Preservadas as regras de pernoite e seleção de rotas em modo chuva.',
+            'Adicionados testes de regressão para os blocos corrigidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.381',
+          current: false,
           changes: [
             'Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.',
             'Preservados os avisos de pavimento, relevo e segurança para cicloviagens.',
@@ -3325,8 +3335,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.381',
+          version: '1.0.382',
           current: true,
+          changes: [
+            'Corrigidos os dois avisos fatais de blocos if no Flutter Analyze do build Android 326.',
+            'Preservadas as regras de pernoite e seleção de rotas em modo chuva.',
+            'Adicionados testes de regressão para os blocos corrigidos.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.381',
+          current: false,
           changes: [
             'Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.',
             'Preservados os avisos de pavimento, relevo e segurança para cicloviagens.',

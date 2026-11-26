@@ -334,7 +334,10 @@ class BikeTripPlanner {
     for (final result in candidates) {
       // Apoios de abastecimento não são candidatos automáticos a pernoite.
       if (result.kind == MapDestinationKind.pointOfInterest &&
-          result.poiCategory != null && result.poiCategory != RouteExplorerCategory.camping) continue;
+          result.poiCategory != null &&
+          result.poiCategory != RouteExplorerCategory.camping) {
+        continue;
+      }
       final candidatePoint = LatLng(result.latitude, result.longitude);
       var nearestMeters = double.infinity;
       var nearestGeometryMeters = 0.0;

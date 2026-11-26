@@ -1,3 +1,7 @@
+# Validação Vigia IA 1.0.382+382
+
+Consultar `VALIDATION-1.0.382.md` para a correção do build 326.
+
 # Validação Vigia IA 1.0.381+381
 
 - Corrigida a verificação preventiva da prévia de rotas que bloqueava o build Android 325.
