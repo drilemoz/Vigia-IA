@@ -8,7 +8,7 @@ widget=(root/'lib/widgets/map_route_preview_card.dart').read_text()
 test=(root/'test/map_route_preview_card_test.dart').read_text()
 block=widget[widget.index('class MapRoutePreviewCard extends StatelessWidget {'):].strip()
 checks={
- 'codigo de previa preserva callbacks e limites do modelo': all(t in block for t in ('required this.onStart', 'onPressed: onStart', 'distanceDifference(firstMetrics)', 'Comparação limitada a distância e tempo')),
+ 'codigo de previa preserva callbacks e limites do modelo': all(t in block for t in ('required this.onStart', 'onPressed: onStart', 'distanceDifference(firstMetrics)', 'Pavimento desconhecido ou terra')),
  'chamada unica no mapa': len(re.findall(r'\bMapRoutePreviewCard\s*\(',screen)) == 1,
  'classe publica e import': 'class MapRoutePreviewCard extends StatelessWidget {' in widget and "import '../widgets/map_route_preview_card.dart';" in screen,
  'classe antiga removida': 'class _RoutePreviewCard' not in screen,

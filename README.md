@@ -1,4 +1,13 @@
-**Versão atual:** `1.0.376+376`
+**Versão atual:** `1.0.377+377`
+
+## 1.0.377+377 — GPS, pavimento e APIs
+
+- GPS: aquisição de alta precisão, limite de espera e reconexão.
+- Preferências de pavimento compartilhadas entre Mapas e Planejamento.
+- OpenRouteService migrado ao novo endpoint HeiGIT e alternativas com dados de superfície.
+- Geoapify integrado como fallback de roteamento de bicicleta, com informações de superfície.
+
+
 
 ## 1.0.376 — Correção de análise estática dos builds 320 e 321
 

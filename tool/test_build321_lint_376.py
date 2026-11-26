@@ -13,7 +13,7 @@ class LintBuild321Test(unittest.TestCase):
         self.assertNotIn('distanceGoalMeters! * day', code)
 
     def test_source_build_376(self):
-        self.assertIn('version: 1.0.376+376', (ROOT / 'pubspec.yaml').read_text())
+        self.assertGreaterEqual(int((ROOT / 'pubspec.yaml').read_text().split('version: ', 1)[1].split('+', 1)[1].splitlines()[0]), 376)
 
 if __name__ == '__main__':
     unittest.main()

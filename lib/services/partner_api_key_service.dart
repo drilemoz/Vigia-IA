@@ -63,24 +63,28 @@ class PartnerApiKeyService {
           'apiKey': key,
         }),
       PartnerApiProvider.openrouteservice => Uri.https(
-        'api.openrouteservice.org', '/v2/directions/cycling-regular', {
-          'start': '-47.8825,-15.7942', 'end': '-47.8790,-15.7915',
-        }),
+        'api.heigit.org', '/openrouteservice/v2/directions/cycling-regular/geojson'),
     };
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
-      final request = await client.getUrl(uri).timeout(const Duration(seconds: 10));
+      final request = await (provider == PartnerApiProvider.openrouteservice
+          ? client.postUrl(uri) : client.getUrl(uri)).timeout(const Duration(seconds: 10));
       request.followRedirects = false;
       if (provider == PartnerApiProvider.openrouteservice) {
         request.headers.set('Authorization', key);
+        request.headers.contentType = ContentType.json;
+        request.write('{"coordinates":[[-47.8825,-15.7942],[-47.8790,-15.7915]]}');
       }
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       final response = await request.close().timeout(const Duration(seconds: 15));
       final code = response.statusCode;
       // Drena no máximo o cabeçalho efetivo e fecha; não armazena ou exibe o corpo.
       await response.drain<void>().timeout(const Duration(seconds: 10));
-      if (code == 200) return 'API respondeu com sucesso (HTTP 200). O uso no mapa depende de conexão, cota e operação disponível.';
+      if (code == 200) return provider == PartnerApiProvider.geoapify
+          ? 'Busca de endereço respondeu HTTP 200. O roteamento usa outra operação e pode ter cota própria.'
+          : 'Roteamento de bicicleta respondeu HTTP 200.';
       if (code == 401 || code == 403) return 'Acesso negado (HTTP $code). Verifique a chave e suas restrições.';
+      if (code == 410) return 'Endpoint desativado (HTTP 410). Atualize o aplicativo.';
       if (code == 429) return 'Limite de requisições atingido (HTTP 429).';
       return 'O serviço respondeu HTTP $code. Confira a configuração e tente mais tarde.';
     } on TimeoutException {

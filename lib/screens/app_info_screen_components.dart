@@ -89,8 +89,18 @@ class AllChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.376',
+          version: '1.0.377',
           current: true,
+          changes: [
+            'GPS: aquisição de alta precisão, limite de espera e reconexão.',
+            'Preferências de pavimento compartilhadas entre Mapas e Planejamento.',
+            'OpenRouteService migrado ao novo endpoint HeiGIT e alternativas com dados de superfície.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.376',
+          current: false,
           changes: [
             'Corrigido o aviso de análise estática que impedia gerar o APK.',
             'Operador desnecessário removido sem mudar as metas da cicloviagem.',
@@ -3275,8 +3285,18 @@ class _ChangesPanel extends StatelessWidget {
     return const Column(
       children: [
         _ReleaseCard(
-          version: '1.0.376',
+          version: '1.0.377',
           current: true,
+          changes: [
+            'GPS: aquisição de alta precisão, limite de espera e reconexão.',
+            'Preferências de pavimento compartilhadas entre Mapas e Planejamento.',
+            'OpenRouteService migrado ao novo endpoint HeiGIT e alternativas com dados de superfície.',
+          ],
+        ),
+        SizedBox(height: 10),
+        _ReleaseCard(
+          version: '1.0.376',
+          current: false,
           changes: [
             'Corrigido o aviso de análise estática que impedia gerar o APK.',
             'Operador desnecessário removido sem mudar as metas da cicloviagem.',

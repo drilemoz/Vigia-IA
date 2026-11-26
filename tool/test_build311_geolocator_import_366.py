@@ -17,7 +17,7 @@ class GeolocatorImportRegression311(unittest.TestCase):
         for expected in (
             'Platform.isAndroid && !highAccuracy',
             'AndroidSettings(',
-            'intervalDuration: const Duration(seconds: 15)',
+            'intervalDuration: acquiring ? const Duration(seconds: 5) : const Duration(seconds: 15)',
             'distanceFilter: 0,',
             'Geolocator.getPositionStream(locationSettings: settings)',
             'MapPerformancePolicy.gpsDistanceFilterMeters',

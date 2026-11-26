@@ -11,6 +11,8 @@ class MapGpsHudPolicy {
     required LocationTrackingAvailability? availability,
     required MapRoutePoint? point,
     DateTime? now,
+    bool weakSignal = false,
+    bool reconnecting = false,
   }) {
     switch (availability) {
       case null:
@@ -22,6 +24,8 @@ class MapGpsHudPolicy {
       case LocationTrackingAvailability.permissionDeniedForever:
         return 'Permissão bloqueada';
       case LocationTrackingAvailability.ready:
+        if (point == null && reconnecting) return 'Reconectando GPS';
+        if (point == null && weakSignal) return 'GPS com baixa precisão';
         if (point == null) return 'Aguardando posição';
         if (MapTelemetryPolicy.isFresh(point, now: now)) return 'GPS ativo';
         final age = (now ?? DateTime.now()).difference(point.recordedAt);

@@ -58,6 +58,6 @@ class MapSearchUi324(unittest.TestCase):
         self.assertIn('.round() + 59) ~/ 60',preview)
         screen=read('lib/screens/map_monitoring_screen.dart')
         self.assertIn('(duration.inSeconds + 59) ~/ 60',screen)
-        self.assertIn('Comparação limitada a distância e tempo',read('lib/widgets/map_route_preview_card.dart'))
+        self.assertIn('Pavimento desconhecido ou terra',read('lib/widgets/map_route_preview_card.dart'))
 
 if __name__ == '__main__': unittest.main()

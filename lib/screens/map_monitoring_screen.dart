@@ -75,6 +75,7 @@ import '../services/map_camera_source_policy.dart';
 import '../services/map_view_policy.dart';
 import '../services/google_maps_key_service.dart';
 import '../services/map_view_settings_service.dart';
+import '../widgets/bike_surface_dialog.dart';
 import 'api_services_setup_screen.dart';
 import 'trip_planning_screen.dart';
 import '../services/gemini_map_service.dart';
@@ -2060,6 +2061,8 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     if (travelMode != MapTravelMode.bicycle) return true;
     final selection = await _chooseBikeTravelPreferences();
     if (!mounted || selection == null) return false;
+    if (!await chooseBikeSurface(context)) return false;
+    if (!mounted) return false;
     await _mapViewSettings.setBikeTravelPreferences(selection.preferences);
     await _mapViewSettings.setBikeUseHistoricalSpeed(
       selection.useHistoricalSpeed,
@@ -2405,6 +2408,17 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
     final routes = List<MapCyclingRoute>.of(_previewRoutes);
     final selected = _previewIndex;
     final route = routes[selected];
+    if (target.travelMode == MapTravelMode.bicycle &&
+        _mapViewSettings.bikeSurface == BikeSurfacePreference.rain &&
+        (route.unpavedMeters > 0 || route.unknownSurfaceMeters > 0)) {
+      final confirm = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
+        title: const Text('Pavimento não confirmado'),
+        content: Text('${route.surfaceLabel}. Não é possível garantir uma rota pavimentada. Deseja continuar?'),
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuar'))],
+      ));
+      if (!mounted || confirm != true || _previewTarget != target || _previewIndex != selected) return;
+    }
     final current = _routeState.current;
     ++_previewSerial;
     _navigationVoice.resetRoute();
@@ -2747,6 +2761,11 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
             ? null
             : _navigationGuidance.evaluate(route: route, position: current!);
       });
+      if (target.travelMode == MapTravelMode.bicycle && mounted &&
+          (route.unpavedMeters > 0 || route.unknownSurfaceMeters > 0)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
+          'Atenção: ${route.surfaceLabel}. Confira o trajeto.')));
+      }
       if (target.travelMode == MapTravelMode.bicycle) {
         unawaited(_refreshBikeTripPlan(route: route, target: target));
       }
@@ -7412,7 +7431,9 @@ class _MapMonitoringScreenState extends State<MapMonitoringScreen>
                         _routeState.availability == LocationTrackingAvailability.ready &&
                         current != null,
                     speedSource: MapGpsHudPolicy.label(
-                      availability: _routeState.availability, point: current),
+                      availability: _routeState.availability, point: current,
+                      weakSignal: _routeState.lastGpsRejectionReason == MapGpsRejectionReason.invalidAccuracy,
+                      reconnecting: _routeState.gpsReconnecting),
                   ),
                 ),
 

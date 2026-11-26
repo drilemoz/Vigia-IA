@@ -39,7 +39,7 @@ class ApiServices327Tests(unittest.TestCase):
     def test_keys_are_only_sent_after_explicit_action(self):
         service=read('lib/services/partner_api_key_service.dart')
         screen=read('lib/screens/partner_api_key_screen.dart')
-        self.assertIn("'api.openrouteservice.org', '/v2/directions/cycling-regular'",service)
+        self.assertIn("'api.heigit.org', '/openrouteservice/v2/directions/cycling-regular/geojson'",service)
         self.assertIn("'api.geoapify.com', '/v1/geocode/search'",service)
         self.assertIn("request.followRedirects = false",service)
         self.assertIn('Future<String> test(PartnerApiProvider provider)',service)

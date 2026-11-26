@@ -63,6 +63,8 @@ class SavedBikeRouteService {
         <String, Object?>{
           'distanceMeters': route.distanceMeters,
           'durationSeconds': route.durationSeconds,
+          'pavedMeters': route.pavedMeters,
+          'unpavedMeters': route.unpavedMeters,
           if (_isValidElevationTotal(route.ascentMeters)) 'ascentMeters': route.ascentMeters,
           if (_isValidElevationTotal(route.descentMeters)) 'descentMeters': route.descentMeters,
           if (route.elevationsMeters.length == route.points.length &&
@@ -149,6 +151,8 @@ class SavedBikeRouteService {
       }
       routes.add(MapCyclingRoute(
         points: points,
+        pavedMeters: metric('pavedMeters') ?? 0,
+        unpavedMeters: metric('unpavedMeters') ?? 0,
         ascentMeters: metric('ascentMeters'),
         descentMeters: metric('descentMeters'),
         elevationsMeters: elevations.any((h) => h != null)

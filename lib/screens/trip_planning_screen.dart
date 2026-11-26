@@ -32,6 +32,7 @@ import '../services/planned_trip_export_service.dart';
 import '../services/map_cycling_route_service.dart';
 import '../services/map_destination_search_service.dart';
 import '../services/map_view_settings_service.dart';
+import '../widgets/bike_surface_dialog.dart';
 import '../services/offline_map_service.dart';
 import '../services/planned_bike_trip_service.dart';
 import '../services/route_explorer_service.dart';
@@ -689,6 +690,7 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       _notify('Origem e destino precisam ser diferentes.');
       return false;
     }
+    if (!await chooseBikeSurface(context) || !mounted) return false;
     setState(() { _busy = true; _message = null; });
     try {
       final routes = await _routeProvider.fetchAlternatives(
@@ -1667,6 +1669,8 @@ class _TripPlanningScreenState extends State<TripPlanningScreen> {
       Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
         Text('${trip.origin.title} → ${trip.destination.title}',
           style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+        Text(trip.selectedRoute.surfaceLabel),
+        const Text('Confira trechos desconhecidos e não pavimentados antes de sair.'),
         const SizedBox(height: 12),
         Row(children: [
           Expanded(child: _metric('Distância', '${estimate.distanceKm.toStringAsFixed(1)} km', Icons.route_rounded)),

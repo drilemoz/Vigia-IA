@@ -7,15 +7,15 @@ class UpdateNewsCatalog {
 
   /// Apenas a versão instalada aparece no pop-up Novidades.
   static const currentVersion =
-      AppBuildVersion(version: '1.0.376', build: 376);
+      AppBuildVersion(version: '1.0.377', build: 377);
 
   static const current = UpdateNewsCatalog(<UpdateRelease>[
     UpdateRelease(
-      version: AppBuildVersion(version: '1.0.376', build: 376),
+      version: AppBuildVersion(version: '1.0.377', build: 377),
       changes: <String>[
-        'Correção da análise estática do planejamento que bloqueava o APK.',
-        'Removido operador redundante no cálculo das metas diárias.',
-        'Cálculo, divisão de etapas e dados salvos da cicloviagem preservados.',
+        'GPS: aquisição de alta precisão, limite de espera e reconexão.',
+        'Preferências de pavimento compartilhadas entre Mapas e Planejamento.',
+        'OpenRouteService migrado ao novo endpoint HeiGIT e alternativas com dados de superfície.',
       ],
     ),
   ]);

@@ -41,6 +41,30 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
 
   StreamSubscription<MapRoutePoint>? _positionSubscription;
   bool? _streamHighAccuracy;
+  bool _streamAcquiring = false;
+  Timer? _gpsRetry;
+  Timer? _gpsWatchdog;
+  bool _gpsRestarting = false;
+  void _scheduleGpsRetry() {
+    if (!_needsContinuousLocation || _gpsRetry?.isActive == true) return;
+    _gpsRetry = Timer(const Duration(seconds: 5), () async {
+      if (!_needsContinuousLocation || _gpsRestarting) return;
+      _gpsRestarting = true;
+      try {
+        final previous = _positionSubscription;
+        _positionSubscription = null;
+        _streamHighAccuracy = null;
+        await previous?.cancel();
+        if (_needsContinuousLocation) await ensureLocation(requestPermission: false);
+      } catch (_) {
+        _gpsStreamErrors++;
+        _scheduleGpsRetry();
+      } finally {
+        _gpsRestarting = false;
+        notifyListeners();
+      }
+    });
+  }
   Timer? _persistDebounce;
   Future<void>? _initializing;
   File? _file;
@@ -143,6 +167,7 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
   bool get gpsStreamActive => _positionSubscription != null;
   int get gpsStreamStarts => _gpsStreamStarts;
   int get gpsStreamErrors => _gpsStreamErrors;
+  bool get gpsReconnecting => _gpsRestarting || _gpsRetry?.isActive == true;
   DateTime? get lastGpsSampleReceivedAt => _lastGpsSampleReceivedAt;
   int gpsUpdatesInLastMinute({DateTime? now}) {
     final threshold = (now ?? DateTime.now()).subtract(const Duration(minutes: 1));
@@ -176,6 +201,8 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
 
   void releaseLocationIfIdle() {
     if (_needsContinuousLocation) return;
+    _gpsRetry?.cancel();
+    _gpsWatchdog?.cancel();
     final subscription = _positionSubscription;
     _positionSubscription = null;
     _streamHighAccuracy = null;
@@ -199,6 +226,8 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
       _appForeground = false;
       if (!_tracking && !navigating && _positionSubscription != null) {
         _passiveLocationSuspended = true;
+        _gpsRetry?.cancel();
+        _gpsWatchdog?.cancel();
         final subscription = _positionSubscription;
         _positionSubscription = null;
         _streamHighAccuracy = null;
@@ -245,6 +274,8 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
       notifyListeners();
     }
     if (availability != LocationTrackingAvailability.ready) {
+      _gpsRetry?.cancel();
+      _gpsWatchdog?.cancel();
       await _positionSubscription?.cancel();
       _positionSubscription = null;
       _streamHighAccuracy = null;
@@ -275,12 +306,13 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
   /// mantêm o filtro de 8 m; consulta passiva do mapa usa filtro de 35 m.
   Future<void> _configureLocationStream() async {
     if (!_needsContinuousLocation) return;
+    final acquiring = _current == null || DateTime.now().difference(_current!.recordedAt) > const Duration(seconds: 35);
     final highAccuracy = MapPerformancePolicy.needsPreciseGps(
       recording: _tracking,
       navigating: navigating,
     );
     if (_positionSubscription != null &&
-        _streamHighAccuracy == highAccuracy) {
+        _streamHighAccuracy == highAccuracy && _streamAcquiring == acquiring) {
       return;
     }
     final previous = _positionSubscription;
@@ -290,12 +322,23 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
     if (!_needsContinuousLocation) return;
     _gpsStreamStarts++;
     _streamHighAccuracy = highAccuracy;
+    _streamAcquiring = acquiring;
     _positionSubscription = _location.positionStream(
       highAccuracy: highAccuracy,
+      acquiring: acquiring,
     ).listen(
       _acceptPosition,
-      onError: (_) { _gpsStreamErrors++; },
+      onError: (_) { _gpsStreamErrors++; notifyListeners(); _scheduleGpsRetry(); },
+      onDone: _scheduleGpsRetry,
     );
+    _gpsWatchdog?.cancel();
+    _gpsWatchdog = Timer.periodic(const Duration(seconds: 35), (timer) {
+      if (!_needsContinuousLocation) { timer.cancel(); return; }
+      final current = _current;
+      if (current == null || DateTime.now().difference(current.recordedAt) > const Duration(seconds: 35)) {
+        _scheduleGpsRetry();
+      }
+    });
   }
 
   Future<void> setMonitorVisibility(MonitorMapVisibilityMode value) async {
@@ -546,10 +589,14 @@ class MapRouteService extends ChangeNotifier with WidgetsBindingObserver {
       _rejectedGpsPoints += 1;
       _lastGpsRejectionReason = filtered.rejectionReason;
       _lastGpsRejectedAt = DateTime.now();
+      if (_current == null) notifyListeners();
       return;
     }
 
     _current = point;
+    if (_streamAcquiring && _streamHighAccuracy == false) {
+      unawaited(_configureLocationStream());
+    }
     final receivedAt = DateTime.now();
     _lastGpsSampleReceivedAt = receivedAt;
     _recentGpsUpdates.add(receivedAt);

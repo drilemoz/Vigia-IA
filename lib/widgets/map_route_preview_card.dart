@@ -132,7 +132,9 @@ class MapRoutePreviewCard extends StatelessWidget {
                   : 'Rota ${selectedIndex + 1}: ${metrics.distanceDifference(firstMetrics)}',
                 style: Theme.of(context).textTheme.bodySmall),
             ],
-            Text('Comparação limitada a distância e tempo. Relevo, pavimento e segurança sem dados verificados.',
+            Text(chosen?.surfaceLabel ?? 'Pavimento desconhecido.',
+              style: Theme.of(context).textTheme.bodySmall),
+            Text('Pavimento desconhecido ou terra: confira antes de pedalar. Segurança e condição atual não verificadas.',
               style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 8),
             Row(children: [

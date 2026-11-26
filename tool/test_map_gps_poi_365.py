@@ -13,7 +13,7 @@ class GpsPoi365(unittest.TestCase):
         service = self.read('lib/services/location_tracking_service.dart')
         self.assertIn('Platform.isAndroid && !highAccuracy', service)
         self.assertIn('AndroidSettings(', service)
-        self.assertIn('intervalDuration: const Duration(seconds: 15)', service)
+        self.assertIn('intervalDuration: acquiring ? const Duration(seconds: 5) : const Duration(seconds: 15)', service)
         self.assertIn('distanceFilter: 0,', service)
         self.assertIn('geolocator_android: ^5.0.3', self.read('pubspec.yaml'))
         self.assertIn('MapPerformancePolicy.gpsDistanceFilterMeters', service)

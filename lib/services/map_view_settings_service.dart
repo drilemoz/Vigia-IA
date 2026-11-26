@@ -96,6 +96,8 @@ extension MapStylePresetX on MapStylePreset {
       this == MapStylePreset.terrain || this == MapStylePreset.satellite;
 }
 
+enum BikeSurfacePreference { paved, balanced, shortest, rain }
+
 class MapViewSettingsService extends ChangeNotifier {
   MapViewSettingsService._();
 
@@ -115,6 +117,14 @@ class MapViewSettingsService extends ChangeNotifier {
   bool _navigationVoiceEnabled = true;
   bool _weatherVoiceEnabled = true;
   bool _tripPreviewOnlineBaseMap = true;
+  BikeSurfacePreference _bikeSurface = BikeSurfacePreference.paved;
+  BikeSurfacePreference get bikeSurface => _bikeSurface;
+  Future<void> setBikeSurface(BikeSurfacePreference value) async {
+    await initialize();
+    _bikeSurface = value;
+    notifyListeners();
+    await _persist();
+  }
   bool _initialized = false;
   File? _file;
 
@@ -146,6 +156,9 @@ class MapViewSettingsService extends ChangeNotifier {
         final decoded = jsonDecode(await file.readAsString());
         if (decoded is Map) {
           final map = decoded.cast<String, dynamic>();
+          _bikeSurface = BikeSurfacePreference.values.firstWhere(
+            (v) => v.name == map['bikeSurface'],
+            orElse: () => BikeSurfacePreference.paved); 
           final providerName = map['provider'] as String?;
           final orientationName = map['orientationMode'] as String?;
           final presetName = map['followViewPreset'] as String?;
@@ -332,6 +345,7 @@ class MapViewSettingsService extends ChangeNotifier {
       jsonEncode(<String, Object?>{
         'version': 10,
         'provider': _provider.name,
+        'bikeSurface': _bikeSurface.name,
         'orientationMode': _orientationMode.name,
         'followViewPreset': _followViewPreset.name,
         'stylePreset': _stylePreset.name,

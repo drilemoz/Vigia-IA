@@ -45,7 +45,7 @@ const Map<ApiHelpProvider, ApiHelpInfo> apiHelp = {
     ], 'https://client.stadiamaps.com/dashboard/', keyRequired: true,
     warning: 'Verifique os termos de cache, uso não comercial e limites de créditos.'),
   ApiHelpProvider.geoapify: ApiHelpInfo(
-    'Geoapify', 'Pesquisa de destinos e apoio aos POIs quando a consulta OSM falha.', [
+    'Geoapify', 'Pesquisa de destinos, POIs e fallback de rotas para bicicleta.', [
       'Abra o painel Geoapify e crie uma conta gratuita.',
       'Crie um projeto e acesse API Keys.',
       'Copie a chave e configure nesta central.',
@@ -53,7 +53,7 @@ const Map<ApiHelpProvider, ApiHelpInfo> apiHelp = {
     ], 'https://myprojects.geoapify.com/', keyRequired: true,
     warning: 'Teste e consultas consomem créditos da cota gratuita. Sem chave, os provedores atuais continuam disponíveis.'),
   ApiHelpProvider.openrouteservice: ApiHelpInfo(
-    'OpenRouteService · HeiGIT', 'Rotas para bicicleta com geometria, manobras e elevação; com alternativa Valhalla.', [
+    'OpenRouteService · HeiGIT', 'Rotas para bicicleta com geometria, manobras e elevação; com alternativas Geoapify e Valhalla.', [
       'Crie uma conta no painel oficial HeiGIT.',
       'Acesse o painel de API keys e crie ou copie uma chave gratuita.',
       'Cole, salve e teste aqui.',

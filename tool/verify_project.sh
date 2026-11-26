@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 -m unittest -q tool/test_gps_surface_api_377.py || { echo "GPS/pavimento/APIs 377 divergentes." >&2; exit 1; }
 python3 -m unittest -q tool/test_build317_flutter_analyze_372.py || { echo "APK 317: if sem chaves no descarte da rota." >&2; exit 1; }
 python3 -m unittest -q tool/test_build321_lint_376.py || { echo 'Build 321: operador non-null redundante no planejador.' >&2; exit 1; }
 python3 -m unittest -q tool/test_trip_planner_safety_375.py || { echo 'Cicloviagem 375: limites de distância/data e persistência divergentes.' >&2; exit 1; }

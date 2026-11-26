@@ -38,17 +38,17 @@ class LocationTrackingService {
     return LocationTrackingAvailability.ready;
   }
 
-  /// O mapa em consulta usa precisão moderada; gravar e navegar não.
-  Stream<MapRoutePoint> positionStream({bool highAccuracy = true}) {
+  /// Aquisição inicial precisa; mapa passivo reduz consumo após o primeiro fix.
+  Stream<MapRoutePoint> positionStream({bool highAccuracy = true, bool acquiring = false}) {
     // No Android o filtro passivo de 35 m pode impedir qualquer atualização
     // por muito tempo enquanto o ciclista está parado. Com o mapa visível,
-    // solicite atualizações moderadas em intervalos aproximados de 15 s, sem gravar percurso.
+    // solicite alta precisão até obter posição e depois reduza a frequência.
     // O stream é fechado quando a tela deixa de consumi-lo.
     final LocationSettings settings = Platform.isAndroid && !highAccuracy
         ? AndroidSettings(
-            accuracy: LocationAccuracy.medium,
+            accuracy: acquiring ? LocationAccuracy.high : LocationAccuracy.medium,
             distanceFilter: 0,
-            intervalDuration: const Duration(seconds: 15),
+            intervalDuration: acquiring ? const Duration(seconds: 5) : const Duration(seconds: 15),
           )
         : LocationSettings(
             accuracy: highAccuracy
@@ -66,6 +66,7 @@ class LocationTrackingService {
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 20),
       ),
     );
     return _toPoint(position);
